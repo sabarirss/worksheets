@@ -92,15 +92,39 @@ function getCurrentUser() {
 // Login with username/password
 async function login(username, password) {
     try {
-        // Convert username to email format for Firebase Auth
-        const email = username.includes('@') ? username : `${username}@worksheets.local`;
+        let email;
+        let lookupUsername = username;
 
-        // Sign in with Firebase Auth
+        // Determine the email to use for authentication
+        if (username.includes('@')) {
+            // Already an email, use as-is
+            email = username;
+            // Extract username from email for Firestore lookup
+            lookupUsername = username.split('@')[0];
+        } else {
+            // Look up user's real email from Firestore
+            const userQuery = await firebase.firestore().collection('users')
+                .where('username', '==', username)
+                .limit(1)
+                .get();
+
+            if (!userQuery.empty) {
+                // Found user, use their actual email
+                email = userQuery.docs[0].data().email;
+            } else {
+                // User not found in Firestore, fall back to @worksheets.local for admin
+                email = `${username}@worksheets.local`;
+            }
+        }
+
+        console.log('Login attempt - Username:', lookupUsername, 'Email:', email);
+
+        // Sign in with Firebase Auth using the determined email
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
 
-        // Get user document from Firestore
+        // Get user document from Firestore using username
         const userDoc = await firebase.firestore().collection('users')
-            .where('username', '==', username)
+            .where('username', '==', lookupUsername)
             .limit(1)
             .get();
 
@@ -125,6 +149,8 @@ async function login(username, password) {
         if (error.code === 'auth/wrong-password') {
             errorMessage = 'Invalid username or password';
         } else if (error.code === 'auth/user-not-found') {
+            errorMessage = 'Invalid username or password';
+        } else if (error.code === 'auth/invalid-login-credentials') {
             errorMessage = 'Invalid username or password';
         } else if (error.code === 'auth/too-many-requests') {
             errorMessage = 'Too many failed attempts. Please try again later.';
