@@ -371,16 +371,14 @@ async function deleteUser(username) {
         // Delete user's worksheets from Firestore
         await deleteUserWorksheets(username);
 
-        // Delete user from Firebase Auth
-        try {
-            const user = await firebase.auth().getUserByEmail(userData.email);
-            await user.delete();
-        } catch (authError) {
-            console.warn('Could not delete from Auth:', authError);
-        }
-
         // Delete user document from Firestore
         await userDoc.ref.delete();
+
+        // Note: Firebase Auth account cannot be deleted from client-side code
+        // The user won't be able to login anyway since their Firestore profile is deleted
+        // To fully delete Auth accounts, you would need Firebase Admin SDK in a Cloud Function
+
+        console.log(`User ${username} deleted from Firestore. Auth account remains but cannot login.`);
 
         return { success: true };
 
