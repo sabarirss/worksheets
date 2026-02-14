@@ -15,18 +15,22 @@ let currentUserCache = null;
 // Initialize default admin user
 async function initializeAuth() {
     try {
-        // Check if admin user exists in Firestore
-        const adminDoc = await firebase.firestore().collection('users').doc('admin').get();
+        // Check if admin user exists by querying username
+        const adminQuery = await firebase.firestore().collection('users')
+            .where('username', '==', 'admin')
+            .limit(1)
+            .get();
 
-        if (!adminDoc.exists) {
+        if (adminQuery.empty) {
             // Create default admin user in Firebase Auth
             const adminCredential = await firebase.auth().createUserWithEmailAndPassword(
                 'admin@worksheets.local',
                 'admin123'
             );
 
-            // Create admin user document in Firestore
-            await firebase.firestore().collection('users').doc('admin').set({
+            // Create admin user document in Firestore with UID as document ID
+            const docId = adminCredential.user.uid.substring(0, 20);
+            await firebase.firestore().collection('users').doc(docId).set({
                 uid: adminCredential.user.uid,
                 username: 'admin',
                 email: 'admin@worksheets.local',
@@ -43,11 +47,15 @@ async function initializeAuth() {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            console.log('Default admin user created');
+            console.log('Default admin user created with document ID:', docId);
+        } else {
+            console.log('Admin user already exists');
         }
     } catch (error) {
         // Admin might already exist from a previous setup
-        if (error.code !== 'auth/email-already-in-use') {
+        if (error.code === 'auth/email-already-in-use') {
+            console.log('Admin user already exists in Firebase Auth');
+        } else {
             console.error('Error initializing auth:', error);
         }
     }
