@@ -297,6 +297,57 @@
                 <input type="text" id="role" disabled>
                 <div class="info-text">Only admins can change account types</div>
             </div>
+
+            <div class="form-group">
+                <label for="version">Version</label>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <input type="text" id="version" disabled style="flex: 1;">
+                    <button id="request-upgrade-btn" class="btn" style="background: #4caf50; color: white; display: none; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;" onclick="requestVersionUpgrade()">
+                        📤 Request Full Version
+                    </button>
+                    <span id="upgrade-requested-badge" style="display: none; background: #ff9800; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">
+                        ⏳ Upgrade Requested
+                    </span>
+                </div>
+                <div class="info-text" id="version-info-text">Demo version limited to 2 pages per activity</div>
+            </div>
+
+            <!-- Admin Demo Preview Toggle -->
+            <div class="form-group" id="admin-demo-preview" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; font-size: 1.1em;">
+                    <input type="checkbox" id="demo-preview-toggle" onchange="toggleDemoPreview(this.checked)"
+                           style="width: 24px; height: 24px; cursor: pointer;">
+                    <span>
+                        <strong>🔍 Preview Demo Mode</strong><br>
+                        <span style="font-size: 0.9em; font-weight: normal; color: #666;">
+                            Enable to see what demo users experience (2 items per activity)
+                        </span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="settings-section">
+            <h2>🔐 Change Password</h2>
+
+            <div class="parent-control-box">
+                <h3>🔒 Password Protected</h3>
+                <p style="color: #666; margin-bottom: 15px;">
+                    Password changes require parental verification to ensure account security.
+                    Only parents/guardians can change the account password.
+                </p>
+
+                <button class="btn btn-primary" onclick="openPasswordChange()" style="width: 100%; font-size: 1.1em; padding: 15px;">
+                    🔐 Change Password (Parent Login Required)
+                </button>
+
+                <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                    <p style="margin: 0; font-size: 0.9em; color: #2e7d32;">
+                        <strong>Security Note:</strong> Requires parent verification before password can be changed.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Current Child Age Display -->
@@ -320,7 +371,7 @@
                 <h3>🔒 Age Settings & Module Management</h3>
                 <p style="color: #666; margin-bottom: 15px;">
                     Parents can manage their child's age settings and learning modules. This affects which content your child can access.
-                    Requires parent age verification (25 years or older).
+                    Requires parent verification.
                 </p>
 
                 <button class="btn btn-primary" onclick="openParentalControl()" style="width: 100%; font-size: 1.1em; padding: 15px;">
@@ -356,9 +407,8 @@
     <!-- Parent Age Verification Modal -->
     <div class="modal" id="parent-verification-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Age Verification</h2>
+            <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Verification</h2>
             <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
-                Parental Control allows you to manage your child's age settings and learning modules.
                 To verify you are a parent/guardian, please enter your date of birth.
             </p>
 
@@ -385,6 +435,52 @@
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
                 <p style="margin: 0; font-size: 0.9em; color: #2e7d32;">
                     <strong>Privacy Note:</strong> Your date of birth is only used for age verification and is not stored.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="modal" id="password-change-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
+            <h2 style="margin-top: 0; color: #667eea;">🔐 Change Password</h2>
+            <p style="color: #666; margin-bottom: 20px;">Enter a new password for the account.</p>
+
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">New Password:</label>
+                <input
+                    type="password"
+                    id="modal-new-password"
+                    placeholder="Enter new password (min 6 characters)"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;"
+                >
+                <div style="color: #666; font-size: 0.9em; margin-top: 5px;">Password must be at least 6 characters long</div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">Confirm New Password:</label>
+                <input
+                    type="password"
+                    id="modal-confirm-password"
+                    placeholder="Confirm your new password"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;"
+                >
+            </div>
+
+            <div id="password-change-error" style="color: #e74c3c; font-weight: bold; margin: 10px 0; display: none;"></div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="saveNewPassword()" class="btn btn-primary" style="flex: 1;">
+                    💾 Save New Password
+                </button>
+                <button onclick="closePasswordChangeModal()" class="btn btn-secondary" style="flex: 1;">
+                    Cancel
+                </button>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; font-size: 0.9em; color: #856404;">
+                    <strong>Note:</strong> After changing the password, the user will need to log in again with the new password.
                 </p>
             </div>
         </div>
@@ -472,6 +568,7 @@
 
     <script>
         let currentUser = null;
+        let parentalVerificationAction = null; // Track what action requires verification
 
         // Wait for Firebase auth
         firebase.auth().onAuthStateChanged(async function(user) {
@@ -538,6 +635,41 @@
                 document.getElementById('fullname').value = userData.fullName || '';
                 document.getElementById('email').value = userData.email || '';
                 document.getElementById('role').value = userData.role || 'student';
+
+                // Display version and upgrade controls
+                const version = userData.version || 'demo';
+                const versionDisplay = version === 'demo' ? 'Demo (Limited)' : 'Full (Unlimited)';
+                document.getElementById('version').value = versionDisplay;
+
+                // Show/hide upgrade request button based on version and request status
+                const requestBtn = document.getElementById('request-upgrade-btn');
+                const requestedBadge = document.getElementById('upgrade-requested-badge');
+                const versionInfoText = document.getElementById('version-info-text');
+
+                if (version === 'demo') {
+                    if (userData.versionUpgradeRequested) {
+                        requestBtn.style.display = 'none';
+                        requestedBadge.style.display = 'inline-block';
+                        versionInfoText.textContent = 'Upgrade request pending admin approval';
+                    } else {
+                        requestBtn.style.display = 'inline-block';
+                        requestedBadge.style.display = 'none';
+                        versionInfoText.textContent = 'Demo version limited to 2 pages per activity';
+                    }
+                } else {
+                    requestBtn.style.display = 'none';
+                    requestedBadge.style.display = 'none';
+                    versionInfoText.textContent = 'Full version with unlimited access';
+                }
+
+                // Show admin demo preview toggle for admin users
+                if (userData.role === 'admin') {
+                    document.getElementById('admin-demo-preview').style.display = 'block';
+
+                    // Load and set current preview state
+                    const isDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+                    document.getElementById('demo-preview-toggle').checked = isDemoPreview;
+                }
 
                 // Display current age
                 const ageDisplay = userData.age ? `${userData.age} years old` : 'Not set';
@@ -612,6 +744,22 @@
 
         // Parental Control Functions
         function openParentalControl() {
+            parentalVerificationAction = 'control'; // Set action type
+            document.getElementById('parent-verification-modal').style.display = 'flex';
+            document.getElementById('parent-dob-input').value = '';
+            document.getElementById('parent-verification-error').style.display = 'none';
+
+            // Set max date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('parent-dob-input').max = today;
+
+            setTimeout(() => {
+                document.getElementById('parent-dob-input').focus();
+            }, 100);
+        }
+
+        function openPasswordChange() {
+            parentalVerificationAction = 'password'; // Set action type
             document.getElementById('parent-verification-modal').style.display = 'flex';
             document.getElementById('parent-dob-input').value = '';
             document.getElementById('parent-verification-error').style.display = 'none';
@@ -627,6 +775,7 @@
 
         function closeParentVerification() {
             document.getElementById('parent-verification-modal').style.display = 'none';
+            parentalVerificationAction = null;
         }
 
         function verifyParentAge() {
@@ -649,16 +798,21 @@
                 age--;
             }
 
-            // Check if age is 25 or more
+            // Check if age is 25 or more (internal check, don't expose age requirement)
             if (age < 25) {
-                errorDiv.textContent = 'Parental Control is only available for users 25 years or older';
+                errorDiv.textContent = 'Parent verification failed. Please ensure you are entering the parent/guardian date of birth.';
                 errorDiv.style.display = 'block';
                 return;
             }
 
-            // Age verified - open parental control panel
+            // Age verified - route to appropriate action
             closeParentVerification();
-            openParentalControlPanel();
+
+            if (parentalVerificationAction === 'password') {
+                openPasswordChangeModal();
+            } else {
+                openParentalControlPanel();
+            }
         }
 
         function openParentalControlPanel() {
@@ -789,6 +943,148 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Request version upgrade
+        async function requestVersionUpgrade() {
+            if (!currentUser) return;
+
+            if (!confirm('Request full version upgrade? An admin will review your request.')) {
+                return;
+            }
+
+            try {
+                const uid = currentUser.uid.substring(0, 20);
+                await firebase.firestore().collection('users').doc(uid).update({
+                    versionUpgradeRequested: true,
+                    upgradeRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showSuccess('Full version upgrade requested! An admin will review your request.');
+
+                // Reload profile to update UI
+                await loadUserProfile();
+            } catch (error) {
+                console.error('Error requesting upgrade:', error);
+                showError('Failed to request upgrade: ' + error.message);
+            }
+        }
+
+        // Toggle admin demo preview mode
+        function toggleDemoPreview(isEnabled) {
+            localStorage.setItem('adminDemoPreview', isEnabled ? 'true' : 'false');
+
+            if (isEnabled) {
+                showSuccess('Demo Preview Mode Enabled - You will now see the demo experience (2 items per activity). Return to this page to disable.');
+            } else {
+                showSuccess('Demo Preview Mode Disabled - Full access restored.');
+            }
+
+            // Redirect to home page after short delay
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        }
+
+        // Password change modal functions
+        function openPasswordChangeModal() {
+            document.getElementById('password-change-modal').style.display = 'flex';
+            document.getElementById('modal-new-password').value = '';
+            document.getElementById('modal-confirm-password').value = '';
+            document.getElementById('password-change-error').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('modal-new-password').focus();
+            }, 100);
+        }
+
+        function closePasswordChangeModal() {
+            document.getElementById('password-change-modal').style.display = 'none';
+        }
+
+        async function saveNewPassword() {
+            const newPassword = document.getElementById('modal-new-password').value.trim();
+            const confirmPassword = document.getElementById('modal-confirm-password').value.trim();
+            const errorDiv = document.getElementById('password-change-error');
+
+            // Validation
+            if (!newPassword) {
+                errorDiv.textContent = 'Please enter a new password';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters long';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (!confirmPassword) {
+                errorDiv.textContent = 'Please confirm your new password';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    errorDiv.textContent = 'User not authenticated';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                // Update password (no need for re-authentication since parent verified)
+                await user.updatePassword(newPassword);
+
+                closePasswordChangeModal();
+                showSuccess('Password changed successfully! Please log in again with the new password.');
+
+                // Sign out after 2 seconds to require new login
+                setTimeout(() => {
+                    firebase.auth().signOut().then(() => {
+                        window.location.href = 'login.html';
+                    });
+                }, 2000);
+            } catch (error) {
+                console.error('Error changing password:', error);
+
+                let errorMessage = 'Failed to change password: ';
+
+                if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password is too weak. Please choose a stronger password';
+                } else if (error.code === 'auth/requires-recent-login') {
+                    errorMessage = 'Session expired. Please log out and log back in';
+                } else {
+                    errorMessage += error.message;
+                }
+
+                errorDiv.textContent = errorMessage;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Add Enter key support for password modal fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordFields = ['modal-new-password', 'modal-confirm-password'];
+
+            passwordFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            saveNewPassword();
+                        }
+                    });
+                }
+            });
+        });
+
         // Close modals on background click
         document.getElementById('parent-verification-modal').addEventListener('click', function(event) {
             if (event.target === this) {
@@ -799,6 +1095,12 @@
         document.getElementById('parental-control-panel').addEventListener('click', function(event) {
             if (event.target === this) {
                 closeParentalControlPanel();
+            }
+        });
+
+        document.getElementById('password-change-modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePasswordChangeModal();
             }
         });
     </script>
