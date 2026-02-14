@@ -542,6 +542,10 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🏠 Back to Levels</button>
+            </div>
+
             <div class="controls">
                 <div class="timer">
                     <span id="timer-display">00:00</span>
@@ -573,16 +577,15 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation">
-                <div id="answer-toggle-container" class="answer-toggle-container" style="margin-bottom: 20px;">
-                    <span class="answer-toggle-label">Show Answers</span>
+            <div class="navigation" style="margin-top: 20px;">
+                <div id="answer-toggle-container" class="answer-toggle-container" style="display: inline-block; margin-right: 20px;">
+                    <span class="answer-toggle-label">👀 Show Answers</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="answer-toggle-input" onchange="toggleAnswers(event)">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button onclick="location.reload()">Back to Level Selection</button>
-                <button onclick="loadWorksheet('${level}')">Generate New Worksheet</button>
+                <button onclick="loadWorksheet('${level}')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">🔄 Generate New Worksheet</button>
             </div>
         </div>
     `;

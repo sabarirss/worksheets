@@ -367,6 +367,15 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🏠 Back to Levels</button>
+                <div class="page-navigation" style="display: inline-block; margin-left: 20px;">
+                    <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>⬅️ Previous</button>
+                    <span class="page-counter">📄 Page ${currentPage} of ${totalPages}</span>
+                    <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>Next ➡️</button>
+                </div>
+            </div>
+
             <div class="controls">
                 <div class="timer">
                     <span id="timer-display" style="font-size: 1.8em; font-weight: bold; color: #667eea;">⏱️ 00:00</span>
@@ -424,21 +433,15 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation">
-                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🏠 Back to Levels</button>
-                <div class="page-navigation">
-                    <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>⬅️ Previous</button>
-                    <span class="page-counter">📄 Page ${currentPage} of ${totalPages}</span>
-                    <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>Next ➡️</button>
-                </div>
-                <div id="answer-toggle-container" class="answer-toggle-container">
+            <div class="navigation" style="margin-top: 20px;">
+                <div id="answer-toggle-container" class="answer-toggle-container" style="display: inline-block;">
                     <span class="answer-toggle-label">👀 Show Answers</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="answer-toggle-input" onchange="toggleAnswers(event)">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                ${currentPage >= totalPages ? '<button class="generate-more-btn" onclick="generateMorePages()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">➕ Generate 50 More Pages</button>' : ''}
+                ${currentPage >= totalPages ? '<button class="generate-more-btn" onclick="generateMorePages()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); margin-left: 20px;">➕ Generate 50 More Pages</button>' : ''}
             </div>
         </div>
     `;
