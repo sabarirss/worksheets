@@ -165,6 +165,21 @@
             </div>
 
             <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    autocomplete="username"
+                    pattern="[a-zA-Z0-9_]{3,20}"
+                    title="Username must be 3-20 characters (letters, numbers, underscore only)"
+                >
+                <div class="password-requirements">3-20 characters (letters, numbers, underscore only)</div>
+            </div>
+
+            <div class="form-group">
                 <label for="email">Email Address</label>
                 <input
                     type="email"
@@ -225,6 +240,7 @@
             event.preventDefault();
 
             const fullName = document.getElementById('fullname').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
@@ -236,6 +252,13 @@
             // Hide messages
             errorMsg.style.display = 'none';
             successMsg.style.display = 'none';
+
+            // Validate username format
+            if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+                errorMsg.textContent = 'Username must be 3-20 characters (letters, numbers, underscore only)';
+                errorMsg.style.display = 'block';
+                return;
+            }
 
             // Validate passwords match
             if (password !== confirmPassword) {
@@ -249,15 +272,26 @@
             signupBtn.textContent = 'Creating Account...';
 
             try {
+                // Check if username already exists
+                const usernameQuery = await firebase.firestore().collection('users')
+                    .where('username', '==', username)
+                    .limit(1)
+                    .get();
+
+                if (!usernameQuery.empty) {
+                    errorMsg.textContent = 'Username already taken. Please choose another.';
+                    errorMsg.style.display = 'block';
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Create Account';
+                    return;
+                }
+
                 // Create user in Firebase Auth
                 const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
                 // Send email verification
                 await user.sendEmailVerification();
-
-                // Create username from email (before @)
-                const username = email.split('@')[0];
 
                 // Create user document in Firestore with default Math module only
                 await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).set({
@@ -284,8 +318,9 @@
                 // Show success message
                 successMsg.innerHTML = `
                     <strong>Account created!</strong><br>
+                    Username: <strong>${username}</strong><br>
                     Please check your email (${email}) and click the verification link.<br>
-                    After verifying, you can sign in.
+                    After verifying, you can sign in with your username or email.
                 `;
                 successMsg.style.display = 'block';
 
