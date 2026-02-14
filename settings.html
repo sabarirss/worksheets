@@ -518,8 +518,8 @@
                 const ageDisplay = userData.age ? `${userData.age} years old` : 'Not set';
                 document.getElementById('current-age-display').value = ageDisplay;
 
-                // Display modules
-                displayModules(userData.modules || {});
+                // Display enabled modules (what parent has enabled for child)
+                displayModules(userData.enabledModules || userData.modules || {});
             } catch (error) {
                 console.error('Error loading user profile:', error);
                 showError('Failed to load user data: ' + error.message);
@@ -645,16 +645,37 @@
                 const ageDisplay = currentUser.age ? `${currentUser.age} years old` : 'Not set';
                 document.getElementById('panel-current-age').value = ageDisplay;
 
-                // Load current module states
-                if (currentUser.modules) {
-                    document.getElementById('panel-toggle-math').checked = currentUser.modules.math || false;
-                    document.getElementById('panel-toggle-english').checked = currentUser.modules.english || false;
-                    document.getElementById('panel-toggle-aptitude').checked = currentUser.modules.aptitude || false;
-                    document.getElementById('panel-toggle-stories').checked = currentUser.modules.stories || false;
-                    document.getElementById('panel-toggle-emotional-quotient').checked = currentUser.modules['emotional-quotient'] || false;
-                    document.getElementById('panel-toggle-drawing').checked = currentUser.modules.drawing || false;
-                    document.getElementById('panel-toggle-german-kids').checked = currentUser.modules['german-kids'] || false;
-                }
+                // Get assigned modules (what admin has made available)
+                const assignedModules = currentUser.modules || {};
+                // Get enabled modules (what parent has enabled) - fallback to modules if enabledModules doesn't exist
+                const enabledModules = currentUser.enabledModules || currentUser.modules || {};
+
+                // Module list
+                const allModules = [
+                    { key: 'math', id: 'panel-toggle-math' },
+                    { key: 'english', id: 'panel-toggle-english' },
+                    { key: 'aptitude', id: 'panel-toggle-aptitude' },
+                    { key: 'stories', id: 'panel-toggle-stories' },
+                    { key: 'emotional-quotient', id: 'panel-toggle-emotional-quotient' },
+                    { key: 'drawing', id: 'panel-toggle-drawing' },
+                    { key: 'german-kids', id: 'panel-toggle-german-kids' }
+                ];
+
+                // Update each module checkbox
+                allModules.forEach(module => {
+                    const checkbox = document.getElementById(module.id);
+                    const label = checkbox.closest('label');
+
+                    if (assignedModules[module.key]) {
+                        // Module is assigned by admin - show and enable it
+                        label.style.display = 'flex';
+                        checkbox.disabled = false;
+                        checkbox.checked = enabledModules[module.key] || false;
+                    } else {
+                        // Module not assigned by admin - hide it
+                        label.style.display = 'none';
+                    }
+                });
             }
         }
 
@@ -678,8 +699,8 @@
                     currentUser.age = parseInt(newAge);
                 }
 
-                // Update modules
-                const modules = {
+                // Update enabled modules (parent controls these)
+                const enabledModules = {
                     math: document.getElementById('panel-toggle-math').checked,
                     english: document.getElementById('panel-toggle-english').checked,
                     aptitude: document.getElementById('panel-toggle-aptitude').checked,
@@ -689,16 +710,16 @@
                     'german-kids': document.getElementById('panel-toggle-german-kids').checked
                 };
 
-                // Add module updates
-                for (const [key, value] of Object.entries(modules)) {
-                    updates[`modules.${key}`] = value;
+                // Add enabled module updates
+                for (const [key, value] of Object.entries(enabledModules)) {
+                    updates[`enabledModules.${key}`] = value;
                 }
 
                 // Save to Firestore
                 await userDoc.update(updates);
 
                 // Update local cache
-                currentUser.modules = modules;
+                currentUser.enabledModules = enabledModules;
 
                 closeParentalControlPanel();
                 showSuccess('Settings updated successfully! Page will reload to apply changes.');

@@ -134,6 +134,7 @@
         function initializeUserInterface(user) {
             console.log('Initializing UI for user:', user.username);
             console.log('User modules:', user.modules);
+            console.log('Enabled modules:', user.enabledModules);
 
             // Display user name
             document.getElementById('user-name-display').textContent = user.fullName;
@@ -146,9 +147,10 @@
             // Initialize parent mode
             initializeParentMode(user);
 
-            // Hide modules user doesn't have access to
-            const modules = user.modules || {};
-            console.log('Modules to check:', modules);
+            // Show only enabled modules (what parent has enabled for child)
+            // Fallback to modules for backward compatibility
+            const modules = user.enabledModules || user.modules || {};
+            console.log('Modules to display:', modules);
 
             if (!modules.math) {
                 const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');

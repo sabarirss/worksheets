@@ -382,7 +382,19 @@
                     parentPin: parentPin,
                     role: 'student',
                     modules: {
-                        math: true,
+                        // Modules assigned by admin (available to parent)
+                        math: true,  // Only math assigned by default
+                        english: false,
+                        aptitude: false,
+                        stories: false,
+                        'emotional-quotient': false,
+                        german: false,
+                        drawing: false,
+                        'german-kids': false
+                    },
+                    enabledModules: {
+                        // Modules enabled by parent (visible to child)
+                        math: true,  // Math enabled by default
                         english: false,
                         aptitude: false,
                         stories: false,

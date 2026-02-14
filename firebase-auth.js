@@ -38,12 +38,26 @@ async function initializeAuth() {
                 fullName: 'Administrator',
                 age: 13, // Admin has access to all content
                 modules: {
+                    // All modules assigned for admin
                     math: true,
                     english: true,
                     aptitude: true,
                     stories: true,
                     'emotional-quotient': true,
-                    german: true
+                    german: true,
+                    drawing: true,
+                    'german-kids': true
+                },
+                enabledModules: {
+                    // All modules enabled for admin
+                    math: true,
+                    english: true,
+                    aptitude: true,
+                    stories: true,
+                    'emotional-quotient': true,
+                    german: true,
+                    drawing: true,
+                    'german-kids': true
                 },
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
