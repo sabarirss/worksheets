@@ -113,6 +113,20 @@ async function login(username, password) {
             email = username.toLowerCase();
             // Extract username from email for Firestore lookup
             lookupUsername = username.split('@')[0].toLowerCase();
+
+            // Verify user exists in Firestore and get their actual email
+            const userQuery = await firebase.firestore().collection('users')
+                .where('username', '==', lookupUsername)
+                .limit(1)
+                .get();
+
+            if (!userQuery.empty) {
+                // Use the email stored in Firestore (in case it's different)
+                email = userQuery.docs[0].data().email;
+                console.log('Found user with email login, using stored email:', email);
+            } else {
+                console.log('User not found in Firestore for email:', username);
+            }
         } else {
             // Look up user's real email from Firestore (using lowercase username)
             const userQuery = await firebase.firestore().collection('users')
@@ -125,7 +139,7 @@ async function login(username, password) {
                 email = userQuery.docs[0].data().email;
             } else {
                 // User not found in Firestore, fall back to @worksheets.local for admin
-                email = `${username}@worksheets.local`;
+                email = `${lookupUsername}@worksheets.local`;
             }
         }
 
