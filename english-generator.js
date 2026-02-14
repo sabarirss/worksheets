@@ -789,10 +789,6 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
             </div>
 
             <div class="problems-container">${problemsHTML}</div>
-
-            <div class="navigation" style="margin-top: 30px; text-align: center;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 30px;">← Back to Difficulty</button>
-            </div>
         </div>
     `;
 

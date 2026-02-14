@@ -730,6 +730,11 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
+                <button onclick="loadPuzzles('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
+            </div>
+
             <div class="controls">
                 <div class="timer">
                     <span id="timer-display">00:00</span>
@@ -760,8 +765,6 @@ function renderWorksheet() {
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
-                <button onclick="loadPuzzles('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
             </div>
         </div>
     `;

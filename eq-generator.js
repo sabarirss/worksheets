@@ -512,6 +512,11 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
+                <button onclick="loadActivities('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
+            </div>
+
             <div class="controls">
                 <div class="timer">
                     <span id="timer-display">00:00</span>
@@ -527,11 +532,6 @@ function renderWorksheet() {
             <div class="results-summary" id="results-summary"></div>
 
             <div class="problems-container">${problemsHTML}</div>
-
-            <div class="navigation">
-                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
-                <button onclick="loadActivities('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
-            </div>
         </div>
     `;
 

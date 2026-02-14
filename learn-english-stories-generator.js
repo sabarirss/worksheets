@@ -128,11 +128,121 @@ const storyDatabase = {
                 }
             ]
         }],
-        medium: [],
-        hard: []
+        medium: [
+        {
+            id: 3,
+            title: "The Big Red Bus",
+            icon: "🚌",
+            level: "Beginner",
+            wordCount: 95,
+            grammarFocus: "Colors, sizes, action verbs",
+            vocabulary: ["bus", "ride", "stop", "driver", "window"],
+            content: [
+                "Lily sees a big red bus. The bus stops near her house.",
+                "The driver smiles. He opens the door.",
+                "Lily gets on the bus. She sits by the window.",
+                "The bus moves. It goes down the street.",
+                "Lily looks out the window. She sees trees and houses.",
+                "The bus stops at the park. Lily's mom is there.",
+                "Lily waves goodbye to the driver. She had a fun ride!"
+            ],
+            questions: [
+                {
+                    question: "What color is the bus?",
+                    options: ["Blue", "Red", "Yellow", "Green"],
+                    correct: 1
+                },
+                {
+                    question: "Where does Lily sit?",
+                    options: ["By the door", "By the window", "In the back", "Near the driver"],
+                    correct: 1
+                },
+                {
+                    question: "Where does the bus stop?",
+                    options: ["At school", "At home", "At the park", "At the store"],
+                    correct: 2
+                }
+            ]
+        }],
+        hard: [
+        {
+            id: 4,
+            title: "Baking Cookies",
+            icon: "🍪",
+            level: "Beginner",
+            wordCount: 110,
+            grammarFocus: "Sequence words (first, then, next, finally)",
+            vocabulary: ["bake", "mix", "oven", "delicious", "share"],
+            content: [
+                "Today, Mom and I are baking cookies. I am excited!",
+                "First, we get a big bowl. We put flour in it.",
+                "Then, we add sugar and butter. I help mix everything.",
+                "Mom cracks two eggs into the bowl. I stir and stir.",
+                "Next, we make small balls with the dough. We put them on a tray.",
+                "Mom puts the tray in the oven. We wait for 15 minutes.",
+                "Finally, the cookies are ready! They smell delicious.",
+                "The cookies are warm and sweet. I share them with Dad.",
+                "Baking cookies is fun. I want to bake again tomorrow!"
+            ],
+            questions: [
+                {
+                    question: "What do they make first?",
+                    options: ["They crack eggs", "They get a bowl", "They mix flour", "They bake cookies"],
+                    correct: 1
+                },
+                {
+                    question: "How long do the cookies bake?",
+                    options: ["5 minutes", "10 minutes", "15 minutes", "20 minutes"],
+                    correct: 2
+                },
+                {
+                    question: "Who does the child share cookies with?",
+                    options: ["Mom", "A friend", "Dad", "The teacher"],
+                    correct: 2
+                }
+            ]
+        }]
     },
     '6': {
-        easy: [],
+        easy: [
+        {
+            id: 1,
+            title: "The Rainbow",
+            icon: "🌈",
+            level: "Early Reader",
+            wordCount: 100,
+            grammarFocus: "Color names, descriptive adjectives",
+            vocabulary: ["rainbow", "beautiful", "after", "rain", "sky"],
+            content: [
+                "Yesterday, it rained all morning. The sky was gray and cloudy.",
+                "Then the rain stopped. The sun came out from behind the clouds.",
+                "I looked up at the sky. I saw something beautiful!",
+                "It was a rainbow! It had many colors.",
+                "I saw red, orange, yellow, green, blue, and purple.",
+                "The rainbow was very big. It stretched across the whole sky.",
+                "My little sister came outside. She saw the rainbow too.",
+                "We pointed at the colors. We counted them together.",
+                "The rainbow stayed for ten minutes. Then it slowly faded away.",
+                "I hope to see another rainbow soon. Rainbows make me happy!"
+            ],
+            questions: [
+                {
+                    question: "When did it rain?",
+                    options: ["At night", "All morning", "In the evening", "All day"],
+                    correct: 1
+                },
+                {
+                    question: "How many colors did the child see?",
+                    options: ["Four", "Five", "Six", "Seven"],
+                    correct: 2
+                },
+                {
+                    question: "How long did the rainbow stay?",
+                    options: ["Five minutes", "Ten minutes", "Fifteen minutes", "One hour"],
+                    correct: 1
+                }
+            ]
+        }],
         medium: [{
             id: 1,
             title: "Max the Cat",
@@ -203,20 +313,441 @@ const storyDatabase = {
                 }
             ]
         }],
-        hard: []
+        hard: [
+        {
+            id: 3,
+            title: "The Helpful Robot",
+            icon: "🤖",
+            level: "Early Reader",
+            wordCount: 140,
+            grammarFocus: "Simple past tense, helping verbs (can, could)",
+            vocabulary: ["robot", "helpful", "chores", "tired", "grateful"],
+            content: [
+                "My family got a new robot last week. His name is Robo.",
+                "Robo is very helpful. He can do many things around the house.",
+                "In the morning, Robo makes breakfast. He cooks eggs and toast.",
+                "After breakfast, Robo cleans the dishes. He washes them carefully.",
+                "When I go to school, Robo tidies my room. He makes my bed and picks up my toys.",
+                "In the afternoon, Robo helps my mom with the laundry. He folds all the clothes neatly.",
+                "Robo can also water the plants in our garden. He does it every day.",
+                "At night, Robo tells me a bedtime story. He has a gentle voice.",
+                "Sometimes Robo plays games with me. He is good at chess!",
+                "My parents say Robo saved them a lot of time. Now they are less tired.",
+                "I am grateful for Robo. He is not just a robot. He is part of our family!"
+            ],
+            questions: [
+                {
+                    question: "What does Robo make for breakfast?",
+                    options: ["Pancakes", "Eggs and toast", "Cereal", "Sandwiches"],
+                    correct: 1
+                },
+                {
+                    question: "When does Robo tidy the child's room?",
+                    options: ["At night", "After breakfast", "When the child is at school", "In the afternoon"],
+                    correct: 2
+                },
+                {
+                    question: "How do the parents feel about Robo?",
+                    options: ["Angry", "Worried", "Grateful", "Confused"],
+                    correct: 2
+                },
+                {
+                    question: "What game does Robo play with the child?",
+                    options: ["Soccer", "Chess", "Hide and seek", "Video games"],
+                    correct: 1
+                }
+            ]
+        }]
     },
     '7': {
-        easy: [],
-        medium: [],
-        hard: []
+        easy: [
+        {
+            id: 1,
+            title: "The Class Pet",
+            icon: "🐹",
+            level: "Developing Reader",
+            wordCount: 150,
+            grammarFocus: "Present continuous tense, responsibility words",
+            vocabulary: ["responsibility", "schedule", "observe", "habitat", "behavior"],
+            content: [
+                "Our class has a new pet hamster. Her name is Peanut. She is small and brown.",
+                "Miss Carter, our teacher, said we must take good care of Peanut. Everyone will have a turn.",
+                "We made a schedule. On Monday, Tom feeds Peanut. On Tuesday, Sarah cleans her cage.",
+                "Today is Wednesday. It is my turn to take care of Peanut!",
+                "I arrive at school early. First, I check if Peanut has enough water. Her bottle is half empty, so I fill it up.",
+                "Next, I give her fresh food. Peanut loves carrots and sunflower seeds.",
+                "I watch Peanut eat. She holds the food in her tiny paws. It is very cute!",
+                "Peanut is running on her wheel. She is getting exercise. I write this in our observation journal.",
+                "At lunchtime, I check on Peanut again. She is sleeping in her little house. Hamsters sleep during the day.",
+                "Taking care of Peanut is a big responsibility. But I enjoy it very much.",
+                "Tomorrow, it will be Emma's turn. I will tell her what Peanut needs.",
+                "Having a class pet teaches us to be responsible. Everyone is learning!"
+            ],
+            questions: [
+                {
+                    question: "What is the hamster's name?",
+                    options: ["Fluffy", "Peanut", "Cookie", "Brownie"],
+                    correct: 1
+                },
+                {
+                    question: "When does the child take care of Peanut?",
+                    options: ["Monday", "Tuesday", "Wednesday", "Thursday"],
+                    correct: 2
+                },
+                {
+                    question: "What does Peanut do during the day?",
+                    options: ["She plays", "She sleeps", "She runs", "She eats"],
+                    correct: 1
+                },
+                {
+                    question: "What did the child write in?",
+                    options: ["A book", "The schedule", "An observation journal", "A letter"],
+                    correct: 2
+                }
+            ]
+        }],
+        medium: [
+        {
+            id: 2,
+            title: "The Birthday Surprise",
+            icon: "🎂",
+            level: "Developing Reader",
+            wordCount: 180,
+            grammarFocus: "Past tense narrative, time expressions",
+            vocabulary: ["surprise", "secretly", "decorated", "delighted", "celebrate"],
+            content: [
+                "Last Saturday was Dad's birthday. My sister and I wanted to surprise him.",
+                "Two weeks before his birthday, we started planning secretly. We saved our pocket money to buy him a gift.",
+                "On Friday night, Dad went to bed early. Mom helped us prepare everything.",
+                "We blew up colorful balloons and hung them in the living room. We made a big banner that said 'Happy Birthday Dad!'",
+                "My sister baked a chocolate cake. It was Dad's favorite. I helped her put candles on top.",
+                "We wrapped our present carefully. We had bought him a new watch because his old one was broken.",
+                "On Saturday morning, we woke up very early. Everything was ready. We were so excited!",
+                "When Dad came downstairs, we all shouted, 'SURPRISE!' His face showed complete shock.",
+                "Dad looked around at the decorations. He saw the cake with the candles. Then he noticed the wrapped present.",
+                "'This is wonderful!' Dad exclaimed. He had tears in his eyes. They were happy tears.",
+                "We sang 'Happy Birthday' together. Dad blew out all the candles and made a wish.",
+                "He opened his present and loved the new watch. 'Thank you so much,' he said, hugging us tightly.",
+                "We ate cake for breakfast. Mom said it was okay because it was a special day.",
+                "Dad said it was the best birthday surprise ever. We were delighted that our plan worked!"
+            ],
+            questions: [
+                {
+                    question: "How long did the children plan the surprise?",
+                    options: ["One week", "Two weeks", "Three weeks", "One month"],
+                    correct: 1
+                },
+                {
+                    question: "What did the children buy for Dad?",
+                    options: ["A book", "A watch", "A shirt", "Shoes"],
+                    correct: 1
+                },
+                {
+                    question: "What flavor was the cake?",
+                    options: ["Vanilla", "Strawberry", "Chocolate", "Lemon"],
+                    correct: 2
+                },
+                {
+                    question: "How did Dad feel about the surprise?",
+                    options: ["Angry", "Confused", "Sad", "Delighted"],
+                    correct: 3
+                }
+            ]
+        }],
+        hard: [
+        {
+            id: 3,
+            title: "The Science Fair Project",
+            icon: "🔬",
+            level: "Developing Reader",
+            wordCount: 200,
+            grammarFocus: "Complex sentences, cause and effect",
+            vocabulary: ["experiment", "hypothesis", "observe", "conclusion", "demonstrate"],
+            content: [
+                "The annual science fair was coming up. Every student in grade 7 had to create a project.",
+                "My friend Alex and I decided to work together. We wanted to do something interesting about plants.",
+                "'What if we test how different types of music affect plant growth?' Alex suggested.",
+                "'That's brilliant!' I replied. 'We can have three groups of plants.'",
+                "We wrote our hypothesis: Plants that listen to classical music will grow taller than plants that listen to rock music or no music.",
+                "We bought 15 small bean plants. We divided them into three groups of five plants each.",
+                "Group A listened to classical music for one hour every day. Group B listened to rock music. Group C stayed in silence.",
+                "For four weeks, we observed the plants carefully. We measured their height every three days and wrote everything in our notebook.",
+                "We made sure all plants got the same amount of water and sunlight. We only changed the music.",
+                "After four weeks, we analyzed our results. The classical music plants grew an average of 15 centimeters.",
+                "The rock music plants grew 12 centimeters. The silent plants grew 11 centimeters.",
+                "Our hypothesis was correct! Classical music seemed to help the plants grow better.",
+                "We created a display board with photos and graphs. We explained our method and conclusion clearly.",
+                "At the science fair, many people visited our booth. They were impressed by our experiment.",
+                "We learned that good experiments need careful planning and patience. Science is fascinating!"
+            ],
+            questions: [
+                {
+                    question: "What was the children's hypothesis?",
+                    options: [
+                        "Rock music helps plants grow",
+                        "Classical music helps plants grow",
+                        "Music doesn't affect plants",
+                        "Silence is best for plants"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "How many plants did they use in total?",
+                    options: ["5", "10", "15", "20"],
+                    correct: 2
+                },
+                {
+                    question: "How often did they measure the plants?",
+                    options: ["Every day", "Every two days", "Every three days", "Every week"],
+                    correct: 2
+                },
+                {
+                    question: "Which group of plants grew the tallest?",
+                    options: ["Classical music group", "Rock music group", "Silent group", "They all grew the same"],
+                    correct: 0
+                }
+            ]
+        }]
     },
     '8': {
-        easy: [],
-        medium: [],
-        hard: []
+        easy: [
+        {
+            id: 1,
+            title: "The Community Garden",
+            icon: "🌻",
+            level: "Confident Reader",
+            wordCount: 220,
+            grammarFocus: "Present perfect tense, community vocabulary",
+            vocabulary: ["community", "volunteer", "cooperate", "harvest", "appreciate"],
+            content: [
+                "Our neighborhood has started a community garden. It's located on an empty lot that has been unused for years.",
+                "Mrs. Kim, who lives on Oak Street, organized the project. She has always loved gardening and wanted to share it with others.",
+                "Many families have volunteered to help. Each family gets a small plot of land to grow vegetables or flowers.",
+                "My family chose Plot 12. We have planted tomatoes, lettuce, and carrots. We visit the garden every weekend.",
+                "In the garden, we have met many neighbors we didn't know before. Mr. Rodriguez teaches us about composting. The Wilson family shares their gardening tools with everyone.",
+                "Every Saturday morning, there is a work session. People cooperate to maintain the shared areas. We pull weeds, water the plants, and fix the fence together.",
+                "The garden has brought our community closer. Children play while their parents work. Everyone talks and laughs.",
+                "Last month, we had our first harvest. We picked ripe tomatoes, crisp lettuce, and crunchy carrots.",
+                "Mrs. Kim organized a potluck dinner. Each family brought a dish made with vegetables from their plot.",
+                "My mom made a fresh salad with our lettuce and tomatoes. It tasted better than any store-bought salad!",
+                "During dinner, Mrs. Kim said, 'This garden is more than just plants. It's about friendship and working together.'",
+                "Everyone agreed. The community garden has become a special place where neighbors have become friends.",
+                "I have learned that when people cooperate, wonderful things happen. I appreciate what our community has created together."
+            ],
+            questions: [
+                {
+                    question: "Who organized the community garden project?",
+                    options: ["Mr. Rodriguez", "Mrs. Kim", "The Wilson family", "The narrator's mom"],
+                    correct: 1
+                },
+                {
+                    question: "What vegetables did the narrator's family plant?",
+                    options: [
+                        "Potatoes, beans, and onions",
+                        "Tomatoes, lettuce, and carrots",
+                        "Peppers, cucumbers, and squash",
+                        "Corn, peas, and cabbage"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "When do people work together in the garden?",
+                    options: ["Every day", "Every Saturday morning", "Every Sunday afternoon", "Once a month"],
+                    correct: 1
+                },
+                {
+                    question: "What did Mrs. Kim say the garden was about?",
+                    options: [
+                        "Growing food",
+                        "Saving money",
+                        "Friendship and working together",
+                        "Learning about plants"
+                    ],
+                    correct: 2
+                }
+            ]
+        }],
+        medium: [
+        {
+            id: 2,
+            title: "The Coding Competition",
+            icon: "💻",
+            level: "Confident Reader",
+            wordCount: 250,
+            grammarFocus: "Past continuous, subordinate clauses",
+            vocabulary: ["algorithm", "collaborate", "debug", "perseverance", "innovative"],
+            content: [
+                "When the announcement about the regional coding competition appeared on our school's bulletin board, I knew I wanted to participate.",
+                "The competition required teams of three students. We had to create a simple game using basic programming.",
+                "I asked my friends Priya and Marcus to join my team. Priya was excellent at design, while Marcus understood algorithms better than anyone in our class.",
+                "We spent three weeks preparing. Every afternoon after school, we were working in the computer lab, brainstorming ideas and writing code.",
+                "We decided to create a maze game where players collected stars while avoiding obstacles. It sounded simple, but programming it was challenging.",
+                "Marcus wrote the code for the character movement. Priya designed colorful graphics and backgrounds. I focused on the scoring system and game levels.",
+                "One week before the competition, disaster struck. Our game kept crashing whenever players reached level three.",
+                "We spent hours trying to find the bug. Marcus examined every line of code. Priya tested different scenarios. I searched online forums for solutions.",
+                "Finally, at midnight before the competition, Marcus discovered the problem. A single misplaced bracket was causing the crash!",
+                "At the competition, fifteen teams from different schools presented their projects. The judges tested each game carefully.",
+                "When it was our turn, we were nervous but prepared. We demonstrated our game and explained our code. The judges asked difficult questions, but we answered confidently.",
+                "Two days later, we received incredible news. Our team won second place! We were thrilled.",
+                "The experience taught us valuable lessons about perseverance and teamwork. When Marcus found that bug, we celebrated like we had won first place.",
+                "Working together, we created something innovative. I realized that coding isn't just about programming—it's about problem-solving and never giving up."
+            ],
+            questions: [
+                {
+                    question: "Why did the narrator choose Priya and Marcus as teammates?",
+                    options: [
+                        "They were best friends",
+                        "They had complementary skills",
+                        "They were the only volunteers",
+                        "The teacher assigned them"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What type of game did the team create?",
+                    options: ["A racing game", "A puzzle game", "A maze game", "A sports game"],
+                    correct: 2
+                },
+                {
+                    question: "What caused the game to crash?",
+                    options: [
+                        "A misplaced bracket",
+                        "Wrong graphics",
+                        "Slow computer",
+                        "Missing code"
+                    ],
+                    correct: 0
+                },
+                {
+                    question: "What place did the team win?",
+                    options: ["First place", "Second place", "Third place", "Fourth place"],
+                    correct: 1
+                }
+            ]
+        }],
+        hard: [
+        {
+            id: 3,
+            title: "The Time Capsule Discovery",
+            icon: "📦",
+            level: "Confident Reader",
+            wordCount: 280,
+            grammarFocus: "Past perfect, reported speech, descriptive clauses",
+            vocabulary: ["archaeological", "excavate", "artifact", "deduce", "preservation"],
+            content: [
+                "During the renovation of our school's old gymnasium, construction workers made an unexpected discovery. Buried beneath the wooden floorboards, they had found a metal box covered in rust.",
+                "When Principal Anderson examined the box, she noticed an inscription: 'To be opened in 2026—From the Class of 1976.'",
+                "The principal called an assembly. 'Fifty years ago, students from this school buried a time capsule,' she announced. 'Today, we're finally going to open it!'",
+                "The entire school gathered in the auditorium. Principal Anderson carefully opened the lid. Inside, there were letters, photographs, newspapers, and various objects.",
+                "The first item was a class photo. Twenty-five students smiled at the camera, dressed in clothes that looked very different from what we wear today.",
+                "Mr. Thompson, our history teacher, picked up a newspaper. 'Look at this headline,' he said. 'Gas prices were only 60 cents per gallon!'",
+                "There were letters written by students to their future selves. One girl named Jennifer had written, 'I wonder if people in the future will have flying cars. I hope the world is peaceful and everyone is happy.'",
+                "We found a vinyl record of popular songs from 1976. Nobody in our class had ever seen one before. Mr. Thompson explained how people used to play music before CDs and digital files existed.",
+                "The most interesting artifact was a handmade prediction book. Students had written what they thought the future would be like.",
+                "Some predictions were accurate: 'Computers will be in every home.' Others were amusing: 'We'll have robot teachers!' and 'Students will learn telepathically!'",
+                "Principal Anderson suggested that we create our own time capsule. 'Let's show future students what life was like in 2026,' she said enthusiastically.",
+                "Our class decided to include smartphones, face masks from the pandemic era, and letters about climate change efforts.",
+                "We also included predictions about future technology, hoping that students in 2076 would find them interesting.",
+                "As we buried our time capsule beneath the new gym floor, I imagined future students discovering it. What would they think about our time?",
+                "The discovery had taught us that while technology changes rapidly, human curiosity and hope for the future remain constant across generations."
+            ],
+            questions: [
+                {
+                    question: "When was the original time capsule buried?",
+                    options: ["1926", "1956", "1976", "1996"],
+                    correct: 2
+                },
+                {
+                    question: "What was the most interesting artifact according to the narrator?",
+                    options: [
+                        "The class photo",
+                        "The vinyl record",
+                        "The prediction book",
+                        "The newspaper"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "Which prediction from 1976 came true?",
+                    options: [
+                        "Flying cars",
+                        "Robot teachers",
+                        "Computers in every home",
+                        "Telepathic learning"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "What did the narrator realize from this experience?",
+                    options: [
+                        "Technology changes but curiosity remains constant",
+                        "Old things are better than new things",
+                        "Schools never change",
+                        "Predictions are always wrong"
+                    ],
+                    correct: 0
+                }
+            ]
+        }]
     },
     '9+': {
-        easy: [],
+        easy: [
+        {
+            id: 1,
+            title: "The Volunteer Project",
+            icon: "🤝",
+            level: "Fluent Reader",
+            wordCount: 240,
+            grammarFocus: "Modal verbs (should, could, must), conditional sentences",
+            vocabulary: ["volunteer", "initiative", "impact", "compassion", "contribution"],
+            content: [
+                "If someone had told me last year that I would spend my Saturdays at a food bank, I wouldn't have believed them. Yet here I was, sorting canned goods and packing boxes.",
+                "It all started when Ms. Rodriguez, my social studies teacher, announced a mandatory volunteer project. Each student must complete 20 hours of community service before the end of the semester.",
+                "'You could choose any organization you like,' she explained. 'But you should pick something that helps others in a meaningful way.'",
+                "I wasn't sure where to begin. My friend Amelia suggested we volunteer together at the City Food Bank. 'My older sister volunteers there,' she said. 'She says it's really rewarding.'",
+                "On our first Saturday, we arrived nervously. The coordinator, Mr. Patterson, welcomed us warmly. 'We're grateful for your help,' he said. 'Many families in our community depend on this food bank.'",
+                "He showed us how to check expiration dates, organize items by category, and pack family-sized boxes. The work required attention to detail and physical effort.",
+                "As we worked, I noticed the variety of people who came for food. There were elderly people, young families with children, and even some people who looked like they had regular jobs.",
+                "'Hard times can happen to anyone,' Mr. Patterson explained when he saw my surprised expression. 'That's why this service is so important.'",
+                "Over the following weeks, I began to understand the real impact of our work. One day, a mother with three children thanked us personally. 'You're helping us get through a difficult month,' she said, her eyes glistening with tears.",
+                "Amelia and I started coming on additional days beyond our required hours. We realized that volunteering wasn't just about fulfilling an assignment—it was about making a genuine difference.",
+                "By the end of the semester, I had completed 45 hours instead of the required 20. I learned that compassion isn't just feeling sorry for others; it's taking action to help.",
+                "Ms. Rodriguez was pleased with my progress report. But the real reward wasn't the grade. It was knowing that my small contribution could help someone have enough food on their table.",
+                "I've decided to continue volunteering next semester. If everyone gave a little of their time, our community would be so much stronger."
+            ],
+            questions: [
+                {
+                    question: "How many hours of community service were required?",
+                    options: ["10 hours", "20 hours", "30 hours", "45 hours"],
+                    correct: 1
+                },
+                {
+                    question: "Who suggested volunteering at the food bank?",
+                    options: ["Ms. Rodriguez", "Amelia", "Mr. Patterson", "Amelia's sister"],
+                    correct: 1
+                },
+                {
+                    question: "Why did the narrator keep volunteering beyond the required hours?",
+                    options: [
+                        "To get a better grade",
+                        "Because it was mandatory",
+                        "To make a genuine difference",
+                        "Because there was nothing else to do"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "What lesson did the narrator learn about compassion?",
+                    options: [
+                        "It's about feeling sorry for others",
+                        "It's about taking action to help",
+                        "It's only for wealthy people",
+                        "It's a school requirement"
+                    ],
+                    correct: 1
+                }
+            ]
+        }],
         medium: [
         {
             id: 1,
@@ -306,11 +837,219 @@ const storyDatabase = {
                 }
             ]
         }],
-        hard: []
+        hard: [
+        {
+            id: 3,
+            title: "The Environmental Debate",
+            icon: "🌍",
+            level: "Fluent Reader",
+            wordCount: 300,
+            grammarFocus: "Argumentative language, passive voice, complex conditionals",
+            vocabulary: ["sustainability", "controversy", "perspective", "compromise", "advocate"],
+            content: [
+                "The town hall meeting room was packed. Our community was divided over a controversial proposal: should we allow a solar panel farm to be built on the outskirts of town?",
+                "Mayor Williams opened the meeting. 'Tonight, we'll hear arguments from both sides. Please be respectful, even if you disagree.'",
+                "The first speaker was Dr. Chen, an environmental scientist. 'Climate change is the greatest challenge of our generation,' she began. 'If we don't transition to renewable energy now, our children will inherit a damaged planet.'",
+                "She presented data showing how much carbon dioxide would be eliminated if the solar farm were constructed. The panels could generate enough electricity to power 500 homes.",
+                "'This isn't just about our town,' Dr. Chen concluded. 'It's about being part of the solution to a global problem.'",
+                "Next, Mr. Blackwood, a local farmer, approached the microphone. His family had been farming the land for three generations.",
+                "'I'm not against renewable energy,' he said carefully. 'But this land has been used for agriculture for over a hundred years. Once it's covered with solar panels, it can never be farmland again.'",
+                "He argued that food production was equally important as energy production. 'We need both food and power to survive,' he pointed out. 'But we can't eat electricity.'",
+                "The debate continued for hours. Some argued that technological advancement must be prioritized. Others insisted that traditional ways of life should be preserved.",
+                "My sister whispered to me, 'Why can't they find a compromise?'",
+                "That question stuck in my mind. Why couldn't both sides work together?",
+                "During the open forum, I nervously raised my hand. When Mayor Williams called on me, I stood up.",
+                "'What if we used the land for both purposes?' I suggested. 'I read about agrivoltaics—growing crops beneath raised solar panels. Sheep can graze under them too.'",
+                "The room fell silent. Dr. Chen's eyes lit up. 'That's an innovative idea,' she said. 'Studies have shown that certain crops actually grow better in partial shade.'",
+                "Mr. Blackwood looked thoughtful. 'If we could continue farming while also generating clean energy, I might reconsider my opposition.'",
+                "Mayor Williams smiled. 'This is exactly the kind of creative thinking we need. Let's form a committee to investigate this possibility.'",
+                "As we left the meeting, my sister said, 'You found a way to respect both perspectives.'",
+                "I realized that the best solutions often come from listening to all sides and finding innovative compromises. Progress doesn't have to mean abandoning everything from the past.",
+                "Sometimes, the answer isn't choosing between two opposing ideas—it's finding a way to combine them."
+            ],
+            questions: [
+                {
+                    question: "What was the controversial proposal?",
+                    options: [
+                        "Building a new school",
+                        "Creating a solar panel farm",
+                        "Expanding the highway",
+                        "Opening a new factory"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What was Mr. Blackwood's main concern?",
+                    options: [
+                        "The cost of the project",
+                        "Noise from the panels",
+                        "Loss of farmland forever",
+                        "Visual appearance"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "What solution did the narrator suggest?",
+                    options: [
+                        "Building panels elsewhere",
+                        "Agrivoltaics - combining farming and solar",
+                        "Using wind energy instead",
+                        "Doing nothing"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What lesson did the narrator learn?",
+                    options: [
+                        "Technology is always better",
+                        "Traditional ways are always better",
+                        "Best solutions combine different perspectives",
+                        "Debates are waste of time"
+                    ],
+                    correct: 2
+                }
+            ]
+        }]
     },
     '10+': {
-        easy: [],
-        medium: [],
+        easy: [
+        {
+            id: 1,
+            title: "The Photography Club",
+            icon: "📷",
+            level: "Advanced Reader",
+            wordCount: 260,
+            grammarFocus: "Perfect continuous tenses, embedded clauses",
+            vocabulary: ["composition", "perspective", "documentation", "interpret", "portfolio"],
+            content: [
+                "I had been walking past the photography club's exhibition for three days before I finally stopped to look closely at the images displayed.",
+                "Each photograph told a story. One showed an elderly man feeding pigeons in the park, his weathered hands gentle and patient. Another captured rain droplets on a spider web, each drop reflecting the world like a tiny mirror.",
+                "A poster near the entrance announced: 'Photography Club—New Members Welcome. Meetings Every Thursday.'",
+                "I had always been interested in photography but had never seriously pursued it. My phone was full of random snapshots, but I had never thought of photography as art.",
+                "At the next meeting, I nervously entered the art room. About fifteen students were already there, cameras of all types spread across the tables.",
+                "The club president, Sofia, welcomed me warmly. 'Photography isn't just about having expensive equipment,' she explained. 'It's about seeing the world differently and capturing moments that matter.'",
+                "She introduced our first assignment: document something ordinary in an extraordinary way. We had two weeks to take photos and present them.",
+                "I spent the next week observing my surroundings with new attention. Things I had walked past every day suddenly seemed interesting through the lens of potential photography.",
+                "I noticed how morning sunlight created shadows on the school's brick walls, forming intricate patterns. I observed how my little brother's face changed completely when he was focused on building with blocks—pure concentration replacing his usual playful expression.",
+                "I photographed the way books were stacked in the library, creating layers of colors and textures. I captured steam rising from my mother's coffee cup, backlit by the kitchen window.",
+                "When presentation day arrived, I was surprised by everyone's interpretations of 'ordinary made extraordinary.' One student had photographed his grandmother's hands kneading bread dough. Another had captured the geometry of fire escape stairs creating patterns against the sky.",
+                "When I showed my photos, Sofia said, 'You've developed a good eye for light and composition. Have you been practicing for long?'",
+                "'Just two weeks,' I admitted. 'But I've been learning to see.'",
+                "Sofia nodded approvingly. 'That's exactly what photography teaches us—to truly observe the world around us.'",
+                "Throughout the semester, I continued developing my skills. I learned about exposure, composition rules, and most importantly, about patience.",
+                "Photography had become more than a hobby. It was a way of documenting life and interpreting reality through my unique perspective.",
+                "By the end of the year, I had compiled a portfolio of fifty photographs that I was genuinely proud of. Each image represented not just a moment captured, but a moment truly seen."
+            ],
+            questions: [
+                {
+                    question: "What made the narrator finally join the photography club?",
+                    options: [
+                        "A friend invited them",
+                        "It was mandatory",
+                        "After seeing the exhibition for three days",
+                        "The teacher suggested it"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "What was the first assignment?",
+                    options: [
+                        "Take portrait photos",
+                        "Document something ordinary in an extraordinary way",
+                        "Photograph nature",
+                        "Create a photo story"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What did Sofia say photography teaches us?",
+                    options: [
+                        "How to use expensive cameras",
+                        "How to pose for pictures",
+                        "To truly observe the world",
+                        "Technical editing skills"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "How many photos did the narrator include in their final portfolio?",
+                    options: ["Fifteen", "Twenty-five", "Forty", "Fifty"],
+                    correct: 3
+                }
+            ]
+        }],
+        medium: [
+        {
+            id: 2,
+            title: "The Historical Research Project",
+            icon: "📜",
+            level: "Advanced Reader",
+            wordCount: 320,
+            grammarFocus: "Academic language, citation phrases, subjunctive mood",
+            vocabulary: ["archive", "primary source", "verify", "interpretation", "methodology"],
+            content: [
+                "When Mr. Harrison assigned our history research project, he emphasized that we were to act as real historians. 'Don't just repeat what you find online,' he instructed. 'I want you to examine primary sources and form your own conclusions.'",
+                "I chose to investigate whether a local historical figure, Samuel Morrison, who was credited with founding our town's first hospital in 1892, actually deserved sole credit for this achievement.",
+                "My research began at the town's historical archives. The librarian, Mrs. Chen, had been working there for thirty years. 'Samuel Morrison? Yes, there are several documents about him,' she said, leading me to a collection of yellowed newspapers and handwritten letters.",
+                "The official town history, published in 1950, stated clearly that Morrison 'single-handedly established Morrison Hospital through his generous donation and tireless effort.'",
+                "However, as I examined older newspaper articles from 1891-1893, I discovered something interesting. Multiple articles mentioned a 'Ladies' Hospital Committee' that had been fundraising for two years before Morrison's involvement.",
+                "I found a letter written by Morrison himself to the newspaper editor. He wrote, 'While I am honored to have my name associated with this institution, it would be unjust if I were to accept credit that rightly belongs to the determined women who initiated this endeavor.'",
+                "This was fascinating! Why had the later historical account given Morrison sole credit?",
+                "I discovered that the 1950 history was written by Morrison's grandson. Perhaps family pride had influenced his interpretation of events. Or perhaps the contributions of women in that era were systematically undervalued and unrecorded.",
+                "I tracked down original meeting minutes from the Ladies' Hospital Committee. The chairwoman, Eleanor Wright, had organized fundraisers, secured the land, and recruited the first medical staff.",
+                "Morrison's contribution, while significant, was primarily financial. He donated money for the building's construction, which was certainly important. But the vision, planning, and years of groundwork belonged to the women's committee.",
+                "For my presentation, I created a timeline showing both Morrison's and the committee's contributions. I used direct quotes from primary sources to support my findings.",
+                "Mr. Harrison was impressed. 'This is excellent historical research,' he said. 'You've demonstrated that history isn't always what we're told—it's what we can verify through evidence.'",
+                "He suggested I submit my findings to the town historical society. 'They should know about this. Eleanor Wright and her colleagues deserve recognition.'",
+                "I wrote a formal research paper and presented it to the historical society. They were intrigued and decided to update their exhibits to reflect the fuller story.",
+                "A month later, I attended the unveiling of the new exhibit. A plaque now read: 'Morrison Hospital: Founded through the vision of the Ladies' Hospital Committee (1890-1892) and made possible through the generous funding of Samuel Morrison.'",
+                "Mrs. Wright's great-granddaughter was present. She thanked me with tears in her eyes. 'My family always knew Grandma Eleanor had done this work, but no one believed us without proof.'",
+                "This experience taught me that history is not just dates and facts—it's about ensuring that all contributors are remembered accurately. Sometimes, uncovering the truth requires looking beyond the official story.",
+                "As historians, we have a responsibility to question, verify, and, when necessary, correct the historical record."
+            ],
+            questions: [
+                {
+                    question: "What was unusual about Samuel Morrison according to historical records?",
+                    options: [
+                        "He founded the hospital alone",
+                        "He actually acknowledged the Ladies' Committee",
+                        "He was a doctor",
+                        "He wrote many books"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "Who actually initiated the hospital project?",
+                    options: [
+                        "Samuel Morrison",
+                        "Morrison's grandson",
+                        "The Ladies' Hospital Committee led by Eleanor Wright",
+                        "Mr. Harrison"
+                    ],
+                    correct: 2
+                },
+                {
+                    question: "Why might the 1950 history have given Morrison sole credit?",
+                    options: [
+                        "He deserved it",
+                        "His grandson wrote it and women's contributions were undervalued",
+                        "Nobody else helped",
+                        "The committee refused recognition"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What was the main lesson the narrator learned?",
+                    options: [
+                        "History books are always right",
+                        "Historians should question and verify the historical record",
+                        "Women never contributed to history",
+                        "Primary sources don't matter"
+                    ],
+                    correct: 1
+                }
+            ]
+        }],
         hard: [
         {
             id: 1,
