@@ -405,8 +405,8 @@
             updateStats();
         });
 
-        function updateStats() {
-            const users = getAllUsers();
+        async function updateStats() {
+            const users = await getAllUsers();
             const totalUsers = users.length;
             const admins = users.filter(u => u.role === 'admin').length;
             const students = users.filter(u => u.role === 'student').length;
@@ -429,8 +429,8 @@
             document.getElementById('stats-grid').innerHTML = statsHTML;
         }
 
-        function loadUsers() {
-            const users = getAllUsers();
+        async function loadUsers() {
+            const users = await getAllUsers();
             const tbody = document.getElementById('users-tbody');
 
             if (users.length === 0) {
