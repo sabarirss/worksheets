@@ -377,12 +377,25 @@
     <script src="firebase-auth.js"></script>
 
     <script>
-        // Require admin access
-        const currentUser = requireAdmin();
-        if (!currentUser) {
-            // Will redirect automatically
-            throw new Error('Admin access required');
-        }
+        // Wait for Firebase auth and check admin access
+        firebase.auth().onAuthStateChanged(async function(user) {
+            if (!user) {
+                // Not authenticated
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Check if user is admin
+            const userDoc = await firebase.firestore().collection('users')
+                .where('username', '==', user.email.split('@')[0])
+                .limit(1)
+                .get();
+
+            if (userDoc.empty || userDoc.docs[0].data().role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'index.html';
+            }
+        });
 
         let editingUsername = null;
 

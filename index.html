@@ -58,11 +58,13 @@
 </head>
 <body>
     <script>
-        // Require authentication
-        const currentUser = requireAuth();
-        if (!currentUser) {
-            throw new Error('Authentication required');
-        }
+        // Wait for Firebase auth to initialize before checking
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                // Not authenticated, redirect to login
+                window.location.href = 'login.html';
+            }
+        });
     </script>
 
     <div class="container">
