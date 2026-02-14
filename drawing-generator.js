@@ -855,32 +855,44 @@ function loadDrawingTutorial(tutorialKey) {
                     <canvas id="drawing-canvas" width="500" height="500"></canvas>
                 </div>
                 <div class="canvas-controls">
-                    <button class="canvas-btn" id="undo-btn" onclick="undo()">↶ Undo</button>
-                    <button class="canvas-btn" id="redo-btn" onclick="redo()">↷ Redo</button>
-                    <button class="canvas-btn" onclick="clearCanvas()">🗑️ Clear Canvas</button>
+                    <button class="canvas-btn" id="undo-btn" onclick="undo()" title="Undo">↶</button>
+                    <button class="canvas-btn" id="redo-btn" onclick="redo()" title="Redo">↷</button>
+                    <button class="canvas-btn" onclick="clearCanvas()" title="Clear Canvas">🗑️</button>
+                    <button class="canvas-btn" onclick="toggleColorPicker()" id="brush-btn" title="Choose Color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 1.3em;">🖌️</button>
+                    <button class="canvas-btn" onclick="changeColor('white')" title="Eraser">🧹</button>
                 </div>
-                <div class="canvas-controls">
-                    <button class="canvas-btn" onclick="changeColor('black')">⚫ Black</button>
-                    <button class="canvas-btn" onclick="changeColor('blue')">🔵 Blue</button>
-                    <button class="canvas-btn" onclick="changeColor('red')">🔴 Red</button>
-                    <button class="canvas-btn" onclick="changeColor('green')">🟢 Green</button>
-                    <button class="canvas-btn" onclick="changeColor('yellow')">🟡 Yellow</button>
-                    <button class="canvas-btn" onclick="changeColor('brown')">🟤 Brown</button>
-                    <button class="canvas-btn" onclick="changeColor('orange')">🟠 Orange</button>
-                    <button class="canvas-btn" onclick="changeColor('white')">🧹 Eraser</button>
+                <div class="canvas-controls" id="color-picker-container" style="display: none; flex-wrap: wrap; gap: 8px; padding: 15px; background: #f8f9fa; border-radius: 10px; justify-content: center;">
+                    <button class="color-dot" onclick="changeColor('black')" style="background: black;" title="Black">⚫</button>
+                    <button class="color-dot" onclick="changeColor('#1a1a1a')" style="background: #1a1a1a;" title="Dark Gray">⚫</button>
+                    <button class="color-dot" onclick="changeColor('blue')" style="background: blue;" title="Blue">🔵</button>
+                    <button class="color-dot" onclick="changeColor('#4169e1')" style="background: #4169e1;" title="Royal Blue">🔵</button>
+                    <button class="color-dot" onclick="changeColor('red')" style="background: red;" title="Red">🔴</button>
+                    <button class="color-dot" onclick="changeColor('#dc143c')" style="background: #dc143c;" title="Crimson">🔴</button>
+                    <button class="color-dot" onclick="changeColor('green')" style="background: green;" title="Green">🟢</button>
+                    <button class="color-dot" onclick="changeColor('#32cd32')" style="background: #32cd32;" title="Lime Green">🟢</button>
+                    <button class="color-dot" onclick="changeColor('yellow')" style="background: yellow;" title="Yellow">🟡</button>
+                    <button class="color-dot" onclick="changeColor('#ffd700')" style="background: #ffd700;" title="Gold">🟡</button>
+                    <button class="color-dot" onclick="changeColor('orange')" style="background: orange;" title="Orange">🟠</button>
+                    <button class="color-dot" onclick="changeColor('#ff8c00')" style="background: #ff8c00;" title="Dark Orange">🟠</button>
+                    <button class="color-dot" onclick="changeColor('brown')" style="background: brown;" title="Brown">🟤</button>
+                    <button class="color-dot" onclick="changeColor('#8b4513')" style="background: #8b4513;" title="Saddle Brown">🟤</button>
+                    <button class="color-dot" onclick="changeColor('purple')" style="background: purple;" title="Purple">🟣</button>
+                    <button class="color-dot" onclick="changeColor('#9370db')" style="background: #9370db;" title="Medium Purple">🟣</button>
+                    <button class="color-dot" onclick="changeColor('pink')" style="background: pink;" title="Pink">🩷</button>
+                    <button class="color-dot" onclick="changeColor('#ff1493')" style="background: #ff1493;" title="Deep Pink">🩷</button>
                 </div>
                 <div class="canvas-controls" id="eraser-size-container" style="display: none; flex-direction: column; align-items: center; background: #f0f0f0; padding: 15px; border-radius: 10px; margin: 10px 0;">
                     <label style="font-weight: bold; margin-bottom: 10px; color: #764ba2;">
-                        Eraser Size: <span id="eraser-size-value">20</span>px
+                        🧹 <span id="eraser-size-value">20</span>px
                     </label>
                     <input type="range" min="5" max="50" value="20"
                            oninput="changeEraserSize(this.value)"
                            style="width: 80%; cursor: pointer;">
                 </div>
                 <div class="canvas-controls">
-                    <button class="canvas-btn" onclick="changeBrushSize('small')">Small Brush</button>
-                    <button class="canvas-btn" onclick="changeBrushSize('medium')">Medium Brush</button>
-                    <button class="canvas-btn" onclick="changeBrushSize('large')">Large Brush</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('small')" title="Small Brush">🖌️ S</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('medium')" title="Medium Brush">🖌️ M</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('large')" title="Large Brush">🖌️ L</button>
                 </div>
                 <div class="canvas-controls">
                     <button class="canvas-btn" style="background: #4caf50; color: white;" onclick="savePDF()">💾 Save as PDF</button>
@@ -1177,6 +1189,21 @@ function clearCanvas() {
     undoStack = [];
     redoStack = [];
     saveState();
+}
+
+/**
+ * Toggle color picker visibility
+ */
+function toggleColorPicker() {
+    const colorPicker = document.getElementById('color-picker-container');
+    const brushBtn = document.getElementById('brush-btn');
+    if (colorPicker.style.display === 'none' || colorPicker.style.display === '') {
+        colorPicker.style.display = 'flex';
+        brushBtn.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
+    } else {
+        colorPicker.style.display = 'none';
+        brushBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    }
 }
 
 /**
