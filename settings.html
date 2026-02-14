@@ -26,6 +26,7 @@
             margin-bottom: 40px;
             padding-bottom: 30px;
             border-bottom: 2px solid #f0f0f0;
+            position: relative;
         }
 
         .settings-header h1 {
@@ -37,6 +38,30 @@
         .settings-header p {
             color: #666;
             margin: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+            transform: rotate(90deg);
         }
 
         .settings-section {
@@ -238,6 +263,7 @@
 <body>
     <div class="settings-container">
         <div class="settings-header">
+            <button class="close-btn" onclick="window.location.href='index.html'" title="Close Settings">✕</button>
             <h1>⚙️ Settings</h1>
             <p>Manage your profile and preferences</p>
         </div>
