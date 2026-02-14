@@ -598,12 +598,94 @@ function handleEnter(event, index) {
     }
 }
 
-// Check answers
+// Helper: Calculate Levenshtein distance for spelling similarity
+function levenshteinDistance(str1, str2) {
+    const matrix = [];
+
+    for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+
+    return matrix[str2.length][str1.length];
+}
+
+// Helper: Remove German articles from text
+function removeArticles(text) {
+    return text
+        .replace(/\b(der|die|das|den|dem|des|ein|eine|einen|einem|einer|eines)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// Helper: Evaluate answer with partial credit
+function evaluateAnswer(userAnswer, correctAnswer) {
+    // Full credit: exact match
+    if (userAnswer === correctAnswer) {
+        return { score: 1.0, feedback: '✓ Richtig!' };
+    }
+
+    // Empty answer
+    if (userAnswer === '') {
+        return { score: 0.0, feedback: '' };
+    }
+
+    // Check without articles (0.9 credit if matches)
+    const userWithoutArticles = removeArticles(userAnswer);
+    const correctWithoutArticles = removeArticles(correctAnswer);
+
+    if (userWithoutArticles === correctWithoutArticles && userWithoutArticles !== '') {
+        return { score: 0.9, feedback: '○ Fast richtig (missing/wrong article)' };
+    }
+
+    // Check for minor spelling mistakes (Levenshtein distance)
+    const distance = levenshteinDistance(userAnswer, correctAnswer);
+    const maxLength = Math.max(userAnswer.length, correctAnswer.length);
+    const similarity = 1 - (distance / maxLength);
+
+    // 1-2 character difference: 0.8 credit
+    if (distance <= 2 && distance > 0 && similarity >= 0.7) {
+        return { score: 0.8, feedback: '△ Teilweise richtig (minor spelling error)' };
+    }
+
+    // Check spelling without articles
+    if (userWithoutArticles !== '' && correctWithoutArticles !== '') {
+        const distanceWithoutArticles = levenshteinDistance(userWithoutArticles, correctWithoutArticles);
+        const maxLengthWithoutArticles = Math.max(userWithoutArticles.length, correctWithoutArticles.length);
+        const similarityWithoutArticles = 1 - (distanceWithoutArticles / maxLengthWithoutArticles);
+
+        if (distanceWithoutArticles <= 2 && distanceWithoutArticles > 0 && similarityWithoutArticles >= 0.7) {
+            return { score: 0.7, feedback: '△ Teilweise richtig (article + spelling)' };
+        }
+    }
+
+    // Completely wrong
+    return { score: 0.0, feedback: '✗ Falsch' };
+}
+
+// Check answers with partial credit
 function checkAnswers() {
     stopTimer();
 
-    let correct = 0;
-    let total = 0;
+    let totalScore = 0;
+    let maxScore = 0;
 
     currentWorksheet.problems.forEach((problem, index) => {
         if (problem.type === 'passage' || problem.type === 'writing') return;
@@ -615,35 +697,53 @@ function checkAnswers() {
         const userAnswer = input.value.trim().toLowerCase();
         const correctAnswer = problem.answer.toLowerCase();
 
-        total++;
+        maxScore += 1.0;
 
-        if (userAnswer === correctAnswer) {
-            feedback.textContent = '✓';
+        const result = evaluateAnswer(userAnswer, correctAnswer);
+        totalScore += result.score;
+
+        // Update feedback and styling
+        feedback.textContent = result.feedback;
+
+        if (result.score === 1.0) {
             feedback.style.color = '#00aa00';
             input.style.borderColor = '#00aa00';
-            correct++;
-        } else if (userAnswer === '') {
-            feedback.textContent = '';
+        } else if (result.score >= 0.7) {
+            feedback.style.color = '#ff8800';
+            input.style.borderColor = '#ff8800';
+        } else if (result.score > 0) {
+            feedback.style.color = '#cc6600';
+            input.style.borderColor = '#cc6600';
+        } else if (result.feedback === '') {
             input.style.borderColor = '#000';
         } else {
-            feedback.textContent = '✗';
             feedback.style.color = '#cc0000';
             input.style.borderColor = '#cc0000';
         }
     });
 
-    if (total === 0) {
+    if (maxScore === 0) {
         alert('This is a writing exercise. Please review your text yourself or with a teacher.');
         return;
     }
 
-    const resultsDiv = document.getElementById('results-summary');
-    const percentage = Math.round((correct / total) * 100);
+    const percentage = Math.round((totalScore / maxScore) * 100);
+    const fullCorrect = Math.floor(totalScore);
+    const partialCorrect = Math.round((totalScore - fullCorrect) * 10) / 10;
 
+    let scoreDisplay = `${fullCorrect}`;
+    if (partialCorrect > 0) {
+        scoreDisplay += ` + ${partialCorrect.toFixed(1)} partial`;
+    }
+
+    const resultsDiv = document.getElementById('results-summary');
     resultsDiv.innerHTML = `
         <h3>Ergebnisse (Results)</h3>
-        <div class="score">${correct} / ${total} richtig (${percentage}%)</div>
+        <div class="score">${scoreDisplay} / ${maxScore} points (${percentage}%)</div>
         <p>Zeit: ${document.getElementById('elapsed-time').textContent}</p>
+        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+            ✓ = Full credit | ○ = 90% (article issue) | △ = 70-80% (spelling error)
+        </p>
         ${percentage === 100 ? '<p style="color: #00aa00; font-weight: bold;">Ausgezeichnet! Perfect score!</p>' : ''}
         ${percentage >= 80 && percentage < 100 ? '<p style="color: #0066cc; font-weight: bold;">Sehr gut! Keep practicing!</p>' : ''}
         ${percentage < 80 ? '<p style="color: #cc6600; font-weight: bold;">Weiter üben! Keep practicing!</p>' : ''}

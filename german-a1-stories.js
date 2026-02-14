@@ -127,6 +127,251 @@ const germanA1Stories = {
                     correct: 0
                 }
             ]
+        },
+        post_office: {
+            name: 'Auf der Post (At the Post Office)',
+            icon: '📮',
+            story: `
+                <p>Ich gehe zur Post. Ich möchte ein Paket nach Italien schicken.</p>
+                <p>An der Post ist viel los. Ich nehme eine Nummer und warte.</p>
+                <p>"Nummer 47, bitte!", ruft die Mitarbeiterin.</p>
+                <p>Das ist meine Nummer! Ich gehe zum Schalter.</p>
+                <p>"Guten Tag. Ich möchte dieses Paket schicken", sage ich.</p>
+                <p>Die Mitarbeiterin wiegt das Paket. Es kostet 12 Euro.</p>
+                <p>Ich bezahle und bekomme eine Quittung. Das Paket kommt in 3 Tagen an.</p>
+            `,
+            vocabulary: [
+                { word: 'die Post', meaning: 'the post office' },
+                { word: 'das Paket', meaning: 'the package' },
+                { word: 'schicken', meaning: 'to send' },
+                { word: 'ist los', meaning: 'is busy/happening' },
+                { word: 'die Nummer', meaning: 'the number' },
+                { word: 'der Schalter', meaning: 'the counter' },
+                { word: 'wiegt', meaning: 'weighs' },
+                { word: 'die Quittung', meaning: 'the receipt' },
+                { word: 'ankommt', meaning: 'arrives' }
+            ],
+            questions: [
+                {
+                    question: 'Was möchte ich schicken? (What do I want to send?)',
+                    options: ['einen Brief', 'ein Paket', 'eine Postkarte', 'Geld'],
+                    correct: 1
+                },
+                {
+                    question: 'Wohin schicke ich das Paket? (Where am I sending the package?)',
+                    options: ['nach Frankreich', 'nach Spanien', 'nach Italien', 'nach Österreich'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie viel kostet es? (How much does it cost?)',
+                    options: ['10 Euro', '12 Euro', '15 Euro', '20 Euro'],
+                    correct: 1
+                }
+            ]
+        },
+        doctor: {
+            name: 'Beim Arzt (At the Doctor)',
+            icon: '👨‍⚕️',
+            story: `
+                <p>Ich bin krank. Ich habe Kopfschmerzen und Fieber.</p>
+                <p>Ich rufe beim Arzt an und bekomme heute einen Termin.</p>
+                <p>Um 15 Uhr bin ich in der Praxis. Ich muss warten.</p>
+                <p>Nach 20 Minuten ruft die Arzthelferin meinen Namen.</p>
+                <p>Der Arzt untersucht mich. "Sie haben eine Erkältung", sagt er.</p>
+                <p>Er gibt mir ein Rezept für Medikamente. "Bleiben Sie drei Tage zu Hause", sagt er.</p>
+                <p>Ich gehe zur Apotheke und kaufe die Medikamente. Ich hoffe, es geht mir bald besser!</p>
+            `,
+            vocabulary: [
+                { word: 'krank', meaning: 'sick' },
+                { word: 'die Kopfschmerzen', meaning: 'the headache' },
+                { word: 'das Fieber', meaning: 'the fever' },
+                { word: 'die Praxis', meaning: 'the doctor\'s office' },
+                { word: 'die Arzthelferin', meaning: 'the medical assistant (female)' },
+                { word: 'untersucht', meaning: 'examines' },
+                { word: 'die Erkältung', meaning: 'the cold' },
+                { word: 'das Rezept', meaning: 'the prescription' },
+                { word: 'die Apotheke', meaning: 'the pharmacy' }
+            ],
+            questions: [
+                {
+                    question: 'Was habe ich? (What do I have?)',
+                    options: ['Kopfschmerzen und Fieber', 'Husten', 'Bauchschmerzen', 'nichts'],
+                    correct: 0
+                },
+                {
+                    question: 'Was sagt der Arzt? (What does the doctor say?)',
+                    options: ['Sie haben Grippe', 'Sie haben eine Erkältung', 'Sie sind gesund', 'Sie brauchen eine Operation'],
+                    correct: 1
+                },
+                {
+                    question: 'Wo kaufe ich die Medikamente? (Where do I buy the medicine?)',
+                    options: ['im Supermarkt', 'in der Apotheke', 'beim Arzt', 'im Krankenhaus'],
+                    correct: 1
+                }
+            ]
+        },
+        restaurant: {
+            name: 'Im Restaurant (At the Restaurant)',
+            icon: '🍽️',
+            story: `
+                <p>Heute Abend gehe ich mit meiner Freundin ins Restaurant.</p>
+                <p>Das Restaurant heißt "Bella Italia". Es ist ein italienisches Restaurant.</p>
+                <p>Der Kellner bringt die Speisekarte. Es gibt Pizza, Pasta und Salat.</p>
+                <p>Ich bestelle eine Pizza Margherita. Meine Freundin nimmt Spaghetti Carbonara.</p>
+                <p>Wir trinken Wasser und Wein. Das Essen ist sehr lecker!</p>
+                <p>Nach dem Essen möchten wir bezahlen. "Die Rechnung, bitte", sage ich.</p>
+                <p>Die Rechnung ist 45 Euro. Wir geben 50 Euro und sagen "Stimmt so!" (Keep the change!)</p>
+            `,
+            vocabulary: [
+                { word: 'das Restaurant', meaning: 'the restaurant' },
+                { word: 'die Freundin', meaning: 'the girlfriend/female friend' },
+                { word: 'die Speisekarte', meaning: 'the menu' },
+                { word: 'bestelle', meaning: 'order' },
+                { word: 'nimmt', meaning: 'takes/has' },
+                { word: 'lecker', meaning: 'delicious' },
+                { word: 'die Rechnung', meaning: 'the bill' },
+                { word: 'stimmt so', meaning: 'keep the change' }
+            ],
+            questions: [
+                {
+                    question: 'Was für ein Restaurant ist es? (What kind of restaurant is it?)',
+                    options: ['chinesisch', 'deutsch', 'italienisch', 'türkisch'],
+                    correct: 2
+                },
+                {
+                    question: 'Was esse ich? (What do I eat?)',
+                    options: ['Spaghetti', 'Salat', 'Pizza Margherita', 'Lasagne'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie viel kostet das Essen? (How much does the food cost?)',
+                    options: ['40 Euro', '45 Euro', '50 Euro', '55 Euro'],
+                    correct: 1
+                }
+            ]
+        },
+        weather: {
+            name: 'Das Wetter (The Weather)',
+            icon: '🌤️',
+            story: `
+                <p>Heute ist das Wetter schön. Die Sonne scheint und der Himmel ist blau.</p>
+                <p>Es ist warm, ungefähr 25 Grad. Perfekt für einen Spaziergang!</p>
+                <p>Ich gehe in den Park. Viele Menschen sind hier. Kinder spielen und Hunde laufen herum.</p>
+                <p>Ich sitze auf einer Bank und lese ein Buch. Es ist sehr angenehm.</p>
+                <p>Nach zwei Stunden wird es wolkig. Dunkle Wolken kommen.</p>
+                <p>Plötzlich beginnt es zu regnen! Ich habe keinen Regenschirm.</p>
+                <p>Ich laufe schnell nach Hause. Ich bin nass, aber ich bin glücklich. Frische Luft tut gut!</p>
+            `,
+            vocabulary: [
+                { word: 'das Wetter', meaning: 'the weather' },
+                { word: 'die Sonne', meaning: 'the sun' },
+                { word: 'scheint', meaning: 'shines' },
+                { word: 'der Himmel', meaning: 'the sky' },
+                { word: 'der Grad', meaning: 'the degree' },
+                { word: 'der Spaziergang', meaning: 'the walk' },
+                { word: 'wolkig', meaning: 'cloudy' },
+                { word: 'regnen', meaning: 'to rain' },
+                { word: 'nass', meaning: 'wet' }
+            ],
+            questions: [
+                {
+                    question: 'Wie ist das Wetter am Anfang? (How is the weather at the beginning?)',
+                    options: ['regnerisch', 'schön', 'kalt', 'windig'],
+                    correct: 1
+                },
+                {
+                    question: 'Wie warm ist es? (How warm is it?)',
+                    options: ['20 Grad', '25 Grad', '30 Grad', '15 Grad'],
+                    correct: 1
+                },
+                {
+                    question: 'Was passiert später? (What happens later?)',
+                    options: ['es schneit', 'es regnet', 'die Sonne scheint', 'es ist neblig'],
+                    correct: 1
+                }
+            ]
+        },
+        train: {
+            name: 'Mit dem Zug (By Train)',
+            icon: '🚆',
+            story: `
+                <p>Ich fahre mit dem Zug nach Berlin. Die Fahrt dauert drei Stunden.</p>
+                <p>Ich bin am Bahnhof. Zuerst kaufe ich eine Fahrkarte am Automaten.</p>
+                <p>Die Fahrkarte kostet 39 Euro. Dann suche ich den richtigen Bahnsteig.</p>
+                <p>Der Zug fährt von Gleis 7. Ich steige in den Zug ein und suche meinen Platz.</p>
+                <p>Ich habe einen Fensterplatz. Das ist gut! Ich kann die Landschaft sehen.</p>
+                <p>Im Zug lese ich und trinke Kaffee. Die Zeit vergeht schnell.</p>
+                <p>Nach drei Stunden sind wir in Berlin. Ich steige aus. Berlin, ich komme!</p>
+            `,
+            vocabulary: [
+                { word: 'der Zug', meaning: 'the train' },
+                { word: 'die Fahrt', meaning: 'the journey/trip' },
+                { word: 'dauert', meaning: 'lasts/takes (time)' },
+                { word: 'der Bahnhof', meaning: 'the train station' },
+                { word: 'die Fahrkarte', meaning: 'the ticket' },
+                { word: 'der Automat', meaning: 'the machine' },
+                { word: 'der Bahnsteig', meaning: 'the platform' },
+                { word: 'das Gleis', meaning: 'the track' },
+                { word: 'die Landschaft', meaning: 'the landscape' }
+            ],
+            questions: [
+                {
+                    question: 'Wohin fahre ich? (Where am I going?)',
+                    options: ['nach München', 'nach Hamburg', 'nach Berlin', 'nach Köln'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie lange dauert die Fahrt? (How long does the trip take?)',
+                    options: ['zwei Stunden', 'drei Stunden', 'vier Stunden', 'fünf Stunden'],
+                    correct: 1
+                },
+                {
+                    question: 'Was für einen Platz habe ich? (What kind of seat do I have?)',
+                    options: ['Gangplatz (aisle)', 'Fensterplatz (window)', 'Stehplatz (standing)', 'keinen Platz'],
+                    correct: 1
+                }
+            ]
+        },
+        weekend: {
+            name: 'Das Wochenende (The Weekend)',
+            icon: '🎉',
+            story: `
+                <p>Endlich ist Wochenende! Ich freue mich sehr.</p>
+                <p>Am Samstag schlafe ich lange. Ich stehe um 10 Uhr auf.</p>
+                <p>Nach dem Frühstück putze ich die Wohnung. Das dauert zwei Stunden.</p>
+                <p>Am Nachmittag gehe ich einkaufen. Ich brauche Obst, Gemüse und Brot.</p>
+                <p>Am Abend treffe ich meine Freunde. Wir gehen ins Kino.</p>
+                <p>Am Sonntag ist das Wetter schön. Ich mache einen langen Spaziergang.</p>
+                <p>Das Wochenende ist zu kurz! Morgen ist wieder Montag.</p>
+            `,
+            vocabulary: [
+                { word: 'das Wochenende', meaning: 'the weekend' },
+                { word: 'endlich', meaning: 'finally' },
+                { word: 'lange', meaning: 'long/late' },
+                { word: 'stehe auf', meaning: 'get up' },
+                { word: 'putze', meaning: 'clean' },
+                { word: 'der Nachmittag', meaning: 'the afternoon' },
+                { word: 'einkaufen', meaning: 'to shop' },
+                { word: 'treffe', meaning: 'meet' },
+                { word: 'zu kurz', meaning: 'too short' }
+            ],
+            questions: [
+                {
+                    question: 'Wann stehe ich auf? (When do I get up?)',
+                    options: ['um 8 Uhr', 'um 9 Uhr', 'um 10 Uhr', 'um 11 Uhr'],
+                    correct: 2
+                },
+                {
+                    question: 'Was mache ich am Samstag Nachmittag? (What do I do on Saturday afternoon?)',
+                    options: ['ich schlafe', 'ich gehe einkaufen', 'ich koche', 'ich arbeite'],
+                    correct: 1
+                },
+                {
+                    question: 'Wohin gehe ich am Samstag Abend? (Where do I go on Saturday evening?)',
+                    options: ['ins Restaurant', 'ins Kino', 'nach Hause', 'ins Theater'],
+                    correct: 1
+                }
+            ]
         }
     },
     medium: {
@@ -268,6 +513,219 @@ const germanA1Stories = {
                     question: 'Wie lange dauert die Fahrt? (How long is the journey?)',
                     options: ['1 Stunde', '2 Stunden', '3 Stunden', '4 Stunden'],
                     correct: 1
+                }
+            ]
+        },
+        phone_call: {
+            name: 'Ein wichtiger Anruf (An Important Call)',
+            icon: '📞',
+            story: `
+                <p>Mein Telefon klingelt. Ich nehme das Gespräch an. "Hallo, hier spricht Anna Weber."</p>
+                <p>"Guten Tag, Frau Weber. Hier ist Dr. Schmidt von der Zahnarztpraxis. Ich rufe wegen Ihres Termins an."</p>
+                <p>"Ja, ich habe einen Termin am Mittwoch um 10 Uhr", sage ich.</p>
+                <p>"Genau. Leider muss Dr. Müller den Termin verschieben. Passt Ihnen Donnerstag um 14 Uhr?"</p>
+                <p>Ich schaue in meinen Kalender. "Ja, das passt gut. Donnerstag um 14 Uhr ist in Ordnung."</p>
+                <p>"Wunderbar! Vielen Dank für Ihr Verständnis, Frau Weber. Bis Donnerstag!"</p>
+                <p>"Auf Wiederhören!" Ich beende das Gespräch und trage den neuen Termin in meinen Kalender ein.</p>
+            `,
+            vocabulary: [
+                { word: 'der Anruf', meaning: 'the call' },
+                { word: 'klingelt', meaning: 'rings' },
+                { word: 'nehme an', meaning: 'answer/accept' },
+                { word: 'die Zahnarztpraxis', meaning: 'the dental office' },
+                { word: 'wegen', meaning: 'because of/regarding' },
+                { word: 'verschieben', meaning: 'to postpone' },
+                { word: 'passt', meaning: 'suits/fits' },
+                { word: 'der Kalender', meaning: 'the calendar' },
+                { word: 'das Verständnis', meaning: 'the understanding' },
+                { word: 'trage ein', meaning: 'enter/write down' }
+            ],
+            questions: [
+                {
+                    question: 'Wer ruft an? (Who is calling?)',
+                    options: ['eine Freundin', 'Dr. Schmidt', 'meine Mutter', 'mein Chef'],
+                    correct: 1
+                },
+                {
+                    question: 'Warum ruft sie an? (Why is she calling?)',
+                    options: ['um zu fragen, wie es mir geht', 'wegen eines Termins', 'um mich einzuladen', 'um zu verkaufen'],
+                    correct: 1
+                },
+                {
+                    question: 'Wann ist der neue Termin? (When is the new appointment?)',
+                    options: ['Mittwoch 10 Uhr', 'Donnerstag 14 Uhr', 'Freitag 10 Uhr', 'Montag 14 Uhr'],
+                    correct: 1
+                }
+            ]
+        },
+        hobby: {
+            name: 'Mein Hobby (My Hobby)',
+            icon: '🎸',
+            story: `
+                <p>Ich habe ein tolles Hobby: Ich spiele Gitarre. Vor drei Jahren habe ich angefangen.</p>
+                <p>Am Anfang war es schwierig. Meine Finger taten weh und die Akkorde klangen nicht gut.</p>
+                <p>Aber ich habe nicht aufgegeben. Ich habe jeden Tag eine Stunde geübt.</p>
+                <p>Jetzt kann ich viele Lieder spielen. Meine Lieblingslieder sind von den Beatles.</p>
+                <p>Jeden Mittwoch habe ich Gitarrenunterricht. Mein Lehrer heißt Thomas. Er ist sehr geduldig.</p>
+                <p>Manchmal spiele ich für meine Freunde. Sie sagen, dass ich gut bin. Das macht mich glücklich.</p>
+                <p>Nächsten Monat möchte ich bei einem kleinen Konzert in einem Café mitspielen. Ich bin nervös, aber auch aufgeregt!</p>
+            `,
+            vocabulary: [
+                { word: 'das Hobby', meaning: 'the hobby' },
+                { word: 'die Gitarre', meaning: 'the guitar' },
+                { word: 'angefangen', meaning: 'started' },
+                { word: 'schwierig', meaning: 'difficult' },
+                { word: 'taten weh', meaning: 'hurt' },
+                { word: 'der Akkord', meaning: 'the chord' },
+                { word: 'aufgegeben', meaning: 'given up' },
+                { word: 'geübt', meaning: 'practiced' },
+                { word: 'geduldig', meaning: 'patient' },
+                { word: 'aufgeregt', meaning: 'excited' }
+            ],
+            questions: [
+                {
+                    question: 'Was ist mein Hobby? (What is my hobby?)',
+                    options: ['Klavier spielen', 'Gitarre spielen', 'Singen', 'Malen'],
+                    correct: 1
+                },
+                {
+                    question: 'Wann habe ich angefangen? (When did I start?)',
+                    options: ['vor einem Jahr', 'vor zwei Jahren', 'vor drei Jahren', 'vor fünf Jahren'],
+                    correct: 2
+                },
+                {
+                    question: 'Was mache ich nächsten Monat? (What am I doing next month?)',
+                    options: ['Urlaub machen', 'bei einem Konzert mitspielen', 'Unterricht geben', 'eine Gitarre kaufen'],
+                    correct: 1
+                }
+            ]
+        },
+        neighbors: {
+            name: 'Neue Nachbarn (New Neighbors)',
+            icon: '👫',
+            story: `
+                <p>Letzte Woche sind neue Nachbarn eingezogen. Sie wohnen in der Wohnung neben mir.</p>
+                <p>Am Samstag habe ich an ihre Tür geklopft. "Guten Tag! Ich bin Paul, Ihr Nachbar", habe ich gesagt.</p>
+                <p>"Hallo Paul! Ich bin Maria und das ist mein Mann, Stefan", sagte die Frau freundlich.</p>
+                <p>Wir haben uns unterhalten. Maria und Stefan kommen aus Spanien. Sie arbeiten beide hier in München.</p>
+                <p>Maria ist Lehrerin und Stefan ist Ingenieur. Sie haben einen kleinen Hund namens Coco.</p>
+                <p>"Wenn Sie Hilfe brauchen oder Fragen haben, können Sie gerne klopfen", habe ich gesagt.</p>
+                <p>"Das ist sehr nett, danke!", sagte Maria. "Möchten Sie morgen zum Kaffee vorbeikommen?"</p>
+                <p>"Sehr gerne!", habe ich geantwortet. Ich freue mich über die neuen Nachbarn. Sie sind sehr sympathisch!</p>
+            `,
+            vocabulary: [
+                { word: 'der Nachbar', meaning: 'the neighbor' },
+                { word: 'eingezogen', meaning: 'moved in' },
+                { word: 'geklopft', meaning: 'knocked' },
+                { word: 'unterhalten', meaning: 'chatted/talked' },
+                { word: 'der Ingenieur', meaning: 'the engineer' },
+                { word: 'namens', meaning: 'named' },
+                { word: 'klopfen', meaning: 'to knock' },
+                { word: 'vorbeikommen', meaning: 'to come by/visit' },
+                { word: 'sympathisch', meaning: 'likeable/nice' }
+            ],
+            questions: [
+                {
+                    question: 'Woher kommen Maria und Stefan? (Where are Maria and Stefan from?)',
+                    options: ['aus Italien', 'aus Frankreich', 'aus Spanien', 'aus Portugal'],
+                    correct: 2
+                },
+                {
+                    question: 'Was ist Stefan von Beruf? (What is Stefan\'s profession?)',
+                    options: ['Lehrer', 'Arzt', 'Ingenieur', 'Koch'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie heißt der Hund? (What is the dog\'s name?)',
+                    options: ['Luna', 'Max', 'Bella', 'Coco'],
+                    correct: 3
+                }
+            ]
+        },
+        job_interview: {
+            name: 'Das Vorstellungsgespräch (The Job Interview)',
+            icon: '💼',
+            story: `
+                <p>Heute habe ich ein wichtiges Vorstellungsgespräch. Ich möchte als Verkäufer in einem Elektronikgeschäft arbeiten.</p>
+                <p>Ich stehe früh auf und ziehe meinen besten Anzug an. Ich möchte einen guten Eindruck machen.</p>
+                <p>Das Gespräch ist um 10 Uhr. Ich komme 10 Minuten früher an. Pünktlichkeit ist wichtig.</p>
+                <p>Der Geschäftsführer, Herr Klein, begrüßt mich freundlich. "Erzählen Sie mir etwas über sich", sagt er.</p>
+                <p>Ich erkläre meine Ausbildung und meine Berufserfahrung. Ich habe drei Jahre in einem anderen Geschäft gearbeitet.</p>
+                <p>"Warum möchten Sie bei uns arbeiten?", fragt Herr Klein.</p>
+                <p>"Ich interessiere mich sehr für Technik, und Ihr Geschäft hat einen sehr guten Ruf", antworte ich.</p>
+                <p>Das Gespräch dauert 30 Minuten. Am Ende sagt Herr Klein: "Vielen Dank. Wir melden uns in einer Woche bei Ihnen."</p>
+                <p>Ich bin zufrieden. Das Gespräch ist gut gelaufen. Jetzt muss ich warten und hoffen!</p>
+            `,
+            vocabulary: [
+                { word: 'das Vorstellungsgespräch', meaning: 'the job interview' },
+                { word: 'der Verkäufer', meaning: 'the salesperson' },
+                { word: 'der Anzug', meaning: 'the suit' },
+                { word: 'der Eindruck', meaning: 'the impression' },
+                { word: 'die Pünktlichkeit', meaning: 'punctuality' },
+                { word: 'der Geschäftsführer', meaning: 'the manager/director' },
+                { word: 'die Ausbildung', meaning: 'the education/training' },
+                { word: 'die Berufserfahrung', meaning: 'work experience' },
+                { word: 'der Ruf', meaning: 'the reputation' },
+                { word: 'melden uns', meaning: 'will contact (you)' }
+            ],
+            questions: [
+                {
+                    question: 'Als was möchte ich arbeiten? (What do I want to work as?)',
+                    options: ['als Manager', 'als Verkäufer', 'als Techniker', 'als Buchhalter'],
+                    correct: 1
+                },
+                {
+                    question: 'Wann komme ich zum Gespräch? (When do I arrive for the interview?)',
+                    options: ['pünktlich um 10 Uhr', '10 Minuten früher', '10 Minuten später', 'um 9 Uhr'],
+                    correct: 1
+                },
+                {
+                    question: 'Wann bekomme ich eine Antwort? (When will I get an answer?)',
+                    options: ['heute', 'morgen', 'in einer Woche', 'in einem Monat'],
+                    correct: 2
+                }
+            ]
+        },
+        sports: {
+            name: 'Sport und Fitness (Sports and Fitness)',
+            icon: '🏃‍♂️',
+            story: `
+                <p>Ich möchte fit und gesund bleiben. Deshalb habe ich mich in einem Fitness-Studio angemeldet.</p>
+                <p>Das Studio ist modern und gut ausgestattet. Es gibt Laufbänder, Gewichte und viele Fitnessgeräte.</p>
+                <p>Ich gehe dreimal pro Woche trainieren: Montag, Mittwoch und Freitag.</p>
+                <p>Ein Personal Trainer hat mir einen Trainingsplan gemacht. Zuerst mache ich 20 Minuten Cardio.</p>
+                <p>Danach trainiere ich verschiedene Muskelgruppen mit Gewichten. Das ist anstrengend, aber ich fühle mich danach gut.</p>
+                <p>Am Ende mache ich immer Dehnübungen. Das ist wichtig für die Muskeln.</p>
+                <p>Nach drei Monaten sehe ich schon Resultate. Ich habe mehr Energie und fühle mich stärker.</p>
+                <p>Außerdem habe ich im Studio neue Freunde gefunden. Wir motivieren uns gegenseitig. Sport macht mehr Spaß zusammen!</p>
+            `,
+            vocabulary: [
+                { word: 'fit', meaning: 'fit' },
+                { word: 'gesund', meaning: 'healthy' },
+                { word: 'angemeldet', meaning: 'registered/signed up' },
+                { word: 'ausgestattet', meaning: 'equipped' },
+                { word: 'das Laufband', meaning: 'the treadmill' },
+                { word: 'die Gewichte', meaning: 'the weights' },
+                { word: 'anstrengend', meaning: 'exhausting/strenuous' },
+                { word: 'die Dehnübungen', meaning: 'stretching exercises' },
+                { word: 'die Muskeln', meaning: 'the muscles' },
+                { word: 'motivieren', meaning: 'to motivate' }
+            ],
+            questions: [
+                {
+                    question: 'Wie oft gehe ich trainieren? (How often do I train?)',
+                    options: ['zweimal pro Woche', 'dreimal pro Woche', 'jeden Tag', 'einmal pro Woche'],
+                    correct: 1
+                },
+                {
+                    question: 'Was mache ich zuerst? (What do I do first?)',
+                    options: ['Gewichte', 'Dehnübungen', 'Cardio', 'Yoga'],
+                    correct: 2
+                },
+                {
+                    question: 'Wann sehe ich Resultate? (When do I see results?)',
+                    options: ['nach einem Monat', 'nach zwei Monaten', 'nach drei Monaten', 'nach einem Jahr'],
+                    correct: 2
                 }
             ]
         }
@@ -441,6 +899,244 @@ const germanA1Stories = {
                 {
                     question: 'Welche Prüfung möchte ich bestehen? (Which exam do I want to pass?)',
                     options: ['A1', 'A2', 'B1', 'B2'],
+                    correct: 2
+                }
+            ]
+        },
+        moving_countries: {
+            name: 'Umzug nach Deutschland (Moving to Germany)',
+            icon: '✈️',
+            story: `
+                <p>Vor einem Jahr bin ich nach Deutschland gezogen. Das war eine große Veränderung für mich.</p>
+                <p>Am Anfang war alles neu und fremd. Die Sprache war schwierig, das Wetter war kalt, und ich kannte niemanden.</p>
+                <p>Ich musste viele Dinge regeln: eine Wohnung finden, ein Bankkonto eröffnen, mich bei der Stadt anmelden.</p>
+                <p>Die Bürokratie in Deutschland ist kompliziert. Man braucht immer viele Dokumente und Formulare.</p>
+                <p>Aber langsam habe ich mich eingelebt. Ich habe einen Deutschkurs besucht und dort nette Leute kennengelernt.</p>
+                <p>Meine Nachbarn haben mir am Anfang sehr geholfen. Sie haben mir erklärt, wie das System funktioniert.</p>
+                <p>Nach sechs Monaten habe ich einen Job gefunden. Das war ein wichtiger Schritt für mich.</p>
+                <p>Jetzt, nach einem Jahr, fühle ich mich zu Hause. Ich habe Freunde, eine Arbeit und spreche besser Deutsch.</p>
+                <p>Natürlich vermisse ich manchmal mein Heimatland. Aber ich bin froh, dass ich den Mut hatte, hierher zu kommen.</p>
+            `,
+            vocabulary: [
+                { word: 'gezogen', meaning: 'moved' },
+                { word: 'die Veränderung', meaning: 'the change' },
+                { word: 'fremd', meaning: 'foreign/strange' },
+                { word: 'regeln', meaning: 'to arrange/settle' },
+                { word: 'eröffnen', meaning: 'to open (account)' },
+                { word: 'anmelden', meaning: 'to register' },
+                { word: 'die Bürokratie', meaning: 'the bureaucracy' },
+                { word: 'eingelebt', meaning: 'settled in' },
+                { word: 'vermisse', meaning: 'miss' },
+                { word: 'der Mut', meaning: 'the courage' }
+            ],
+            questions: [
+                {
+                    question: 'Wann bin ich nach Deutschland gezogen? (When did I move to Germany?)',
+                    options: ['vor sechs Monaten', 'vor einem Jahr', 'vor zwei Jahren', 'vor drei Jahren'],
+                    correct: 1
+                },
+                {
+                    question: 'Was war am Anfang schwierig? (What was difficult at the beginning?)',
+                    options: ['nur die Sprache', 'nur das Wetter', 'nur die Bürokratie', 'alles war neu und fremd'],
+                    correct: 3
+                },
+                {
+                    question: 'Wer hat mir geholfen? (Who helped me?)',
+                    options: ['meine Familie', 'meine Nachbarn', 'mein Chef', 'niemand'],
+                    correct: 1
+                },
+                {
+                    question: 'Wann habe ich einen Job gefunden? (When did I find a job?)',
+                    options: ['nach drei Monaten', 'nach sechs Monaten', 'nach einem Jahr', 'nach zwei Jahren'],
+                    correct: 1
+                }
+            ]
+        },
+        public_transport: {
+            name: 'Öffentliche Verkehrsmittel (Public Transportation)',
+            icon: '🚇',
+            story: `
+                <p>In Deutschland benutze ich täglich öffentliche Verkehrsmittel. Das war am Anfang verwirrend.</p>
+                <p>Es gibt viele verschiedene Optionen: U-Bahn, S-Bahn, Bus, Straßenbahn und Regionalzug.</p>
+                <p>Jede Stadt hat ihr eigenes Tarifsystem. Man muss verstehen, welche Zonen man durchfährt.</p>
+                <p>Ich habe mir eine Monatskarte gekauft. Sie kostet 85 Euro und gilt für alle Verkehrsmittel in der Stadt.</p>
+                <p>Das ist praktisch und günstiger als jeden Tag ein Einzelticket zu kaufen.</p>
+                <p>Am Anfang habe ich oft die falsche Linie genommen oder bin in die falsche Richtung gefahren.</p>
+                <p>Einmal bin ich am Sonntag gefahren, aber die U-Bahn hatte einen anderen Fahrplan. Ich habe 30 Minuten gewartet!</p>
+                <p>Jetzt habe ich eine App auf meinem Handy. Sie zeigt mir die besten Verbindungen und sagt mir, wann ich umsteigen muss.</p>
+                <p>Ich finde das öffentliche Verkehrssystem in Deutschland sehr gut. Es ist pünktlich, sauber und effizient.</p>
+                <p>Ich brauche kein Auto mehr. Das spart Geld und ist besser für die Umwelt!</p>
+            `,
+            vocabulary: [
+                { word: 'öffentliche Verkehrsmittel', meaning: 'public transport' },
+                { word: 'verwirrend', meaning: 'confusing' },
+                { word: 'die U-Bahn', meaning: 'the subway' },
+                { word: 'die S-Bahn', meaning: 'the city train' },
+                { word: 'die Straßenbahn', meaning: 'the tram' },
+                { word: 'das Tarifsystem', meaning: 'the fare system' },
+                { word: 'durchfährt', meaning: 'travels through' },
+                { word: 'die Monatskarte', meaning: 'the monthly pass' },
+                { word: 'umsteigen', meaning: 'to change/transfer' },
+                { word: 'die Umwelt', meaning: 'the environment' }
+            ],
+            questions: [
+                {
+                    question: 'Was benutze ich täglich? (What do I use daily?)',
+                    options: ['ein Auto', 'ein Fahrrad', 'öffentliche Verkehrsmittel', 'ein Motorrad'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie viel kostet die Monatskarte? (How much does the monthly pass cost?)',
+                    options: ['75 Euro', '85 Euro', '95 Euro', '100 Euro'],
+                    correct: 1
+                },
+                {
+                    question: 'Was hilft mir jetzt? (What helps me now?)',
+                    options: ['ein Stadtplan', 'eine App', 'ein Freund', 'ein Buch'],
+                    correct: 1
+                }
+            ]
+        },
+        dating_culture: {
+            name: 'Kulturelle Unterschiede (Cultural Differences)',
+            icon: '🌍',
+            story: `
+                <p>Seit ich in Deutschland lebe, bemerke ich viele kulturelle Unterschiede zu meinem Heimatland.</p>
+                <p>Die Deutschen sind sehr pünktlich. Wenn ein Treffen um 15 Uhr ist, kommen die Leute um 15 Uhr – nicht um 15:15!</p>
+                <p>Am Anfang kam ich oft zu spät, weil ich das nicht gewöhnt war. Meine Kollegen waren immer schon da.</p>
+                <p>Ein anderer Unterschied ist die Direktheit. Deutsche sagen ihre Meinung sehr direkt und ehrlich.</p>
+                <p>In meinem Heimatland sind wir höflicher und indirekter. Wir sagen nicht sofort "nein", sondern suchen nach diplomatischen Worten.</p>
+                <p>Das war für mich am Anfang ungewohnt. Ich dachte, die Leute sind unhöflich. Aber sie meinen es nicht böse!</p>
+                <p>Auch beim Thema Privatsphäre gibt es Unterschiede. Deutsche brauchen mehr persönlichen Raum.</p>
+                <p>Man fragt nicht sofort nach dem Gehalt oder dem Alter. Das gilt als zu persönlich.</p>
+                <p>Positiv finde ich die Trennung von Arbeit und Privatleben. Nach 18 Uhr schreibt niemand E-Mails über die Arbeit.</p>
+                <p>Jetzt verstehe ich die deutsche Kultur besser. Es ist nicht besser oder schlechter – nur anders!</p>
+            `,
+            vocabulary: [
+                { word: 'bemerke', meaning: 'notice' },
+                { word: 'der Unterschied', meaning: 'the difference' },
+                { word: 'das Heimatland', meaning: 'the home country' },
+                { word: 'pünktlich', meaning: 'punctual' },
+                { word: 'gewöhnt', meaning: 'used to/accustomed' },
+                { word: 'die Direktheit', meaning: 'the directness' },
+                { word: 'ehrlich', meaning: 'honest' },
+                { word: 'unhöflich', meaning: 'impolite' },
+                { word: 'die Privatsphäre', meaning: 'the privacy' },
+                { word: 'das Gehalt', meaning: 'the salary' }
+            ],
+            questions: [
+                {
+                    question: 'Was ist typisch deutsch? (What is typically German?)',
+                    options: ['zu spät kommen', 'sehr pünktlich sein', 'unpünktlich sein', 'Zeit vergessen'],
+                    correct: 1
+                },
+                {
+                    question: 'Wie sprechen Deutsche? (How do Germans speak?)',
+                    options: ['sehr höflich', 'sehr indirekt', 'sehr direkt', 'sehr leise'],
+                    correct: 2
+                },
+                {
+                    question: 'Was gilt als zu persönlich? (What is considered too personal?)',
+                    options: ['nach dem Namen fragen', 'nach dem Beruf fragen', 'nach dem Gehalt fragen', 'nach dem Wohnort fragen'],
+                    correct: 2
+                }
+            ]
+        },
+        smartphone: {
+            name: 'Das neue Smartphone (The New Smartphone)',
+            icon: '📱',
+            story: `
+                <p>Mein altes Handy ist kaputt gegangen. Der Bildschirm war gebrochen und der Akku hielt nicht mehr lange.</p>
+                <p>Ich musste ein neues kaufen. Aber welches? Es gibt so viele Modelle und Marken!</p>
+                <p>Ich bin in mehrere Elektronikgeschäfte gegangen und habe mich beraten lassen.</p>
+                <p>Ein Verkäufer hat mir verschiedene Optionen gezeigt. Samsung, Apple, Huawei – jedes hatte Vor- und Nachteile.</p>
+                <p>Das Problem war der Preis. Die neuesten Modelle kosten über 1000 Euro! Das ist zu teuer für mich.</p>
+                <p>Dann hat mir der Verkäufer ein Modell aus dem letzten Jahr gezeigt. Es kostet nur 400 Euro und hat fast die gleichen Funktionen.</p>
+                <p>Ich habe nicht sofort gekauft. Ich bin nach Hause gegangen und habe im Internet Bewertungen gelesen.</p>
+                <p>Die meisten Kunden waren zufrieden mit diesem Modell. Die Kamera ist gut, der Akku hält lange und es ist schnell genug.</p>
+                <p>Am nächsten Tag bin ich zurück ins Geschäft gegangen und habe es gekauft. Der Verkäufer hat mir auch eine Schutzhülle empfohlen.</p>
+                <p>Zu Hause habe ich das neue Handy eingerichtet: Apps installiert, Kontakte übertragen, Einstellungen angepasst.</p>
+                <p>Jetzt bin ich sehr zufrieden mit meiner Entscheidung. Man muss nicht immer das neueste Modell kaufen!</p>
+            `,
+            vocabulary: [
+                { word: 'kaputt', meaning: 'broken' },
+                { word: 'der Bildschirm', meaning: 'the screen' },
+                { word: 'der Akku', meaning: 'the battery' },
+                { word: 'beraten lassen', meaning: 'get advice' },
+                { word: 'der Vorteil', meaning: 'the advantage' },
+                { word: 'der Nachteil', meaning: 'the disadvantage' },
+                { word: 'die Funktion', meaning: 'the function/feature' },
+                { word: 'die Bewertung', meaning: 'the review' },
+                { word: 'die Schutzhülle', meaning: 'the protective case' },
+                { word: 'eingerichtet', meaning: 'set up' }
+            ],
+            questions: [
+                {
+                    question: 'Warum brauche ich ein neues Handy? (Why do I need a new phone?)',
+                    options: ['es ist alt', 'es ist kaputt', 'ich will ein besseres', 'ich habe es verloren'],
+                    correct: 1
+                },
+                {
+                    question: 'Wie teuer sind die neuesten Modelle? (How expensive are the newest models?)',
+                    options: ['über 500 Euro', 'über 1000 Euro', 'über 2000 Euro', 'über 3000 Euro'],
+                    correct: 1
+                },
+                {
+                    question: 'Was mache ich vor dem Kauf? (What do I do before buying?)',
+                    options: ['nichts', 'ich lese Bewertungen im Internet', 'ich frage meine Eltern', 'ich kaufe sofort'],
+                    correct: 1
+                }
+            ]
+        },
+        recycling: {
+            name: 'Mülltrennung in Deutschland (Waste Separation in Germany)',
+            icon: '♻️',
+            story: `
+                <p>Eine Sache, die mich in Deutschland überrascht hat, ist die Mülltrennung. Das System ist sehr kompliziert!</p>
+                <p>In meinem Heimatland gab es nur eine Mülltonne. Hier gibt es mindestens vier verschiedene Tonnen!</p>
+                <p>Die gelbe Tonne ist für Verpackungen aus Plastik und Metall. Zum Beispiel Joghurtbecher oder Konservendosen.</p>
+                <p>Die blaue Tonne ist für Papier und Karton. Zeitungen, Kartons und Briefumschläge kommen hier rein.</p>
+                <p>Die braune Tonne ist für Biomüll. Das sind Essensreste, Obst- und Gemüsereste, Kaffeefilter und so weiter.</p>
+                <p>Die schwarze Tonne ist für Restmüll – alles, was nicht in die anderen Tonnen passt.</p>
+                <p>Aber das ist noch nicht alles! Glasflaschen muss man zu Glascontainern bringen. Und man muss sie nach Farben trennen!</p>
+                <p>Pfandflaschen bringt man zurück zum Supermarkt. Man bekommt 25 Cent pro Flasche zurück.</p>
+                <p>Am Anfang war ich völlig verwirrt. Ich habe oft Fehler gemacht und Sachen in die falsche Tonne geworfen.</p>
+                <p>Meine Nachbarin hat es bemerkt und mir alles geduldig erklärt. Sie hat mir sogar eine Liste mit Beispielen gegeben.</p>
+                <p>Jetzt verstehe ich das System besser. Es macht Sinn – Deutschland recycelt über 60% des Mülls!</p>
+                <p>Am Anfang fand ich es lästig, aber jetzt ist es zur Gewohnheit geworden. Und es ist gut für die Umwelt!</p>
+            `,
+            vocabulary: [
+                { word: 'die Mülltrennung', meaning: 'waste separation' },
+                { word: 'überrascht', meaning: 'surprised' },
+                { word: 'die Mülltonne', meaning: 'the trash bin' },
+                { word: 'die Verpackung', meaning: 'the packaging' },
+                { word: 'die Konservendose', meaning: 'the tin can' },
+                { word: 'der Karton', meaning: 'the cardboard' },
+                { word: 'der Biomüll', meaning: 'organic waste' },
+                { word: 'der Restmüll', meaning: 'residual waste' },
+                { word: 'das Pfand', meaning: 'the deposit' },
+                { word: 'lästig', meaning: 'annoying' },
+                { word: 'die Gewohnheit', meaning: 'the habit' }
+            ],
+            questions: [
+                {
+                    question: 'Wie viele Tonnen gibt es mindestens? (How many bins are there at least?)',
+                    options: ['zwei', 'drei', 'vier', 'fünf'],
+                    correct: 2
+                },
+                {
+                    question: 'Was kommt in die gelbe Tonne? (What goes in the yellow bin?)',
+                    options: ['Papier', 'Biomüll', 'Plastik und Metall', 'Glas'],
+                    correct: 2
+                },
+                {
+                    question: 'Wie viel bekommt man für eine Pfandflasche? (How much do you get for a deposit bottle?)',
+                    options: ['10 Cent', '25 Cent', '50 Cent', '1 Euro'],
+                    correct: 1
+                },
+                {
+                    question: 'Wie viel Müll recycelt Deutschland? (How much waste does Germany recycle?)',
+                    options: ['über 40%', 'über 50%', 'über 60%', 'über 70%'],
                     correct: 2
                 }
             ]
