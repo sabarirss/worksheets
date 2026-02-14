@@ -2,49 +2,251 @@
 
 let canvases = [];
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 const writingActivities = {
     letters: [
+        // Uppercase letters A-Z
         { prompt: 'Practice writing the letter:', example: 'A', type: 'uppercase' },
         { prompt: 'Practice writing the letter:', example: 'B', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'C', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'D', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'E', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'F', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'G', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'H', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'I', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'J', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'K', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'L', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'M', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'N', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'O', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'P', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'Q', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'R', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'S', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'T', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'U', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'V', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'W', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'X', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'Y', type: 'uppercase' },
+        { prompt: 'Practice writing the letter:', example: 'Z', type: 'uppercase' },
+        // Lowercase letters a-z
         { prompt: 'Practice writing the letter:', example: 'a', type: 'lowercase' },
         { prompt: 'Practice writing the letter:', example: 'b', type: 'lowercase' },
         { prompt: 'Practice writing the letter:', example: 'c', type: 'lowercase' },
-        { prompt: 'Practice writing the letter:', example: 'd', type: 'lowercase' }
+        { prompt: 'Practice writing the letter:', example: 'd', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'e', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'f', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'g', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'h', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'i', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'j', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'k', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'l', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'm', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'n', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'o', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'p', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'q', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'r', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 's', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 't', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'u', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'v', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'w', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'x', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'y', type: 'lowercase' },
+        { prompt: 'Practice writing the letter:', example: 'z', type: 'lowercase' }
     ],
     words: [
+        // Animals
         { prompt: 'Practice writing the word:', example: 'cat', meaning: '🐱' },
         { prompt: 'Practice writing the word:', example: 'dog', meaning: '🐶' },
+        { prompt: 'Practice writing the word:', example: 'bird', meaning: '🐦' },
+        { prompt: 'Practice writing the word:', example: 'fish', meaning: '🐟' },
+        { prompt: 'Practice writing the word:', example: 'lion', meaning: '🦁' },
+        { prompt: 'Practice writing the word:', example: 'bear', meaning: '🐻' },
+        { prompt: 'Practice writing the word:', example: 'elephant', meaning: '🐘' },
+        { prompt: 'Practice writing the word:', example: 'monkey', meaning: '🐒' },
+        { prompt: 'Practice writing the word:', example: 'rabbit', meaning: '🐰' },
+        { prompt: 'Practice writing the word:', example: 'frog', meaning: '🐸' },
+        // Nature
         { prompt: 'Practice writing the word:', example: 'sun', meaning: '🌞' },
+        { prompt: 'Practice writing the word:', example: 'moon', meaning: '🌙' },
+        { prompt: 'Practice writing the word:', example: 'star', meaning: '⭐' },
         { prompt: 'Practice writing the word:', example: 'tree', meaning: '🌳' },
+        { prompt: 'Practice writing the word:', example: 'flower', meaning: '🌺' },
+        { prompt: 'Practice writing the word:', example: 'cloud', meaning: '☁️' },
+        { prompt: 'Practice writing the word:', example: 'rain', meaning: '🌧️' },
+        { prompt: 'Practice writing the word:', example: 'rainbow', meaning: '🌈' },
+        { prompt: 'Practice writing the word:', example: 'mountain', meaning: '🏔️' },
+        { prompt: 'Practice writing the word:', example: 'ocean', meaning: '🌊' },
+        // Food
+        { prompt: 'Practice writing the word:', example: 'apple', meaning: '🍎' },
+        { prompt: 'Practice writing the word:', example: 'banana', meaning: '🍌' },
+        { prompt: 'Practice writing the word:', example: 'orange', meaning: '🍊' },
+        { prompt: 'Practice writing the word:', example: 'bread', meaning: '🍞' },
+        { prompt: 'Practice writing the word:', example: 'milk', meaning: '🥛' },
+        { prompt: 'Practice writing the word:', example: 'egg', meaning: '🥚' },
+        { prompt: 'Practice writing the word:', example: 'cheese', meaning: '🧀' },
+        { prompt: 'Practice writing the word:', example: 'pizza', meaning: '🍕' },
+        { prompt: 'Practice writing the word:', example: 'cake', meaning: '🍰' },
+        { prompt: 'Practice writing the word:', example: 'cookie', meaning: '🍪' },
+        // Objects
         { prompt: 'Practice writing the word:', example: 'book', meaning: '📚' },
-        { prompt: 'Practice writing the word:', example: 'apple', meaning: '🍎' }
+        { prompt: 'Practice writing the word:', example: 'pencil', meaning: '✏️' },
+        { prompt: 'Practice writing the word:', example: 'car', meaning: '🚗' },
+        { prompt: 'Practice writing the word:', example: 'bus', meaning: '🚌' },
+        { prompt: 'Practice writing the word:', example: 'plane', meaning: '✈️' },
+        { prompt: 'Practice writing the word:', example: 'bike', meaning: '🚲' },
+        { prompt: 'Practice writing the word:', example: 'ball', meaning: '⚽' },
+        { prompt: 'Practice writing the word:', example: 'house', meaning: '🏠' },
+        { prompt: 'Practice writing the word:', example: 'school', meaning: '🏫' },
+        { prompt: 'Practice writing the word:', example: 'phone', meaning: '📱' },
+        // Colors & Shapes
+        { prompt: 'Practice writing the word:', example: 'red', meaning: '🔴' },
+        { prompt: 'Practice writing the word:', example: 'blue', meaning: '🔵' },
+        { prompt: 'Practice writing the word:', example: 'yellow', meaning: '🟡' },
+        { prompt: 'Practice writing the word:', example: 'green', meaning: '🟢' },
+        { prompt: 'Practice writing the word:', example: 'circle', meaning: '⭕' },
+        { prompt: 'Practice writing the word:', example: 'square', meaning: '⬜' },
+        { prompt: 'Practice writing the word:', example: 'triangle', meaning: '🔺' },
+        { prompt: 'Practice writing the word:', example: 'heart', meaning: '❤️' },
+        { prompt: 'Practice writing the word:', example: 'star', meaning: '⭐' },
+        { prompt: 'Practice writing the word:', example: 'diamond', meaning: '💎' }
     ],
     sentences: [
+        // Simple present tense
         { prompt: 'Copy this sentence:', example: 'I am happy.' },
         { prompt: 'Copy this sentence:', example: 'The cat is big.' },
         { prompt: 'Copy this sentence:', example: 'I like to read.' },
         { prompt: 'Copy this sentence:', example: 'The sun is bright.' },
         { prompt: 'Copy this sentence:', example: 'My dog can run.' },
-        { prompt: 'Copy this sentence:', example: 'We play together.' }
+        { prompt: 'Copy this sentence:', example: 'We play together.' },
+        { prompt: 'Copy this sentence:', example: 'She has a red ball.' },
+        { prompt: 'Copy this sentence:', example: 'The bird can sing.' },
+        { prompt: 'Copy this sentence:', example: 'I love my family.' },
+        { prompt: 'Copy this sentence:', example: 'The tree is tall.' },
+        // Action sentences
+        { prompt: 'Copy this sentence:', example: 'The boy runs fast.' },
+        { prompt: 'Copy this sentence:', example: 'We eat breakfast.' },
+        { prompt: 'Copy this sentence:', example: 'She reads a book.' },
+        { prompt: 'Copy this sentence:', example: 'They play outside.' },
+        { prompt: 'Copy this sentence:', example: 'I write my name.' },
+        { prompt: 'Copy this sentence:', example: 'He jumps very high.' },
+        { prompt: 'Copy this sentence:', example: 'The fish swims fast.' },
+        { prompt: 'Copy this sentence:', example: 'We sing a song.' },
+        { prompt: 'Copy this sentence:', example: 'The baby sleeps well.' },
+        { prompt: 'Copy this sentence:', example: 'She draws a picture.' },
+        // Descriptive sentences
+        { prompt: 'Copy this sentence:', example: 'The sky is blue.' },
+        { prompt: 'Copy this sentence:', example: 'My room is clean.' },
+        { prompt: 'Copy this sentence:', example: 'The water is cold.' },
+        { prompt: 'Copy this sentence:', example: 'Her dress is pretty.' },
+        { prompt: 'Copy this sentence:', example: 'The apple tastes good.' },
+        { prompt: 'Copy this sentence:', example: 'This book is funny.' },
+        { prompt: 'Copy this sentence:', example: 'The flower smells nice.' },
+        { prompt: 'Copy this sentence:', example: 'My bed is soft.' },
+        { prompt: 'Copy this sentence:', example: 'The moon is round.' },
+        { prompt: 'Copy this sentence:', example: 'His car is new.' },
+        // Question sentences
+        { prompt: 'Copy this sentence:', example: 'What is your name?' },
+        { prompt: 'Copy this sentence:', example: 'How are you today?' },
+        { prompt: 'Copy this sentence:', example: 'Where is my toy?' },
+        { prompt: 'Copy this sentence:', example: 'Can you help me?' },
+        { prompt: 'Copy this sentence:', example: 'Do you like ice cream?' },
+        { prompt: 'Copy this sentence:', example: 'When is your birthday?' },
+        { prompt: 'Copy this sentence:', example: 'Who is that person?' },
+        { prompt: 'Copy this sentence:', example: 'Why is the sky blue?' },
+        { prompt: 'Copy this sentence:', example: 'Which book do you want?' },
+        { prompt: 'Copy this sentence:', example: 'May I go outside?' }
     ],
     free: [
+        // Personal
         { prompt: 'Write about your day:', example: '' },
         { prompt: 'Write your name and age:', example: '' },
         { prompt: 'Write about your favorite toy:', example: '' },
-        { prompt: 'Write what you see:', example: '' }
+        { prompt: 'Write what you see:', example: '' },
+        { prompt: 'Write about your family:', example: '' },
+        { prompt: 'Write about your best friend:', example: '' },
+        { prompt: 'Write what you did today:', example: '' },
+        { prompt: 'Write about your pet:', example: '' },
+        { prompt: 'Write your favorite color and why:', example: '' },
+        { prompt: 'Write about your bedroom:', example: '' },
+        // Creative
+        { prompt: 'Describe a happy day:', example: '' },
+        { prompt: 'Write about your favorite food:', example: '' },
+        { prompt: 'What do you want to be when you grow up?', example: '' },
+        { prompt: 'Write about a fun trip:', example: '' },
+        { prompt: 'Describe your school:', example: '' },
+        { prompt: 'Write about a special birthday:', example: '' },
+        { prompt: 'What makes you smile?', example: '' },
+        { prompt: 'Write about the weather today:', example: '' },
+        { prompt: 'Describe your favorite game:', example: '' },
+        { prompt: 'Write about a kind act:', example: '' },
+        // Imaginative
+        { prompt: 'If you had superpowers, what would they be?', example: '' },
+        { prompt: 'Write about meeting a friendly alien:', example: '' },
+        { prompt: 'Describe your dream treehouse:', example: '' },
+        { prompt: 'If animals could talk, what would they say?', example: '' },
+        { prompt: 'Write about a magic adventure:', example: '' },
+        { prompt: 'Describe a flying car:', example: '' },
+        { prompt: 'If you could visit any place, where would it be?', example: '' },
+        { prompt: 'Write about finding a treasure:', example: '' },
+        { prompt: 'Describe your perfect playground:', example: '' },
+        { prompt: 'If you had a robot friend, what would it do?', example: '' }
     ]
 };
 
 function generateWritingWorksheet() {
     const today = new Date().toLocaleDateString();
+    const isDemo = isDemoMode();
 
-    // Combine activities
-    const allActivities = [
-        ...writingActivities.letters.slice(0, 4),
-        ...writingActivities.words.slice(0, 4),
-        ...writingActivities.sentences.slice(0, 3),
-        ...writingActivities.free.slice(0, 1)
-    ];
+    // Combine activities with demo limiting
+    let allActivities = [];
+
+    if (isDemo) {
+        // Demo: Only 2 activities total
+        allActivities = [
+            writingActivities.letters[0],  // Letter A
+            writingActivities.words[0]     // cat
+        ];
+    } else {
+        // Full version: 60+ activities total
+        allActivities = [
+            // 10 uppercase letters (A-J)
+            ...writingActivities.letters.slice(0, 10),
+            // 10 lowercase letters (a-j)
+            ...writingActivities.letters.slice(26, 36),
+            // 20 common words
+            ...writingActivities.words.slice(0, 20),
+            // 15 sentences
+            ...writingActivities.sentences.slice(0, 15),
+            // 5 creative writing prompts
+            ...writingActivities.free.slice(0, 5)
+        ];
+    }
 
     let problemsHTML = '';
 
@@ -72,18 +274,20 @@ function generateWritingWorksheet() {
         `;
     });
 
+    const versionBadge = isDemo ? '<span style="color: #ff6b6b; font-weight: bold;">(DEMO - 2 activities)</span>' : '<span style="color: #4caf50; font-weight: bold;">(FULL VERSION - 60 activities)</span>';
+
     const html = `
         <div class="worksheet-container">
             <div class="worksheet-header">
                 <div class="worksheet-info">
-                    <h2>✍️ Writing Practice</h2>
+                    <h2>✍️ Writing Practice ${versionBadge}</h2>
                     <p>Use your iPad pencil to practice handwriting</p>
                     <p>${allActivities.length} activities</p>
                 </div>
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="Karthigai Selvi">
+                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>
