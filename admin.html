@@ -350,6 +350,14 @@
                             <input type="checkbox" id="module-german">
                             <label for="module-german">🇩🇪 German</label>
                         </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="module-drawing">
+                            <label for="module-drawing">🎨 Drawing</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="module-german-kids">
+                            <label for="module-german-kids">🇩🇪 German Kids</label>
+                        </div>
                     </div>
                 </div>
 
@@ -514,6 +522,8 @@
             document.getElementById('module-stories').checked = false;
             document.getElementById('module-emotional').checked = false;
             document.getElementById('module-german').checked = false;
+            document.getElementById('module-drawing').checked = false;
+            document.getElementById('module-german-kids').checked = false;
 
             document.getElementById('user-modal').classList.add('active');
         }
@@ -545,6 +555,8 @@
             document.getElementById('module-stories').checked = modules.stories || false;
             document.getElementById('module-emotional').checked = modules['emotional-quotient'] || false;
             document.getElementById('module-german').checked = modules.german || false;
+            document.getElementById('module-drawing').checked = modules.drawing || false;
+            document.getElementById('module-german-kids').checked = modules['german-kids'] || false;
 
             document.getElementById('user-modal').classList.add('active');
         }
@@ -569,7 +581,9 @@
                 aptitude: document.getElementById('module-aptitude').checked,
                 stories: document.getElementById('module-stories').checked,
                 'emotional-quotient': document.getElementById('module-emotional').checked,
-                german: document.getElementById('module-german').checked
+                german: document.getElementById('module-german').checked,
+                drawing: document.getElementById('module-drawing').checked,
+                'german-kids': document.getElementById('module-german-kids').checked
             };
 
             // Show loading state
