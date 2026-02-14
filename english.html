@@ -35,47 +35,62 @@
             <p class="subtitle">Select a level to begin</p>
         </header>
 
-        <div class="level-selection">
-            <h2>English Levels</h2>
+        <!-- Age Group Selection -->
+        <div class="level-selection" id="age-groups">
+            <h2>Select Age Group</h2>
             <div class="navigation" style="margin-bottom: 20px;">
                 <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="loadWorksheet('writing')" class="level-btn">
+                <button onclick="loadWorksheet('writing', null)" class="level-btn">
                     <span class="level-name">✍️ Writing Practice</span>
                     <span class="level-desc">Handwriting with ruled lines (iPad Pencil)</span>
                 </button>
-                <button onclick="loadWorksheet('7A')" class="level-btn">
-                    <span class="level-name">Level 7A</span>
-                    <span class="level-desc">🖼️ Picture Words - Fill in the blanks</span>
+                <button onclick="showDifficulties('4-5')" class="level-btn">
+                    <span class="level-name">👶 Ages 4-5</span>
+                    <span class="level-desc">Pre-kindergarten level</span>
                 </button>
-                <button onclick="loadWorksheet('6A')" class="level-btn">
-                    <span class="level-name">Level 6A</span>
-                    <span class="level-desc">Sight Words - Basic (the, and, is, a)</span>
+                <button onclick="showDifficulties('6')" class="level-btn">
+                    <span class="level-name">🧒 Age 6</span>
+                    <span class="level-desc">Kindergarten/1st grade</span>
                 </button>
-                <button onclick="loadWorksheet('5A')" class="level-btn">
-                    <span class="level-name">Level 5A</span>
-                    <span class="level-desc">Simple Sentences & Basic Vocabulary</span>
+                <button onclick="showDifficulties('7')" class="level-btn">
+                    <span class="level-name">👦 Age 7</span>
+                    <span class="level-desc">1st/2nd grade</span>
                 </button>
-                <button onclick="loadWorksheet('4A')" class="level-btn">
-                    <span class="level-name">Level 4A</span>
-                    <span class="level-desc">Sentence Completion & Grammar</span>
+                <button onclick="showDifficulties('8')" class="level-btn">
+                    <span class="level-name">👧 Age 8</span>
+                    <span class="level-desc">2nd/3rd grade</span>
                 </button>
-                <button onclick="loadWorksheet('3A')" class="level-btn">
-                    <span class="level-name">Level 3A</span>
-                    <span class="level-desc">Synonyms, Antonyms & Vocabulary</span>
+                <button onclick="showDifficulties('9+')" class="level-btn">
+                    <span class="level-name">🧑 Ages 9+</span>
+                    <span class="level-desc">3rd/4th grade and above</span>
                 </button>
-                <button onclick="loadWorksheet('2A')" class="level-btn">
-                    <span class="level-name">Level 2A</span>
-                    <span class="level-desc">Parts of Speech & Grammar</span>
+                <button onclick="showDifficulties('10+')" class="level-btn">
+                    <span class="level-name">👨 Ages 10+</span>
+                    <span class="level-desc">Advanced (5th grade+)</span>
                 </button>
-                <button onclick="loadWorksheet('A')" class="level-btn">
-                    <span class="level-name">Level A</span>
-                    <span class="level-desc">Reading Comprehension - Short Passages</span>
+            </div>
+        </div>
+
+        <!-- Difficulty Selection -->
+        <div class="level-selection" id="difficulties" style="display: none;">
+            <h2>Select Difficulty Level</h2>
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="showAgeGroups()">← Back to Age Groups</button>
+            </div>
+            <div class="level-grid">
+                <button onclick="loadWorksheetNew('easy')" class="level-btn">
+                    <span class="level-name">⭐ Easy</span>
+                    <span class="level-desc" id="easy-desc">Beginner level</span>
                 </button>
-                <button onclick="loadWorksheet('B')" class="level-btn">
-                    <span class="level-name">Level B</span>
-                    <span class="level-desc">Advanced Grammar & Writing</span>
+                <button onclick="loadWorksheetNew('medium')" class="level-btn">
+                    <span class="level-name">⭐⭐ Medium</span>
+                    <span class="level-desc" id="medium-desc">Intermediate level</span>
+                </button>
+                <button onclick="loadWorksheetNew('hard')" class="level-btn">
+                    <span class="level-name">⭐⭐⭐ Hard</span>
+                    <span class="level-desc" id="hard-desc">Advanced level</span>
                 </button>
             </div>
         </div>

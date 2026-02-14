@@ -41,7 +41,41 @@
             <p class="subtitle">Hand-Written Quality Stories with Real Photos!</p>
         </header>
 
-        <div class="story-selection" id="category-selection">
+        <!-- Age Group Selection -->
+        <div class="level-selection" id="age-selection">
+            <h2>Select Age Group</h2>
+            <div class="level-grid">
+                <button onclick="selectAge('4-5')" class="level-btn">
+                    <span class="level-name">👶 Ages 4-5</span>
+                    <span class="level-desc">Pre-kindergarten level</span>
+                </button>
+                <button onclick="selectAge('6')" class="level-btn">
+                    <span class="level-name">🧒 Age 6</span>
+                    <span class="level-desc">Kindergarten/1st grade</span>
+                </button>
+                <button onclick="selectAge('7')" class="level-btn">
+                    <span class="level-name">👦 Age 7</span>
+                    <span class="level-desc">1st/2nd grade</span>
+                </button>
+                <button onclick="selectAge('8')" class="level-btn">
+                    <span class="level-name">👧 Age 8</span>
+                    <span class="level-desc">2nd/3rd grade</span>
+                </button>
+                <button onclick="selectAge('9+')" class="level-btn">
+                    <span class="level-name">🧑 Ages 9+</span>
+                    <span class="level-desc">3rd/4th grade and above</span>
+                </button>
+                <button onclick="selectAge('10+')" class="level-btn">
+                    <span class="level-name">👨 Ages 10+</span>
+                    <span class="level-desc">Advanced (5th grade+)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div class="story-selection" id="category-selection" style="display: none;">
             <h2>Choose a Story Category</h2>
             <div class="category-grid">
                 <button onclick="selectCategory('animals')" class="category-btn">
@@ -76,7 +110,7 @@
                 </button>
             </div>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+                <button onclick="backToAges()">← Back to Age Groups</button>
             </div>
         </div>
 
@@ -86,15 +120,15 @@
             <div class="level-grid">
                 <button onclick="showStories('easy')" class="level-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
                     <span class="level-name">⭐ Easy</span>
-                    <span class="level-desc">Ages 4-5</span>
+                    <span class="level-desc">Beginner level</span>
                 </button>
                 <button onclick="showStories('medium')" class="level-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
                     <span class="level-name">⭐⭐ Medium</span>
-                    <span class="level-desc">Ages 6-7</span>
+                    <span class="level-desc">Intermediate level</span>
                 </button>
                 <button onclick="showStories('hard')" class="level-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
                     <span class="level-name">⭐⭐⭐ Hard</span>
-                    <span class="level-desc">Ages 8+</span>
+                    <span class="level-desc">Advanced level</span>
                 </button>
             </div>
             <div class="navigation" style="margin-bottom: 20px;">

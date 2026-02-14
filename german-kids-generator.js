@@ -1,9 +1,22 @@
 // German Kids Story Generator - Simple stories with comprehension questions
 
+let currentAge = null;
 let currentDifficulty = '';
 let currentStory = '';
 let userAnswers = [];
 let currentScore = 0;
+
+// Navigation functions
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('age-selection').style.display = 'block';
+}
 
 // Demo version limiting
 function isDemoMode() {
@@ -474,11 +487,9 @@ function loadStoryList(difficulty) {
 
     const stories = germanStories[difficulty];
 
-    // Apply demo limiting to story list
     const storyEntries = Object.entries(stories);
-    const limitedEntries = storyEntries.slice(0, getDemoLimit(storyEntries.length));
 
-    for (const [key, story] of limitedEntries) {
+    for (const [key, story] of storyEntries) {
         const card = document.createElement('div');
         card.className = 'story-card';
         card.onclick = () => loadStory(key);

@@ -388,146 +388,91 @@
                     <span class="subject-name">🇩🇪 German Kids</span>
                     <span class="subject-desc">Simple Stories for Ages 6-8</span>
                 </button>
+                <button onclick="window.location.href='learn-english-stories.html'" class="subject-btn">
+                    <span class="subject-name">📚 Learn English Stories</span>
+                    <span class="subject-desc">Interactive Stories with Comprehension Questions</span>
+                </button>
             </div>
         </div>
 
-        <div class="level-selection" id="math-operations" style="display: none;">
-            <h2>Select Math Operation</h2>
+        <!-- Age Group Selection -->
+        <div class="level-selection" id="math-age-groups" style="display: none;">
+            <h2>Select Age Group</h2>
             <div class="navigation" style="margin-bottom: 20px;">
                 <button onclick="showSubjects()">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="showOperation('addition')" class="level-btn">
+                <button onclick="showMathOperations('4-5')" class="level-btn">
+                    <span class="level-name">👶 Ages 4-5</span>
+                    <span class="level-desc">Pre-kindergarten level</span>
+                </button>
+                <button onclick="showMathOperations('6')" class="level-btn">
+                    <span class="level-name">🧒 Age 6</span>
+                    <span class="level-desc">Kindergarten/1st grade</span>
+                </button>
+                <button onclick="showMathOperations('7')" class="level-btn">
+                    <span class="level-name">👦 Age 7</span>
+                    <span class="level-desc">1st/2nd grade</span>
+                </button>
+                <button onclick="showMathOperations('8')" class="level-btn">
+                    <span class="level-name">👧 Age 8</span>
+                    <span class="level-desc">2nd/3rd grade</span>
+                </button>
+                <button onclick="showMathOperations('9+')" class="level-btn">
+                    <span class="level-name">🧑 Ages 9+</span>
+                    <span class="level-desc">3rd/4th grade and above</span>
+                </button>
+                <button onclick="showMathOperations('10+')" class="level-btn">
+                    <span class="level-name">👨 Ages 10+</span>
+                    <span class="level-desc">Advanced (5th grade+)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Operation Selection -->
+        <div class="level-selection" id="math-operations" style="display: none;">
+            <h2>Select Math Operation</h2>
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="showMathAgeGroups()">← Back to Age Groups</button>
+            </div>
+            <div class="level-grid">
+                <button onclick="showDifficulties('addition')" class="level-btn">
                     <span class="level-name">➕ Addition</span>
                     <span class="level-desc">Basic addition skills</span>
                 </button>
-                <button onclick="showOperation('subtraction')" class="level-btn">
+                <button onclick="showDifficulties('subtraction')" class="level-btn">
                     <span class="level-name">➖ Subtraction</span>
                     <span class="level-desc">Basic subtraction skills</span>
                 </button>
-                <button onclick="showOperation('multiplication')" class="level-btn">
+                <button onclick="showDifficulties('multiplication')" class="level-btn">
                     <span class="level-name">✖️ Multiplication</span>
                     <span class="level-desc">Times tables and more</span>
                 </button>
-                <button onclick="showOperation('division')" class="level-btn">
+                <button onclick="showDifficulties('division')" class="level-btn">
                     <span class="level-name">➗ Division</span>
                     <span class="level-desc">Division skills</span>
                 </button>
             </div>
         </div>
 
-        <div class="level-selection" id="addition-levels" style="display: none;">
-            <h2>Addition Levels</h2>
+        <!-- Difficulty Selection -->
+        <div class="level-selection" id="math-difficulties" style="display: none;">
+            <h2>Select Difficulty Level</h2>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathLevels()">← Back to Operations</button>
+                <button onclick="showMathOperationsBack()">← Back to Operations</button>
             </div>
             <div class="level-grid">
-                <button onclick="loadWorksheet('addition', '6A')" class="level-btn">
-                    <span class="level-name">Level 6A</span>
-                    <span class="level-desc">Addition to 5 (1+1, 2+1)</span>
+                <button onclick="loadWorksheetNew('easy')" class="level-btn">
+                    <span class="level-name">⭐ Easy</span>
+                    <span class="level-desc" id="easy-desc">Beginner level</span>
                 </button>
-                <button onclick="loadWorksheet('addition', '5A')" class="level-btn">
-                    <span class="level-name">Level 5A</span>
-                    <span class="level-desc">Addition to 10 (3+4, 5+2)</span>
+                <button onclick="loadWorksheetNew('medium')" class="level-btn">
+                    <span class="level-name">⭐⭐ Medium</span>
+                    <span class="level-desc" id="medium-desc">Intermediate level</span>
                 </button>
-                <button onclick="loadWorksheet('addition', '4A')" class="level-btn">
-                    <span class="level-name">Level 4A</span>
-                    <span class="level-desc">Addition to 20 (8+7, 9+6)</span>
-                </button>
-                <button onclick="loadWorksheet('addition', '3A')" class="level-btn">
-                    <span class="level-name">Level 3A</span>
-                    <span class="level-desc">Two-digit + One-digit (23+5)</span>
-                </button>
-                <button onclick="loadWorksheet('addition', '2A')" class="level-btn">
-                    <span class="level-name">Level 2A</span>
-                    <span class="level-desc">Two-digit + Two-digit (23+45)</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="level-selection" id="subtraction-levels" style="display: none;">
-            <h2>Subtraction Levels</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathLevels()">← Back to Operations</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="loadWorksheet('subtraction', '6A')" class="level-btn">
-                    <span class="level-name">Level 6A</span>
-                    <span class="level-desc">Subtraction within 5 (5-2, 4-1)</span>
-                </button>
-                <button onclick="loadWorksheet('subtraction', '5A')" class="level-btn">
-                    <span class="level-name">Level 5A</span>
-                    <span class="level-desc">Subtraction within 10 (10-5, 8-3)</span>
-                </button>
-                <button onclick="loadWorksheet('subtraction', '4A')" class="level-btn">
-                    <span class="level-name">Level 4A</span>
-                    <span class="level-desc">Subtraction within 20 (15-7, 18-9)</span>
-                </button>
-                <button onclick="loadWorksheet('subtraction', '3A')" class="level-btn">
-                    <span class="level-name">Level 3A</span>
-                    <span class="level-desc">Two-digit - One-digit (23-5)</span>
-                </button>
-                <button onclick="loadWorksheet('subtraction', '2A')" class="level-btn">
-                    <span class="level-name">Level 2A</span>
-                    <span class="level-desc">Two-digit - Two-digit (45-23)</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="level-selection" id="multiplication-levels" style="display: none;">
-            <h2>Multiplication Levels</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathLevels()">← Back to Operations</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="loadWorksheet('multiplication', '6A')" class="level-btn">
-                    <span class="level-name">Level 6A</span>
-                    <span class="level-desc">Multiply by 1 and 2 (2×3, 1×5)</span>
-                </button>
-                <button onclick="loadWorksheet('multiplication', '5A')" class="level-btn">
-                    <span class="level-name">Level 5A</span>
-                    <span class="level-desc">Multiply by 3, 4, 5 (3×4, 5×6)</span>
-                </button>
-                <button onclick="loadWorksheet('multiplication', '4A')" class="level-btn">
-                    <span class="level-name">Level 4A</span>
-                    <span class="level-desc">Multiply by 6, 7, 8, 9 (7×8, 9×6)</span>
-                </button>
-                <button onclick="loadWorksheet('multiplication', '3A')" class="level-btn">
-                    <span class="level-name">Level 3A</span>
-                    <span class="level-desc">Two-digit × One-digit (12×3)</span>
-                </button>
-                <button onclick="loadWorksheet('multiplication', '2A')" class="level-btn">
-                    <span class="level-name">Level 2A</span>
-                    <span class="level-desc">Two-digit × Two-digit (12×13)</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="level-selection" id="division-levels" style="display: none;">
-            <h2>Division Levels</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathLevels()">← Back to Operations</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="loadWorksheet('division', '6A')" class="level-btn">
-                    <span class="level-name">Level 6A</span>
-                    <span class="level-desc">Divide by 1 and 2 (6÷2, 8÷2)</span>
-                </button>
-                <button onclick="loadWorksheet('division', '5A')" class="level-btn">
-                    <span class="level-name">Level 5A</span>
-                    <span class="level-desc">Divide by 3, 4, 5 (15÷3, 20÷4)</span>
-                </button>
-                <button onclick="loadWorksheet('division', '4A')" class="level-btn">
-                    <span class="level-name">Level 4A</span>
-                    <span class="level-desc">Divide by 6, 7, 8, 9 (48÷6, 63÷7)</span>
-                </button>
-                <button onclick="loadWorksheet('division', '3A')" class="level-btn">
-                    <span class="level-name">Level 3A</span>
-                    <span class="level-desc">Two-digit ÷ One-digit (24÷3)</span>
-                </button>
-                <button onclick="loadWorksheet('division', '2A')" class="level-btn">
-                    <span class="level-name">Level 2A</span>
-                    <span class="level-desc">Division with remainders (25÷3 = 8 R1)</span>
+                <button onclick="loadWorksheetNew('hard')" class="level-btn">
+                    <span class="level-name">⭐⭐⭐ Hard</span>
+                    <span class="level-desc" id="hard-desc">Advanced level</span>
                 </button>
             </div>
         </div>

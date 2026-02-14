@@ -1,5 +1,6 @@
 // Aptitude & Logic Puzzles - Complete with Difficulty Levels
 
+let currentAge = null;
 let currentType = null;
 let currentDifficulty = null;
 let currentWorksheet = null;
@@ -39,6 +40,17 @@ function shuffleArray(array) {
 }
 
 // Navigation
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('type-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('type-selection').style.display = 'none';
+    document.getElementById('age-selection').style.display = 'block';
+}
+
 function selectType(type) {
     currentType = type;
     const names = {
@@ -54,6 +66,15 @@ function selectType(type) {
 function backToTypes() {
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('type-selection').style.display = 'block';
+}
+
+function backToWorksheetSelection() {
+    // Hide worksheet content and show difficulty selection
+    const worksheetContent = document.getElementById('worksheet-content');
+    if (worksheetContent) {
+        worksheetContent.style.display = 'none';
+    }
+    document.getElementById('difficulty-selection').style.display = 'block';
 }
 
 // Complex Maze Generation
@@ -465,7 +486,6 @@ function loadPuzzles(difficulty) {
     };
 
     let count = counts[difficulty][currentType];
-    count = getDemoLimit(count);
     let problems = [];
 
     switch(currentType) {
@@ -740,7 +760,7 @@ function renderWorksheet() {
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button onclick="location.reload()">Back to Challenges</button>
+                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
                 <button onclick="loadPuzzles('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
             </div>
         </div>

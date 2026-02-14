@@ -1,6 +1,7 @@
 // Story Time - Dynamic Story Generation
 // Generates 100+ stories per difficulty level per category
 
+let currentAge = null;
 let currentCategory = null;
 let currentDifficulty = null;
 let currentStoryIndex = 0;
@@ -165,8 +166,7 @@ function generateStories(category, difficulty) {
     }
 
     // NO template generation - only show unique quality stories
-    // Apply demo limiting before returning
-    return stories.slice(0, getDemoLimit(stories.length));
+    return stories;
 }
 
 function generateAnimalStories(difficulty, count) {
@@ -281,6 +281,17 @@ function capitalize(str) {
 }
 
 // Navigation
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('category-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('category-selection').style.display = 'none';
+    document.getElementById('age-selection').style.display = 'block';
+}
+
 function selectCategory(category) {
     currentCategory = category;
 

@@ -1,5 +1,55 @@
 // English Worksheet Generator
 
+// State variables for navigation
+let selectedAgeGroup = null;
+let selectedDifficulty = null;
+
+// Navigation functions
+function showAgeGroups() {
+    document.getElementById('age-groups').style.display = 'block';
+    document.getElementById('difficulties').style.display = 'none';
+}
+
+function showDifficulties(ageGroup) {
+    selectedAgeGroup = ageGroup;
+    document.getElementById('age-groups').style.display = 'none';
+    document.getElementById('difficulties').style.display = 'block';
+
+    // Update difficulty descriptions based on selected age
+    updateDifficultyDescriptions();
+}
+
+function updateDifficultyDescriptions() {
+    if (!selectedAgeGroup) return;
+
+    const config = contentConfigs[selectedAgeGroup];
+    if (!config) return;
+
+    const easyDesc = document.getElementById('easy-desc');
+    const mediumDesc = document.getElementById('medium-desc');
+    const hardDesc = document.getElementById('hard-desc');
+
+    if (easyDesc && config.easy) easyDesc.textContent = config.easy.description;
+    if (mediumDesc && config.medium) mediumDesc.textContent = config.medium.description;
+    if (hardDesc && config.hard) hardDesc.textContent = config.hard.description;
+}
+
+function loadWorksheetNew(difficulty) {
+    selectedDifficulty = difficulty;
+    if (selectedAgeGroup && selectedDifficulty) {
+        loadWorksheet(selectedAgeGroup, selectedDifficulty);
+    }
+}
+
+function backToWorksheetSelection() {
+    // Hide worksheet content and show difficulty selection
+    const worksheetContent = document.getElementById('worksheet-content');
+    if (worksheetContent) {
+        worksheetContent.style.display = 'none';
+    }
+    document.getElementById('difficulties').style.display = 'block';
+}
+
 let currentWorksheet = null;
 let timer = null;
 let startTime = null;
@@ -175,59 +225,144 @@ const wordBanks = {
     ]
 };
 
-// Level Configurations
-const levelConfigs = {
-    '7A': {
-        name: 'Level 7A - Picture Words',
-        description: 'Look at the picture and complete the word',
-        problemCount: 20,
-        type: 'pictureWords',
-        wordList: wordBanks.pictureWords
+// Age groups configuration
+const AGE_GROUPS = ['4-5', '6', '7', '8', '9+', '10+'];
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const DIFFICULTY_LABELS = {
+    'easy': 'Easy ⭐',
+    'medium': 'Medium ⭐⭐',
+    'hard': 'Hard ⭐⭐⭐'
+};
+
+// Content Configurations (age-based with difficulty levels)
+const contentConfigs = {
+    '4-5': {
+        easy: {
+            name: 'Ages 4-5 - Easy English',
+            description: 'Picture words with emojis',
+            problemCount: 15,
+            type: 'pictureWords',
+            wordList: wordBanks.pictureWords
+        },
+        medium: {
+            name: 'Ages 4-5 - Medium English',
+            description: 'Basic sight words',
+            problemCount: 12,
+            type: 'sightWords',
+            wordList: wordBanks.sightWords1
+        },
+        hard: {
+            name: 'Ages 4-5 - Hard English',
+            description: 'Simple letter tracing',
+            problemCount: 15,
+            type: 'pictureWords',
+            wordList: wordBanks.pictureWords
+        }
     },
-    '6A': {
-        name: 'Level 6A - Sight Words (Basic)',
-        description: 'Recognize and write basic sight words',
-        problemCount: 15,
-        type: 'sightWords',
-        wordList: wordBanks.sightWords1
+    '6': {
+        easy: {
+            name: 'Age 6 - Easy English',
+            description: 'Basic sight words',
+            problemCount: 15,
+            type: 'sightWords',
+            wordList: wordBanks.sightWords1
+        },
+        medium: {
+            name: 'Age 6 - Medium English',
+            description: 'Simple sentences',
+            problemCount: 12,
+            type: 'sentenceFill',
+            difficulty: 'easy'
+        },
+        hard: {
+            name: 'Age 6 - Hard English',
+            description: 'Sentence completion',
+            problemCount: 12,
+            type: 'sentenceCompletion',
+            difficulty: 'medium'
+        }
     },
-    '5A': {
-        name: 'Level 5A - Simple Sentences',
-        description: 'Complete simple sentences with appropriate words',
-        problemCount: 12,
-        type: 'sentenceFill',
-        difficulty: 'easy'
+    '7': {
+        easy: {
+            name: 'Age 7 - Easy English',
+            description: 'Simple sentences',
+            problemCount: 12,
+            type: 'sentenceFill',
+            difficulty: 'easy'
+        },
+        medium: {
+            name: 'Age 7 - Medium English',
+            description: 'Grammar basics',
+            problemCount: 12,
+            type: 'sentenceCompletion',
+            difficulty: 'medium'
+        },
+        hard: {
+            name: 'Age 7 - Hard English',
+            description: 'Synonyms & antonyms',
+            problemCount: 15,
+            type: 'synonymsAntonyms'
+        }
     },
-    '4A': {
-        name: 'Level 4A - Sentence Completion',
-        description: 'Fill in the blanks with correct words',
-        problemCount: 12,
-        type: 'sentenceCompletion',
-        difficulty: 'medium'
+    '8': {
+        easy: {
+            name: 'Age 8 - Easy English',
+            description: 'Vocabulary building',
+            problemCount: 15,
+            type: 'synonymsAntonyms'
+        },
+        medium: {
+            name: 'Age 8 - Medium English',
+            description: 'Parts of speech',
+            problemCount: 15,
+            type: 'partsOfSpeech'
+        },
+        hard: {
+            name: 'Age 8 - Hard English',
+            description: 'Reading comprehension',
+            problemCount: 8,
+            type: 'readingComprehension'
+        }
     },
-    '3A': {
-        name: 'Level 3A - Synonyms & Antonyms',
-        description: 'Find words with similar and opposite meanings',
-        problemCount: 15,
-        type: 'synonymsAntonyms'
+    '9+': {
+        easy: {
+            name: 'Ages 9+ - Easy English',
+            description: 'Advanced grammar',
+            problemCount: 15,
+            type: 'partsOfSpeech'
+        },
+        medium: {
+            name: 'Ages 9+ - Medium English',
+            description: 'Reading comprehension',
+            problemCount: 8,
+            type: 'readingComprehension'
+        },
+        hard: {
+            name: 'Ages 9+ - Hard English',
+            description: 'Advanced writing',
+            problemCount: 12,
+            type: 'advancedGrammar'
+        }
     },
-    '2A': {
-        name: 'Level 2A - Parts of Speech',
-        description: 'Identify nouns, verbs, and adjectives',
-        problemCount: 15,
-        type: 'partsOfSpeech'
-    },
-    'A': {
-        name: 'Level A - Reading Comprehension',
-        description: 'Read passages and answer questions',
-        problemCount: 8,
-        type: 'readingComprehension'
-    },
-    'B': {
-        name: 'Level B - Advanced Grammar',
-        description: 'Advanced sentence structure and grammar',
-        problemCount: 12,
-        type: 'advancedGrammar'
+    '10+': {
+        easy: {
+            name: 'Ages 10+ - Easy English',
+            description: 'Complex reading',
+            problemCount: 8,
+            type: 'readingComprehension'
+        },
+        medium: {
+            name: 'Ages 10+ - Medium English',
+            description: 'Essay writing',
+            problemCount: 10,
+            type: 'advancedGrammar'
+        },
+        hard: {
+            name: 'Ages 10+ - Hard English',
+            description: 'Creative writing',
+            problemCount: 8,
+            type: 'advancedGrammar'
+        }
     }
 };
 
@@ -235,7 +370,6 @@ const levelConfigs = {
 function generatePictureWordProblems(wordList, count) {
     const problems = [];
     const shuffled = [...wordList].sort(() => Math.random() - 0.5);
-    count = getDemoLimit(count);
 
     for (let i = 0; i < Math.min(count, shuffled.length); i++) {
         const item = shuffled[i];
@@ -253,7 +387,6 @@ function generatePictureWordProblems(wordList, count) {
 function generateSightWordProblems(wordList, count) {
     const problems = [];
     const shuffled = [...wordList].sort(() => Math.random() - 0.5);
-    count = getDemoLimit(count);
 
     for (let i = 0; i < Math.min(count, shuffled.length); i++) {
         problems.push({
@@ -266,7 +399,6 @@ function generateSightWordProblems(wordList, count) {
 }
 
 function generateSentenceFillProblems(count, difficulty) {
-    count = getDemoLimit(count);
     const sentences = [
         { text: 'The cat ___ on the mat.', answer: 'sat', options: ['sat', 'stand', 'jump'] },
         { text: 'I ___ a red ball.', answer: 'have', options: ['have', 'has', 'had'] },
@@ -292,7 +424,6 @@ function generateSentenceFillProblems(count, difficulty) {
 }
 
 function generateSynonymAntonymProblems(count) {
-    count = getDemoLimit(count);
     const problems = [];
     const halfCount = Math.floor(count / 2);
 
@@ -322,7 +453,6 @@ function generateSynonymAntonymProblems(count) {
 }
 
 function generatePartsOfSpeechProblems(count) {
-    count = getDemoLimit(count);
     const sentences = [
         { sentence: 'The big dog runs fast.', word: 'dog', answer: 'noun' },
         { sentence: 'The big dog runs fast.', word: 'big', answer: 'adjective' },
@@ -351,7 +481,6 @@ function generatePartsOfSpeechProblems(count) {
 }
 
 function generateReadingComprehension(count) {
-    count = getDemoLimit(count);
     const passages = [
         {
             text: 'Tom has a pet dog named Max. Max is a golden retriever. He loves to play fetch in the park. Every morning, Tom takes Max for a walk. Max is a very friendly dog.',
@@ -391,7 +520,6 @@ function generateReadingComprehension(count) {
 }
 
 function generateAdvancedGrammarProblems(count) {
-    count = getDemoLimit(count);
     const problems = [
         { prompt: 'Correct the sentence: "She don\'t like apples."', answer: 'She doesn\'t like apples.' },
         { prompt: 'Add punctuation: "what time is it"', answer: 'What time is it?' },
@@ -415,10 +543,10 @@ function generateAdvancedGrammarProblems(count) {
     }));
 }
 
-// Load worksheet for specific level
-function loadWorksheet(level) {
+// Load worksheet for specific age group and difficulty
+function loadWorksheet(ageGroup, difficulty) {
     // Special handling for writing practice
-    if (level === 'writing') {
+    if (ageGroup === 'writing') {
         document.querySelector('.level-selection').style.display = 'none';
         document.body.innerHTML = generateWritingWorksheet();
         setTimeout(() => {
@@ -427,8 +555,11 @@ function loadWorksheet(level) {
         return;
     }
 
-    const config = levelConfigs[level];
-    if (!config) return;
+    const config = contentConfigs[ageGroup]?.[difficulty];
+    if (!config) {
+        console.error(`No config found for: ${ageGroup}, ${difficulty}`);
+        return;
+    }
 
     let problems = [];
 
@@ -458,7 +589,8 @@ function loadWorksheet(level) {
     }
 
     currentWorksheet = {
-        level,
+        ageGroup,
+        difficulty,
         config,
         problems,
         answers: new Array(problems.length).fill('')
@@ -469,7 +601,7 @@ function loadWorksheet(level) {
 
 // Render the worksheet
 function renderWorksheet() {
-    const { level, config, problems } = currentWorksheet;
+    const { ageGroup, difficulty, config, problems } = currentWorksheet;
     const today = new Date().toLocaleDateString();
 
     let problemsHTML = '';
@@ -570,7 +702,7 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation" style="margin-bottom: 20px;">
-                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🏠 Back to Levels</button>
+                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">← Back to Difficulty</button>
             </div>
 
             <div class="controls">
@@ -751,7 +883,7 @@ function savePDF() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    const filename = `English_${currentWorksheet.level}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+    const filename = `English_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
@@ -824,7 +956,7 @@ function saveCurrentWorksheet() {
         return;
     }
 
-    const identifier = currentWorksheet.level;
+    const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
     const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
@@ -860,7 +992,7 @@ function saveCurrentWorksheet() {
 function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
-    const identifier = currentWorksheet.level;
+    const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
     const savedData = loadWorksheet('english', identifier);
 
     if (!savedData) return;

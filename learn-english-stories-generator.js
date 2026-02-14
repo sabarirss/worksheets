@@ -1,7 +1,8 @@
 // Learn English with Stories Generator
 // Original educational stories for different age groups
 
-let currentAgeGroup = null;
+let currentAge = null;
+let currentDifficulty = null;
 let currentStory = null;
 
 // Demo version limiting
@@ -25,10 +26,26 @@ function getDemoLimit(defaultCount) {
 }
 
 // Navigation functions
-function backToAgeSelection() {
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('story-reader').style.display = 'none';
     document.getElementById('age-selection').style.display = 'block';
+}
+
+function selectDifficulty(difficulty) {
+    currentDifficulty = difficulty;
+    loadStoryList();
+}
+
+function backToDifficulties() {
+    document.getElementById('story-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'block';
 }
 
 function backToStoryList() {
@@ -37,8 +54,10 @@ function backToStoryList() {
 }
 
 // Story Database - Original educational stories
+// Organized by age group and difficulty level
 const storyDatabase = {
-    '4-6': [
+    '4-5': {
+        easy: [
         {
             id: 1,
             title: "Max the Cat",
@@ -108,9 +127,97 @@ const storyDatabase = {
                     correct: 2
                 }
             ]
-        }
-    ],
-    '7-9': [
+        }],
+        medium: [],
+        hard: []
+    },
+    '6': {
+        easy: [],
+        medium: [{
+            id: 1,
+            title: "Max the Cat",
+            icon: "🐱",
+            level: "Beginner",
+            wordCount: 80,
+            grammarFocus: "Simple present tense, 'is/are'",
+            vocabulary: ["cat", "happy", "play", "jump", "sleep"],
+            content: [
+                "Max is a cat. He is orange and white.",
+                "Max likes to play. He plays with a ball.",
+                "The ball is red. It is round.",
+                "Max jumps high. He jumps on the chair.",
+                "Max is happy. He likes to run.",
+                "At night, Max sleeps. He sleeps in his bed.",
+                "Max is a good cat!"
+            ],
+            questions: [
+                {
+                    question: "What color is Max?",
+                    options: ["Orange and white", "Black and white", "Gray", "Brown"],
+                    correct: 0
+                },
+                {
+                    question: "What does Max play with?",
+                    options: ["A stick", "A ball", "A toy car", "A rope"],
+                    correct: 1
+                },
+                {
+                    question: "Where does Max sleep?",
+                    options: ["On the floor", "In a box", "In his bed", "On the chair"],
+                    correct: 2
+                }
+            ]
+        },
+        {
+            id: 2,
+            title: "Sam Goes to the Park",
+            icon: "🏞️",
+            level: "Beginner",
+            wordCount: 90,
+            grammarFocus: "Action verbs, simple sentences",
+            vocabulary: ["park", "swing", "slide", "friend", "fun"],
+            content: [
+                "Sam goes to the park. It is a sunny day.",
+                "The park is big. There are many trees.",
+                "Sam sees a swing. He swings high.",
+                "Next, Sam goes to the slide. The slide is tall.",
+                "Sam slides down fast. Wheee!",
+                "Sam sees his friend Ben. They play together.",
+                "Sam and Ben have fun. They love the park!"
+            ],
+            questions: [
+                {
+                    question: "Where does Sam go?",
+                    options: ["To school", "To the park", "To the store", "To home"],
+                    correct: 1
+                },
+                {
+                    question: "What is the weather like?",
+                    options: ["Rainy", "Snowy", "Sunny", "Windy"],
+                    correct: 2
+                },
+                {
+                    question: "Who does Sam play with?",
+                    options: ["His sister", "His mom", "His friend Ben", "His dog"],
+                    correct: 2
+                }
+            ]
+        }],
+        hard: []
+    },
+    '7': {
+        easy: [],
+        medium: [],
+        hard: []
+    },
+    '8': {
+        easy: [],
+        medium: [],
+        hard: []
+    },
+    '9+': {
+        easy: [],
+        medium: [
         {
             id: 1,
             title: "The Lost Puppy",
@@ -198,9 +305,13 @@ const storyDatabase = {
                     correct: 2
                 }
             ]
-        }
-    ],
-    '10-12': [
+        }],
+        hard: []
+    },
+    '10+': {
+        easy: [],
+        medium: [],
+        hard: [
         {
             id: 1,
             title: "The Mystery of the Old Lighthouse",
@@ -314,32 +425,42 @@ const storyDatabase = {
                     correct: 1
                 }
             ]
-        }
-    ]
+        }]
+    }
 };
 
-// Load story list for selected age group
-function loadStoryList(ageGroup) {
-    currentAgeGroup = ageGroup;
-    const stories = storyDatabase[ageGroup] || [];
+// Load story list for selected age group and difficulty
+function loadStoryList() {
+    if (!currentAge || !currentDifficulty) return;
 
-    // Apply demo limiting
-    const limitedStories = stories.slice(0, getDemoLimit(stories.length));
+    const stories = storyDatabase[currentAge]?.[currentDifficulty] || [];
 
-    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-selection').style.display = 'block';
 
-    const ageLabels = {
-        '4-6': 'Ages 4-6: Beginner Stories',
-        '7-9': 'Ages 7-9: Early Reader',
-        '10-12': 'Ages 10-12: Advanced Reader'
+    const difficultyStars = {
+        easy: '⭐',
+        medium: '⭐⭐',
+        hard: '⭐⭐⭐'
     };
 
-    document.getElementById('story-list-title').textContent = ageLabels[ageGroup];
+    const title = `Age ${currentAge} - ${difficultyStars[currentDifficulty]} ${currentDifficulty.toUpperCase()} Stories`;
+    document.getElementById('story-list-title').textContent = title;
 
     const listContainer = document.getElementById('story-list');
-    listContainer.innerHTML = limitedStories.map(story => `
-        <div class="story-card" onclick="loadStory('${ageGroup}', ${story.id})">
+
+    if (stories.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                <p style="font-size: 1.2em; color: #666;">No stories available for this age and difficulty level yet.</p>
+                <p style="color: #999;">More stories coming soon!</p>
+            </div>
+        `;
+        return;
+    }
+
+    listContainer.innerHTML = stories.map(story => `
+        <div class="story-card" onclick="loadStory(${story.id})">
             <div class="story-icon">${story.icon}</div>
             <div class="story-title">${story.title}</div>
             <div class="story-meta">
@@ -351,8 +472,11 @@ function loadStoryList(ageGroup) {
 }
 
 // Load and display a story
-function loadStory(ageGroup, storyId) {
-    const story = storyDatabase[ageGroup].find(s => s.id === storyId);
+function loadStory(storyId) {
+    if (!currentAge || !currentDifficulty) return;
+
+    const stories = storyDatabase[currentAge]?.[currentDifficulty] || [];
+    const story = stories.find(s => s.id === storyId);
     if (!story) return;
 
     currentStory = story;

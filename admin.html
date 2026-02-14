@@ -378,6 +378,10 @@
                             <input type="checkbox" id="module-german-kids">
                             <label for="module-german-kids">🇩🇪 German Kids</label>
                         </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="module-learn-english-stories">
+                            <label for="module-learn-english-stories">📚 Learn English Stories</label>
+                        </div>
                     </div>
                 </div>
 
@@ -483,7 +487,10 @@
                             aptitude: '🧩 Aptitude',
                             stories: '📖 Stories',
                             'emotional-quotient': '❤️ EQ',
-                            german: '🇩🇪 German'
+                            german: '🇩🇪 German',
+                            drawing: '🎨 Drawing',
+                            'german-kids': '🇩🇪 German Kids',
+                            'learn-english-stories': '📚 Learn English'
                         };
                         return `<span class="module-badge ${enabled ? '' : 'disabled'}">${names[mod] || mod}</span>`;
                     }).join('');
@@ -574,6 +581,7 @@
             document.getElementById('module-german').checked = false;
             document.getElementById('module-drawing').checked = false;
             document.getElementById('module-german-kids').checked = false;
+            document.getElementById('module-learn-english-stories').checked = false;
 
             document.getElementById('user-modal').classList.add('active');
         }
@@ -608,6 +616,7 @@
             document.getElementById('module-german').checked = modules.german || false;
             document.getElementById('module-drawing').checked = modules.drawing || false;
             document.getElementById('module-german-kids').checked = modules['german-kids'] || false;
+            document.getElementById('module-learn-english-stories').checked = modules['learn-english-stories'] || false;
 
             document.getElementById('user-modal').classList.add('active');
         }
@@ -635,7 +644,8 @@
                 'emotional-quotient': document.getElementById('module-emotional').checked,
                 german: document.getElementById('module-german').checked,
                 drawing: document.getElementById('module-drawing').checked,
-                'german-kids': document.getElementById('module-german-kids').checked
+                'german-kids': document.getElementById('module-german-kids').checked,
+                'learn-english-stories': document.getElementById('module-learn-english-stories').checked
             };
 
             // Show loading state

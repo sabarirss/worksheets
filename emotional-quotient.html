@@ -141,7 +141,41 @@
             <p class="subtitle">Building emotional intelligence and empathy!</p>
         </header>
 
-        <div class="eq-selection" id="eq-selection">
+        <!-- Age Group Selection -->
+        <div class="level-selection" id="age-selection">
+            <h2>Select Age Group</h2>
+            <div class="level-grid">
+                <button onclick="selectAge('4-5')" class="level-btn">
+                    <span class="level-name">👶 Ages 4-5</span>
+                    <span class="level-desc">Pre-kindergarten level</span>
+                </button>
+                <button onclick="selectAge('6')" class="level-btn">
+                    <span class="level-name">🧒 Age 6</span>
+                    <span class="level-desc">Kindergarten/1st grade</span>
+                </button>
+                <button onclick="selectAge('7')" class="level-btn">
+                    <span class="level-name">👦 Age 7</span>
+                    <span class="level-desc">1st/2nd grade</span>
+                </button>
+                <button onclick="selectAge('8')" class="level-btn">
+                    <span class="level-name">👧 Age 8</span>
+                    <span class="level-desc">2nd/3rd grade</span>
+                </button>
+                <button onclick="selectAge('9+')" class="level-btn">
+                    <span class="level-name">🧑 Ages 9+</span>
+                    <span class="level-desc">3rd/4th grade and above</span>
+                </button>
+                <button onclick="selectAge('10+')" class="level-btn">
+                    <span class="level-name">👨 Ages 10+</span>
+                    <span class="level-desc">Advanced (5th grade+)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div class="eq-selection" id="eq-selection" style="display: none;">
             <h2>Select Difficulty Level</h2>
             <div class="difficulty-grid">
                 <button onclick="loadActivities('easy')" class="difficulty-btn">
@@ -158,7 +192,7 @@
                 </button>
             </div>
             <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+                <button onclick="backToAges()">← Back to Age Groups</button>
             </div>
         </div>
 

@@ -235,17 +235,29 @@
         <div class="age-selection" id="age-selection">
             <h2>Select Age Group</h2>
             <div class="age-grid">
-                <button onclick="loadStoryList('4-6')" class="age-btn">
-                    👶 Ages 4-6<br>
-                    <span style="font-size: 0.8em;">Beginner Stories</span>
+                <button onclick="selectAge('4-5')" class="age-btn">
+                    👶 Ages 4-5<br>
+                    <span style="font-size: 0.8em;">Pre-kindergarten level</span>
                 </button>
-                <button onclick="loadStoryList('7-9')" class="age-btn">
-                    🧒 Ages 7-9<br>
-                    <span style="font-size: 0.8em;">Early Reader</span>
+                <button onclick="selectAge('6')" class="age-btn">
+                    🧒 Age 6<br>
+                    <span style="font-size: 0.8em;">Kindergarten/1st grade</span>
                 </button>
-                <button onclick="loadStoryList('10-12')" class="age-btn">
-                    👦 Ages 10-12<br>
-                    <span style="font-size: 0.8em;">Advanced Reader</span>
+                <button onclick="selectAge('7')" class="age-btn">
+                    👦 Age 7<br>
+                    <span style="font-size: 0.8em;">1st/2nd grade</span>
+                </button>
+                <button onclick="selectAge('8')" class="age-btn">
+                    👧 Age 8<br>
+                    <span style="font-size: 0.8em;">2nd/3rd grade</span>
+                </button>
+                <button onclick="selectAge('9+')" class="age-btn">
+                    🧑 Ages 9+<br>
+                    <span style="font-size: 0.8em;">3rd/4th grade and above</span>
+                </button>
+                <button onclick="selectAge('10+')" class="age-btn">
+                    👨 Ages 10+<br>
+                    <span style="font-size: 0.8em;">Advanced (5th grade+)</span>
                 </button>
             </div>
             <div class="navigation">
@@ -253,10 +265,32 @@
             </div>
         </div>
 
+        <!-- Difficulty Selection -->
+        <div class="age-selection" id="difficulty-selection" style="display: none;">
+            <h2>Choose Difficulty Level</h2>
+            <div class="age-grid">
+                <button onclick="selectDifficulty('easy')" class="age-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                    ⭐ Easy<br>
+                    <span style="font-size: 0.8em;">Simple stories with basic vocabulary</span>
+                </button>
+                <button onclick="selectDifficulty('medium')" class="age-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
+                    ⭐⭐ Medium<br>
+                    <span style="font-size: 0.8em;">Longer stories with more complex words</span>
+                </button>
+                <button onclick="selectDifficulty('hard')" class="age-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    ⭐⭐⭐ Hard<br>
+                    <span style="font-size: 0.8em;">Advanced stories with challenging concepts</span>
+                </button>
+            </div>
+            <div class="navigation">
+                <button onclick="backToAges()">← Back to Age Groups</button>
+            </div>
+        </div>
+
         <!-- Story List -->
         <div id="story-selection" style="display: none;">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToAgeSelection()">← Back to Age Groups</button>
+                <button onclick="backToDifficulties()">← Back to Difficulty Levels</button>
             </div>
             <h2 id="story-list-title">Choose a Story</h2>
             <div class="story-list" id="story-list"></div>

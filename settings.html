@@ -550,6 +550,10 @@
                         <input type="checkbox" id="panel-toggle-german-kids" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
                         <span style="font-size: 1.05em;">🇩🇪 German Kids</span>
                     </label>
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                        <input type="checkbox" id="panel-toggle-learn-english-stories" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+                        <span style="font-size: 1.05em;">📚 Learn English Stories</span>
+                    </label>
                 </div>
             </div>
 
@@ -614,7 +618,8 @@
                         'emotional-quotient': false,
                         german: false,
                         drawing: false,
-                        'german-kids': false
+                        'german-kids': false,
+                        'learn-english-stories': false
                     };
 
                     try {
@@ -692,7 +697,8 @@
                 'emotional-quotient': '❤️ Emotional Quotient',
                 german: '🇩🇪 German B1',
                 drawing: '🎨 Drawing',
-                'german-kids': '🇩🇪 German Kids'
+                'german-kids': '🇩🇪 German Kids',
+                'learn-english-stories': '📚 Learn English Stories'
             };
 
             let html = '<div style="display: flex; flex-wrap: wrap;">';
@@ -744,6 +750,12 @@
 
         // Parental Control Functions
         function openParentalControl() {
+            // Skip age verification for admin users
+            if (currentUser && currentUser.role === 'admin') {
+                openParentalControlPanel();
+                return;
+            }
+
             parentalVerificationAction = 'control'; // Set action type
             document.getElementById('parent-verification-modal').style.display = 'flex';
             document.getElementById('parent-dob-input').value = '';
@@ -759,6 +771,12 @@
         }
 
         function openPasswordChange() {
+            // Skip age verification for admin users
+            if (currentUser && currentUser.role === 'admin') {
+                openPasswordChangeModal();
+                return;
+            }
+
             parentalVerificationAction = 'password'; // Set action type
             document.getElementById('parent-verification-modal').style.display = 'flex';
             document.getElementById('parent-dob-input').value = '';
@@ -837,7 +855,8 @@
                     { key: 'stories', id: 'panel-toggle-stories' },
                     { key: 'emotional-quotient', id: 'panel-toggle-emotional-quotient' },
                     { key: 'drawing', id: 'panel-toggle-drawing' },
-                    { key: 'german-kids', id: 'panel-toggle-german-kids' }
+                    { key: 'german-kids', id: 'panel-toggle-german-kids' },
+                    { key: 'learn-english-stories', id: 'panel-toggle-learn-english-stories' }
                 ];
 
                 // Update each module checkbox
@@ -886,7 +905,8 @@
                     stories: document.getElementById('panel-toggle-stories').checked,
                     'emotional-quotient': document.getElementById('panel-toggle-emotional-quotient').checked,
                     drawing: document.getElementById('panel-toggle-drawing').checked,
-                    'german-kids': document.getElementById('panel-toggle-german-kids').checked
+                    'german-kids': document.getElementById('panel-toggle-german-kids').checked,
+                    'learn-english-stories': document.getElementById('panel-toggle-learn-english-stories').checked
                 };
 
                 // Add enabled module updates

@@ -1,29 +1,79 @@
 // Math Worksheet Generator
 
+// State variables for navigation
+let selectedAgeGroup = null;
+let selectedOperation = null;
+let selectedDifficulty = null;
+
 // Navigation functions
 function showSubjects() {
     document.querySelector('.subject-selection').style.display = 'block';
+    document.getElementById('math-age-groups').style.display = 'none';
     document.getElementById('math-operations').style.display = 'none';
-    hideAllOperationLevels();
+    document.getElementById('math-difficulties').style.display = 'none';
 }
 
 function showMathLevels() {
+    showMathAgeGroups();
+}
+
+function showMathAgeGroups() {
     document.querySelector('.subject-selection').style.display = 'none';
-    document.getElementById('math-operations').style.display = 'block';
-    hideAllOperationLevels();
-}
-
-function showOperation(operation) {
+    document.getElementById('math-age-groups').style.display = 'block';
     document.getElementById('math-operations').style.display = 'none';
-    hideAllOperationLevels();
-    document.getElementById(`${operation}-levels`).style.display = 'block';
+    document.getElementById('math-difficulties').style.display = 'none';
 }
 
-function hideAllOperationLevels() {
-    ['addition', 'subtraction', 'multiplication', 'division'].forEach(op => {
-        const elem = document.getElementById(`${op}-levels`);
-        if (elem) elem.style.display = 'none';
-    });
+function showMathOperations(ageGroup) {
+    selectedAgeGroup = ageGroup;
+    document.getElementById('math-age-groups').style.display = 'none';
+    document.getElementById('math-operations').style.display = 'block';
+    document.getElementById('math-difficulties').style.display = 'none';
+}
+
+function showMathOperationsBack() {
+    document.getElementById('math-operations').style.display = 'block';
+    document.getElementById('math-difficulties').style.display = 'none';
+}
+
+function showDifficulties(operation) {
+    selectedOperation = operation;
+    document.getElementById('math-operations').style.display = 'none';
+    document.getElementById('math-difficulties').style.display = 'block';
+
+    // Update difficulty descriptions based on selected age and operation
+    updateDifficultyDescriptions();
+}
+
+function updateDifficultyDescriptions() {
+    if (!selectedAgeGroup || !selectedOperation) return;
+
+    const config = contentConfigs[selectedOperation]?.[selectedAgeGroup];
+    if (!config) return;
+
+    const easyDesc = document.getElementById('easy-desc');
+    const mediumDesc = document.getElementById('medium-desc');
+    const hardDesc = document.getElementById('hard-desc');
+
+    if (easyDesc && config.easy) easyDesc.textContent = config.easy.description;
+    if (mediumDesc && config.medium) mediumDesc.textContent = config.medium.description;
+    if (hardDesc && config.hard) hardDesc.textContent = config.hard.description;
+}
+
+function loadWorksheetNew(difficulty) {
+    selectedDifficulty = difficulty;
+    if (selectedAgeGroup && selectedOperation && selectedDifficulty) {
+        loadWorksheet(selectedOperation, selectedAgeGroup, selectedDifficulty, 1);
+    }
+}
+
+function backToWorksheetSelection() {
+    // Hide worksheet content and show difficulty selection
+    const worksheetContent = document.getElementById('worksheet-content');
+    if (worksheetContent) {
+        worksheetContent.style.display = 'none';
+    }
+    document.getElementById('math-difficulties').style.display = 'block';
 }
 
 let currentWorksheet = null;
@@ -69,134 +119,503 @@ class SeededRandom {
 
 let seededRandom = null;
 
-// Level Configurations (progressive difficulty)
-const levelConfigs = {
+// Age groups configuration
+const AGE_GROUPS = ['4-5', '6', '7', '8', '9+', '10+'];
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const DIFFICULTY_LABELS = {
+    'easy': 'Easy ⭐',
+    'medium': 'Medium ⭐⭐',
+    'hard': 'Hard ⭐⭐⭐'
+};
+
+// Content Configurations (age-based with difficulty levels)
+const contentConfigs = {
     addition: {
-        '6A': {
-            name: 'Level 6A - Addition to 5',
-            description: 'Simple addition with sums up to 5',
-            problemCount: 20,
-            generator: () => generateSimpleAddition(1, 4, 5)
+        '4-5': {
+            easy: {
+                name: 'Ages 4-5 - Easy Addition',
+                description: 'Adding numbers up to 5',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(1, 4, 5)
+            },
+            medium: {
+                name: 'Ages 4-5 - Medium Addition',
+                description: 'Adding numbers up to 10',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(1, 9, 10)
+            },
+            hard: {
+                name: 'Ages 4-5 - Hard Addition',
+                description: 'Adding numbers up to 15',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(1, 10, 15)
+            }
         },
-        '5A': {
-            name: 'Level 5A - Addition to 10',
-            description: 'Addition with sums up to 10',
-            problemCount: 20,
-            generator: () => generateSimpleAddition(1, 9, 10)
+        '6': {
+            easy: {
+                name: 'Age 6 - Easy Addition',
+                description: 'Adding numbers up to 10',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(1, 9, 10)
+            },
+            medium: {
+                name: 'Age 6 - Medium Addition',
+                description: 'Adding numbers up to 20',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(5, 15, 20)
+            },
+            hard: {
+                name: 'Age 6 - Hard Addition',
+                description: 'Two-digit + One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedAddition(10, 99, 1, 9)
+            }
         },
-        '4A': {
-            name: 'Level 4A - Addition to 20',
-            description: 'Addition with sums up to 20',
-            problemCount: 20,
-            generator: () => generateSimpleAddition(5, 15, 20)
+        '7': {
+            easy: {
+                name: 'Age 7 - Easy Addition',
+                description: 'Adding numbers up to 20',
+                problemCount: 20,
+                generator: () => generateSimpleAddition(5, 15, 20)
+            },
+            medium: {
+                name: 'Age 7 - Medium Addition',
+                description: 'Two-digit + One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedAddition(10, 99, 1, 9)
+            },
+            hard: {
+                name: 'Age 7 - Hard Addition',
+                description: 'Two-digit + Two-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedAddition(10, 99, 10, 99)
+            }
         },
-        '3A': {
-            name: 'Level 3A - Two-digit + One-digit',
-            description: 'Adding one-digit numbers to two-digit numbers',
-            problemCount: 20,
-            generator: () => generateMixedAddition(10, 99, 1, 9)
+        '8': {
+            easy: {
+                name: 'Age 8 - Easy Addition',
+                description: 'Two-digit + One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedAddition(10, 99, 1, 9)
+            },
+            medium: {
+                name: 'Age 8 - Medium Addition',
+                description: 'Two-digit + Two-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedAddition(10, 99, 10, 99)
+            },
+            hard: {
+                name: 'Age 8 - Hard Addition',
+                description: 'Three-digit operations',
+                problemCount: 20,
+                generator: () => generateMixedAddition(100, 999, 10, 99)
+            }
         },
-        '2A': {
-            name: 'Level 2A - Two-digit + Two-digit',
-            description: 'Adding two-digit numbers',
-            problemCount: 20,
-            generator: () => generateMixedAddition(10, 99, 10, 99)
+        '9+': {
+            easy: {
+                name: 'Ages 9+ - Easy Addition',
+                description: 'Complex two-digit addition',
+                problemCount: 20,
+                generator: () => generateMixedAddition(50, 99, 50, 99)
+            },
+            medium: {
+                name: 'Ages 9+ - Medium Addition',
+                description: 'Three-digit addition',
+                problemCount: 20,
+                generator: () => generateMixedAddition(100, 999, 100, 999)
+            },
+            hard: {
+                name: 'Ages 9+ - Hard Addition',
+                description: 'Decimal addition',
+                problemCount: 20,
+                generator: () => generateDecimalAddition(1, 100, 1)
+            }
+        },
+        '10+': {
+            easy: {
+                name: 'Ages 10+ - Easy Addition',
+                description: 'Large number addition',
+                problemCount: 20,
+                generator: () => generateMixedAddition(100, 999, 100, 999)
+            },
+            medium: {
+                name: 'Ages 10+ - Medium Addition',
+                description: 'Decimal addition (2 places)',
+                problemCount: 20,
+                generator: () => generateDecimalAddition(1, 100, 2)
+            },
+            hard: {
+                name: 'Ages 10+ - Hard Addition',
+                description: 'Fraction addition',
+                problemCount: 20,
+                generator: () => generateFractionAddition()
+            }
         }
     },
     subtraction: {
-        '6A': {
-            name: 'Level 6A - Subtraction within 5',
-            description: 'Simple subtraction with numbers up to 5',
-            problemCount: 20,
-            generator: () => generateSimpleSubtraction(1, 5)
+        '4-5': {
+            easy: {
+                name: 'Ages 4-5 - Easy Subtraction',
+                description: 'Subtracting within 5',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(1, 5)
+            },
+            medium: {
+                name: 'Ages 4-5 - Medium Subtraction',
+                description: 'Subtracting within 10',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(1, 10)
+            },
+            hard: {
+                name: 'Ages 4-5 - Hard Subtraction',
+                description: 'Subtracting within 15',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(1, 15)
+            }
         },
-        '5A': {
-            name: 'Level 5A - Subtraction within 10',
-            description: 'Subtraction with numbers up to 10',
-            problemCount: 20,
-            generator: () => generateSimpleSubtraction(1, 10)
+        '6': {
+            easy: {
+                name: 'Age 6 - Easy Subtraction',
+                description: 'Subtracting within 10',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(1, 10)
+            },
+            medium: {
+                name: 'Age 6 - Medium Subtraction',
+                description: 'Subtracting within 20',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(5, 20)
+            },
+            hard: {
+                name: 'Age 6 - Hard Subtraction',
+                description: 'Two-digit - One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(10, 99, 1, 9)
+            }
         },
-        '4A': {
-            name: 'Level 4A - Subtraction within 20',
-            description: 'Subtraction with numbers up to 20',
-            problemCount: 20,
-            generator: () => generateSimpleSubtraction(5, 20)
+        '7': {
+            easy: {
+                name: 'Age 7 - Easy Subtraction',
+                description: 'Subtracting within 20',
+                problemCount: 20,
+                generator: () => generateSimpleSubtraction(5, 20)
+            },
+            medium: {
+                name: 'Age 7 - Medium Subtraction',
+                description: 'Two-digit - One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(10, 99, 1, 9)
+            },
+            hard: {
+                name: 'Age 7 - Hard Subtraction',
+                description: 'Two-digit - Two-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(20, 99, 10, 30)
+            }
         },
-        '3A': {
-            name: 'Level 3A - Two-digit - One-digit',
-            description: 'Subtracting one-digit numbers from two-digit numbers',
-            problemCount: 20,
-            generator: () => generateMixedSubtraction(10, 99, 1, 9)
+        '8': {
+            easy: {
+                name: 'Age 8 - Easy Subtraction',
+                description: 'Two-digit - One-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(10, 99, 1, 9)
+            },
+            medium: {
+                name: 'Age 8 - Medium Subtraction',
+                description: 'Two-digit - Two-digit numbers',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(20, 99, 10, 30)
+            },
+            hard: {
+                name: 'Age 8 - Hard Subtraction',
+                description: 'Three-digit operations',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(100, 999, 10, 99)
+            }
         },
-        '2A': {
-            name: 'Level 2A - Two-digit - Two-digit',
-            description: 'Subtracting two-digit numbers',
-            problemCount: 20,
-            generator: () => generateMixedSubtraction(20, 99, 10, 30)
+        '9+': {
+            easy: {
+                name: 'Ages 9+ - Easy Subtraction',
+                description: 'Complex two-digit subtraction',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(50, 99, 10, 50)
+            },
+            medium: {
+                name: 'Ages 9+ - Medium Subtraction',
+                description: 'Three-digit subtraction',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(100, 999, 100, 500)
+            },
+            hard: {
+                name: 'Ages 9+ - Hard Subtraction',
+                description: 'Decimal subtraction',
+                problemCount: 20,
+                generator: () => generateDecimalSubtraction(1, 100, 1)
+            }
+        },
+        '10+': {
+            easy: {
+                name: 'Ages 10+ - Easy Subtraction',
+                description: 'Large number subtraction',
+                problemCount: 20,
+                generator: () => generateMixedSubtraction(100, 999, 100, 500)
+            },
+            medium: {
+                name: 'Ages 10+ - Medium Subtraction',
+                description: 'Decimal subtraction (2 places)',
+                problemCount: 20,
+                generator: () => generateDecimalSubtraction(1, 100, 2)
+            },
+            hard: {
+                name: 'Ages 10+ - Hard Subtraction',
+                description: 'Fraction subtraction',
+                problemCount: 20,
+                generator: () => generateFractionSubtraction()
+            }
         }
     },
     multiplication: {
-        '6A': {
-            name: 'Level 6A - Multiply by 1 and 2',
-            description: 'Simple multiplication with 1 and 2',
-            problemCount: 20,
-            generator: () => generateMultiplication([1, 2], 1, 10)
+        '4-5': {
+            easy: {
+                name: 'Ages 4-5 - Easy Multiplication',
+                description: 'Multiply by 1',
+                problemCount: 20,
+                generator: () => generateMultiplication([1], 1, 10)
+            },
+            medium: {
+                name: 'Ages 4-5 - Medium Multiplication',
+                description: 'Multiply by 1 and 2',
+                problemCount: 20,
+                generator: () => generateMultiplication([1, 2], 1, 5)
+            },
+            hard: {
+                name: 'Ages 4-5 - Hard Multiplication',
+                description: 'Multiply by 1 and 2',
+                problemCount: 20,
+                generator: () => generateMultiplication([1, 2], 1, 10)
+            }
         },
-        '5A': {
-            name: 'Level 5A - Multiply by 3, 4, 5',
-            description: 'Multiplication tables 3, 4, and 5',
-            problemCount: 20,
-            generator: () => generateMultiplication([3, 4, 5], 1, 10)
+        '6': {
+            easy: {
+                name: 'Age 6 - Easy Multiplication',
+                description: 'Multiply by 1 and 2',
+                problemCount: 20,
+                generator: () => generateMultiplication([1, 2], 1, 10)
+            },
+            medium: {
+                name: 'Age 6 - Medium Multiplication',
+                description: 'Multiply by 3, 4, 5',
+                problemCount: 20,
+                generator: () => generateMultiplication([3, 4, 5], 1, 10)
+            },
+            hard: {
+                name: 'Age 6 - Hard Multiplication',
+                description: 'Multiply by 2-5',
+                problemCount: 20,
+                generator: () => generateMultiplication([2, 3, 4, 5], 1, 10)
+            }
         },
-        '4A': {
-            name: 'Level 4A - Multiply by 6, 7, 8, 9',
-            description: 'Multiplication tables 6, 7, 8, and 9',
-            problemCount: 20,
-            generator: () => generateMultiplication([6, 7, 8, 9], 1, 10)
+        '7': {
+            easy: {
+                name: 'Age 7 - Easy Multiplication',
+                description: 'Multiply by 3, 4, 5',
+                problemCount: 20,
+                generator: () => generateMultiplication([3, 4, 5], 1, 10)
+            },
+            medium: {
+                name: 'Age 7 - Medium Multiplication',
+                description: 'Multiply by 6, 7, 8, 9',
+                problemCount: 20,
+                generator: () => generateMultiplication([6, 7, 8, 9], 1, 10)
+            },
+            hard: {
+                name: 'Age 7 - Hard Multiplication',
+                description: 'Two-digit × One-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(10, 99, 2, 9)
+            }
         },
-        '3A': {
-            name: 'Level 3A - Two-digit × One-digit',
-            description: 'Multiplying two-digit by one-digit numbers',
-            problemCount: 20,
-            generator: () => generateAdvancedMultiplication(10, 99, 2, 9)
+        '8': {
+            easy: {
+                name: 'Age 8 - Easy Multiplication',
+                description: 'Multiply by 6, 7, 8, 9',
+                problemCount: 20,
+                generator: () => generateMultiplication([6, 7, 8, 9], 1, 10)
+            },
+            medium: {
+                name: 'Age 8 - Medium Multiplication',
+                description: 'Two-digit × One-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(10, 99, 2, 9)
+            },
+            hard: {
+                name: 'Age 8 - Hard Multiplication',
+                description: 'Two-digit × Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(10, 50, 10, 50)
+            }
         },
-        '2A': {
-            name: 'Level 2A - Two-digit × Two-digit',
-            description: 'Multiplying two-digit numbers',
-            problemCount: 20,
-            generator: () => generateAdvancedMultiplication(10, 50, 10, 50)
+        '9+': {
+            easy: {
+                name: 'Ages 9+ - Easy Multiplication',
+                description: 'Two-digit × Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(10, 50, 10, 50)
+            },
+            medium: {
+                name: 'Ages 9+ - Medium Multiplication',
+                description: 'Larger two-digit multiplication',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(20, 99, 10, 99)
+            },
+            hard: {
+                name: 'Ages 9+ - Hard Multiplication',
+                description: 'Three-digit × Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(100, 999, 10, 99)
+            }
+        },
+        '10+': {
+            easy: {
+                name: 'Ages 10+ - Easy Multiplication',
+                description: 'Three-digit × Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedMultiplication(100, 999, 10, 99)
+            },
+            medium: {
+                name: 'Ages 10+ - Medium Multiplication',
+                description: 'Decimal multiplication',
+                problemCount: 20,
+                generator: () => generateDecimalMultiplication(1, 50, 1)
+            },
+            hard: {
+                name: 'Ages 10+ - Hard Multiplication',
+                description: 'Fraction multiplication',
+                problemCount: 20,
+                generator: () => generateFractionMultiplication()
+            }
         }
     },
     division: {
-        '6A': {
-            name: 'Level 6A - Divide by 1 and 2',
-            description: 'Simple division by 1 and 2',
-            problemCount: 20,
-            generator: () => generateDivision([1, 2], 1, 20)
+        '4-5': {
+            easy: {
+                name: 'Ages 4-5 - Easy Division',
+                description: 'Divide by 1',
+                problemCount: 20,
+                generator: () => generateDivision([1], 1, 10)
+            },
+            medium: {
+                name: 'Ages 4-5 - Medium Division',
+                description: 'Divide by 1 and 2',
+                problemCount: 20,
+                generator: () => generateDivision([1, 2], 1, 5)
+            },
+            hard: {
+                name: 'Ages 4-5 - Hard Division',
+                description: 'Divide by 1 and 2',
+                problemCount: 20,
+                generator: () => generateDivision([1, 2], 1, 10)
+            }
         },
-        '5A': {
-            name: 'Level 5A - Divide by 3, 4, 5',
-            description: 'Division by 3, 4, and 5',
-            problemCount: 20,
-            generator: () => generateDivision([3, 4, 5], 1, 10)
+        '6': {
+            easy: {
+                name: 'Age 6 - Easy Division',
+                description: 'Divide by 1 and 2',
+                problemCount: 20,
+                generator: () => generateDivision([1, 2], 1, 20)
+            },
+            medium: {
+                name: 'Age 6 - Medium Division',
+                description: 'Divide by 3, 4, 5',
+                problemCount: 20,
+                generator: () => generateDivision([3, 4, 5], 1, 10)
+            },
+            hard: {
+                name: 'Age 6 - Hard Division',
+                description: 'Divide by 2-5',
+                problemCount: 20,
+                generator: () => generateDivision([2, 3, 4, 5], 1, 10)
+            }
         },
-        '4A': {
-            name: 'Level 4A - Divide by 6, 7, 8, 9',
-            description: 'Division by 6, 7, 8, and 9',
-            problemCount: 20,
-            generator: () => generateDivision([6, 7, 8, 9], 1, 10)
+        '7': {
+            easy: {
+                name: 'Age 7 - Easy Division',
+                description: 'Divide by 3, 4, 5',
+                problemCount: 20,
+                generator: () => generateDivision([3, 4, 5], 1, 10)
+            },
+            medium: {
+                name: 'Age 7 - Medium Division',
+                description: 'Divide by 6, 7, 8, 9',
+                problemCount: 20,
+                generator: () => generateDivision([6, 7, 8, 9], 1, 10)
+            },
+            hard: {
+                name: 'Age 7 - Hard Division',
+                description: 'Two-digit ÷ One-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(10, 99, 2, 9, false)
+            }
         },
-        '3A': {
-            name: 'Level 3A - Two-digit ÷ One-digit',
-            description: 'Dividing two-digit by one-digit numbers',
-            problemCount: 20,
-            generator: () => generateAdvancedDivision(10, 99, 2, 9, false)
+        '8': {
+            easy: {
+                name: 'Age 8 - Easy Division',
+                description: 'Divide by 6, 7, 8, 9',
+                problemCount: 20,
+                generator: () => generateDivision([6, 7, 8, 9], 1, 10)
+            },
+            medium: {
+                name: 'Age 8 - Medium Division',
+                description: 'Two-digit ÷ One-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(10, 99, 2, 9, false)
+            },
+            hard: {
+                name: 'Age 8 - Hard Division',
+                description: 'Division with remainders',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(10, 99, 2, 9, true)
+            }
         },
-        '2A': {
-            name: 'Level 2A - Division with Remainders',
-            description: 'Division with remainders',
-            problemCount: 20,
-            generator: () => generateAdvancedDivision(10, 99, 2, 9, true)
+        '9+': {
+            easy: {
+                name: 'Ages 9+ - Easy Division',
+                description: 'Division with remainders',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(10, 99, 2, 9, true)
+            },
+            medium: {
+                name: 'Ages 9+ - Medium Division',
+                description: 'Three-digit ÷ Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(100, 999, 10, 50, false)
+            },
+            hard: {
+                name: 'Ages 9+ - Hard Division',
+                description: 'Complex division with remainders',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(100, 999, 10, 50, true)
+            }
+        },
+        '10+': {
+            easy: {
+                name: 'Ages 10+ - Easy Division',
+                description: 'Three-digit ÷ Two-digit',
+                problemCount: 20,
+                generator: () => generateAdvancedDivision(100, 999, 10, 50, false)
+            },
+            medium: {
+                name: 'Ages 10+ - Medium Division',
+                description: 'Decimal division',
+                problemCount: 20,
+                generator: () => generateDecimalDivision(10, 100, 1)
+            },
+            hard: {
+                name: 'Ages 10+ - Hard Division',
+                description: 'Fraction division',
+                problemCount: 20,
+                generator: () => generateFractionDivision()
+            }
         }
     }
 };
@@ -307,19 +726,127 @@ function generateAdvancedDivision(min, max, minDivisor, maxDivisor, withRemainde
     }
 }
 
-// Load worksheet for specific level and page
-function loadWorksheet(operation, level, page = 1) {
+// Generate decimal addition problems
+function generateDecimalAddition(min, max, decimalPlaces) {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const multiplier = Math.pow(10, decimalPlaces);
+    let a = Math.floor(random() * (max - min + 1) * multiplier) / multiplier + min;
+    let b = Math.floor(random() * (max - min + 1) * multiplier) / multiplier + min;
+    a = parseFloat(a.toFixed(decimalPlaces));
+    b = parseFloat(b.toFixed(decimalPlaces));
+    return { a, b, answer: parseFloat((a + b).toFixed(decimalPlaces)) };
+}
+
+// Generate decimal subtraction problems
+function generateDecimalSubtraction(min, max, decimalPlaces) {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const multiplier = Math.pow(10, decimalPlaces);
+    let a = Math.floor(random() * (max - min + 1) * multiplier) / multiplier + min;
+    let b = Math.floor(random() * a * multiplier) / multiplier;
+    a = parseFloat(a.toFixed(decimalPlaces));
+    b = parseFloat(b.toFixed(decimalPlaces));
+    return { a, b, answer: parseFloat((a - b).toFixed(decimalPlaces)) };
+}
+
+// Generate decimal multiplication problems
+function generateDecimalMultiplication(min, max, decimalPlaces) {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const multiplier = Math.pow(10, decimalPlaces);
+    let a = Math.floor(random() * (max - min + 1) * multiplier) / multiplier + min;
+    let b = Math.floor(random() * 10 * multiplier) / multiplier + 1;
+    a = parseFloat(a.toFixed(decimalPlaces));
+    b = parseFloat(b.toFixed(decimalPlaces));
+    return { a, b, answer: parseFloat((a * b).toFixed(decimalPlaces + 1)) };
+}
+
+// Generate decimal division problems
+function generateDecimalDivision(min, max, decimalPlaces) {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const multiplier = Math.pow(10, decimalPlaces);
+    let divisor = Math.floor(random() * 9 * multiplier) / multiplier + 1;
+    let quotient = Math.floor(random() * 20 * multiplier) / multiplier + 1;
+    divisor = parseFloat(divisor.toFixed(decimalPlaces));
+    quotient = parseFloat(quotient.toFixed(decimalPlaces));
+    const dividend = parseFloat((divisor * quotient).toFixed(decimalPlaces + 1));
+    return { a: dividend, b: divisor, answer: quotient };
+}
+
+// Generate fraction addition problems
+function generateFractionAddition() {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const denominator = [2, 3, 4, 5, 6, 8, 10][Math.floor(random() * 7)];
+    const num1 = Math.floor(random() * (denominator - 1)) + 1;
+    const num2 = Math.floor(random() * (denominator - 1)) + 1;
+    const sum = num1 + num2;
+    const answerNum = sum % denominator || denominator;
+    const answerWhole = Math.floor(sum / denominator);
+    return {
+        a: `${num1}/${denominator}`,
+        b: `${num2}/${denominator}`,
+        answer: answerWhole > 0 ? `${answerWhole} ${answerNum}/${denominator}` : `${answerNum}/${denominator}`
+    };
+}
+
+// Generate fraction subtraction problems
+function generateFractionSubtraction() {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const denominator = [2, 3, 4, 5, 6, 8, 10][Math.floor(random() * 7)];
+    const num1 = Math.floor(random() * (denominator - 1)) + 2;
+    const num2 = Math.floor(random() * (num1 - 1)) + 1;
+    return {
+        a: `${num1}/${denominator}`,
+        b: `${num2}/${denominator}`,
+        answer: `${num1 - num2}/${denominator}`
+    };
+}
+
+// Generate fraction multiplication problems
+function generateFractionMultiplication() {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const denom1 = [2, 3, 4, 5, 6][Math.floor(random() * 5)];
+    const denom2 = [2, 3, 4, 5, 6][Math.floor(random() * 5)];
+    const num1 = Math.floor(random() * (denom1 - 1)) + 1;
+    const num2 = Math.floor(random() * (denom2 - 1)) + 1;
+    return {
+        a: `${num1}/${denom1}`,
+        b: `${num2}/${denom2}`,
+        answer: `${num1 * num2}/${denom1 * denom2}`
+    };
+}
+
+// Generate fraction division problems
+function generateFractionDivision() {
+    const random = () => seededRandom ? seededRandom.next() : Math.random();
+    const denom1 = [2, 3, 4, 5, 6][Math.floor(random() * 5)];
+    const denom2 = [2, 3, 4, 5, 6][Math.floor(random() * 5)];
+    const num1 = Math.floor(random() * (denom1 - 1)) + 1;
+    const num2 = Math.floor(random() * (denom2 - 1)) + 1;
+    return {
+        a: `${num1}/${denom1}`,
+        b: `${num2}/${denom2}`,
+        answer: `${num1 * denom2}/${denom1 * num2}`
+    };
+}
+
+// Load worksheet for specific age group, difficulty, and page
+function loadWorksheet(operation, ageGroup, difficulty, page = 1) {
     currentOperation = operation;
     currentPage = page;
-    const config = levelConfigs[operation][level];
-    if (!config) return;
+    const config = contentConfigs[operation]?.[ageGroup]?.[difficulty];
+    if (!config) {
+        console.error(`No config found for: ${operation}, ${ageGroup}, ${difficulty}`);
+        return;
+    }
 
     // Initialize seeded random with page number for deterministic generation
-    const seed = hashCode(`${operation}-${level}-${page}`);
+    const seed = hashCode(`${operation}-${ageGroup}-${difficulty}-${page}`);
     seededRandom = new SeededRandom(seed);
 
-    // Generate problems (limit to 2 in demo mode)
-    const problemCount = getDemoLimit(config.problemCount);
+    // Set page limit for demo mode (2 pages) vs full mode (50 pages)
+    totalPages = isDemoMode() ? 2 : 50;
+
+    // Generate full problems per page (no limit on problems, limit on pages instead)
+    const problemCount = config.problemCount;
     const problems = [];
     for (let i = 0; i < problemCount; i++) {
         problems.push(config.generator());
@@ -327,7 +854,8 @@ function loadWorksheet(operation, level, page = 1) {
 
     currentWorksheet = {
         operation,
-        level,
+        ageGroup,
+        difficulty,
         page,
         config,
         problems,
@@ -361,7 +889,7 @@ function getOperationSymbol(operation) {
 
 // Render the worksheet
 function renderWorksheet() {
-    const { operation, level, config, problems } = currentWorksheet;
+    const { operation, ageGroup, difficulty, config, problems } = currentWorksheet;
     const today = new Date().toLocaleDateString();
     const symbol = getOperationSymbol(operation);
 
@@ -389,7 +917,7 @@ function renderWorksheet() {
             </div>
 
             <div class="top-navigation" style="margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
-                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">🏠 Back to Levels</button>
+                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
                 <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
                     <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">⬅️ Previous</button>
                     <span class="page-counter" style="font-weight: bold; font-size: 1.1em;">📄 Page ${currentPage} of ${totalPages}</span>
@@ -466,7 +994,21 @@ function renderWorksheet() {
         </div>
     `;
 
-    document.body.innerHTML = html;
+    // Hide navigation and show worksheet in container
+    document.getElementById('math-age-groups').style.display = 'none';
+    document.getElementById('math-operations').style.display = 'none';
+    document.getElementById('math-difficulties').style.display = 'none';
+
+    // Get or create worksheet container
+    let worksheetContainer = document.getElementById('worksheet-content');
+    if (!worksheetContainer) {
+        worksheetContainer = document.createElement('div');
+        worksheetContainer.id = 'worksheet-content';
+        document.body.appendChild(worksheetContainer);
+    }
+
+    worksheetContainer.innerHTML = html;
+    worksheetContainer.style.display = 'block';
 
     // Initialize handwriting inputs
     setTimeout(() => {
@@ -598,7 +1140,7 @@ function savePDF() {
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
     const operationName = currentWorksheet.operation.charAt(0).toUpperCase() + currentWorksheet.operation.slice(1);
-    const filename = `${operationName}_${currentWorksheet.level}_Page${currentPage}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+    const filename = `${operationName}_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_Page${currentPage}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
 
     // Hide elements that shouldn't be in PDF
     const controls = document.querySelector('.controls');
@@ -674,7 +1216,7 @@ function saveCurrentWorksheet() {
         return;
     }
 
-    const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
+    const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
     const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
@@ -701,7 +1243,7 @@ function saveCurrentWorksheet() {
 
     if (saveWorksheetToStorage('math', identifier, data)) {
         alert(`Page ${currentPage} saved successfully!`);
-        updateCompletionBadge(currentWorksheet.operation, currentWorksheet.level);
+        updateCompletionBadge(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty);
     }
 }
 
@@ -709,7 +1251,7 @@ function saveCurrentWorksheet() {
 function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
-    const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
+    const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
     const savedData = loadWorksheetFromStorage('math', identifier);
 
     if (!savedData) return;
@@ -779,8 +1321,8 @@ function clearAllAnswers() {
 }
 
 // Update completion badge on level selection screen
-function updateCompletionBadge(operation, level) {
-    console.log(`Worksheet ${operation}-${level} marked as completed`);
+function updateCompletionBadge(operation, ageGroup, difficulty) {
+    console.log(`Worksheet ${operation}-${ageGroup}-${difficulty} marked as completed`);
 }
 
 // Navigate between pages
@@ -806,7 +1348,7 @@ function navigatePage(direction) {
         }
 
         // Load new page
-        loadWorksheet(currentWorksheet.operation, currentWorksheet.level, newPage);
+        loadWorksheet(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty, newPage);
     } catch (error) {
         console.error('Navigation error:', error);
         alert('Navigation error: ' + error.message);
@@ -817,7 +1359,7 @@ function navigatePage(direction) {
 function autoSavePage() {
     if (!currentWorksheet) return;
 
-    const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
+    const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
     const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
@@ -849,5 +1391,5 @@ function autoSavePage() {
 function generateMorePages() {
     totalPages += 50;
     // Reload current page to update navigation
-    loadWorksheet(currentWorksheet.operation, currentWorksheet.level, currentPage);
+    loadWorksheet(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty, currentPage);
 }

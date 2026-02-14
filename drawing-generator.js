@@ -1,8 +1,21 @@
 // Drawing Tutorial Generator with Interactive Step-by-Step Visual Guides
 
+let currentAge = null;
 let currentDifficulty = '';
 let currentTutorial = '';
 let currentStep = 0;
+
+// Navigation functions
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('age-selection').style.display = 'block';
+}
 
 // Demo version limiting
 function isDemoMode() {

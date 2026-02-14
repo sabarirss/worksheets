@@ -1,5 +1,6 @@
 // Emotional Quotient Activities Generator
 
+let currentAge = null;
 let currentDifficulty = null;
 let currentWorksheet = null;
 let timer = null;
@@ -24,6 +25,23 @@ function isDemoMode() {
 
 function getDemoLimit(defaultCount) {
     return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
+// Navigation
+function selectAge(age) {
+    currentAge = age;
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'block';
+}
+
+function backToAges() {
+    document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('age-selection').style.display = 'block';
+}
+
+function backToWorksheetSelection() {
+    document.getElementById('worksheet-area').innerHTML = '';
+    document.getElementById('difficulty-selection').style.display = 'block';
 }
 
 // Activity Generators
@@ -391,12 +409,9 @@ function loadActivities(difficulty) {
         activities = generateHardActivities();
     }
 
-    // Apply demo limiting to activities
-    const limitedActivities = activities.slice(0, getDemoLimit(activities.length));
-
     currentWorksheet = {
         difficulty,
-        activities: limitedActivities
+        activities: activities
     };
 
     renderWorksheet();
@@ -514,7 +529,7 @@ function renderWorksheet() {
             <div class="problems-container">${problemsHTML}</div>
 
             <div class="navigation">
-                <button onclick="location.reload()">Back to Difficulty Selection</button>
+                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
                 <button onclick="loadActivities('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
             </div>
         </div>
