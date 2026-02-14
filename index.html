@@ -18,6 +18,7 @@
     <!-- Firebase Auth & Storage -->
     <script src="firebase-auth.js"></script>
     <script src="firebase-storage.js"></script>
+    <script src="age-filter.js"></script>
     <style>
         .user-header {
             display: flex;
@@ -202,6 +203,9 @@
                 <strong id="user-name-display"></strong>
             </div>
             <div class="user-actions">
+                <button class="header-btn" onclick="showParentSettings()">
+                    👨‍👩‍👧 Age Settings
+                </button>
                 <button class="header-btn" id="parent-mode-btn" style="display: none;" onclick="toggleParentMode()">
                     🔒 Parent Mode
                 </button>

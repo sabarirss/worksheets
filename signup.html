@@ -217,6 +217,29 @@
                 >
             </div>
 
+            <div class="form-group">
+                <label for="child-age">Child's Age</label>
+                <select
+                    id="child-age"
+                    name="child-age"
+                    required
+                    style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; background: white; cursor: pointer;"
+                >
+                    <option value="">Select child's age</option>
+                    <option value="4">4 years old</option>
+                    <option value="5">5 years old</option>
+                    <option value="6">6 years old</option>
+                    <option value="7">7 years old</option>
+                    <option value="8">8 years old</option>
+                    <option value="9">9 years old</option>
+                    <option value="10">10 years old</option>
+                    <option value="11">11 years old</option>
+                    <option value="12">12 years old</option>
+                    <option value="13">13+ years old</option>
+                </select>
+                <div class="password-requirements">Content will be filtered based on child's age</div>
+            </div>
+
             <button type="submit" class="signup-btn" id="signup-btn">
                 Create Account
             </button>
@@ -244,6 +267,7 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
+            const childAge = parseInt(document.getElementById('child-age').value);
 
             const errorMsg = document.getElementById('error-message');
             const successMsg = document.getElementById('success-message');
@@ -263,6 +287,13 @@
             // Validate passwords match
             if (password !== confirmPassword) {
                 errorMsg.textContent = 'Passwords do not match';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Validate age is selected
+            if (!childAge || isNaN(childAge)) {
+                errorMsg.textContent = 'Please select the child\'s age';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -299,6 +330,7 @@
                     username: username,
                     email: email,
                     fullName: fullName,
+                    age: childAge,
                     role: 'student',
                     modules: {
                         math: true,

@@ -36,6 +36,7 @@ async function initializeAuth() {
                 email: 'admin@worksheets.local',
                 role: 'admin',
                 fullName: 'Administrator',
+                age: 13, // Admin has access to all content
                 modules: {
                     math: true,
                     english: true,
