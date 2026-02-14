@@ -766,17 +766,30 @@ function updateCompletionBadge(operation, level) {
 
 // Navigate between pages
 function navigatePage(direction) {
-    if (!currentWorksheet) return;
+    console.log('navigatePage called with direction:', direction);
+    console.log('currentWorksheet:', currentWorksheet);
+    console.log('currentPage:', currentPage, 'totalPages:', totalPages);
+
+    if (!currentWorksheet) {
+        console.error('navigatePage: currentWorksheet is null');
+        return;
+    }
 
     const newPage = currentPage + direction;
+    console.log('newPage would be:', newPage);
 
     // Check bounds
-    if (newPage < 1 || newPage > totalPages) return;
+    if (newPage < 1 || newPage > totalPages) {
+        console.log('navigatePage: Out of bounds, returning');
+        return;
+    }
 
     // Auto-save current page before navigating
+    console.log('Auto-saving current page...');
     autoSavePage();
 
     // Load new page
+    console.log('Loading worksheet:', currentWorksheet.operation, currentWorksheet.level, newPage);
     loadWorksheet(currentWorksheet.operation, currentWorksheet.level, newPage);
 }
 
