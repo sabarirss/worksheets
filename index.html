@@ -133,8 +133,9 @@
                 if (germanBtn) germanBtn.style.display = 'none';
             }
 
-            // Add completion badges after UI is initialized
-            setTimeout(() => addCompletionBadges(), 100);
+            // TODO: Fix completion badges to show page progress instead of marking entire level complete
+            // Disabled for now as it's misleading (shows complete after saving just 1 page)
+            // setTimeout(() => addCompletionBadges(), 100);
         }
     </script>
 
