@@ -291,7 +291,9 @@ function showStories(difficulty) {
     currentDifficulty = difficulty;
 
     // Generate 100 stories for the selected category and difficulty
+    console.log('Generating stories for:', currentCategory, difficulty);
     currentList = generateStories(currentCategory, difficulty, 100);
+    console.log('Generated', currentList.length, 'stories');
 
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-list').style.display = 'block';
