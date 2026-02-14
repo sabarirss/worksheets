@@ -207,17 +207,24 @@ async function createUser(userData) {
             return { success: false, error: 'Username already exists' };
         }
 
+        // Save current admin user (will be logged out after creating new user)
+        const currentAdmin = firebase.auth().currentUser;
+        const adminEmail = currentAdmin.email;
+
         // Create user in Firebase Auth
         const email = userData.username.includes('@')
             ? userData.username
             : `${userData.username}@worksheets.local`;
 
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(
+        // Create secondary app instance to avoid logging out current user
+        const secondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary');
+
+        const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(
             email,
             userData.password
         );
 
-        // Create user document in Firestore
+        // Create user document in Firestore (using main app)
         const newUser = {
             uid: userCredential.user.uid,
             username: userData.username,
@@ -237,6 +244,11 @@ async function createUser(userData) {
 
         await firebase.firestore().collection('users').doc(userCredential.user.uid.substring(0, 20)).set(newUser);
 
+        // Sign out from secondary app and delete it
+        await secondaryApp.auth().signOut();
+        await secondaryApp.delete();
+
+        console.log('User created successfully, admin still logged in');
         return { success: true, user: newUser };
 
     } catch (error) {
