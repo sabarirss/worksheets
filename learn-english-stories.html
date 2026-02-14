@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn English with Stories</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .age-selection {
+            margin: 40px 0;
+        }
+
+        .age-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .age-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 40px 20px;
+            cursor: pointer;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .age-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .story-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .story-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .story-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .story-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .story-meta {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .story-reader {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .story-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .story-content {
+            font-size: 1.2em;
+            line-height: 2;
+            color: #333;
+            margin: 30px 0;
+        }
+
+        .story-content p {
+            margin-bottom: 20px;
+        }
+
+        .comprehension-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .question {
+            background: white;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .option-btn.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .option-btn.correct {
+            border-color: #4caf50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .option-btn.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .vocabulary-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .vocabulary-box h4 {
+            color: #f57c00;
+            margin-bottom: 15px;
+        }
+
+        .vocab-word {
+            display: inline-block;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .grammar-focus {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .grammar-focus h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Firebase Auth -->
+    <script src="firebase-auth.js"></script>
+    <script src="age-filter.js"></script>
+</head>
+<body>
+    <script>
+        // Wait for Firebase auth to initialize
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <div class="container">
+        <header>
+            <h1>📚 Learn English with Stories</h1>
+            <p class="subtitle">Fun stories to build reading and grammar skills</p>
+        </header>
+
+        <!-- Age Selection -->
+        <div class="age-selection" id="age-selection">
+            <h2>Select Age Group</h2>
+            <div class="age-grid">
+                <button onclick="loadStoryList('4-6')" class="age-btn">
+                    👶 Ages 4-6<br>
+                    <span style="font-size: 0.8em;">Beginner Stories</span>
+                </button>
+                <button onclick="loadStoryList('7-9')" class="age-btn">
+                    🧒 Ages 7-9<br>
+                    <span style="font-size: 0.8em;">Early Reader</span>
+                </button>
+                <button onclick="loadStoryList('10-12')" class="age-btn">
+                    👦 Ages 10-12<br>
+                    <span style="font-size: 0.8em;">Advanced Reader</span>
+                </button>
+            </div>
+            <div class="navigation">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <!-- Story List -->
+        <div id="story-selection" style="display: none;">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToAgeSelection()">← Back to Age Groups</button>
+            </div>
+            <h2 id="story-list-title">Choose a Story</h2>
+            <div class="story-list" id="story-list"></div>
+        </div>
+
+        <!-- Story Reader -->
+        <div id="story-reader" style="display: none;"></div>
+
+        <footer>
+            <p>Reading is the key to learning! Keep practicing! 📖✨</p>
+        </footer>
+    </div>
+
+    <script src="learn-english-stories-generator.js"></script>
+</body>
+</html>
