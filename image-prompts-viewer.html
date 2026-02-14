@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Image Prompts - Copy & Paste</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .category {
+            margin-bottom: 40px;
+        }
+        .category-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .story-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .story-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .story-filename {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #e74c3c;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .story-prompt {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            line-height: 1.6;
+            cursor: pointer;
+            position: relative;
+        }
+        .story-prompt:hover {
+            background: #e3f2fd;
+        }
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        .copy-btn:active {
+            background: #4a5ab8;
+        }
+        .copied {
+            background: #27ae60 !important;
+        }
+        .progress {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📸 Story Image Generation Prompts</h1>
+
+    <div class="instructions">
+        <h2>How to Use This Page</h2>
+        <ol>
+            <li><strong>Click any prompt box</strong> to automatically copy it to clipboard</li>
+            <li><strong>Go to</strong> <a href="https://www.bing.com/create" target="_blank">Bing Image Creator</a> (free)</li>
+            <li><strong>Paste the prompt</strong> and click "Create"</li>
+            <li><strong>Download the image</strong> and rename it to the filename shown (e.g., animal_01.png)</li>
+            <li><strong>Save to</strong> the <code>images/stories/</code> folder</li>
+            <li>Repeat for all 100 stories!</li>
+        </ol>
+        <p><strong>Tip:</strong> Start with just a few to test, then continue with the rest.</p>
+    </div>
+
+    <div class="progress">
+        <h3>Generation Progress</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress">0 / 100 (0%)</div>
+        </div>
+        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Images will load automatically once you save them to the images/stories/ folder</p>
+    </div>
+
+    <div id="prompts-container"></div>
+
+    <script>
+        const prompts = {
+            "animals": [
+                { title: "The Helpful Rabbit", filename: "animal_01.png", prompt: "A cheerful cartoon rabbit helping a small injured bird, bringing leaves and berries, surrounded by colorful flowers in a sunny garden. Children's book illustration style, bright and friendly colors." },
+                { title: "The Brave Little Mouse", filename: "animal_02.png", prompt: "A tiny brave mouse nibbling through ropes to free a large friendly lion caught in a net in a forest. Children's book illustration, warm lighting, heroic scene." },
+                { title: "The Sharing Squirrel", filename: "animal_03.png", prompt: "A friendly squirrel sharing acorns with a chipmunk friend, both smiling, surrounded by autumn leaves and trees. Children's book illustration, warm fall colors." },
+                { title: "The Singing Bird", filename: "animal_04.png", prompt: "A beautiful bird singing on a tree branch at sunrise, with musical notes floating in the air and a happy turtle listening below. Children's book illustration, bright morning colors." },
+                { title: "The Curious Cat", filename: "animal_05.png", prompt: "A cute cat stuck high in a tree looking worried, while friendly animal friends bring a ladder to help rescue her. Children's book illustration, safe and reassuring scene." },
+                { title: "The Friendly Frog", filename: "animal_06.png", prompt: "A cheerful frog at a pond saying hello to fish, dragonflies, and snails, having a party with all his friends by the water. Children's book illustration, fun and playful scene." },
+                { title: "The Wise Old Owl", filename: "animal_07.png", prompt: "A wise owl with glasses sitting on a branch at night, teaching young animals under moonlight, surrounded by books and stars. Children's book illustration, peaceful night scene." },
+                { title: "The Fast Cheetah", filename: "animal_08.png", prompt: "A cheetah and tortoise racing, with the cheetah resting while the slow tortoise steadily walks past. Children's book illustration, bright savanna setting." },
+                { title: "The Kind Elephant", filename: "animal_09.png", prompt: "A gentle elephant using her trunk to dig for water and sharing it with zebras, giraffes, and monkeys during a dry season. Children's book illustration, warm African savanna." },
+                { title: "The Playful Puppy", filename: "animal_10.png", prompt: "A happy puppy playing fetch with a ball, wagging tail, with a rainbow in the background. Children's book illustration, joyful and energetic scene." },
+                { title: "The Colorful Parrot", filename: "animal_11.png", prompt: "A beautiful rainbow-feathered parrot talking kindly to a plain brown bird near a pond with tropical flowers. Children's book illustration, vibrant tropical colors." },
+                { title: "The Hardworking Bee", filename: "animal_12.png", prompt: "A busy bee collecting nectar from sunflowers, with a honey jar nearby and other bees working together. Children's book illustration, bright yellow and golden tones." },
+                { title: "The Gentle Giant", filename: "animal_13.png", prompt: "A tall friendly giraffe helping small animals reach high places, picking fruit from trees for birds and butterflies. Children's book illustration, gentle and caring scene." },
+                { title: "The Lucky Ladybug", filename: "animal_14.png", prompt: "A red ladybug with seven spots helping other insects, surrounded by four-leaf clovers and sparkles. Children's book illustration, lucky and magical feeling." },
+                { title: "The Dancing Dolphin", filename: "animal_15.png", prompt: "A joyful dolphin leaping and dancing in ocean waves, making a sad whale smile. Children's book illustration, ocean blues and playful splashes." },
+                { title: "The Patient Spider", filename: "animal_16.png", prompt: "A spider carefully spinning an intricate beautiful web in a garden, with morning dewdrops sparkling on it. Children's book illustration, delicate and detailed." },
+                { title: "The Truthful Turtle", filename: "animal_17.png", prompt: "A honest turtle apologizing to a friend about a broken toy, both animals hugging and forgiving each other. Children's book illustration, emotional and caring scene." },
+                { title: "The Grateful Goose", filename: "animal_18.png", prompt: "A friendly goose saying thank you to a farmer, pond, and animal friends, showing gratitude with hearts floating around. Children's book illustration, warm and appreciative." },
+                { title: "The Creative Crab", filename: "animal_19.png", prompt: "A creative crab building elaborate sandcastles on a beach with towers and bridges, other animals admiring the art. Children's book illustration, beach scene with bright sand and blue water." },
+                { title: "The Forgiving Fox", filename: "animal_20.png", prompt: "A kind fox and raccoon picking up spilled berries together, both smiling and becoming friends. Children's book illustration, forest setting with warm colors." }
+            ],
+            "nature": [
+                { title: "The Little Seed", filename: "nature_01.png", prompt: "A tiny seed underground growing into a beautiful flower through stages, with sun and rain helping it grow. Children's book illustration, showing growth progression." },
+                { title: "The Rainy Day", filename: "nature_02.png", prompt: "Children in raincoats jumping in puddles during rain, with a rainbow appearing after the storm. Children's book illustration, fun rainy day scene." },
+                { title: "The Four Seasons", filename: "nature_03.png", prompt: "A wise tree showing all four seasons in quarters: spring blossoms, summer green, autumn gold, winter snow. Children's book illustration, divided into four seasonal sections." },
+                { title: "The Busy Bees", filename: "nature_04.png", prompt: "Many bees working together building a honeycomb hive, collecting nectar from flowers in a sunny meadow. Children's book illustration, busy and cooperative scene." },
+                { title: "The Tall Mountain", filename: "nature_05.png", prompt: "A young girl climbing a tall mountain step by step, reaching the summit with arms raised in victory. Children's book illustration, inspiring achievement scene." },
+                { title: "The Flowing River", filename: "nature_06.png", prompt: "A winding river flowing around rocks, under bridges, through valleys toward the ocean with fish swimming. Children's book illustration, peaceful water journey." },
+                { title: "The Friendly Sun", filename: "nature_07.png", prompt: "A smiling sun shining brightly in the sky, warming the earth and helping flowers grow. Children's book illustration, cheerful and warm." },
+                { title: "The Dancing Leaves", filename: "nature_08.png", prompt: "Colorful autumn leaves in red, orange, yellow dancing and twirling in the wind. Children's book illustration, beautiful fall colors in motion." },
+                { title: "The Strong Oak Tree", filename: "nature_09.png", prompt: "A mighty oak tree standing strong in storm with deep roots, birds nesting in branches, squirrels in trunk. Children's book illustration, powerful and protective." },
+                { title: "The Curious Cloud", filename: "nature_10.png", prompt: "A fluffy white cloud traveling across the sky over mountains, oceans, and cities, bringing rain and shade. Children's book illustration, sky adventure scene." },
+                { title: "The Peaceful Pond", filename: "nature_11.png", prompt: "A calm pond with ducks swimming, fish in water, frogs on lily pads, surrounded by peaceful nature. Children's book illustration, serene water scene." },
+                { title: "The Helpful Rain", filename: "nature_12.png", prompt: "Gentle rain falling on a wilted garden, flowers perking up and blooming, looking refreshed and happy. Children's book illustration, before and after transformation." },
+                { title: "The Glowing Firefly", filename: "nature_13.png", prompt: "A tiny firefly glowing brightly in the dark night, guiding lost insects home with its light. Children's book illustration, magical night scene with tiny lights." },
+                { title: "The Recycling Adventure", filename: "nature_14.png", prompt: "Children sorting recyclables into bins marked paper, plastic, glass, with Earth smiling in background. Children's book illustration, environmental care theme." },
+                { title: "The Garden Party", filename: "nature_15.png", prompt: "A vibrant garden with butterflies dancing on flowers, bees working, birds singing, under warm sunshine. Children's book illustration, celebration of nature." }
+            ],
+            "family": [
+                { title: "Mom's Special Cookies", filename: "family_01.png", prompt: "Mother and daughter baking cookies together in kitchen, mixing dough, cutting star and heart shapes. Children's book illustration, warm kitchen scene." },
+                { title: "Dad's Bedtime Story", filename: "family_02.png", prompt: "Father reading a storybook to child tucked in bed at night with lamp light, both smiling. Children's book illustration, cozy bedtime scene." },
+                { title: "Big Brother's Help", filename: "family_03.png", prompt: "Big brother holding little sister's hand helping her walk, both children smiling, mom watching proudly. Children's book illustration, supportive family moment." },
+                { title: "Grandma's Wise Words", filename: "family_04.png", prompt: "Grandmother hugging sad granddaughter on couch, offering comfort and wisdom. Children's book illustration, loving and comforting scene." },
+                { title: "Family Picnic Day", filename: "family_05.png", prompt: "Family having picnic in park with basket, playing frisbee, flying kite together under sunny sky. Children's book illustration, happy outdoor family time." },
+                { title: "Sister's Birthday Surprise", filename: "family_06.png", prompt: "Brother giving wrapped birthday present to sister, both children excited and happy. Children's book illustration, celebration and giving." },
+                { title: "Pet Adoption Day", filename: "family_07.png", prompt: "Family at animal shelter adopting a happy puppy wagging tail, everyone smiling. Children's book illustration, welcoming new pet." },
+                { title: "Homework Helper", filename: "family_08.png", prompt: "Father helping son with math homework at table, both looking at papers and high-fiving. Children's book illustration, learning together scene." },
+                { title: "Sunday Morning Pancakes", filename: "family_09.png", prompt: "Family making pancakes together in kitchen, mixing, cooking, setting table with berries and syrup. Children's book illustration, family tradition." },
+                { title: "The Moving Day", filename: "family_10.png", prompt: "Family packing boxes and moving to new house, working together with cardboard boxes and smiles. Children's book illustration, transition and togetherness." },
+                { title: "Grandpa's Garden", filename: "family_11.png", prompt: "Grandfather and granddaughter planting and harvesting vegetables in garden, picking tomatoes and carrots. Children's book illustration, gardening together." },
+                { title: "Rainy Day Fort", filename: "family_12.png", prompt: "Two siblings building blanket fort in living room with pillows, reading books inside together. Children's book illustration, creative indoor play." },
+                { title: "Mom's Sick Day", filename: "family_13.png", prompt: "Children bringing soup and tea to mom in bed, showing get-well cards with hearts. Children's book illustration, caring for family member." },
+                { title: "The Family Meeting", filename: "family_14.png", prompt: "Family sitting in circle having discussion, everyone talking and listening respectfully. Children's book illustration, communication and compromise." },
+                { title: "New Baby Arrival", filename: "family_15.png", prompt: "Big sister holding newborn baby gently, whole family gathered around with love and excitement. Children's book illustration, growing family." },
+                { title: "Phone Call to Grandma", filename: "family_16.png", prompt: "Child talking on phone to grandmother with hearts and happy expressions connecting them. Children's book illustration, staying connected." },
+                { title: "Dad's Day at School", filename: "family_17.png", prompt: "Father visiting daughter's classroom for career day, both proud, walking home holding hands. Children's book illustration, school and family connection." },
+                { title: "The Lost Toy", filename: "family_18.png", prompt: "Family searching together for lost teddy bear, finding it under couch, child hugging toy happily. Children's book illustration, teamwork and relief." },
+                { title: "Cooking Dad's Recipe", filename: "family_19.png", prompt: "Father teaching daughter to cook pasta, chopping vegetables and stirring sauce together. Children's book illustration, cooking lesson and bonding." },
+                { title: "Family Photo Album", filename: "family_20.png", prompt: "Grandmother showing children old family photo album, everyone looking at pictures and laughing together. Children's book illustration, memories and family history." }
+            ],
+            "adventures": [
+                { title: "The Pirate's Treasure", filename: "adventure_01.png", prompt: "Pirate captain with treasure map finding buried gold chest on island, sharing with crew. Children's book illustration, pirate adventure scene." },
+                { title: "Space Explorer", filename: "adventure_02.png", prompt: "Female astronaut in spacecraft flying past moon and Mars, looking at Earth from space. Children's book illustration, space adventure with stars." },
+                { title: "The Magic Carpet Ride", filename: "adventure_03.png", prompt: "Child flying on magic carpet over cities, mountains, and oceans with wonder. Children's book illustration, magical flying adventure." },
+                { title: "Jungle Explorer", filename: "adventure_04.png", prompt: "Young explorer in jungle with notebook, seeing monkeys, parrots, and tigers. Children's book illustration, jungle discovery adventure." },
+                { title: "The Underwater Adventure", filename: "adventure_05.png", prompt: "Scuba diver exploring colorful coral reef with fish, jellyfish, octopus, and sea turtle. Children's book illustration, underwater ocean scene." },
+                { title: "Mountain Climber", filename: "adventure_06.png", prompt: "Young girl climbing tall snowy mountain, reaching summit with arms raised victoriously. Children's book illustration, mountain climbing achievement." },
+                { title: "The Time Machine", filename: "adventure_07.png", prompt: "Child in time machine visiting dinosaurs, knights in castles, and ancient Egypt pyramids. Children's book illustration, time travel collage." },
+                { title: "Desert Journey", filename: "adventure_08.png", prompt: "Person riding camel across vast desert dunes under hot sun, reaching oasis with palm trees. Children's book illustration, desert adventure." },
+                { title: "The Mysterious Cave", filename: "adventure_09.png", prompt: "Explorer with flashlight discovering crystals and ancient paintings in cave. Children's book illustration, cave exploration with wonder." },
+                { title: "Sailing Adventure", filename: "adventure_10.png", prompt: "Captain sailing boat through ocean waves with dolphins swimming alongside and seagulls flying. Children's book illustration, sailing adventure scene." },
+                { title: "Hot Air Balloon Ride", filename: "adventure_11.png", prompt: "Child in colorful hot air balloon floating over forests, rivers, and villages. Children's book illustration, peaceful balloon flight." },
+                { title: "Train Journey", filename: "adventure_12.png", prompt: "Child looking out train window at passing fields, mountains, and cities. Children's book illustration, train travel adventure." },
+                { title: "The Enchanted Forest", filename: "adventure_13.png", prompt: "Child in magical glowing forest with sparkling trees, glowing flowers, and friendly fairies dancing. Children's book illustration, magical fantasy scene." },
+                { title: "Arctic Explorer", filename: "adventure_14.png", prompt: "Explorer in Arctic seeing polar bears, penguins, and icebergs in snowy landscape. Children's book illustration, Arctic adventure." },
+                { title: "The Bicycle Journey", filename: "adventure_15.png", prompt: "Child riding bicycle over bridges, through towns, up hills at sunset feeling accomplished. Children's book illustration, cycling adventure journey." }
+            ],
+            "learning": [
+                { title: "First Day of School", filename: "learning_01.png", prompt: "Young girl arriving at school, meeting friendly teacher, making new friends in classroom. Children's book illustration, exciting first day." },
+                { title: "Learning to Read", filename: "learning_02.png", prompt: "Boy proudly reading book by himself with lightbulb moment, teacher and parents encouraging. Children's book illustration, reading achievement." },
+                { title: "The Science Experiment", filename: "learning_03.png", prompt: "Children in classroom doing science experiment with baking soda and vinegar fizzing and bubbling. Children's book illustration, science excitement." },
+                { title: "The Math Challenge", filename: "learning_04.png", prompt: "Student working on math problems with friend helping, both celebrating good grade together. Children's book illustration, math learning success." },
+                { title: "Art Class Masterpiece", filename: "learning_05.png", prompt: "Child painting colorful artwork in art class, teacher hanging it on wall proudly. Children's book illustration, creative expression." },
+                { title: "The Library Adventure", filename: "learning_06.png", prompt: "Child in library surrounded by thousands of books, librarian helping find dragon stories. Children's book illustration, library exploration." },
+                { title: "Learning to Share", filename: "learning_07.png", prompt: "Two children sharing crayons and coloring together happily at table. Children's book illustration, sharing and friendship." },
+                { title: "The Spelling Bee", filename: "learning_08.png", prompt: "Girl spelling word correctly at spelling bee competition, winning trophy, parents hugging her. Children's book illustration, achievement and pride." },
+                { title: "Music Lesson", filename: "learning_09.png", prompt: "Boy learning piano with patient teacher, practicing and playing song for family applauding. Children's book illustration, music learning." },
+                { title: "The History Project", filename: "learning_10.png", prompt: "Classroom studying ancient Egypt with pyramids, students dressed as pharaohs, hieroglyphics. Children's book illustration, fun history learning." },
+                { title: "Learning Kindness", filename: "learning_11.png", prompt: "Students doing kind acts: helping with homework, sharing snack, picking up trash. Children's book illustration, kindness in action." },
+                { title: "The Geography Game", filename: "learning_12.png", prompt: "Children looking at world map and globe, learning about different countries with flags. Children's book illustration, geography exploration." },
+                { title: "Physical Education Fun", filename: "learning_13.png", prompt: "Children playing soccer together in PE class, practicing teamwork and having fun. Children's book illustration, sports and teamwork." },
+                { title: "The Writing Workshop", filename: "learning_14.png", prompt: "Students writing creative stories in notebooks, sharing imaginative tales with class. Children's book illustration, creative writing." },
+                { title: "Learning Responsibility", filename: "learning_15.png", prompt: "Students doing classroom jobs: watering plants, erasing board, organizing books. Children's book illustration, responsibility and helping." }
+            ],
+            "bedtime": [
+                { title: "The Sleepy Moon", filename: "bedtime_01.png", prompt: "Yawning moon closing eyes with stars whispering goodnight, peaceful night sky. Children's book illustration, gentle sleepy scene." },
+                { title: "Teddy's Dream", filename: "bedtime_02.png", prompt: "Teddy bear sitting on bed keeping watch while child sleeps, protecting dreams with love. Children's book illustration, safe and cozy." },
+                { title: "The Dream Fairy", filename: "bedtime_03.png", prompt: "Magical fairy sprinkling dream dust on sleeping children, creating happy dream bubbles. Children's book illustration, magical bedtime fairy." },
+                { title: "Stars' Lullaby", filename: "bedtime_04.png", prompt: "Twinkling stars singing lullaby in night sky with musical notes, world sleeping peacefully below. Children's book illustration, peaceful night scene." },
+                { title: "The Cozy Blanket", filename: "bedtime_05.png", prompt: "Child wrapped in soft handmade blanket feeling safe and loved like a warm hug. Children's book illustration, comfort and warmth." },
+                { title: "The Night Owl's Story", filename: "bedtime_06.png", prompt: "Wise owl reading books at night, watching over sleeping forest peacefully. Children's book illustration, nighttime guardian." },
+                { title: "Counting Sheep", filename: "bedtime_07.png", prompt: "Fluffy white sheep jumping over fence while child counts them sleepily. Children's book illustration, classic bedtime scene." },
+                { title: "The Snoring Dragon", filename: "bedtime_08.png", prompt: "Friendly dragon sleeping in cave snoring loudly, village sleeping safely nearby. Children's book illustration, protective dragon guard." },
+                { title: "Midnight Garden", filename: "bedtime_09.png", prompt: "Secret garden at midnight with glowing flowers, dancing fireflies, moon watching over. Children's book illustration, magical night garden." },
+                { title: "The Sleepy Train", filename: "bedtime_10.png", prompt: "Train resting in station at night tucked in by conductor, dreaming of adventures. Children's book illustration, sleepy train scene." },
+                { title: "Pillow Cloud", filename: "bedtime_11.png", prompt: "Child's head on soft cloud pillow floating through dreamy sky with rainbows and stars. Children's book illustration, dreamy cloud scene." },
+                { title: "The Lighthouse Keeper", filename: "bedtime_12.png", prompt: "Lighthouse keeper keeping light burning all night, guiding ships safely to shore. Children's book illustration, dedicated lighthouse scene." },
+                { title: "Nighttime Prayer", filename: "bedtime_13.png", prompt: "Child saying bedtime prayer with peaceful expression, feeling grateful and safe. Children's book illustration, peaceful spiritual moment." },
+                { title: "The Sleepy Village", filename: "bedtime_14.png", prompt: "Village at night with lights turning off, everyone sleeping peacefully together. Children's book illustration, peaceful community rest." },
+                { title: "Tomorrow's Promise", filename: "bedtime_15.png", prompt: "Child closing eyes with smile thinking of tomorrow's sunrise and new possibilities. Children's book illustration, hopeful and peaceful." }
+            ]
+        };
+
+        const container = document.getElementById('prompts-container');
+        let copiedCount = 0;
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progress');
+            const percentage = Math.round((copiedCount / 100) * 100);
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = `${copiedCount} / 100 (${percentage}%)`;
+        }
+
+        function copyToClipboard(text, button, card) {
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = '✓ Copied!';
+                button.classList.add('copied');
+                card.style.background = '#e8f5e9';
+
+                if (!card.dataset.copied) {
+                    card.dataset.copied = 'true';
+                    copiedCount++;
+                    updateProgress();
+                }
+
+                setTimeout(() => {
+                    button.textContent = '📋 Copy Prompt';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        Object.keys(prompts).forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+
+            const categoryTitles = {
+                animals: '🦁 Animal Stories (20 images)',
+                nature: '🌳 Nature Tales (15 images)',
+                family: '👨‍👩‍👧‍👦 Family & Friends (20 images)',
+                adventures: '🚀 Adventures (15 images)',
+                learning: '📚 Learning & School (15 images)',
+                bedtime: '🌙 Bedtime Stories (15 images)'
+            };
+
+            categoryDiv.innerHTML = `<h2 class="category-title">${categoryTitles[category]}</h2>`;
+
+            prompts[category].forEach(story => {
+                const storyCard = document.createElement('div');
+                storyCard.className = 'story-card';
+
+                storyCard.innerHTML = `
+                    <div class="story-title">${story.title}</div>
+                    <div class="story-filename">Save as: ${story.filename}</div>
+                    <div class="story-prompt">${story.prompt}</div>
+                    <button class="copy-btn">📋 Copy Prompt</button>
+                `;
+
+                const copyBtn = storyCard.querySelector('.copy-btn');
+                copyBtn.onclick = () => copyToClipboard(story.prompt, copyBtn, storyCard);
+
+                categoryDiv.appendChild(storyCard);
+            });
+
+            container.appendChild(categoryDiv);
+        });
+    </script>
+</body>
+</html>

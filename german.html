@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German B1 (DTZ) Practice Worksheets</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇩🇪 Deutsch B1 - DTZ Vorbereitung</h1>
+            <p class="subtitle">German B1 Level - DTZ Test Preparation</p>
+        </header>
+
+        <div class="level-selection">
+            <h2>Practice Modules</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('articles')" class="level-btn">
+                    <span class="level-name">Artikel (Articles)</span>
+                    <span class="level-desc">der, die, das - Definite & Indefinite Articles</span>
+                </button>
+                <button onclick="loadWorksheet('cases')" class="level-btn">
+                    <span class="level-name">Fälle (Cases)</span>
+                    <span class="level-desc">Nominativ, Akkusativ, Dativ</span>
+                </button>
+                <button onclick="loadWorksheet('verbs')" class="level-btn">
+                    <span class="level-name">Verben (Verbs)</span>
+                    <span class="level-desc">Present, Past, Perfect Tense</span>
+                </button>
+                <button onclick="loadWorksheet('prepositions')" class="level-btn">
+                    <span class="level-name">Präpositionen (Prepositions)</span>
+                    <span class="level-desc">mit, zu, nach, für, etc.</span>
+                </button>
+                <button onclick="loadWorksheet('adjectives')" class="level-btn">
+                    <span class="level-name">Adjektivendungen (Adjective Endings)</span>
+                    <span class="level-desc">Adjective Declension Practice</span>
+                </button>
+                <button onclick="loadWorksheet('reading')" class="level-btn">
+                    <span class="level-name">Leseverstehen (Reading)</span>
+                    <span class="level-desc">Reading Comprehension - DTZ Style</span>
+                </button>
+                <button onclick="loadWorksheet('vocabulary')" class="level-btn">
+                    <span class="level-name">Wortschatz (Vocabulary)</span>
+                    <span class="level-desc">B1 Level Essential Words</span>
+                </button>
+                <button onclick="loadWorksheet('writing')" class="level-btn">
+                    <span class="level-name">Schreiben (Writing)</span>
+                    <span class="level-desc">Formal & Informal Letters/Emails</span>
+                </button>
+                <button onclick="loadWorksheet('modalverbs')" class="level-btn">
+                    <span class="level-name">Modalverben (Modal Verbs)</span>
+                    <span class="level-desc">können, müssen, dürfen, sollen, wollen, mögen</span>
+                </button>
+                <button onclick="loadWorksheet('separable')" class="level-btn">
+                    <span class="level-name">Trennbare Verben (Separable Verbs)</span>
+                    <span class="level-desc">aufstehen, mitkommen, anrufen, etc.</span>
+                </button>
+                <button onclick="loadWorksheet('reflexive')" class="level-btn">
+                    <span class="level-name">Reflexivverben (Reflexive Verbs)</span>
+                    <span class="level-desc">sich freuen, sich interessieren, etc.</span>
+                </button>
+                <button onclick="loadWorksheet('conjunctions')" class="level-btn">
+                    <span class="level-name">Konjunktionen (Conjunctions)</span>
+                    <span class="level-desc">weil, dass, wenn, obwohl, etc.</span>
+                </button>
+                <button onclick="loadWorksheet('wordorder')" class="level-btn">
+                    <span class="level-name">Wortstellung (Word Order)</span>
+                    <span class="level-desc">Main & Subordinate Clauses</span>
+                </button>
+                <button onclick="loadWorksheet('comparative')" class="level-btn">
+                    <span class="level-name">Komparativ & Superlativ</span>
+                    <span class="level-desc">Comparative & Superlative</span>
+                </button>
+                <button onclick="loadWorksheet('pronouns')" class="level-btn">
+                    <span class="level-name">Pronomen (Pronouns)</span>
+                    <span class="level-desc">Personal, Possessive, Reflexive</span>
+                </button>
+                <button onclick="loadWorksheet('relativeclauses')" class="level-btn">
+                    <span class="level-name">Relativsätze (Relative Clauses)</span>
+                    <span class="level-desc">der, die, das (relative pronouns)</span>
+                </button>
+                <button onclick="loadWorksheet('konjunktiv')" class="level-btn">
+                    <span class="level-name">Konjunktiv II</span>
+                    <span class="level-desc">würde, könnte, wäre, hätte</span>
+                </button>
+                <button onclick="loadWorksheet('passive')" class="level-btn">
+                    <span class="level-name">Passiv (Passive Voice)</span>
+                    <span class="level-desc">werden + Partizip II</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Viel Erfolg! - Good luck with your German studies!</p>
+        </footer>
+    </div>
+
+    <script src="german-b1-extended.js"></script>
+    <script src="german-generator.js"></script>
+</body>
+</html>

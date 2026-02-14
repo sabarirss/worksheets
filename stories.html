@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Time - 1,800 Stories for Kids</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="stories.css">
+    <script src="auth.js"></script>
+    <style>
+        /* Ensure emoji rendering */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Require authentication and module access
+        const currentUser = requireAuth();
+        if (!currentUser) throw new Error('Authentication required');
+        if (!hasModuleAccess('stories')) {
+            alert('You do not have access to the Stories module.');
+            window.location.href = 'index.html';
+        }
+    </script>
+    <div class="container">
+        <header>
+            <h1>📖 Story Time</h1>
+            <p class="subtitle">1,800 wonderful stories across 3 reading levels!</p>
+        </header>
+
+        <div class="story-selection" id="category-selection">
+            <h2>Choose a Story Category</h2>
+            <div class="category-grid">
+                <button onclick="selectCategory('animals')" class="category-btn">
+                    <span class="category-icon">🦁</span>
+                    <span class="category-name">Animal Stories</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+                <button onclick="selectCategory('nature')" class="category-btn">
+                    <span class="category-icon">🌳</span>
+                    <span class="category-name">Nature Tales</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+                <button onclick="selectCategory('family')" class="category-btn">
+                    <span class="category-icon">👨‍👩‍👧‍👦</span>
+                    <span class="category-name">Family & Friends</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+                <button onclick="selectCategory('adventures')" class="category-btn">
+                    <span class="category-icon">🚀</span>
+                    <span class="category-name">Adventures</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+                <button onclick="selectCategory('learning')" class="category-btn">
+                    <span class="category-icon">📚</span>
+                    <span class="category-name">Learning & School</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+                <button onclick="selectCategory('bedtime')" class="category-btn">
+                    <span class="category-icon">🌙</span>
+                    <span class="category-name">Bedtime Stories</span>
+                    <span class="story-count">300 stories (100 per level)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="difficulty-selection" style="display: none;">
+            <h2>Choose Reading Level</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;" id="category-subtitle"></p>
+            <div class="level-grid">
+                <button onclick="showStories('easy')" class="level-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                    <span class="level-name">⭐ Easy</span>
+                    <span class="level-desc">Ages 4-5</span>
+                </button>
+                <button onclick="showStories('medium')" class="level-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
+                    <span class="level-name">⭐⭐ Medium</span>
+                    <span class="level-desc">Ages 6-7</span>
+                </button>
+                <button onclick="showStories('hard')" class="level-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <span class="level-name">⭐⭐⭐ Hard</span>
+                    <span class="level-desc">Ages 8+</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="backToCategories()">← Back to Categories</button>
+            </div>
+        </div>
+
+        <div class="story-list" id="story-list" style="display: none;">
+            <h2 id="category-title">Stories</h2>
+            <div id="stories-container"></div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="backToDifficulty()">← Back to Reading Levels</button>
+            </div>
+        </div>
+
+        <div class="story-reader" id="story-reader" style="display: none;">
+            <div class="story-content" id="story-content"></div>
+            <div class="story-navigation">
+                <button onclick="previousStory()" id="prev-btn">← Previous Story</button>
+                <button onclick="backToList()">Back to List</button>
+                <button onclick="nextStory()" id="next-btn">Next Story →</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Happy Reading! 📚✨</p>
+        </footer>
+    </div>
+
+    <script src="stories-generator.js"></script>
+</body>
+</html>

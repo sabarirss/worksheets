@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Stories Navigation</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        .story-count { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Stories Difficulty Level Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Category Selection</h2>
+        <button onclick="testCategory('animals')">Test Animals</button>
+        <button onclick="testCategory('nature')">Test Nature</button>
+        <button onclick="testCategory('family')">Test Family</button>
+        <button onclick="testCategory('adventures')">Test Adventures</button>
+        <button onclick="testCategory('learning')">Test Learning</button>
+        <button onclick="testCategory('bedtime')">Test Bedtime</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Difficulty Distribution</h2>
+        <button onclick="testDistribution()">Run Distribution Test</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Story Access</h2>
+        <button onclick="testStoryAccess()">Test Story Retrieval</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <script src="story-illustrations.js"></script>
+    <script src="stories-generator.js"></script>
+    <script>
+        function testCategory(category) {
+            const result = document.getElementById('test1-result');
+            const allStories = storyCollection[category];
+
+            if (!allStories) {
+                result.innerHTML = `<span class="fail">❌ FAIL: Category "${category}" not found</span>`;
+                return;
+            }
+
+            result.innerHTML = `<span class="pass">✅ PASS: Category "${category}" has ${allStories.length} stories</span>`;
+        }
+
+        function testDistribution() {
+            const result = document.getElementById('test2-result');
+            let output = '<h3>Distribution Test Results:</h3>';
+
+            const categories = ['animals', 'nature', 'family', 'adventures', 'learning', 'bedtime'];
+            const difficulties = ['easy', 'medium', 'hard'];
+            let allPass = true;
+
+            categories.forEach(category => {
+                const allStories = storyCollection[category];
+                const total = allStories.length;
+                const perDiff = Math.ceil(total / 3);
+
+                output += `<div style="margin: 10px 0;"><strong>${category}</strong> (${total} stories):`;
+
+                difficulties.forEach((diff, idx) => {
+                    let count;
+                    if (diff === 'easy') {
+                        count = perDiff;
+                    } else if (diff === 'medium') {
+                        count = perDiff;
+                    } else {
+                        count = total - (perDiff * 2);
+                    }
+
+                    const hasStories = count > 0;
+                    const icon = hasStories ? '✅' : '❌';
+                    output += `<br>&nbsp;&nbsp;${icon} ${diff}: ${count} stories`;
+
+                    if (!hasStories) allPass = false;
+                });
+
+                output += '</div>';
+            });
+
+            output += allPass ? '<br><span class="pass">✅ ALL TESTS PASSED</span>' : '<br><span class="fail">❌ SOME TESTS FAILED</span>';
+            result.innerHTML = output;
+        }
+
+        function testStoryAccess() {
+            const result = document.getElementById('test3-result');
+            let output = '<h3>Story Access Test:</h3>';
+            let allPass = true;
+
+            // Test accessing stories from each category and difficulty
+            const testCases = [
+                { category: 'animals', difficulty: 'easy' },
+                { category: 'nature', difficulty: 'medium' },
+                { category: 'family', difficulty: 'hard' }
+            ];
+
+            testCases.forEach(test => {
+                currentCategory = test.category;
+                currentDifficulty = test.difficulty;
+
+                const allStories = storyCollection[currentCategory];
+                const totalStories = allStories.length;
+                const perDifficulty = Math.ceil(totalStories / 3);
+
+                let testList;
+                if (test.difficulty === 'easy') {
+                    testList = allStories.slice(0, perDifficulty);
+                } else if (test.difficulty === 'medium') {
+                    testList = allStories.slice(perDifficulty, perDifficulty * 2);
+                } else {
+                    testList = allStories.slice(perDifficulty * 2);
+                }
+
+                const hasStories = testList && testList.length > 0;
+                const icon = hasStories ? '✅' : '❌';
+
+                output += `${icon} ${test.category} - ${test.difficulty}: ${testList.length} stories<br>`;
+
+                if (!hasStories) allPass = false;
+            });
+
+            output += allPass ? '<br><span class="pass">✅ ALL STORIES ACCESSIBLE</span>' : '<br><span class="fail">❌ SOME STORIES NOT ACCESSIBLE</span>';
+            result.innerHTML = output;
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            console.log('🧪 Running automatic tests...');
+            setTimeout(() => {
+                testDistribution();
+                testStoryAccess();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptitude & Logic Puzzles for Kids</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth.js"></script>
+</head>
+<body>
+    <script>
+        // Require authentication and module access
+        const currentUser = requireAuth();
+        if (!currentUser) throw new Error('Authentication required');
+        if (!hasModuleAccess('aptitude')) {
+            alert('You do not have access to the Aptitude module.');
+            window.location.href = 'index.html';
+        }
+    </script>
+    <div class="container">
+        <header>
+            <h1>🧩 Aptitude & Logic Puzzles</h1>
+            <p class="subtitle">Fun brain exercises with difficulty levels!</p>
+        </header>
+
+        <!-- Challenge Type Selection -->
+        <div class="level-selection" id="type-selection">
+            <h2>Choose Your Challenge</h2>
+            <div class="level-grid">
+                <button onclick="selectType('patterns')" class="level-btn">
+                    <span class="level-name">🔷 Patterns</span>
+                    <span class="level-desc">Complete sequences</span>
+                </button>
+                <button onclick="selectType('counting')" class="level-btn">
+                    <span class="level-name">🔢 Counting</span>
+                    <span class="level-desc">Count objects</span>
+                </button>
+                <button onclick="selectType('sequences')" class="level-btn">
+                    <span class="level-name">➡️ Sequences</span>
+                    <span class="level-desc">What comes next?</span>
+                </button>
+                <button onclick="selectType('matching')" class="level-btn">
+                    <span class="level-name">🔗 Matching</span>
+                    <span class="level-desc">Find pairs</span>
+                </button>
+                <button onclick="selectType('oddone')" class="level-btn">
+                    <span class="level-name">👀 Odd One Out</span>
+                    <span class="level-desc">Find the different</span>
+                </button>
+                <button onclick="selectType('comparison')" class="level-btn">
+                    <span class="level-name">📏 Compare</span>
+                    <span class="level-desc">Bigger or smaller?</span>
+                </button>
+                <button onclick="selectType('logic')" class="level-btn">
+                    <span class="level-name">🤔 Logic</span>
+                    <span class="level-desc">Think and solve!</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <!-- Difficulty Selection -->
+        <div class="level-selection" id="difficulty-selection" style="display: none;">
+            <h2>Choose Difficulty Level</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;" id="challenge-name"></p>
+            <div class="level-grid">
+                <button onclick="loadPuzzles('easy')" class="level-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                    <span class="level-name">⭐ Easy</span>
+                    <span class="level-desc">Ages 4-5</span>
+                </button>
+                <button onclick="loadPuzzles('medium')" class="level-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
+                    <span class="level-name">⭐⭐ Medium</span>
+                    <span class="level-desc">Ages 6-7</span>
+                </button>
+                <button onclick="loadPuzzles('hard')" class="level-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <span class="level-name">⭐⭐⭐ Hard</span>
+                    <span class="level-desc">Ages 8+</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="backToTypes()">← Back to Challenges</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Have fun learning! 🎉</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="storage-manager.js"></script>
+    <script src="handwriting-input.js"></script>
+    <script src="aptitude-generator.js"></script>
+    <script>
+        // Add completion badges on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all completed aptitude worksheets
+            const completedWorksheets = getCompletedWorksheets('aptitude');
+
+            // Track which types have at least one completed difficulty
+            const completedTypes = new Set();
+
+            completedWorksheets.forEach(identifier => {
+                // identifier format: "type-difficulty" (e.g., "mazes-easy")
+                const parts = identifier.split('-');
+                if (parts.length === 2) {
+                    const type = parts[0];
+                    completedTypes.add(type);
+                }
+            });
+
+            // Add badges to type selection buttons if any difficulty is completed
+            completedTypes.forEach(type => {
+                const buttons = document.querySelectorAll(`button[onclick*="selectType('${type}')"]`);
+                buttons.forEach(btn => {
+                    btn.classList.add('completed');
+                });
+            });
+        });
+
+        // Override selectType to show completion on difficulty buttons
+        const originalSelectType = selectType;
+        selectType = function(type) {
+            originalSelectType(type);
+
+            // After showing difficulty selection, add badges to completed difficulties
+            setTimeout(() => {
+                const completedWorksheets = getCompletedWorksheets('aptitude');
+                ['easy', 'medium', 'hard'].forEach(difficulty => {
+                    const identifier = `${type}-${difficulty}`;
+                    if (completedWorksheets.includes(identifier)) {
+                        const buttons = document.querySelectorAll(`button[onclick*="loadPuzzles('${difficulty}')"]`);
+                        buttons.forEach(btn => {
+                            btn.classList.add('completed');
+                        });
+                    }
+                });
+            }, 100);
+        };
+    </script>
+</body>
+</html>

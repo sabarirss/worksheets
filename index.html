@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Math Worksheets</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            font-size: 1.1em;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Require authentication
+        const currentUser = requireAuth();
+        if (!currentUser) {
+            throw new Error('Authentication required');
+        }
+    </script>
+
+    <div class="container">
+        <div class="user-header" id="user-header">
+            <div class="user-info">
+                <span style="font-size: 1.3em;">👤</span>
+                <strong id="user-name-display"></strong>
+            </div>
+            <div class="user-actions">
+                <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
+                    ⚙️ Admin Panel
+                </button>
+                <button class="header-btn" onclick="logout()">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <header>
+            <h1>Practice Worksheets</h1>
+            <p class="subtitle">Select a subject to begin</p>
+        </header>
+
+        <div class="subject-selection">
+            <h2>Choose Subject</h2>
+            <div class="subject-grid">
+                <button onclick="showMathLevels()" class="subject-btn">
+                    <span class="subject-name">📐 Mathematics</span>
+                    <span class="subject-desc">Addition, Subtraction, Multiplication, Division</span>
+                </button>
+                <button onclick="window.location.href='english.html'" class="subject-btn">
+                    <span class="subject-name">📚 English</span>
+                    <span class="subject-desc">Reading, Vocabulary, Grammar, Writing</span>
+                </button>
+                <button onclick="window.location.href='aptitude.html'" class="subject-btn">
+                    <span class="subject-name">🧩 Aptitude (Age 6)</span>
+                    <span class="subject-desc">Puzzles, Mazes, Patterns, Logic Games</span>
+                </button>
+                <button onclick="window.location.href='stories.html'" class="subject-btn">
+                    <span class="subject-name">📖 Story Time</span>
+                    <span class="subject-desc">1,800 Stories - 3 Reading Levels (Ages 4-8+)</span>
+                </button>
+                <button onclick="window.location.href='emotional-quotient.html'" class="subject-btn">
+                    <span class="subject-name">❤️ Emotional Quotient</span>
+                    <span class="subject-desc">Understanding Feelings & Social Skills (Age 6)</span>
+                </button>
+                <button onclick="window.location.href='german.html'" class="subject-btn">
+                    <span class="subject-name">🇩🇪 German (B1)</span>
+                    <span class="subject-desc">DTZ Preparation - Grammar, Reading, Writing</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="math-operations" style="display: none;">
+            <h2>Select Math Operation</h2>
+            <div class="level-grid">
+                <button onclick="showOperation('addition')" class="level-btn">
+                    <span class="level-name">➕ Addition</span>
+                    <span class="level-desc">Basic addition skills</span>
+                </button>
+                <button onclick="showOperation('subtraction')" class="level-btn">
+                    <span class="level-name">➖ Subtraction</span>
+                    <span class="level-desc">Basic subtraction skills</span>
+                </button>
+                <button onclick="showOperation('multiplication')" class="level-btn">
+                    <span class="level-name">✖️ Multiplication</span>
+                    <span class="level-desc">Times tables and more</span>
+                </button>
+                <button onclick="showOperation('division')" class="level-btn">
+                    <span class="level-name">➗ Division</span>
+                    <span class="level-desc">Division skills</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="showSubjects()">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="addition-levels" style="display: none;">
+            <h2>Addition Levels</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('addition', '6A')" class="level-btn">
+                    <span class="level-name">Level 6A</span>
+                    <span class="level-desc">Addition to 5 (1+1, 2+1)</span>
+                </button>
+                <button onclick="loadWorksheet('addition', '5A')" class="level-btn">
+                    <span class="level-name">Level 5A</span>
+                    <span class="level-desc">Addition to 10 (3+4, 5+2)</span>
+                </button>
+                <button onclick="loadWorksheet('addition', '4A')" class="level-btn">
+                    <span class="level-name">Level 4A</span>
+                    <span class="level-desc">Addition to 20 (8+7, 9+6)</span>
+                </button>
+                <button onclick="loadWorksheet('addition', '3A')" class="level-btn">
+                    <span class="level-name">Level 3A</span>
+                    <span class="level-desc">Two-digit + One-digit (23+5)</span>
+                </button>
+                <button onclick="loadWorksheet('addition', '2A')" class="level-btn">
+                    <span class="level-name">Level 2A</span>
+                    <span class="level-desc">Two-digit + Two-digit (23+45)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="showMathLevels()">← Back to Operations</button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="subtraction-levels" style="display: none;">
+            <h2>Subtraction Levels</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('subtraction', '6A')" class="level-btn">
+                    <span class="level-name">Level 6A</span>
+                    <span class="level-desc">Subtraction within 5 (5-2, 4-1)</span>
+                </button>
+                <button onclick="loadWorksheet('subtraction', '5A')" class="level-btn">
+                    <span class="level-name">Level 5A</span>
+                    <span class="level-desc">Subtraction within 10 (10-5, 8-3)</span>
+                </button>
+                <button onclick="loadWorksheet('subtraction', '4A')" class="level-btn">
+                    <span class="level-name">Level 4A</span>
+                    <span class="level-desc">Subtraction within 20 (15-7, 18-9)</span>
+                </button>
+                <button onclick="loadWorksheet('subtraction', '3A')" class="level-btn">
+                    <span class="level-name">Level 3A</span>
+                    <span class="level-desc">Two-digit - One-digit (23-5)</span>
+                </button>
+                <button onclick="loadWorksheet('subtraction', '2A')" class="level-btn">
+                    <span class="level-name">Level 2A</span>
+                    <span class="level-desc">Two-digit - Two-digit (45-23)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="showMathLevels()">← Back to Operations</button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="multiplication-levels" style="display: none;">
+            <h2>Multiplication Levels</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('multiplication', '6A')" class="level-btn">
+                    <span class="level-name">Level 6A</span>
+                    <span class="level-desc">Multiply by 1 and 2 (2×3, 1×5)</span>
+                </button>
+                <button onclick="loadWorksheet('multiplication', '5A')" class="level-btn">
+                    <span class="level-name">Level 5A</span>
+                    <span class="level-desc">Multiply by 3, 4, 5 (3×4, 5×6)</span>
+                </button>
+                <button onclick="loadWorksheet('multiplication', '4A')" class="level-btn">
+                    <span class="level-name">Level 4A</span>
+                    <span class="level-desc">Multiply by 6, 7, 8, 9 (7×8, 9×6)</span>
+                </button>
+                <button onclick="loadWorksheet('multiplication', '3A')" class="level-btn">
+                    <span class="level-name">Level 3A</span>
+                    <span class="level-desc">Two-digit × One-digit (12×3)</span>
+                </button>
+                <button onclick="loadWorksheet('multiplication', '2A')" class="level-btn">
+                    <span class="level-name">Level 2A</span>
+                    <span class="level-desc">Two-digit × Two-digit (12×13)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="showMathLevels()">← Back to Operations</button>
+            </div>
+        </div>
+
+        <div class="level-selection" id="division-levels" style="display: none;">
+            <h2>Division Levels</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('division', '6A')" class="level-btn">
+                    <span class="level-name">Level 6A</span>
+                    <span class="level-desc">Divide by 1 and 2 (6÷2, 8÷2)</span>
+                </button>
+                <button onclick="loadWorksheet('division', '5A')" class="level-btn">
+                    <span class="level-name">Level 5A</span>
+                    <span class="level-desc">Divide by 3, 4, 5 (15÷3, 20÷4)</span>
+                </button>
+                <button onclick="loadWorksheet('division', '4A')" class="level-btn">
+                    <span class="level-name">Level 4A</span>
+                    <span class="level-desc">Divide by 6, 7, 8, 9 (48÷6, 63÷7)</span>
+                </button>
+                <button onclick="loadWorksheet('division', '3A')" class="level-btn">
+                    <span class="level-name">Level 3A</span>
+                    <span class="level-desc">Two-digit ÷ One-digit (24÷3)</span>
+                </button>
+                <button onclick="loadWorksheet('division', '2A')" class="level-btn">
+                    <span class="level-name">Level 2A</span>
+                    <span class="level-desc">Division with remainders (25÷3 = 8 R1)</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="showMathLevels()">← Back to Operations</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Practice with focus. Build mastery through repetition.</p>
+        </footer>
+    </div>
+
+    <script src="storage-manager.js"></script>
+    <script src="handwriting-input.js"></script>
+    <script src="worksheet-generator.js"></script>
+    <script>
+        // Initialize user interface
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser();
+
+            // Display user name
+            document.getElementById('user-name-display').textContent = user.fullName;
+
+            // Show admin button if user is admin
+            if (user.role === 'admin') {
+                document.getElementById('admin-btn').style.display = 'block';
+            }
+
+            // Hide modules user doesn't have access to
+            const modules = user.modules || {};
+
+            if (!modules.math) {
+                const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
+                if (mathBtn) mathBtn.style.display = 'none';
+            }
+
+            if (!modules.english) {
+                const englishBtn = document.querySelector('button[onclick*="english.html"]');
+                if (englishBtn) englishBtn.style.display = 'none';
+            }
+
+            if (!modules.aptitude) {
+                const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+                if (aptitudeBtn) aptitudeBtn.style.display = 'none';
+            }
+
+            if (!modules.stories) {
+                const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+                if (storiesBtn) storiesBtn.style.display = 'none';
+            }
+
+            if (!modules['emotional-quotient']) {
+                const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+                if (eqBtn) eqBtn.style.display = 'none';
+            }
+
+            if (!modules.german) {
+                const germanBtn = document.querySelector('button[onclick*="german.html"]');
+                if (germanBtn) germanBtn.style.display = 'none';
+            }
+
+            // Add completion badges on page load
+            const completedWorksheets = getCompletedWorksheets('math');
+
+            completedWorksheets.forEach(identifier => {
+                // identifier format: "operation-level-pageX" or "operation-level"
+                const parts = identifier.split('-');
+                if (parts.length >= 2) {
+                    const operation = parts[0];
+                    const level = parts[1];
+
+                    // Find all buttons for this operation-level combination
+                    const buttons = document.querySelectorAll(`button[onclick*="loadWorksheet('${operation}', '${level}')"]`);
+                    buttons.forEach(btn => {
+                        btn.classList.add('completed');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

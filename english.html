@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Practice Worksheets</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <script>
+        // Require authentication and module access
+        const currentUser = requireAuth();
+        if (!currentUser) throw new Error('Authentication required');
+        if (!hasModuleAccess('english')) {
+            alert('You do not have access to the English module.');
+            window.location.href = 'index.html';
+        }
+    </script>
+    <div class="container">
+        <header>
+            <h1>English Worksheets</h1>
+            <p class="subtitle">Select a level to begin</p>
+        </header>
+
+        <div class="level-selection">
+            <h2>English Levels</h2>
+            <div class="level-grid">
+                <button onclick="loadWorksheet('writing')" class="level-btn">
+                    <span class="level-name">✍️ Writing Practice</span>
+                    <span class="level-desc">Handwriting with ruled lines (iPad Pencil)</span>
+                </button>
+                <button onclick="loadWorksheet('7A')" class="level-btn">
+                    <span class="level-name">Level 7A</span>
+                    <span class="level-desc">🖼️ Picture Words - Fill in the blanks</span>
+                </button>
+                <button onclick="loadWorksheet('6A')" class="level-btn">
+                    <span class="level-name">Level 6A</span>
+                    <span class="level-desc">Sight Words - Basic (the, and, is, a)</span>
+                </button>
+                <button onclick="loadWorksheet('5A')" class="level-btn">
+                    <span class="level-name">Level 5A</span>
+                    <span class="level-desc">Simple Sentences & Basic Vocabulary</span>
+                </button>
+                <button onclick="loadWorksheet('4A')" class="level-btn">
+                    <span class="level-name">Level 4A</span>
+                    <span class="level-desc">Sentence Completion & Grammar</span>
+                </button>
+                <button onclick="loadWorksheet('3A')" class="level-btn">
+                    <span class="level-name">Level 3A</span>
+                    <span class="level-desc">Synonyms, Antonyms & Vocabulary</span>
+                </button>
+                <button onclick="loadWorksheet('2A')" class="level-btn">
+                    <span class="level-name">Level 2A</span>
+                    <span class="level-desc">Parts of Speech & Grammar</span>
+                </button>
+                <button onclick="loadWorksheet('A')" class="level-btn">
+                    <span class="level-name">Level A</span>
+                    <span class="level-desc">Reading Comprehension - Short Passages</span>
+                </button>
+                <button onclick="loadWorksheet('B')" class="level-btn">
+                    <span class="level-name">Level B</span>
+                    <span class="level-desc">Advanced Grammar & Writing</span>
+                </button>
+            </div>
+            <div class="navigation" style="margin-top: 30px;">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Practice with focus. Build mastery through repetition.</p>
+        </footer>
+    </div>
+
+    <script src="storage-manager.js"></script>
+    <script src="handwriting-input.js"></script>
+    <script src="english-generator.js"></script>
+    <script src="writing-practice.js"></script>
+    <script>
+        // Add completion badges on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all completed English worksheets
+            const completedWorksheets = getCompletedWorksheets('english');
+
+            completedWorksheets.forEach(identifier => {
+                // identifier format: "level" (e.g., "7A", "6A", "writing")
+                // Find all buttons for this level
+                const buttons = document.querySelectorAll(`button[onclick*="loadWorksheet('${identifier}')"]`);
+                buttons.forEach(btn => {
+                    btn.classList.add('completed');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
