@@ -279,6 +279,7 @@
                     <tr>
                         <th>Username</th>
                         <th>Full Name</th>
+                        <th>Age</th>
                         <th>Role</th>
                         <th>Modules Access</th>
                         <th>Created</th>
@@ -321,6 +322,24 @@
                         <option value="student">Student</option>
                         <option value="admin">Admin</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-age">Child's Age</label>
+                    <select id="user-age" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; background: white; cursor: pointer;">
+                        <option value="">Not set</option>
+                        <option value="4">4 years old</option>
+                        <option value="5">5 years old</option>
+                        <option value="6">6 years old</option>
+                        <option value="7">7 years old</option>
+                        <option value="8">8 years old</option>
+                        <option value="9">9 years old</option>
+                        <option value="10">10 years old</option>
+                        <option value="11">11 years old</option>
+                        <option value="12">12 years old</option>
+                        <option value="13">13+ years old</option>
+                    </select>
+                    <small style="color: #666; font-size: 0.9em; display: block; margin-top: 5px;">Content will be filtered based on child's age</small>
                 </div>
 
                 <div class="form-group">
@@ -442,7 +461,7 @@
             const tbody = document.getElementById('users-tbody');
 
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No users found</td></tr>';
                 return;
             }
 
@@ -483,11 +502,13 @@
                 const isAdmin = user.username === 'admin';
                 const username = user.username || 'unknown';
                 const fullName = user.fullName || 'N/A';
+                const age = user.age ? `${user.age} years` : 'Not set';
 
                 return `
                     <tr>
                         <td><strong>${username}</strong></td>
                         <td>${fullName}</td>
+                        <td>${age}</td>
                         <td><span class="user-role role-${user.role}">${user.role}</span></td>
                         <td>${modulesList}</td>
                         <td>${createdDate}</td>
@@ -546,6 +567,7 @@
             passwordField.removeAttribute('required'); // Not required when editing
 
             document.getElementById('user-role').value = user.role;
+            document.getElementById('user-age').value = user.age || '';
 
             // Set module checkboxes
             const modules = user.modules || {};
@@ -574,6 +596,7 @@
             const fullName = document.getElementById('user-fullname').value.trim();
             const password = document.getElementById('user-password').value;
             const role = document.getElementById('user-role').value;
+            const age = document.getElementById('user-age').value;
 
             const modules = {
                 math: document.getElementById('module-math').checked,
@@ -602,6 +625,11 @@
                         modules: modules
                     };
 
+                    // Include age if set
+                    if (age) {
+                        updates.age = parseInt(age);
+                    }
+
                     // Only include password if it's not empty (password changes not supported from client)
                     if (password && password.trim().length > 0) {
                         updates.password = password;
@@ -610,13 +638,20 @@
                     result = await updateUser(editingUsername, updates);
                 } else {
                     // Create new user
-                    result = await createUser({
+                    const userData = {
                         username: username,
                         fullName: fullName,
                         password: password,
                         role: role,
                         modules: modules
-                    });
+                    };
+
+                    // Include age if set
+                    if (age) {
+                        userData.age = parseInt(age);
+                    }
+
+                    result = await createUser(userData);
                 }
 
                 if (result.success) {
