@@ -1,9 +1,7 @@
 // Firebase Authentication System
 // Replaces localStorage with Firebase Authentication and Firestore
 
-// Get Firebase instances
-const auth = window.firebaseAuth;
-const db = window.firebaseDb;
+// Firebase instances will be available after firebase-config.js loads
 
 // Security Configuration
 const SECURITY_CONFIG = {
@@ -18,17 +16,17 @@ let currentUserCache = null;
 async function initializeAuth() {
     try {
         // Check if admin user exists in Firestore
-        const adminDoc = await db.collection('users').doc('admin').get();
+        const adminDoc = await firebase.firestore().collection('users').doc('admin').get();
 
         if (!adminDoc.exists) {
             // Create default admin user in Firebase Auth
-            const adminCredential = await auth.createUserWithEmailAndPassword(
+            const adminCredential = await firebase.auth().createUserWithEmailAndPassword(
                 'admin@worksheets.local',
                 'admin123'
             );
 
             // Create admin user document in Firestore
-            await db.collection('users').doc('admin').set({
+            await firebase.firestore().collection('users').doc('admin').set({
                 uid: adminCredential.user.uid,
                 username: 'admin',
                 email: 'admin@worksheets.local',
@@ -56,11 +54,11 @@ async function initializeAuth() {
 }
 
 // Listen for auth state changes
-auth.onAuthStateChanged(async (firebaseUser) => {
+firebase.auth().onAuthStateChanged(async (firebaseUser) => {
     if (firebaseUser) {
         // User is signed in, load their profile from Firestore
         try {
-            const userDoc = await db.collection('users').doc(firebaseUser.uid.substring(0, 20)).get();
+            const userDoc = await firebase.firestore().collection('users').doc(firebaseUser.uid.substring(0, 20)).get();
             if (userDoc.exists) {
                 currentUserCache = {
                     uid: firebaseUser.uid,
@@ -77,7 +75,7 @@ auth.onAuthStateChanged(async (firebaseUser) => {
 
 // Get current authenticated user
 function getCurrentUser() {
-    const firebaseUser = auth.currentUser;
+    const firebaseUser = firebase.auth().currentUser;
     if (!firebaseUser) return null;
 
     return currentUserCache;
@@ -90,16 +88,16 @@ async function login(username, password) {
         const email = username.includes('@') ? username : `${username}@worksheets.local`;
 
         // Sign in with Firebase Auth
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
 
         // Get user document from Firestore
-        const userDoc = await db.collection('users')
+        const userDoc = await firebase.firestore().collection('users')
             .where('username', '==', username)
             .limit(1)
             .get();
 
         if (userDoc.empty) {
-            await auth.signOut();
+            await firebase.auth().signOut();
             return { success: false, error: 'User profile not found' };
         }
 
@@ -133,7 +131,7 @@ async function login(username, password) {
 // Logout
 async function logout() {
     try {
-        await auth.signOut();
+        await firebase.auth().signOut();
         currentUserCache = null;
         window.location.href = 'login.html';
     } catch (error) {
@@ -146,7 +144,7 @@ async function logout() {
 function requireAuth() {
     const user = getCurrentUser();
 
-    if (!user && !auth.currentUser) {
+    if (!user && !firebase.auth().currentUser) {
         window.location.href = 'login.html';
         return null;
     }
@@ -192,7 +190,7 @@ async function createUser(userData) {
         }
 
         // Check if username already exists
-        const existingUser = await db.collection('users')
+        const existingUser = await firebase.firestore().collection('users')
             .where('username', '==', userData.username)
             .limit(1)
             .get();
@@ -206,7 +204,7 @@ async function createUser(userData) {
             ? userData.username
             : `${userData.username}@worksheets.local`;
 
-        const userCredential = await auth.createUserWithEmailAndPassword(
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(
             email,
             userData.password
         );
@@ -229,7 +227,7 @@ async function createUser(userData) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('users').doc(userCredential.user.uid.substring(0, 20)).set(newUser);
+        await firebase.firestore().collection('users').doc(userCredential.user.uid.substring(0, 20)).set(newUser);
 
         return { success: true, user: newUser };
 
@@ -252,7 +250,7 @@ async function createUser(userData) {
 async function updateUser(username, updates) {
     try {
         // Find user by username
-        const userQuery = await db.collection('users')
+        const userQuery = await firebase.firestore().collection('users')
             .where('username', '==', username)
             .limit(1)
             .get();
@@ -274,8 +272,8 @@ async function updateUser(username, updates) {
             }
 
             // Update password in Firebase Auth
-            const user = await auth.getUserByEmail(userData.email);
-            await auth.updateUser(user.uid, {
+            const user = await firebase.auth().getUserByEmail(userData.email);
+            await firebase.auth().updateUser(user.uid, {
                 password: updates.password
             });
 
@@ -312,7 +310,7 @@ async function deleteUser(username) {
 
     try {
         // Find user by username
-        const userQuery = await db.collection('users')
+        const userQuery = await firebase.firestore().collection('users')
             .where('username', '==', username)
             .limit(1)
             .get();
@@ -329,7 +327,7 @@ async function deleteUser(username) {
 
         // Delete user from Firebase Auth
         try {
-            const user = await auth.getUserByEmail(userData.email);
+            const user = await firebase.auth().getUserByEmail(userData.email);
             await user.delete();
         } catch (authError) {
             console.warn('Could not delete from Auth:', authError);
@@ -349,11 +347,11 @@ async function deleteUser(username) {
 // Delete user's worksheets
 async function deleteUserWorksheets(username) {
     try {
-        const worksheets = await db.collection('worksheets')
+        const worksheets = await firebase.firestore().collection('worksheets')
             .where('username', '==', username)
             .get();
 
-        const batch = db.batch();
+        const batch = firebase.firestore().batch();
         worksheets.docs.forEach(doc => {
             batch.delete(doc.ref);
         });
@@ -367,7 +365,7 @@ async function deleteUserWorksheets(username) {
 // Get all users (admin only)
 async function getAllUsers() {
     try {
-        const usersSnapshot = await db.collection('users').get();
+        const usersSnapshot = await firebase.firestore().collection('users').get();
         return usersSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -381,7 +379,7 @@ async function getAllUsers() {
 // Get user count
 async function getUserCount() {
     try {
-        const usersSnapshot = await db.collection('users').get();
+        const usersSnapshot = await firebase.firestore().collection('users').get();
         return usersSnapshot.size;
     } catch (error) {
         console.error('Error getting user count:', error);
@@ -392,7 +390,7 @@ async function getUserCount() {
 // Get user by username
 async function getUser(username) {
     try {
-        const userQuery = await db.collection('users')
+        const userQuery = await firebase.firestore().collection('users')
             .where('username', '==', username)
             .limit(1)
             .get();

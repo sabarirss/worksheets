@@ -1,8 +1,7 @@
 // Firebase Storage Manager
 // Replaces localStorage with Firestore for worksheet storage
 
-const db = window.firebaseDb;
-const auth = window.firebaseAuth;
+// Firebase instances will be available after firebase-config.js loads
 
 // Get current username
 function getCurrentUsername() {
@@ -42,7 +41,7 @@ async function saveWorksheet(subject, identifier, data) {
             checkboxAnswers: data.checkboxAnswers || {}
         };
 
-        await db.collection('worksheets').doc(worksheetId).set(saveData);
+        await firebase.firestore().collection('worksheets').doc(worksheetId).set(saveData);
 
         console.log('Worksheet saved to Firebase:', worksheetId);
         return true;
@@ -64,7 +63,7 @@ async function loadWorksheet(subject, identifier) {
 
     try {
         const worksheetId = `${username}_${subject}_${identifier}`;
-        const doc = await db.collection('worksheets').doc(worksheetId).get();
+        const doc = await firebase.firestore().collection('worksheets').doc(worksheetId).get();
 
         if (doc.exists) {
             return doc.data();
@@ -88,7 +87,7 @@ async function clearWorksheet(subject, identifier) {
 
     try {
         const worksheetId = `${username}_${subject}_${identifier}`;
-        await db.collection('worksheets').doc(worksheetId).delete();
+        await firebase.firestore().collection('worksheets').doc(worksheetId).delete();
 
         console.log('Worksheet cleared from Firebase:', worksheetId);
         return true;
@@ -114,7 +113,7 @@ async function getCompletedWorksheets(subject) {
     }
 
     try {
-        const worksheets = await db.collection('worksheets')
+        const worksheets = await firebase.firestore().collection('worksheets')
             .where('username', '==', username)
             .where('subject', '==', subject)
             .where('completed', '==', true)
@@ -137,7 +136,7 @@ async function getAllUserWorksheets() {
     }
 
     try {
-        const worksheets = await db.collection('worksheets')
+        const worksheets = await firebase.firestore().collection('worksheets')
             .where('username', '==', username)
             .get();
 
@@ -158,7 +157,7 @@ async function getWorksheetCountBySubject(subject) {
     }
 
     try {
-        const worksheets = await db.collection('worksheets')
+        const worksheets = await firebase.firestore().collection('worksheets')
             .where('username', '==', username)
             .where('subject', '==', subject)
             .get();
@@ -212,14 +211,14 @@ async function importWorksheets(exportData) {
     }
 
     try {
-        const batch = db.batch();
+        const batch = firebase.firestore().batch();
 
         exportData.worksheets.forEach(worksheet => {
             // Update username to current user
             worksheet.username = username;
             worksheet.worksheetId = `${username}_${worksheet.subject}_${worksheet.identifier}`;
 
-            const docRef = db.collection('worksheets').doc(worksheet.worksheetId);
+            const docRef = firebase.firestore().collection('worksheets').doc(worksheet.worksheetId);
             batch.set(docRef, worksheet);
         });
 
@@ -245,7 +244,7 @@ async function migrateFromLocalStorage() {
 
     try {
         let migratedCount = 0;
-        const batch = db.batch();
+        const batch = firebase.firestore().batch();
 
         // Find all worksheet keys in localStorage
         for (let i = 0; i < localStorage.length; i++) {
@@ -259,7 +258,7 @@ async function migrateFromLocalStorage() {
                         const worksheetData = JSON.parse(data);
 
                         // Create Firestore document
-                        const docRef = db.collection('worksheets').doc(key);
+                        const docRef = firebase.firestore().collection('worksheets').doc(key);
                         batch.set(docRef, {
                             ...worksheetData,
                             migratedAt: firebase.firestore.FieldValue.serverTimestamp()
