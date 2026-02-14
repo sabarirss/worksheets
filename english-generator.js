@@ -241,55 +241,182 @@ const DIFFICULTY_LABELS = {
 const writingActivities = {
     '4-5': {
         letters: [
-            // Uppercase A-J
+            // Uppercase letters A-Z
             { prompt: 'Practice writing:', example: 'A', type: 'letter' },
             { prompt: 'Practice writing:', example: 'B', type: 'letter' },
             { prompt: 'Practice writing:', example: 'C', type: 'letter' },
             { prompt: 'Practice writing:', example: 'D', type: 'letter' },
             { prompt: 'Practice writing:', example: 'E', type: 'letter' },
-            // Lowercase a-e
+            { prompt: 'Practice writing:', example: 'F', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'G', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'H', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'I', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'J', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'K', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'L', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'M', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'N', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'O', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'P', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'Q', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'R', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'S', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'T', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'U', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'V', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'W', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'X', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'Y', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'Z', type: 'letter' },
+            // Lowercase letters a-z
             { prompt: 'Practice writing:', example: 'a', type: 'letter' },
             { prompt: 'Practice writing:', example: 'b', type: 'letter' },
             { prompt: 'Practice writing:', example: 'c', type: 'letter' },
             { prompt: 'Practice writing:', example: 'd', type: 'letter' },
-            { prompt: 'Practice writing:', example: 'e', type: 'letter' }
+            { prompt: 'Practice writing:', example: 'e', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'f', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'g', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'h', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'i', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'j', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'k', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'l', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'm', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'n', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'o', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'p', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'q', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'r', type: 'letter' },
+            { prompt: 'Practice writing:', example: 's', type: 'letter' },
+            { prompt: 'Practice writing:', example: 't', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'u', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'v', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'w', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'x', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'y', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'z', type: 'letter' }
         ]
     },
     '6': {
         words: [
+            // Animals
             { prompt: 'Practice writing the word:', example: 'cat', meaning: '🐱' },
             { prompt: 'Practice writing the word:', example: 'dog', meaning: '🐶' },
+            { prompt: 'Practice writing the word:', example: 'bird', meaning: '🐦' },
+            { prompt: 'Practice writing the word:', example: 'fish', meaning: '🐟' },
+            { prompt: 'Practice writing the word:', example: 'bear', meaning: '🐻' },
+            { prompt: 'Practice writing the word:', example: 'lion', meaning: '🦁' },
+            { prompt: 'Practice writing the word:', example: 'frog', meaning: '🐸' },
+            { prompt: 'Practice writing the word:', example: 'cow', meaning: '🐄' },
+            // Nature & Objects
             { prompt: 'Practice writing the word:', example: 'sun', meaning: '☀️' },
+            { prompt: 'Practice writing the word:', example: 'moon', meaning: '🌙' },
+            { prompt: 'Practice writing the word:', example: 'star', meaning: '⭐' },
+            { prompt: 'Practice writing the word:', example: 'tree', meaning: '🌳' },
+            { prompt: 'Practice writing the word:', example: 'flower', meaning: '🌸' },
+            { prompt: 'Practice writing the word:', example: 'house', meaning: '🏠' },
+            { prompt: 'Practice writing the word:', example: 'car', meaning: '🚗' },
+            { prompt: 'Practice writing the word:', example: 'book', meaning: '📚' },
+            // Colors & Shapes
             { prompt: 'Practice writing the word:', example: 'red', meaning: '🔴' },
-            { prompt: 'Practice writing the word:', example: 'ball', meaning: '⚽' }
+            { prompt: 'Practice writing the word:', example: 'blue', meaning: '🔵' },
+            { prompt: 'Practice writing the word:', example: 'green', meaning: '🟢' },
+            { prompt: 'Practice writing the word:', example: 'yellow', meaning: '🟡' },
+            { prompt: 'Practice writing the word:', example: 'ball', meaning: '⚽' },
+            { prompt: 'Practice writing the word:', example: 'box', meaning: '📦' },
+            { prompt: 'Practice writing the word:', example: 'cup', meaning: '☕' },
+            { prompt: 'Practice writing the word:', example: 'pen', meaning: '✏️' }
         ]
     },
     '7': {
         sentences: [
-            { prompt: 'Copy this sentence:', example: 'I like to read.' },
-            { prompt: 'Copy this sentence:', example: 'The cat is big.' },
-            { prompt: 'Copy this sentence:', example: 'We play together.' }
+            // Present tense - Simple
+            { prompt: 'Copy this sentence:', example: 'I like to read books.' },
+            { prompt: 'Copy this sentence:', example: 'The cat is very big.' },
+            { prompt: 'Copy this sentence:', example: 'We play together at school.' },
+            { prompt: 'Copy this sentence:', example: 'My dog runs in the park.' },
+            { prompt: 'Copy this sentence:', example: 'She eats an apple every day.' },
+            // Present tense - Questions
+            { prompt: 'Copy this sentence:', example: 'Where is my pencil?' },
+            { prompt: 'Copy this sentence:', example: 'What time is it now?' },
+            { prompt: 'Copy this sentence:', example: 'Can you help me please?' },
+            // Past tense - Simple
+            { prompt: 'Copy this sentence:', example: 'I went to the store yesterday.' },
+            { prompt: 'Copy this sentence:', example: 'We played soccer after school.' },
+            { prompt: 'Copy this sentence:', example: 'She found a pretty shell at the beach.' },
+            { prompt: 'Copy this sentence:', example: 'They made a sandcastle together.' },
+            // Descriptive
+            { prompt: 'Copy this sentence:', example: 'The sky is bright and blue today.' },
+            { prompt: 'Copy this sentence:', example: 'My room is clean and tidy.' },
+            { prompt: 'Copy this sentence:', example: 'The cake tastes sweet and delicious.' }
         ]
     },
     '8': {
         sentences: [
-            { prompt: 'Copy this sentence:', example: 'The boy runs very fast.' },
-            { prompt: 'Copy this sentence:', example: 'She reads her favorite book.' },
-            { prompt: 'Copy this sentence:', example: 'They like to play outside every day.' }
+            // Complex present tense
+            { prompt: 'Copy this sentence:', example: 'The young boy runs very fast every morning.' },
+            { prompt: 'Copy this sentence:', example: 'She reads her favorite book before bedtime.' },
+            { prompt: 'Copy this sentence:', example: 'They like to play outside together every day after school.' },
+            // Past tense narratives
+            { prompt: 'Copy this sentence:', example: 'Yesterday, I visited my grandmother and we baked cookies.' },
+            { prompt: 'Copy this sentence:', example: 'Last week, our class went on a field trip to the museum.' },
+            { prompt: 'Copy this sentence:', example: 'My friend taught me how to ride a bicycle last summer.' },
+            // Compound sentences
+            { prompt: 'Copy this sentence:', example: 'I finished my homework, and then I watched television.' },
+            { prompt: 'Copy this sentence:', example: 'She wanted to play outside, but it was raining heavily.' },
+            { prompt: 'Copy this sentence:', example: 'We can go to the park, or we can stay home and play games.' },
+            // Complex descriptive
+            { prompt: 'Copy this sentence:', example: 'The beautiful garden was full of colorful flowers and tall trees.' },
+            { prompt: 'Copy this sentence:', example: 'My little sister is learning to swim in the community pool.' },
+            { prompt: 'Copy this sentence:', example: 'The teacher explained the difficult math problem step by step.' },
+            // Questions and commands
+            { prompt: 'Copy this sentence:', example: 'Have you finished your homework yet?' },
+            { prompt: 'Copy this sentence:', example: 'Please remember to bring your lunch tomorrow.' },
+            { prompt: 'Copy this sentence:', example: 'Why do birds fly south for the winter?' }
         ]
     },
     '9+': {
         creative: [
-            { prompt: 'Write about your favorite hobby:', example: '' },
-            { prompt: 'Describe a fun day with your family:', example: '' },
-            { prompt: 'What do you want to learn this year?', example: '' }
+            // Personal reflection
+            { prompt: 'Write about your favorite hobby and why you enjoy it:', example: '' },
+            { prompt: 'Describe a fun day you spent with your family:', example: '' },
+            { prompt: 'What do you want to learn this year and why?', example: '' },
+            { prompt: 'Write about a person you admire and explain why:', example: '' },
+            { prompt: 'Describe your best friend and what makes them special:', example: '' },
+            // Creative imagination
+            { prompt: 'If you could have any superpower, what would it be and how would you use it?', example: '' },
+            { prompt: 'Write about an adventure you would like to have:', example: '' },
+            { prompt: 'Imagine you discovered a secret door. What is behind it?', example: '' },
+            { prompt: 'If you could travel anywhere in the world, where would you go?', example: '' },
+            { prompt: 'Describe your perfect day from morning to night:', example: '' },
+            // Opinion and explanation
+            { prompt: 'What is your favorite season and why do you like it?', example: '' },
+            { prompt: 'Write about a book or movie you really enjoyed:', example: '' },
+            { prompt: 'What makes a good friend? Explain your ideas:', example: '' },
+            { prompt: 'Describe something new you tried recently:', example: '' },
+            { prompt: 'What are you grateful for in your life?', example: '' }
         ]
     },
     '10+': {
         creative: [
-            { prompt: 'Write a short story about an adventure:', example: '' },
-            { prompt: 'Describe your ideal future career:', example: '' },
-            { prompt: 'If you could change one thing in the world, what would it be and why?', example: '' }
+            // Extended narratives
+            { prompt: 'Write a short story about an unexpected adventure:', example: '' },
+            { prompt: 'Describe your ideal future career and why it interests you:', example: '' },
+            { prompt: 'If you could change one thing in the world, what would it be and why?', example: '' },
+            { prompt: 'Write about a challenge you overcame and what you learned:', example: '' },
+            { prompt: 'Create a story that begins: "When I opened the mysterious package..."', example: '' },
+            // Analytical writing
+            { prompt: 'Compare and contrast two subjects you study in school:', example: '' },
+            { prompt: 'Explain how technology has changed the way people communicate:', example: '' },
+            { prompt: 'Write about an important historical event and why it matters:', example: '' },
+            { prompt: 'Describe the qualities of a good leader:', example: '' },
+            // Personal philosophy
+            { prompt: 'What does success mean to you? Explain your perspective:', example: '' },
+            { prompt: 'Write about a time when you had to make a difficult decision:', example: '' },
+            { prompt: 'If you could give advice to younger students, what would you say?', example: '' },
+            { prompt: 'Describe your goals for the next five years:', example: '' },
+            { prompt: 'What invention would you create to help solve a problem?', example: '' },
+            { prompt: 'Write about what true friendship means to you:', example: '' }
         ]
     }
 };

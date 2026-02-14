@@ -579,66 +579,73 @@ const visualGuides = {
         </svg>
     `,
 
-    // DOLPHIN - simplified for hard level
+    // DOLPHIN - redesigned with clearer steps
     'dolphin-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="blue" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="blue" stroke-width="4" fill="none" transform="rotate(-10 150 150)"/>
+            <text x="90" y="200" fill="blue" font-size="14">← Draw curved body shape</text>
         </svg>
     `,
     'dolphin-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="blue" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="black" stroke-width="3" fill="none" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="blue" stroke-width="4" fill="none"/>
+            <text x="210" y="115" fill="blue" font-size="14">Add beak →</text>
         </svg>
     `,
     'dolphin-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="blue" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="black" stroke-width="3" fill="none" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 160 140 L 170 100 L 165 140" stroke="blue" stroke-width="4" fill="none"/>
+            <text x="140" y="90" fill="blue" font-size="14">Dorsal fin ↑</text>
         </svg>
     `,
     'dolphin-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="black" stroke-width="3" fill="none" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 160 140 L 170 100 L 165 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 70 155 L 45 140 L 50 165 L 45 180 L 65 170 Z" stroke="blue" stroke-width="3" fill="none"/>
+            <text x="20" y="160" fill="blue" font-size="14">← Tail fins</text>
         </svg>
     `,
     'dolphin-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="none"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="blue" stroke-width="3" fill="none"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="black" stroke-width="3" fill="none" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 160 140 L 170 100 L 165 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 70 155 L 45 140 L 50 165 L 45 180 L 65 170 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 110 165 L 100 185 L 120 170" stroke="blue" stroke-width="3" fill="none"/>
+            <path d="M 190 165 L 200 185 L 180 170" stroke="blue" stroke-width="3" fill="none"/>
+            <text x="95" y="205" fill="blue" font-size="14">Side flippers ↓</text>
         </svg>
     `,
     'dolphin-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="none"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="black" stroke-width="3" fill="none"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="black" stroke-width="3" fill="none"/>
-            <circle cx="235" cy="130" r="4" fill="blue"/>
-            <path d="M 225 138 Q 235 142 245 138" stroke="blue" stroke-width="2" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="black" stroke-width="3" fill="none" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 160 140 L 170 100 L 165 140" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 70 155 L 45 140 L 50 165 L 45 180 L 65 170 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 110 165 L 100 185 L 120 170" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 190 165 L 200 185 L 180 170" stroke="black" stroke-width="3" fill="none"/>
+            <circle cx="235" cy="137" r="5" fill="blue"/>
+            <path d="M 225 145 Q 235 148 245 145" stroke="blue" stroke-width="2" fill="none"/>
+            <text x="205" y="165" fill="blue" font-size="14">Eye & smile →</text>
         </svg>
     `,
     'dolphin-step7': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="#4682b4"/>
-            <path d="M 50 155 Q 100 135 150 145 Q 200 155 240 135" stroke="#87ceeb" stroke-width="2" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="#4682b4"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="#4682b4"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="#4682b4"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="black" stroke-width="3" fill="#4682b4"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="black" stroke-width="3" fill="#4682b4"/>
-            <circle cx="235" cy="130" r="4" fill="#333"/>
-            <path d="M 225 138 Q 235 142 245 138" stroke="#333" stroke-width="2" fill="none"/>
+            <ellipse cx="150" cy="150" rx="80" ry="30" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4" transform="rotate(-10 150 150)"/>
+            <path d="M 220 135 Q 245 130 250 140" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4"/>
+            <path d="M 160 140 L 170 100 L 165 140" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4"/>
+            <path d="M 70 155 L 45 140 L 50 165 L 45 180 L 65 170 Z" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4"/>
+            <path d="M 110 165 L 100 185 L 120 170" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4"/>
+            <path d="M 190 165 L 200 185 L 180 170" stroke="#2c5f7d" stroke-width="3" fill="#6ba3d4"/>
+            <ellipse cx="150" cy="155" rx="70" ry="22" fill="#b3d9f2" opacity="0.6" transform="rotate(-10 150 150)"/>
+            <circle cx="235" cy="137" r="5" fill="#1a1a1a"/>
+            <path d="M 225 145 Q 235 148 245 145" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+            <text x="90" y="240" fill="#2c5f7d" font-size="14" font-weight="bold">Add color & shading!</text>
         </svg>
     `,
 

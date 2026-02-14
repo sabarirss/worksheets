@@ -244,72 +244,97 @@ const storyDatabase = {
             ]
         }],
         medium: [{
-            id: 1,
-            title: "Max the Cat",
-            icon: "🐱",
-            level: "Beginner",
-            wordCount: 80,
-            grammarFocus: "Simple present tense, 'is/are'",
-            vocabulary: ["cat", "happy", "play", "jump", "sleep"],
+            id: 2,
+            title: "The Library Adventure",
+            icon: "📚",
+            level: "Early Reader",
+            wordCount: 130,
+            grammarFocus: "Question words (who, what, where, when, why)",
+            vocabulary: ["library", "borrow", "librarian", "quiet", "discover"],
             content: [
-                "Max is a cat. He is orange and white.",
-                "Max likes to play. He plays with a ball.",
-                "The ball is red. It is round.",
-                "Max jumps high. He jumps on the chair.",
-                "Max is happy. He likes to run.",
-                "At night, Max sleeps. He sleeps in his bed.",
-                "Max is a good cat!"
+                "Today, Mom and I went to the library. I have never been there before.",
+                "The library is a big building with many books. Thousands of books!",
+                "A nice librarian named Ms. Johnson greeted us. She showed us around.",
+                "'This is the children's section,' she said. 'You can find picture books, chapter books, and comics here.'",
+                "I saw books about dinosaurs, space, animals, and magic. So many choices!",
+                "Mom helped me choose three books. One was about a brave knight. One was about ocean animals. The last one was a funny story about a talking dog.",
+                "'Can I take these home?' I asked Ms. Johnson.",
+                "'Yes! You can borrow them for two weeks,' she explained. 'Just bring them back when you're done.'",
+                "She scanned the books with a special machine. She gave me a library card with my name on it!",
+                "On the way home, I couldn't wait to start reading.",
+                "That night, I read the story about the talking dog. It made me laugh!",
+                "The next day, I read about ocean animals. I learned that octopuses have three hearts!",
+                "Libraries are amazing places. I can't wait to go back and borrow more books.",
+                "Now I know the answer to 'Where can I find adventure?' At the library!"
             ],
             questions: [
                 {
-                    question: "What color is Max?",
-                    options: ["Orange and white", "Black and white", "Gray", "Brown"],
-                    correct: 0
-                },
-                {
-                    question: "What does Max play with?",
-                    options: ["A stick", "A ball", "A toy car", "A rope"],
+                    question: "Who showed them around the library?",
+                    options: ["Mom", "Ms. Johnson", "A teacher", "A friend"],
                     correct: 1
                 },
                 {
-                    question: "Where does Max sleep?",
-                    options: ["On the floor", "In a box", "In his bed", "On the chair"],
+                    question: "How many books did the child borrow?",
+                    options: ["One", "Two", "Three", "Four"],
                     correct: 2
+                },
+                {
+                    question: "How long can books be borrowed?",
+                    options: ["One week", "Two weeks", "One month", "Forever"],
+                    correct: 1
+                },
+                {
+                    question: "What did the child learn about octopuses?",
+                    options: ["They have three hearts", "They are blue", "They are small", "They live in rivers"],
+                    correct: 0
                 }
             ]
         },
         {
-            id: 2,
-            title: "Sam Goes to the Park",
-            icon: "🏞️",
-            level: "Beginner",
-            wordCount: 90,
-            grammarFocus: "Action verbs, simple sentences",
-            vocabulary: ["park", "swing", "slide", "friend", "fun"],
+            id: 3,
+            title: "Making New Friends",
+            icon: "👫",
+            level: "Early Reader",
+            wordCount: 125,
+            grammarFocus: "Dialogue, feelings vocabulary",
+            vocabulary: ["nervous", "introduce", "friendship", "conversation", "common"],
             content: [
-                "Sam goes to the park. It is a sunny day.",
-                "The park is big. There are many trees.",
-                "Sam sees a swing. He swings high.",
-                "Next, Sam goes to the slide. The slide is tall.",
-                "Sam slides down fast. Wheee!",
-                "Sam sees his friend Ben. They play together.",
-                "Sam and Ben have fun. They love the park!"
+                "It was my first day at a new school. I felt nervous as I walked into the classroom.",
+                "Mrs. Brown, my new teacher, smiled at me. 'Class, we have a new student. Please welcome Alex!'",
+                "Everyone looked at me. My face felt hot. I quietly said, 'Hello.'",
+                "Mrs. Brown pointed to an empty seat. 'You can sit next to Maria,' she said.",
+                "I sat down. Maria smiled and whispered, 'Hi! I like your backpack. Is that a dinosaur?'",
+                "'Yes, it's a T-Rex,' I replied. 'Dinosaurs are my favorite!'",
+                "'Mine too!' Maria's eyes lit up. 'Do you know what the longest dinosaur was?'",
+                "We talked about dinosaurs during break time. Maria knew so much!",
+                "She introduced me to her friends Leo and Jasmine. They were all very friendly.",
+                "Leo asked, 'Do you want to play soccer with us?'",
+                "I nodded happily. We played together at recess. I scored a goal!",
+                "At the end of the day, Maria said, 'Same seat tomorrow?'",
+                "'Definitely!' I replied with a big smile.",
+                "My first day wasn't scary after all. I made new friends who liked the same things I did.",
+                "Sometimes, all it takes is one person being friendly to make everything better."
             ],
             questions: [
                 {
-                    question: "Where does Sam go?",
-                    options: ["To school", "To the park", "To the store", "To home"],
+                    question: "How did Alex feel on the first day?",
+                    options: ["Excited", "Nervous", "Angry", "Bored"],
                     correct: 1
                 },
                 {
-                    question: "What is the weather like?",
-                    options: ["Rainy", "Snowy", "Sunny", "Windy"],
+                    question: "What did Alex and Maria both like?",
+                    options: ["Soccer", "Books", "Dinosaurs", "Art"],
                     correct: 2
                 },
                 {
-                    question: "Who does Sam play with?",
-                    options: ["His sister", "His mom", "His friend Ben", "His dog"],
+                    question: "Who did Maria introduce to Alex?",
+                    options: ["Her teacher", "Her parents", "Leo and Jasmine", "Her sister"],
                     correct: 2
+                },
+                {
+                    question: "What game did they play at recess?",
+                    options: ["Basketball", "Soccer", "Tag", "Hide and seek"],
+                    correct: 1
                 }
             ]
         }],
