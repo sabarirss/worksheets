@@ -4,6 +4,26 @@ let currentDifficulty = '';
 let currentTutorial = '';
 let currentStep = 0;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // Drawing tutorials database with SVG visual steps
 const drawingTutorials = {
     easy: {
@@ -138,284 +158,284 @@ const visualGuides = {
     // CIRCLE
     'circle-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="3" fill="#667eea" />
-            <text x="170" y="155" fill="#667eea" font-size="16" font-weight="bold">← Start here</text>
+            <circle cx="150" cy="150" r="3" fill="blue" />
+            <text x="170" y="155" fill="blue" font-size="16" font-weight="bold">← Start here</text>
         </svg>
     `,
     'circle-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 150 100 A 50 50 0 0 1 200 150" stroke="#667eea" stroke-width="4" fill="none" stroke-linecap="round"/>
-            <circle cx="150" cy="100" r="3" fill="#667eea" />
-            <path d="M 195 145 L 205 150 L 195 155" fill="#667eea"/>
+            <path d="M 150 100 A 50 50 0 0 1 200 150" stroke="blue" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="150" cy="100" r="3" fill="blue" />
+            <path d="M 195 145 L 205 150 L 195 155" fill="blue"/>
         </svg>
     `,
     'circle-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 150 100 A 50 50 0 1 1 100 150" stroke="#667eea" stroke-width="4" fill="none" stroke-linecap="round"/>
-            <circle cx="150" cy="100" r="3" fill="#667eea" />
-            <path d="M 95 150 L 90 140 L 100 145" fill="#667eea"/>
+            <path d="M 150 100 A 50 50 0 1 1 100 150" stroke="blue" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="150" cy="100" r="3" fill="blue" />
+            <path d="M 95 150 L 90 140 L 100 145" fill="blue"/>
         </svg>
     `,
     'circle-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 150 100 A 50 50 0 1 1 145 100" stroke="#667eea" stroke-width="4" fill="none" stroke-linecap="round"/>
-            <circle cx="150" cy="100" r="3" fill="#667eea" />
-            <circle cx="145" cy="100" r="3" fill="#4caf50" />
-            <path d="M 150 95 L 145 90 L 155 90" fill="#4caf50"/>
+            <path d="M 150 100 A 50 50 0 1 1 145 100" stroke="blue" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="150" cy="100" r="3" fill="blue" />
+            <circle cx="145" cy="100" r="3" fill="blue" />
+            <path d="M 150 95 L 145 90 L 155 90" fill="blue"/>
         </svg>
     `,
     'circle-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="80" stroke="#4caf50" stroke-width="5" fill="none"/>
-            <text x="150" y="160" text-anchor="middle" fill="#4caf50" font-size="24" font-weight="bold">✓</text>
+            <circle cx="150" cy="150" r="80" stroke="black" stroke-width="5" fill="none"/>
+            <text x="150" y="160" text-anchor="middle" fill="green" font-size="24" font-weight="bold">✓</text>
         </svg>
     `,
 
     // SUN
     'sun-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="150" r="40" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'sun-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <line x1="150" y1="80" x2="150" y2="50" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="150" y1="220" x2="150" y2="250" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="80" y1="150" x2="50" y2="150" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="220" y1="150" x2="250" y2="150" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="150" y1="80" x2="150" y2="50" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="150" y1="220" x2="150" y2="250" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="80" y1="150" x2="50" y2="150" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="220" y1="150" x2="250" y2="150" stroke="blue" stroke-width="4" stroke-linecap="round"/>
         </svg>
     `,
     'sun-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <line x1="150" y1="80" x2="150" y2="50" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="150" y1="220" x2="150" y2="250" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="80" y1="150" x2="50" y2="150" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="220" y1="150" x2="250" y2="150" stroke="#667eea" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="100" x2="75" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="100" x2="225" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="200" x2="75" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="200" x2="225" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="150" y1="80" x2="150" y2="50" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="150" y1="220" x2="150" y2="250" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="80" y1="150" x2="50" y2="150" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="220" y1="150" x2="250" y2="150" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="100" x2="75" y2="75" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="100" x2="225" y2="75" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="200" x2="75" y2="225" stroke="blue" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="200" x2="225" y2="225" stroke="blue" stroke-width="4" stroke-linecap="round"/>
         </svg>
     `,
     'sun-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="40" stroke="#667eea" stroke-width="4" fill="#ffd93d"/>
-            <line x1="150" y1="80" x2="150" y2="50" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="150" y1="220" x2="150" y2="250" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="80" y1="150" x2="50" y2="150" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="220" y1="150" x2="250" y2="150" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="100" x2="75" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="100" x2="225" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="200" x2="75" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="200" x2="225" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="150" y1="80" x2="150" y2="50" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="150" y1="220" x2="150" y2="250" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="80" y1="150" x2="50" y2="150" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="220" y1="150" x2="250" y2="150" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="100" x2="75" y2="75" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="100" x2="225" y2="75" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="200" x2="75" y2="225" stroke="black" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="200" x2="225" y2="225" stroke="black" stroke-width="4" stroke-linecap="round"/>
         </svg>
     `,
     'sun-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="150" r="40" stroke="#667eea" stroke-width="4" fill="#ffd93d"/>
-            <line x1="150" y1="80" x2="150" y2="50" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="150" y1="220" x2="150" y2="250" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="80" y1="150" x2="50" y2="150" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="220" y1="150" x2="250" y2="150" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="100" x2="75" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="100" x2="225" y2="75" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="100" y1="200" x2="75" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <line x1="200" y1="200" x2="225" y2="225" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <circle cx="135" cy="140" r="5" fill="#333"/>
-            <circle cx="165" cy="140" r="5" fill="#333"/>
-            <path d="M 130 160 Q 150 170 170 160" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="40" stroke="black" stroke-width="4" fill="yellow"/>
+            <line x1="150" y1="80" x2="150" y2="50" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="150" y1="220" x2="150" y2="250" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="80" y1="150" x2="50" y2="150" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="220" y1="150" x2="250" y2="150" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="100" x2="75" y2="75" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="100" x2="225" y2="75" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="100" y1="200" x2="75" y2="225" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <line x1="200" y1="200" x2="225" y2="225" stroke="orange" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="135" cy="140" r="5" fill="black"/>
+            <circle cx="165" cy="140" r="5" fill="black"/>
+            <path d="M 130 160 Q 150 170 170 160" stroke="black" stroke-width="3" fill="none" stroke-linecap="round"/>
         </svg>
     `,
 
     // HOUSE
     'house-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="75" y="100" width="150" height="150" stroke="#667eea" stroke-width="4" fill="none"/>
+            <rect x="75" y="100" width="150" height="150" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'house-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="75" y="100" width="150" height="150" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="75" y="100" width="150" height="150" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'house-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="75" y="100" width="150" height="150" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="125" y="180" width="50" height="70" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="75" y="100" width="150" height="150" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="125" y="180" width="50" height="70" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'house-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="75" y="100" width="150" height="150" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="125" y="180" width="50" height="70" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="85" y="120" width="30" height="30" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <rect x="185" y="120" width="30" height="30" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <rect x="75" y="100" width="150" height="150" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="125" y="180" width="50" height="70" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="85" y="120" width="30" height="30" stroke="blue" stroke-width="3" fill="none"/>
+            <rect x="185" y="120" width="30" height="30" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'house-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="75" y="100" width="150" height="150" stroke="#667eea" stroke-width="4" fill="#f0e6d2"/>
-            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <rect x="125" y="180" width="50" height="70" stroke="#667eea" stroke-width="4" fill="#8b4513"/>
-            <rect x="85" y="120" width="30" height="30" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <rect x="185" y="120" width="30" height="30" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <circle cx="160" cy="215" r="4" fill="#4caf50"/>
+            <rect x="75" y="100" width="150" height="150" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 60 100 L 150 40 L 240 100 Z" stroke="black" stroke-width="4" fill="red"/>
+            <rect x="125" y="180" width="50" height="70" stroke="black" stroke-width="4" fill="brown"/>
+            <rect x="85" y="120" width="30" height="30" stroke="black" stroke-width="3" fill="none"/>
+            <rect x="185" y="120" width="30" height="30" stroke="black" stroke-width="3" fill="none"/>
+            <circle cx="160" cy="215" r="4" fill="black"/>
         </svg>
     `,
 
     // TREE
     'tree-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <line x1="130" y1="150" x2="130" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="170" y1="150" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
+            <line x1="130" y1="150" x2="130" y2="250" stroke="blue" stroke-width="4"/>
+            <line x1="170" y1="150" x2="170" y2="250" stroke="blue" stroke-width="4"/>
         </svg>
     `,
     'tree-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <line x1="130" y1="150" x2="130" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="170" y1="150" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="130" y1="250" x2="170" y2="250" stroke="#4caf50" stroke-width="4"/>
+            <line x1="130" y1="150" x2="130" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="170" y1="150" x2="170" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="130" y1="250" x2="170" y2="250" stroke="blue" stroke-width="4"/>
         </svg>
     `,
     'tree-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <line x1="130" y1="150" x2="130" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="170" y1="150" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="130" y1="250" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
-            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <line x1="130" y1="150" x2="130" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="170" y1="150" x2="170" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="130" y1="250" x2="170" y2="250" stroke="black" stroke-width="4"/>
+            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'tree-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <line x1="130" y1="150" x2="130" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="170" y1="150" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="130" y1="250" x2="170" y2="250" stroke="#667eea" stroke-width="4"/>
-            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="#4caf50" stroke-width="4" fill="#90EE90"/>
+            <line x1="130" y1="150" x2="130" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="170" y1="150" x2="170" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="130" y1="250" x2="170" y2="250" stroke="black" stroke-width="4"/>
+            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'tree-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="130" y="150" width="40" height="100" stroke="#667eea" stroke-width="4" fill="#8b4513"/>
+            <rect x="130" y="150" width="40" height="100" stroke="black" stroke-width="4" fill="#8b4513"/>
             <line x1="140" y1="170" x2="140" y2="230" stroke="#5a3410" stroke-width="2"/>
             <line x1="160" y1="180" x2="160" y2="240" stroke="#5a3410" stroke-width="2"/>
-            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="#4caf50" stroke-width="4" fill="#90EE90"/>
+            <ellipse cx="150" cy="100" rx="70" ry="60" stroke="black" stroke-width="4" fill="#90EE90"/>
         </svg>
     `,
 
     // FLOWER
     'flower-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="100" r="15" stroke="#667eea" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="100" r="15" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'flower-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="100" r="15" stroke="#667eea" stroke-width="4" fill="none"/>
-            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="#4caf50" stroke-width="3" fill="none" transform="rotate(45 170 80)"/>
+            <circle cx="150" cy="100" r="15" stroke="black" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="blue" stroke-width="3" fill="none"/>
+            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="blue" stroke-width="3" fill="none" transform="rotate(45 170 80)"/>
         </svg>
     `,
     'flower-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="#667eea" stroke-width="3" fill="#ff69b4" transform="rotate(45 170 80)"/>
-            <circle cx="150" cy="100" r="15" stroke="#667eea" stroke-width="4" fill="#ffd93d"/>
+            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="black" stroke-width="3" fill="none" transform="rotate(45 170 80)"/>
+            <circle cx="150" cy="100" r="15" stroke="black" stroke-width="4" fill="none"/>
         </svg>
     `,
     'flower-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="#667eea" stroke-width="3" fill="#ff69b4" transform="rotate(45 170 80)"/>
-            <circle cx="150" cy="100" r="15" stroke="#667eea" stroke-width="4" fill="#ffd93d"/>
-            <line x1="150" y1="115" x2="150" y2="250" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
+            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="black" stroke-width="3" fill="none" transform="rotate(45 170 80)"/>
+            <circle cx="150" cy="100" r="15" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="150" y1="115" x2="150" y2="250" stroke="blue" stroke-width="4" stroke-linecap="round"/>
         </svg>
     `,
     'flower-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="#667eea" stroke-width="3" fill="#ff69b4"/>
-            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="#667eea" stroke-width="3" fill="#ff69b4" transform="rotate(45 170 80)"/>
-            <circle cx="150" cy="100" r="15" stroke="#667eea" stroke-width="4" fill="#ffd93d"/>
-            <line x1="150" y1="115" x2="150" y2="250" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
-            <ellipse cx="120" cy="180" rx="25" ry="15" stroke="#4caf50" stroke-width="3" fill="#90EE90" transform="rotate(-30 120 180)"/>
-            <ellipse cx="180" cy="200" rx="25" ry="15" stroke="#4caf50" stroke-width="3" fill="#90EE90" transform="rotate(30 180 200)"/>
+            <ellipse cx="150" cy="70" rx="12" ry="20" stroke="black" stroke-width="3" fill="#ff69b4"/>
+            <ellipse cx="150" cy="130" rx="12" ry="20" stroke="black" stroke-width="3" fill="#ff69b4"/>
+            <ellipse cx="120" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="#ff69b4"/>
+            <ellipse cx="180" cy="100" rx="20" ry="12" stroke="black" stroke-width="3" fill="#ff69b4"/>
+            <ellipse cx="170" cy="80" rx="15" ry="15" stroke="black" stroke-width="3" fill="#ff69b4" transform="rotate(45 170 80)"/>
+            <circle cx="150" cy="100" r="15" stroke="black" stroke-width="4" fill="#ffd93d"/>
+            <line x1="150" y1="115" x2="150" y2="250" stroke="green" stroke-width="4" stroke-linecap="round"/>
+            <ellipse cx="120" cy="180" rx="25" ry="15" stroke="green" stroke-width="3" fill="#90EE90" transform="rotate(-30 120 180)"/>
+            <ellipse cx="180" cy="200" rx="25" ry="15" stroke="green" stroke-width="3" fill="#90EE90" transform="rotate(30 180 200)"/>
         </svg>
     `,
 
     // CAT
     'cat-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="40" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'cat-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <circle cx="150" cy="120" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="blue" stroke-width="3" fill="none"/>
+            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'cat-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="#667eea" stroke-width="3" fill="none"/>
-            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="#667eea" stroke-width="3" fill="none"/>
-            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'cat-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="#667eea" stroke-width="3" fill="none"/>
-            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="#667eea" stroke-width="3" fill="none"/>
-            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="#667eea" stroke-width="4" fill="none"/>
-            <line x1="120" y1="200" x2="120" y2="250" stroke="#4caf50" stroke-width="4"/>
-            <line x1="140" y1="200" x2="140" y2="250" stroke="#4caf50" stroke-width="4"/>
-            <line x1="160" y1="200" x2="160" y2="250" stroke="#4caf50" stroke-width="4"/>
-            <line x1="180" y1="200" x2="180" y2="250" stroke="#4caf50" stroke-width="4"/>
+            <circle cx="150" cy="120" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="120" y1="200" x2="120" y2="250" stroke="blue" stroke-width="4"/>
+            <line x1="140" y1="200" x2="140" y2="250" stroke="blue" stroke-width="4"/>
+            <line x1="160" y1="200" x2="160" y2="250" stroke="blue" stroke-width="4"/>
+            <line x1="180" y1="200" x2="180" y2="250" stroke="blue" stroke-width="4"/>
         </svg>
     `,
     'cat-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="#ffa500"/>
-            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="#667eea" stroke-width="3" fill="#ffa500"/>
-            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="#667eea" stroke-width="3" fill="#ffa500"/>
-            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="#667eea" stroke-width="4" fill="#ffa500"/>
-            <line x1="120" y1="200" x2="120" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="140" y1="200" x2="140" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="160" y1="200" x2="160" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="180" y1="200" x2="180" y2="250" stroke="#667eea" stroke-width="4"/>
-            <circle cx="135" cy="115" r="4" fill="#333"/>
-            <circle cx="165" cy="115" r="4" fill="#333"/>
-            <path d="M 145 125 L 150 130 L 155 125" stroke="#333" stroke-width="2" fill="none"/>
+            <circle cx="150" cy="120" r="40" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="black" stroke-width="3" fill="none"/>
+            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="120" y1="200" x2="120" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="140" y1="200" x2="140" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="160" y1="200" x2="160" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="180" y1="200" x2="180" y2="250" stroke="black" stroke-width="4"/>
+            <circle cx="135" cy="115" r="4" fill="blue"/>
+            <circle cx="165" cy="115" r="4" fill="blue"/>
+            <path d="M 145 125 L 150 130 L 155 125" stroke="blue" stroke-width="2" fill="none"/>
         </svg>
     `,
     'cat-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <circle cx="150" cy="120" r="40" stroke="#667eea" stroke-width="4" fill="#ffa500"/>
-            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="#667eea" stroke-width="3" fill="#ffa500"/>
-            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="#667eea" stroke-width="3" fill="#ffa500"/>
-            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="#667eea" stroke-width="4" fill="#ffa500"/>
-            <line x1="120" y1="200" x2="120" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="140" y1="200" x2="140" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="160" y1="200" x2="160" y2="250" stroke="#667eea" stroke-width="4"/>
-            <line x1="180" y1="200" x2="180" y2="250" stroke="#667eea" stroke-width="4"/>
+            <circle cx="150" cy="120" r="40" stroke="black" stroke-width="4" fill="#ffa500"/>
+            <path d="M 120 90 L 110 60 L 130 85 Z" stroke="black" stroke-width="3" fill="#ffa500"/>
+            <path d="M 180 90 L 190 60 L 170 85 Z" stroke="black" stroke-width="3" fill="#ffa500"/>
+            <ellipse cx="150" cy="180" rx="50" ry="40" stroke="black" stroke-width="4" fill="#ffa500"/>
+            <line x1="120" y1="200" x2="120" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="140" y1="200" x2="140" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="160" y1="200" x2="160" y2="250" stroke="black" stroke-width="4"/>
+            <line x1="180" y1="200" x2="180" y2="250" stroke="black" stroke-width="4"/>
             <circle cx="135" cy="115" r="4" fill="#333"/>
             <circle cx="165" cy="115" r="4" fill="#333"/>
             <path d="M 145 125 L 150 130 L 155 125" stroke="#333" stroke-width="2" fill="none"/>
@@ -425,120 +445,120 @@ const visualGuides = {
             <line x1="190" y1="120" x2="220" y2="115" stroke="#333" stroke-width="2"/>
             <line x1="190" y1="125" x2="220" y2="125" stroke="#333" stroke-width="2"/>
             <line x1="190" y1="130" x2="220" y2="135" stroke="#333" stroke-width="2"/>
-            <path d="M 190 170 Q 220 160 240 180" stroke="#4caf50" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M 190 170 Q 220 160 240 180" stroke="black" stroke-width="4" fill="none" stroke-linecap="round"/>
         </svg>
     `,
 
     // CAR
     'car-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" stroke="#667eea" stroke-width="4" fill="none"/>
+            <rect x="50" y="150" width="200" height="60" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'car-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="90" y="110" width="120" height="40" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="50" y="150" width="200" height="60" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="90" y="110" width="120" height="40" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'car-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="#667eea" stroke-width="4" fill="none"/>
+            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="black" stroke-width="4" fill="none"/>
         </svg>
     `,
     'car-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="#667eea" stroke-width="4" fill="none"/>
-            <circle cx="100" cy="210" r="25" stroke="#4caf50" stroke-width="4" fill="none"/>
-            <circle cx="200" cy="210" r="25" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="100" cy="210" r="25" stroke="blue" stroke-width="4" fill="none"/>
+            <circle cx="200" cy="210" r="25" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'car-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <circle cx="100" cy="210" r="25" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <circle cx="200" cy="210" r="25" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <circle cx="100" cy="210" r="10" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <circle cx="200" cy="210" r="10" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="100" cy="210" r="25" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="200" cy="210" r="25" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="100" cy="210" r="10" stroke="blue" stroke-width="3" fill="none"/>
+            <circle cx="200" cy="210" r="10" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'car-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <line x1="150" y1="110" x2="150" y2="150" stroke="#667eea" stroke-width="3"/>
-            <circle cx="100" cy="210" r="25" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <circle cx="200" cy="210" r="25" stroke="#667eea" stroke-width="4" fill="#333"/>
+            <rect x="50" y="150" width="200" height="60" rx="10" ry="10" stroke="black" stroke-width="4" fill="#e74c3c"/>
+            <rect x="90" y="110" width="120" height="40" rx="5" ry="5" stroke="black" stroke-width="4" fill="#87ceeb"/>
+            <line x1="150" y1="110" x2="150" y2="150" stroke="black" stroke-width="3"/>
+            <circle cx="100" cy="210" r="25" stroke="black" stroke-width="4" fill="#333"/>
+            <circle cx="200" cy="210" r="25" stroke="black" stroke-width="4" fill="#333"/>
             <circle cx="100" cy="210" r="10" stroke="#ddd" stroke-width="3" fill="none"/>
             <circle cx="200" cy="210" r="10" stroke="#ddd" stroke-width="3" fill="none"/>
-            <rect x="50" y="165" width="15" height="10" stroke="#4caf50" stroke-width="2" fill="#ffd93d"/>
-            <rect x="235" y="165" width="15" height="10" stroke="#4caf50" stroke-width="2" fill="#ffd93d"/>
+            <rect x="50" y="165" width="15" height="10" stroke="black" stroke-width="2" fill="#ffd93d"/>
+            <rect x="235" y="165" width="15" height="10" stroke="black" stroke-width="2" fill="#ffd93d"/>
         </svg>
     `,
 
     // BUTTERFLY
     'butterfly-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'butterfly-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="none"/>
-            <circle cx="150" cy="120" r="10" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="10" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'butterfly-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="none"/>
-            <circle cx="150" cy="120" r="10" stroke="#667eea" stroke-width="4" fill="none"/>
-            <line x1="145" y1="115" x2="130" y2="90" stroke="#4caf50" stroke-width="3"/>
-            <circle cx="130" cy="90" r="3" fill="#4caf50"/>
-            <line x1="155" y1="115" x2="170" y2="90" stroke="#4caf50" stroke-width="3"/>
-            <circle cx="170" cy="90" r="3" fill="#4caf50"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="10" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="145" y1="115" x2="130" y2="90" stroke="blue" stroke-width="3"/>
+            <circle cx="130" cy="90" r="3" fill="blue"/>
+            <line x1="155" y1="115" x2="170" y2="90" stroke="blue" stroke-width="3"/>
+            <circle cx="170" cy="90" r="3" fill="blue"/>
         </svg>
     `,
     'butterfly-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="none"/>
-            <circle cx="150" cy="120" r="10" stroke="#667eea" stroke-width="4" fill="none"/>
-            <line x1="145" y1="115" x2="130" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="130" cy="90" r="3" fill="#667eea"/>
-            <line x1="155" y1="115" x2="170" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="170" cy="90" r="3" fill="#667eea"/>
-            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="#4caf50" stroke-width="4" fill="none"/>
-            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="10" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="145" y1="115" x2="130" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="130" cy="90" r="3" fill="black"/>
+            <line x1="155" y1="115" x2="170" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="170" cy="90" r="3" fill="black"/>
+            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="blue" stroke-width="4" fill="none"/>
+            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'butterfly-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <circle cx="150" cy="120" r="10" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <line x1="145" y1="115" x2="130" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="130" cy="90" r="3" fill="#667eea"/>
-            <line x1="155" y1="115" x2="170" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="170" cy="90" r="3" fill="#667eea"/>
-            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="#667eea" stroke-width="4" fill="#ff69b4"/>
-            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="#667eea" stroke-width="4" fill="#9370db"/>
-            <ellipse cx="200" cy="140" rx="35" ry="25" stroke="#4caf50" stroke-width="4" fill="#ff69b4"/>
-            <ellipse cx="200" cy="170" rx="30" ry="20" stroke="#4caf50" stroke-width="4" fill="#9370db"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="black" stroke-width="4" fill="none"/>
+            <circle cx="150" cy="120" r="10" stroke="black" stroke-width="4" fill="none"/>
+            <line x1="145" y1="115" x2="130" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="130" cy="90" r="3" fill="black"/>
+            <line x1="155" y1="115" x2="170" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="170" cy="90" r="3" fill="black"/>
+            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="black" stroke-width="4" fill="none"/>
+            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="black" stroke-width="4" fill="none"/>
+            <ellipse cx="200" cy="140" rx="35" ry="25" stroke="blue" stroke-width="4" fill="none"/>
+            <ellipse cx="200" cy="170" rx="30" ry="20" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'butterfly-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <circle cx="150" cy="120" r="10" stroke="#667eea" stroke-width="4" fill="#333"/>
-            <line x1="145" y1="115" x2="130" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="130" cy="90" r="3" fill="#667eea"/>
-            <line x1="155" y1="115" x2="170" y2="90" stroke="#667eea" stroke-width="3"/>
-            <circle cx="170" cy="90" r="3" fill="#667eea"/>
-            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="#667eea" stroke-width="4" fill="#ff69b4"/>
-            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="#667eea" stroke-width="4" fill="#9370db"/>
-            <ellipse cx="200" cy="140" rx="35" ry="25" stroke="#667eea" stroke-width="4" fill="#ff69b4"/>
-            <ellipse cx="200" cy="170" rx="30" ry="20" stroke="#667eea" stroke-width="4" fill="#9370db"/>
+            <ellipse cx="150" cy="150" rx="8" ry="35" stroke="black" stroke-width="4" fill="#333"/>
+            <circle cx="150" cy="120" r="10" stroke="black" stroke-width="4" fill="#333"/>
+            <line x1="145" y1="115" x2="130" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="130" cy="90" r="3" fill="black"/>
+            <line x1="155" y1="115" x2="170" y2="90" stroke="black" stroke-width="3"/>
+            <circle cx="170" cy="90" r="3" fill="black"/>
+            <ellipse cx="100" cy="140" rx="35" ry="25" stroke="black" stroke-width="4" fill="#ff69b4"/>
+            <ellipse cx="100" cy="170" rx="30" ry="20" stroke="black" stroke-width="4" fill="#9370db"/>
+            <ellipse cx="200" cy="140" rx="35" ry="25" stroke="black" stroke-width="4" fill="#ff69b4"/>
+            <ellipse cx="200" cy="170" rx="30" ry="20" stroke="black" stroke-width="4" fill="#9370db"/>
             <circle cx="90" cy="135" r="6" fill="#ffd93d"/>
             <circle cx="105" cy="140" r="4" fill="#fff"/>
             <circle cx="190" cy="135" r="6" fill="#ffd93d"/>
@@ -549,61 +569,61 @@ const visualGuides = {
     // DOLPHIN - simplified for hard level
     'dolphin-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'dolphin-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'dolphin-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 150 140 Q 160 110 150 100" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'dolphin-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'dolphin-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="#4caf50" stroke-width="3" fill="none"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 90 145 L 80 130 L 95 145" stroke="blue" stroke-width="3" fill="none"/>
+            <path d="M 210 145 L 220 130 L 205 145" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'dolphin-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="#667eea" stroke-width="4" fill="#87ceeb"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="#667eea" stroke-width="3" fill="#87ceeb"/>
-            <circle cx="235" cy="130" r="4" fill="#333"/>
-            <path d="M 225 138 Q 235 142 245 138" stroke="#4caf50" stroke-width="2" fill="none"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 90 145 L 80 130 L 95 145" stroke="black" stroke-width="3" fill="none"/>
+            <path d="M 210 145 L 220 130 L 205 145" stroke="black" stroke-width="3" fill="none"/>
+            <circle cx="235" cy="130" r="4" fill="blue"/>
+            <path d="M 225 138 Q 235 142 245 138" stroke="blue" stroke-width="2" fill="none"/>
         </svg>
     `,
     'dolphin-step7': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="#667eea" stroke-width="4" fill="#4682b4"/>
+            <path d="M 50 150 Q 100 130 150 140 Q 200 150 240 130" stroke="black" stroke-width="4" fill="#4682b4"/>
             <path d="M 50 155 Q 100 135 150 145 Q 200 155 240 135" stroke="#87ceeb" stroke-width="2" fill="none"/>
-            <path d="M 240 130 Q 250 125 255 130" stroke="#667eea" stroke-width="4" fill="#4682b4"/>
-            <path d="M 150 140 Q 160 110 150 100" stroke="#667eea" stroke-width="4" fill="#4682b4"/>
-            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="#667eea" stroke-width="3" fill="#4682b4"/>
-            <path d="M 90 145 L 80 130 L 95 145" stroke="#667eea" stroke-width="3" fill="#4682b4"/>
-            <path d="M 210 145 L 220 130 L 205 145" stroke="#667eea" stroke-width="3" fill="#4682b4"/>
+            <path d="M 240 130 Q 250 125 255 130" stroke="black" stroke-width="4" fill="#4682b4"/>
+            <path d="M 150 140 Q 160 110 150 100" stroke="black" stroke-width="4" fill="#4682b4"/>
+            <path d="M 45 145 L 35 135 L 40 150 L 35 165 L 45 155 Z" stroke="black" stroke-width="3" fill="#4682b4"/>
+            <path d="M 90 145 L 80 130 L 95 145" stroke="black" stroke-width="3" fill="#4682b4"/>
+            <path d="M 210 145 L 220 130 L 205 145" stroke="black" stroke-width="3" fill="#4682b4"/>
             <circle cx="235" cy="130" r="4" fill="#333"/>
             <path d="M 225 138 Q 235 142 245 138" stroke="#333" stroke-width="2" fill="none"/>
         </svg>
@@ -612,97 +632,97 @@ const visualGuides = {
     // CASTLE - simplified
     'castle-step1': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="none"/>
+            <rect x="100" y="120" width="100" height="120" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'castle-step2': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#4caf50" stroke-width="4" fill="none"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="60" y="100" width="40" height="140" stroke="blue" stroke-width="4" fill="none"/>
+            <rect x="200" y="100" width="40" height="140" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'castle-step3': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="#4caf50" stroke-width="4" fill="none"/>
-            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="#4caf50" stroke-width="4" fill="none"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="60" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="200" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="blue" stroke-width="4" fill="none"/>
+            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="blue" stroke-width="4" fill="none"/>
         </svg>
     `,
     'castle-step4': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="95" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
-            <rect x="113" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
-            <rect x="131" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
-            <rect x="149" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
-            <rect x="167" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
-            <rect x="185" y="115" width="12" height="10" stroke="#4caf50" stroke-width="2" fill="none"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="60" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="200" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="95" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="113" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="131" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="149" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="167" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="185" y="115" width="12" height="10" stroke="blue" stroke-width="2" fill="none"/>
         </svg>
     `,
     'castle-step5': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="#667eea" stroke-width="4" fill="none"/>
-            <rect x="95" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="113" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="131" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="149" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="167" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="185" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="130" y="200" width="40" height="40" stroke="#4caf50" stroke-width="4" fill="none"/>
-            <path d="M 130 200 L 150 185 L 170 200" stroke="#4caf50" stroke-width="3" fill="none"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="60" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="200" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="95" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="113" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="131" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="149" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="167" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="185" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="130" y="200" width="40" height="40" stroke="blue" stroke-width="4" fill="none"/>
+            <path d="M 130 200 L 150 185 L 170 200" stroke="blue" stroke-width="3" fill="none"/>
         </svg>
     `,
     'castle-step6': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <rect x="95" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="113" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="131" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="149" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="167" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="185" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="130" y="200" width="40" height="40" stroke="#667eea" stroke-width="4" fill="#8b4513"/>
-            <path d="M 130 200 L 150 185 L 170 200" stroke="#667eea" stroke-width="3" fill="none"/>
-            <rect x="110" y="140" width="15" height="20" stroke="#4caf50" stroke-width="2" fill="#87ceeb"/>
-            <rect x="175" y="140" width="15" height="20" stroke="#4caf50" stroke-width="2" fill="#87ceeb"/>
-            <rect x="70" y="120" width="15" height="20" stroke="#4caf50" stroke-width="2" fill="#87ceeb"/>
-            <rect x="215" y="120" width="15" height="20" stroke="#4caf50" stroke-width="2" fill="#87ceeb"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="60" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="200" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="black" stroke-width="4" fill="none"/>
+            <rect x="95" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="113" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="131" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="149" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="167" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="185" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="130" y="200" width="40" height="40" stroke="black" stroke-width="4" fill="none"/>
+            <path d="M 130 200 L 150 185 L 170 200" stroke="black" stroke-width="3" fill="none"/>
+            <rect x="110" y="140" width="15" height="20" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="175" y="140" width="15" height="20" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="70" y="120" width="15" height="20" stroke="blue" stroke-width="2" fill="none"/>
+            <rect x="215" y="120" width="15" height="20" stroke="blue" stroke-width="2" fill="none"/>
         </svg>
     `,
     'castle-step7': () => `
         <svg viewBox="0 0 300 300" class="step-visual">
-            <rect x="100" y="120" width="100" height="120" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <rect x="60" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <rect x="200" y="100" width="40" height="140" stroke="#667eea" stroke-width="4" fill="#d3d3d3"/>
-            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="#667eea" stroke-width="4" fill="#e74c3c"/>
-            <rect x="95" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="113" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="131" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="149" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="167" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="185" y="115" width="12" height="10" stroke="#667eea" stroke-width="2" fill="none"/>
-            <rect x="130" y="200" width="40" height="40" stroke="#667eea" stroke-width="4" fill="#8b4513"/>
-            <path d="M 130 200 L 150 185 L 170 200" stroke="#667eea" stroke-width="3" fill="none"/>
-            <rect x="110" y="140" width="15" height="20" stroke="#667eea" stroke-width="2" fill="#87ceeb"/>
-            <rect x="175" y="140" width="15" height="20" stroke="#667eea" stroke-width="2" fill="#87ceeb"/>
-            <rect x="70" y="120" width="15" height="20" stroke="#667eea" stroke-width="2" fill="#87ceeb"/>
-            <rect x="215" y="120" width="15" height="20" stroke="#667eea" stroke-width="2" fill="#87ceeb"/>
+            <rect x="100" y="120" width="100" height="120" stroke="black" stroke-width="4" fill="#d3d3d3"/>
+            <rect x="60" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="#d3d3d3"/>
+            <rect x="200" y="100" width="40" height="140" stroke="black" stroke-width="4" fill="#d3d3d3"/>
+            <path d="M 55 100 L 80 70 L 105 100 Z" stroke="black" stroke-width="4" fill="#e74c3c"/>
+            <path d="M 195 100 L 220 70 L 245 100 Z" stroke="black" stroke-width="4" fill="#e74c3c"/>
+            <rect x="95" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="113" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="131" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="149" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="167" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="185" y="115" width="12" height="10" stroke="black" stroke-width="2" fill="none"/>
+            <rect x="130" y="200" width="40" height="40" stroke="black" stroke-width="4" fill="#8b4513"/>
+            <path d="M 130 200 L 150 185 L 170 200" stroke="black" stroke-width="3" fill="none"/>
+            <rect x="110" y="140" width="15" height="20" stroke="black" stroke-width="2" fill="#87ceeb"/>
+            <rect x="175" y="140" width="15" height="20" stroke="black" stroke-width="2" fill="#87ceeb"/>
+            <rect x="70" y="120" width="15" height="20" stroke="black" stroke-width="2" fill="#87ceeb"/>
+            <rect x="215" y="120" width="15" height="20" stroke="black" stroke-width="2" fill="#87ceeb"/>
             <line x1="78" y1="72" x2="78" y2="58" stroke="#e74c3c" stroke-width="2"/>
             <path d="M 78 58 L 70 63 L 78 60 L 86 63 Z" fill="#e74c3c"/>
             <line x1="220" y1="72" x2="220" y2="58" stroke="#e74c3c" stroke-width="2"/>
@@ -774,6 +794,11 @@ function loadDrawingTutorial(tutorialKey) {
 
         <div class="drawing-title">${tutorial.icon} ${tutorial.name}</div>
 
+        <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 15px; margin: 20px 0; text-align: center;">
+            <strong>💡 Tip:</strong> For the best experience, turn your device to <strong>landscape mode</strong>!
+            The instructions and canvas will appear side-by-side, making it easier to follow along.
+        </div>
+
         <div class="split-screen">
             <div class="instructions-panel">
                 <h3 style="color: #667eea; text-align: center; margin-bottom: 20px;">📋 Follow These Steps</h3>
@@ -810,11 +835,27 @@ function loadDrawingTutorial(tutorialKey) {
                     <canvas id="drawing-canvas" width="500" height="500"></canvas>
                 </div>
                 <div class="canvas-controls">
+                    <button class="canvas-btn" id="undo-btn" onclick="undo()">↶ Undo</button>
+                    <button class="canvas-btn" id="redo-btn" onclick="redo()">↷ Redo</button>
                     <button class="canvas-btn" onclick="clearCanvas()">🗑️ Clear Canvas</button>
+                </div>
+                <div class="canvas-controls">
                     <button class="canvas-btn" onclick="changeColor('black')">⚫ Black</button>
                     <button class="canvas-btn" onclick="changeColor('blue')">🔵 Blue</button>
                     <button class="canvas-btn" onclick="changeColor('red')">🔴 Red</button>
                     <button class="canvas-btn" onclick="changeColor('green')">🟢 Green</button>
+                    <button class="canvas-btn" onclick="changeColor('yellow')">🟡 Yellow</button>
+                    <button class="canvas-btn" onclick="changeColor('brown')">🟤 Brown</button>
+                    <button class="canvas-btn" onclick="changeColor('orange')">🟠 Orange</button>
+                    <button class="canvas-btn" onclick="changeColor('white')">🧹 Eraser</button>
+                </div>
+                <div class="canvas-controls" id="eraser-size-container" style="display: none; flex-direction: column; align-items: center; background: #f0f0f0; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <label style="font-weight: bold; margin-bottom: 10px; color: #764ba2;">
+                        Eraser Size: <span id="eraser-size-value">20</span>px
+                    </label>
+                    <input type="range" min="5" max="50" value="20"
+                           oninput="changeEraserSize(this.value)"
+                           style="width: 80%; cursor: pointer;">
                 </div>
                 <div class="canvas-controls">
                     <button class="canvas-btn" onclick="changeBrushSize('small')">Small Brush</button>
@@ -906,6 +947,13 @@ let canvas, ctx;
 let isDrawing = false;
 let currentColor = 'black';
 let currentBrushSize = 3;
+let eraserSize = 20; // Default eraser size
+let isEraserMode = false;
+
+// Undo/Redo functionality
+let undoStack = [];
+let redoStack = [];
+const MAX_UNDO_STEPS = 50;
 
 /**
  * Initialize drawing canvas
@@ -924,6 +972,9 @@ function initializeDrawingCanvas() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
+    // Save initial state
+    saveState();
+
     // Mouse events
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
@@ -933,7 +984,9 @@ function initializeDrawingCanvas() {
     // Touch events for mobile
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchend', function(e) {
+        stopDrawing();
+    });
 }
 
 /**
@@ -967,7 +1020,94 @@ function draw(e) {
  * Stop drawing
  */
 function stopDrawing() {
-    isDrawing = false;
+    if (isDrawing) {
+        isDrawing = false;
+        saveState(); // Save state after each stroke
+    }
+}
+
+/**
+ * Save canvas state for undo
+ */
+function saveState() {
+    // Save current canvas state
+    undoStack.push(canvas.toDataURL());
+
+    // Limit undo stack size
+    if (undoStack.length > MAX_UNDO_STEPS) {
+        undoStack.shift();
+    }
+
+    // Clear redo stack when new action is made
+    redoStack = [];
+
+    // Update button states
+    updateUndoRedoButtons();
+}
+
+/**
+ * Undo last action
+ */
+function undo() {
+    if (undoStack.length <= 1) return; // Keep at least initial state
+
+    // Move current state to redo stack
+    const currentState = undoStack.pop();
+    redoStack.push(currentState);
+
+    // Restore previous state
+    const previousState = undoStack[undoStack.length - 1];
+    restoreState(previousState);
+
+    updateUndoRedoButtons();
+}
+
+/**
+ * Redo last undone action
+ */
+function redo() {
+    if (redoStack.length === 0) return;
+
+    // Get state from redo stack
+    const state = redoStack.pop();
+    undoStack.push(state);
+
+    // Restore state
+    restoreState(state);
+
+    updateUndoRedoButtons();
+}
+
+/**
+ * Restore canvas state from data URL
+ */
+function restoreState(dataURL) {
+    const img = new Image();
+    img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+    };
+    img.src = dataURL;
+}
+
+/**
+ * Update undo/redo button states
+ */
+function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
+    if (undoBtn) {
+        undoBtn.disabled = undoStack.length <= 1;
+        undoBtn.style.opacity = undoStack.length <= 1 ? '0.5' : '1';
+        undoBtn.style.cursor = undoStack.length <= 1 ? 'not-allowed' : 'pointer';
+    }
+
+    if (redoBtn) {
+        redoBtn.disabled = redoStack.length === 0;
+        redoBtn.style.opacity = redoStack.length === 0 ? '0.5' : '1';
+        redoBtn.style.cursor = redoStack.length === 0 ? 'not-allowed' : 'pointer';
+    }
 }
 
 /**
@@ -1005,17 +1145,64 @@ function handleTouchMove(e) {
  * Clear canvas
  */
 function clearCanvas() {
+    if (!confirm('Clear the entire canvas? This cannot be undone.')) {
+        return;
+    }
+
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = currentColor;
+
+    // Reset undo/redo stacks
+    undoStack = [];
+    redoStack = [];
+    saveState();
 }
 
 /**
  * Change drawing color
  */
 function changeColor(color) {
-    currentColor = color;
-    ctx.strokeStyle = color;
+    if (color === 'white') {
+        // Eraser mode
+        isEraserMode = true;
+        currentColor = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = eraserSize;
+
+        // Show eraser size slider
+        const eraserSlider = document.getElementById('eraser-size-container');
+        if (eraserSlider) {
+            eraserSlider.style.display = 'block';
+        }
+    } else {
+        // Normal drawing mode
+        isEraserMode = false;
+        currentColor = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = currentBrushSize;
+
+        // Hide eraser size slider
+        const eraserSlider = document.getElementById('eraser-size-container');
+        if (eraserSlider) {
+            eraserSlider.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Change eraser size
+ */
+function changeEraserSize(size) {
+    eraserSize = parseInt(size);
+    if (isEraserMode) {
+        ctx.lineWidth = eraserSize;
+    }
+    // Update slider value display
+    const display = document.getElementById('eraser-size-value');
+    if (display) {
+        display.textContent = size;
+    }
 }
 
 /**

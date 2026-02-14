@@ -8,6 +8,36 @@ let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
+// Utility: Shuffle array (Fisher-Yates algorithm)
+function shuffleArray(array) {
+    const shuffled = [...array]; // Create a copy to avoid mutating original
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Navigation
 function selectType(type) {
     currentType = type;
@@ -154,7 +184,8 @@ function generatePatternPuzzles(count, difficulty) {
         type: 'pattern',
         pattern: p.pattern,
         answer: p.answer,
-        options: p.options
+        options: p.options,
+        reason: p.reason || 'Pattern repeats'
     }));
 }
 
@@ -228,7 +259,8 @@ function generateSequencePuzzles(count, difficulty) {
         type: 'sequence',
         sequence: s.seq,
         answer: s.answer,
-        options: s.options
+        options: s.options,
+        reason: s.reason || 'Sequence continues'
     }));
 }
 
@@ -237,40 +269,40 @@ function generateMatchingPuzzles(count, difficulty) {
 
     if (difficulty === 'easy') {
         pairs = [
-            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🥕'] },
-            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻'] },
-            { left: '🐝', right: '🌻', options: ['🌻', '🦴', '🌊'] },
-            { left: '🐟', right: '🌊', options: ['🌊', '🪺', '🥛'] },
-            { left: '🐦', right: '🪺', options: ['🪺', '🥕', '🌻'] },
-            { left: '🐰', right: '🥕', options: ['🥕', '🦴', '🥛'] }
+            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🥕'], reason: 'Cats drink milk' },
+            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻'], reason: 'Dogs love bones' },
+            { left: '🐝', right: '🌻', options: ['🌻', '🦴', '🌊'], reason: 'Bees get nectar from flowers' },
+            { left: '🐟', right: '🌊', options: ['🌊', '🪺', '🥛'], reason: 'Fish live in water' },
+            { left: '🐦', right: '🪺', options: ['🪺', '🥕', '🌻'], reason: 'Birds live in nests' },
+            { left: '🐰', right: '🥕', options: ['🥕', '🦴', '🥛'], reason: 'Rabbits eat carrots' }
         ];
     } else if (difficulty === 'medium') {
         pairs = [
-            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🍌', '🍯'] },
-            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻', '🍌'] },
-            { left: '🐝', right: '🌻', options: ['🌻', '🍯', '🦴', '⭐'] },
-            { left: '🐻', right: '🍯', options: ['🍯', '🍌', '🌻', '💧'] },
-            { left: '🐒', right: '🍌', options: ['🍌', '🍯', '🥛', '✏️'] },
-            { left: '☀️', right: '🌞', options: ['🌞', '⭐', '🌙', '💧'] },
-            { left: '🌙', right: '⭐', options: ['⭐', '🌞', '💧', '✏️'] },
-            { left: '🔥', right: '💧', options: ['💧', '🔥', '⭐', '🖌️'] },
-            { left: '📚', right: '✏️', options: ['✏️', '🖌️', '💧', '🥛'] },
-            { left: '🎨', right: '🖌️', options: ['🖌️', '✏️', '🌻', '💧'] }
+            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🍌', '🍯'], reason: 'Cats drink milk' },
+            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻', '🍌'], reason: 'Dogs love bones' },
+            { left: '🐝', right: '🌻', options: ['🌻', '🍯', '🦴', '⭐'], reason: 'Bees collect nectar from flowers' },
+            { left: '🐻', right: '🍯', options: ['🍯', '🍌', '🌻', '💧'], reason: 'Bears love honey' },
+            { left: '🐒', right: '🍌', options: ['🍌', '🍯', '🥛', '✏️'], reason: 'Monkeys eat bananas' },
+            { left: '☀️', right: '🌞', options: ['🌞', '⭐', '🌙', '💧'], reason: 'Sun shines during the day' },
+            { left: '🌙', right: '⭐', options: ['⭐', '🌞', '💧', '✏️'], reason: 'Stars appear with the moon at night' },
+            { left: '🔥', right: '💧', options: ['💧', '🔥', '⭐', '🖌️'], reason: 'Water puts out fire' },
+            { left: '📚', right: '✏️', options: ['✏️', '🖌️', '💧', '🥛'], reason: 'We write in books with pencils' },
+            { left: '🎨', right: '🖌️', options: ['🖌️', '✏️', '🌻', '💧'], reason: 'We paint art with brushes' }
         ];
     } else {
         pairs = [
-            { left: '🌧️', right: '☂️', options: ['☂️', '🧈', '🔋', '🤒'] },
-            { left: '🍞', right: '🧈', options: ['🧈', '🍞', '🥛', '☂️'] },
-            { left: '🔑', right: '🔒', options: ['🔒', '🔑', '🎶', '👓'] },
-            { left: '🎵', right: '🎶', options: ['🎶', '🎵', '🔋', '📖'] },
-            { left: '📱', right: '🔋', options: ['🔋', '📱', '🛬', '👓'] },
-            { left: '✈️', right: '🛬', options: ['🛬', '✈️', '🔋', '🥅'] },
-            { left: '🌡️', right: '🤒', options: ['🤒', '👓', '☂️', '🔒'] },
-            { left: '🔍', right: '👓', options: ['👓', '🔍', '🤒', '🥅'] },
-            { left: '⚽', right: '🥅', options: ['🥅', '⚽', '📖', '🛬'] },
-            { left: '🎓', right: '📖', options: ['📖', '🎓', '🍞', '🥛'] },
-            { left: '🌾', right: '🍞', options: ['🍞', '🌾', '🥛', '☂️'] },
-            { left: '🐄', right: '🥛', options: ['🥛', '🐄', '🧈', '🍞'] }
+            { left: '🌧️', right: '☂️', options: ['☂️', '🧈', '🔋', '🤒'], reason: 'We use umbrellas when it rains' },
+            { left: '🍞', right: '🧈', options: ['🧈', '🍞', '🥛', '☂️'], reason: 'We spread butter on bread' },
+            { left: '🔑', right: '🔒', options: ['🔒', '🔑', '🎶', '👓'], reason: 'Keys open locks' },
+            { left: '🎵', right: '🎶', options: ['🎶', '🎵', '🔋', '📖'], reason: 'Music notes create melodies' },
+            { left: '📱', right: '🔋', options: ['🔋', '📱', '🛬', '👓'], reason: 'Phones need batteries to work' },
+            { left: '✈️', right: '🛬', options: ['🛬', '✈️', '🔋', '🥅'], reason: 'Airplanes land at airports' },
+            { left: '🌡️', right: '🤒', options: ['🤒', '👓', '☂️', '🔒'], reason: 'Thermometers check if you have a fever' },
+            { left: '🔍', right: '👓', options: ['👓', '🔍', '🤒', '🥅'], reason: 'Both magnifying glass and glasses help us see' },
+            { left: '⚽', right: '🥅', options: ['🥅', '⚽', '📖', '🛬'], reason: 'Soccer balls go into goals' },
+            { left: '🎓', right: '📖', options: ['📖', '🎓', '🍞', '🥛'], reason: 'Graduation caps represent learning from books' },
+            { left: '🌾', right: '🍞', options: ['🍞', '🌾', '🥛', '☂️'], reason: 'Bread is made from wheat' },
+            { left: '🐄', right: '🥛', options: ['🥛', '🐄', '🧈', '🍞'], reason: 'Cows give us milk' }
         ];
     }
 
@@ -278,7 +310,8 @@ function generateMatchingPuzzles(count, difficulty) {
         type: 'matching',
         left: p.left,
         answer: p.right,
-        options: p.options
+        options: p.options,
+        reason: p.reason
     }));
 }
 
@@ -287,43 +320,44 @@ function generateOddOnePuzzles(count, difficulty) {
 
     if (difficulty === 'easy') {
         sets = [
-            { items: ['🍎', '🍊', '🍋', '🚗'], answer: '🚗' },
-            { items: ['🐶', '🐱', '🐭', '🌳'], answer: '🌳' },
-            { items: ['⚽', '🏀', '🎾', '🍎'], answer: '🍎' },
-            { items: ['🟦', '🟥', '🟩', '⭕'], answer: '⭕' },
-            { items: ['😊', '😢', '😡', '🚗'], answer: '🚗' },
-            { items: ['🐝', '🦋', '🐛', '🌸'], answer: '🌸' }
+            { items: ['🍎', '🍊', '🍋', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
+            { items: ['🐶', '🐱', '🐭', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
+            { items: ['⚽', '🏀', '🎾', '🍎'], answer: '🍎', reason: 'Apple is not a ball' },
+            { items: ['🟦', '🟥', '🟩', '⭕'], answer: '⭕', reason: 'Circle is not a square' },
+            { items: ['😊', '😢', '😡', '🚗'], answer: '🚗', reason: 'Car is not a face' },
+            { items: ['🐝', '🦋', '🐛', '🌸'], answer: '🌸', reason: 'Flower is not an insect' }
         ];
     } else if (difficulty === 'medium') {
         sets = [
-            { items: ['🍎', '🍊', '🍋', '🍌', '🚗'], answer: '🚗' },
-            { items: ['🐶', '🐱', '🐭', '🐰', '🌳'], answer: '🌳' },
-            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '🅰️'], answer: '🅰️' },
-            { items: ['🔴', '🔵', '🟢', '🟡', '🔺'], answer: '🔺' },
-            { items: ['😊', '😢', '😡', '🤔', '🚗'], answer: '🚗' },
-            { items: ['🏠', '🏫', '🏥', '🏦', '🐱'], answer: '🐱' },
-            { items: ['⚽', '🏀', '🎾', '⚾', '🍎'], answer: '🍎' },
-            { items: ['🐝', '🦋', '🐛', '🐜', '🌸'], answer: '🌸' }
+            { items: ['🍎', '🍊', '🍋', '🍌', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
+            { items: ['🐶', '🐱', '🐭', '🐰', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
+            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '🅰️'], answer: '🅰️', reason: 'Letter is not a number' },
+            { items: ['🔴', '🔵', '🟢', '🟡', '🔺'], answer: '🔺', reason: 'Triangle is not a circle' },
+            { items: ['😊', '😢', '😡', '🤔', '🚗'], answer: '🚗', reason: 'Car is not an emotion' },
+            { items: ['🏠', '🏫', '🏥', '🏦', '🐱'], answer: '🐱', reason: 'Cat is not a building' },
+            { items: ['⚽', '🏀', '🎾', '⚾', '🍎'], answer: '🍎', reason: 'Apple is not a sports ball' },
+            { items: ['🐝', '🦋', '🐛', '🐜', '🌸'], answer: '🌸', reason: 'Flower is not an insect' }
         ];
     } else {
         sets = [
-            { items: ['🍎', '🍊', '🍋', '🍌', '🍇', '🚗'], answer: '🚗' },
-            { items: ['🐶', '🐱', '🐭', '🐰', '🐹', '🌳'], answer: '🌳' },
-            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '🅰️'], answer: '🅰️' },
-            { items: ['🔴', '🔵', '🟢', '🟡', '🟠', '🔺'], answer: '🔺' },
-            { items: ['😊', '😢', '😡', '🤔', '😴', '🚗'], answer: '🚗' },
-            { items: ['🏠', '🏫', '🏥', '🏦', '🏪', '🐱'], answer: '🐱' },
-            { items: ['⚽', '🏀', '🎾', '⚾', '🏈', '🍎'], answer: '🍎' },
-            { items: ['🐝', '🦋', '🐛', '🐜', '🦗', '🌸'], answer: '🌸' },
-            { items: ['🚗', '🚙', '🚕', '🚌', '🚎', '🐶'], answer: '🐶' },
-            { items: ['📚', '📖', '📝', '✏️', '📏', '🍎'], answer: '🍎' }
+            { items: ['🍎', '🍊', '🍋', '🍌', '🍇', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
+            { items: ['🐶', '🐱', '🐭', '🐰', '🐹', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
+            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '🅰️'], answer: '🅰️', reason: 'Letter is not a number' },
+            { items: ['🔴', '🔵', '🟢', '🟡', '🟠', '🔺'], answer: '🔺', reason: 'Triangle is not a circle' },
+            { items: ['😊', '😢', '😡', '🤔', '😴', '🚗'], answer: '🚗', reason: 'Car is not an emotion' },
+            { items: ['🏠', '🏫', '🏥', '🏦', '🏪', '🐱'], answer: '🐱', reason: 'Cat is not a building' },
+            { items: ['⚽', '🏀', '🎾', '⚾', '🏈', '🍎'], answer: '🍎', reason: 'Apple is not a sports ball' },
+            { items: ['🐝', '🦋', '🐛', '🐜', '🦗', '🌸'], answer: '🌸', reason: 'Flower is not an insect' },
+            { items: ['🚗', '🚙', '🚕', '🚌', '🚎', '🐶'], answer: '🐶', reason: 'Dog is not a vehicle' },
+            { items: ['📚', '📖', '📝', '✏️', '📏', '🍎'], answer: '🍎', reason: 'Apple is not a school supply' }
         ];
     }
 
     return sets.slice(0, count).map(s => ({
         type: 'oddone',
         items: s.items,
-        answer: s.answer
+        answer: s.answer,
+        reason: s.reason
     }));
 }
 
@@ -370,7 +404,8 @@ function generateComparisonPuzzles(count, difficulty) {
         item1: c.item1,
         item2: c.item2,
         question: c.question,
-        answer: c.answer
+        answer: c.answer,
+        reason: c.reason || c.question // Use reason if available, otherwise use question as reason
     }));
 }
 
@@ -429,7 +464,8 @@ function loadPuzzles(difficulty) {
         hard: { patterns: 12, counting: 10, sequences: 10, matching: 10, oddone: 10, comparison: 10, logic: 10 }
     };
 
-    const count = counts[difficulty][currentType];
+    let count = counts[difficulty][currentType];
+    count = getDemoLimit(count);
     let problems = [];
 
     switch(currentType) {
@@ -499,6 +535,8 @@ function renderWorksheet() {
                 </div>
             `;
         } else if (problem.type === 'pattern') {
+            // Randomize answer position
+            const shuffledOptions = shuffleArray(problem.options);
             problemsHTML += `
                 <div class="aptitude-problem pattern-problem">
                     <div class="problem-header">
@@ -510,7 +548,7 @@ function renderWorksheet() {
                         <span class="pattern-item pattern-blank">?</span>
                     </div>
                     <div class="options-display" style="margin-top: 15px;">
-                        ${problem.options.map(opt => `
+                        ${shuffledOptions.map(opt => `
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
@@ -544,6 +582,8 @@ function renderWorksheet() {
                 </div>
             `;
         } else if (problem.type === 'sequence') {
+            // Randomize answer position
+            const shuffledOptions = shuffleArray(problem.options);
             problemsHTML += `
                 <div class="aptitude-problem sequence-problem">
                     <div class="problem-header">
@@ -555,7 +595,7 @@ function renderWorksheet() {
                         <span class="sequence-item">?</span>
                     </div>
                     <div class="options-display" style="margin-top: 15px;">
-                        ${problem.options.map(opt => `
+                        ${shuffledOptions.map(opt => `
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
@@ -564,6 +604,8 @@ function renderWorksheet() {
                 </div>
             `;
         } else if (problem.type === 'matching') {
+            // Randomize answer position
+            const shuffledOptions = shuffleArray(problem.options);
             problemsHTML += `
                 <div class="aptitude-problem matching-problem">
                     <div class="problem-header">
@@ -575,7 +617,7 @@ function renderWorksheet() {
                         <span style="font-size: 1.5em; margin-bottom: 10px; display: block;">↓</span>
                     </div>
                     <div class="options-display" style="margin-top: 15px;">
-                        ${problem.options.map(opt => `
+                        ${shuffledOptions.map(opt => `
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
@@ -833,20 +875,58 @@ function checkAnswers() {
         }
 
         const correctAnswer = problem.answer.toLowerCase();
+        const isCorrect = userAnswer === correctAnswer;
+        const hasAnswer = userAnswer !== '';
 
-        if (userAnswer === correctAnswer) {
-            feedback.textContent = '✓ Great!';
-            feedback.style.color = '#00aa00';
-            feedback.style.fontSize = '1.5em';
-            if (input.style) input.style.borderColor = '#00aa00';
-            correct++;
-        } else if (userAnswer === '') {
-            feedback.textContent = '';
+        // For button-based problems (matching, patterns, sequences, oddone, comparison)
+        if (input.type === 'hidden' && hasAnswer) {
+            if (isCorrect) {
+                feedback.innerHTML = `<span style="color: #00aa00;">✓ Correct!</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                correct++;
+
+                // Highlight the correct button in green
+                const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-answer').toLowerCase() === correctAnswer) {
+                        btn.style.backgroundColor = '#00aa00';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = '#00aa00';
+                    }
+                });
+            } else {
+                feedback.innerHTML = `<span style="color: #cc0000;">✗ Wrong</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+
+                // Highlight user's wrong answer in red, correct answer in green
+                const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
+                buttons.forEach(btn => {
+                    const btnAnswer = btn.getAttribute('data-answer').toLowerCase();
+                    if (btnAnswer === userAnswer) {
+                        btn.style.backgroundColor = '#cc0000';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = '#cc0000';
+                    } else if (btnAnswer === correctAnswer) {
+                        btn.style.backgroundColor = '#00aa00';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = '#00aa00';
+                    }
+                });
+            }
         } else {
-            feedback.textContent = '✗ Try again';
-            feedback.style.color = '#cc0000';
-            feedback.style.fontSize = '1.5em';
-            if (input.style) input.style.borderColor = '#cc0000';
+            // Original logic for checkboxes and empty answers
+            if (isCorrect) {
+                feedback.textContent = '✓ Great!';
+                feedback.style.color = '#00aa00';
+                feedback.style.fontSize = '1.5em';
+                if (input.style) input.style.borderColor = '#00aa00';
+                correct++;
+            } else if (!hasAnswer) {
+                feedback.textContent = '';
+            } else {
+                feedback.textContent = '✗ Try again';
+                feedback.style.color = '#cc0000';
+                feedback.style.fontSize = '1.5em';
+                if (input.style) input.style.borderColor = '#cc0000';
+            }
         }
     });
 
@@ -939,11 +1019,63 @@ function toggleAnswers(event) {
                     feedback.style.color = '#4caf50';
                     feedback.style.fontSize = '1.5em';
                     feedback.style.fontWeight = 'bold';
+                } else if (input && input.type === 'hidden') {
+                    // Button-based problems - show answer with reasoning and highlight
+                    const userAnswer = input.value.trim().toLowerCase();
+                    const correctAnswer = problem.answer.toLowerCase();
+                    const hasAnswer = userAnswer !== '';
+                    const isCorrect = userAnswer === correctAnswer;
+
+                    if (hasAnswer) {
+                        if (isCorrect) {
+                            feedback.innerHTML = `<span style="color: #00aa00;">✓ Correct!</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                        } else {
+                            feedback.innerHTML = `<span style="color: #cc0000;">✗ Wrong</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+                        }
+
+                        // Highlight buttons
+                        const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
+                        buttons.forEach(btn => {
+                            const btnAnswer = btn.getAttribute('data-answer').toLowerCase();
+                            if (btnAnswer === userAnswer && !isCorrect) {
+                                btn.style.backgroundColor = '#cc0000';
+                                btn.style.color = 'white';
+                                btn.style.borderColor = '#cc0000';
+                            } else if (btnAnswer === correctAnswer) {
+                                btn.style.backgroundColor = '#00aa00';
+                                btn.style.color = 'white';
+                                btn.style.borderColor = '#00aa00';
+                            }
+                        });
+                    } else {
+                        // No answer provided - just show the correct answer
+                        feedback.innerHTML = `<span style="color: #00aa00; font-size: 0.9em;">Answer: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+
+                        // Highlight correct answer in green
+                        const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
+                        buttons.forEach(btn => {
+                            if (btn.getAttribute('data-answer').toLowerCase() === correctAnswer) {
+                                btn.style.backgroundColor = '#00aa00';
+                                btn.style.color = 'white';
+                                btn.style.borderColor = '#00aa00';
+                            }
+                        });
+                    }
                 }
                 feedback.style.display = 'inline';
             } else {
-                // Hide answer
+                // Hide answer and reset button colors
                 feedback.style.display = 'none';
+
+                // Reset button highlighting
+                if (input && input.type === 'hidden') {
+                    const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
+                    buttons.forEach(btn => {
+                        btn.style.backgroundColor = '';
+                        btn.style.color = '';
+                        btn.style.borderColor = '';
+                    });
+                }
             }
         }
     });

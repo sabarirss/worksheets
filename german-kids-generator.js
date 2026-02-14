@@ -5,6 +5,26 @@ let currentStory = '';
 let userAnswers = [];
 let currentScore = 0;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // German stories database for kids aged 6-8
 const germanStories = {
     easy: {
@@ -454,7 +474,11 @@ function loadStoryList(difficulty) {
 
     const stories = germanStories[difficulty];
 
-    for (const [key, story] of Object.entries(stories)) {
+    // Apply demo limiting to story list
+    const storyEntries = Object.entries(stories);
+    const limitedEntries = storyEntries.slice(0, getDemoLimit(storyEntries.length));
+
+    for (const [key, story] of limitedEntries) {
         const card = document.createElement('div');
         card.className = 'story-card';
         card.onclick = () => loadStory(key);

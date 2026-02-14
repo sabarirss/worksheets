@@ -6,6 +6,26 @@ let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // Activity Generators
 function generateEasyActivities() {
     return [
@@ -371,9 +391,12 @@ function loadActivities(difficulty) {
         activities = generateHardActivities();
     }
 
+    // Apply demo limiting to activities
+    const limitedActivities = activities.slice(0, getDemoLimit(activities.length));
+
     currentWorksheet = {
         difficulty,
-        activities
+        activities: limitedActivities
     };
 
     renderWorksheet();

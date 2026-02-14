@@ -56,9 +56,17 @@
             margin: 30px 0;
         }
 
-        @media (max-width: 768px) {
+        /* Portrait orientation - stack vertically */
+        @media (orientation: portrait) {
             .split-screen {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* Landscape orientation - side by side */
+        @media (orientation: landscape) {
+            .split-screen {
+                grid-template-columns: 1fr 1fr;
             }
         }
 

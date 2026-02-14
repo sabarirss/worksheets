@@ -6,6 +6,26 @@ let currentDifficulty = null;
 let currentStoryIndex = 0;
 let currentStories = [];
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // Story generation templates
 const storyData = {
     animals: {
@@ -145,7 +165,8 @@ function generateStories(category, difficulty) {
     }
 
     // NO template generation - only show unique quality stories
-    return stories;
+    // Apply demo limiting before returning
+    return stories.slice(0, getDemoLimit(stories.length));
 }
 
 function generateAnimalStories(difficulty, count) {

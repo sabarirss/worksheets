@@ -5,6 +5,26 @@ let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // German vocabulary and exercise banks
 const germanContent = {
     articles: [
@@ -249,8 +269,9 @@ const levelConfigs = {
 
 // Problem generators
 function generateArticleProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.articles].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'article',
         prompt: `<strong>${item.word}</strong> (${item.translation})`,
         answer: item.article,
@@ -259,8 +280,9 @@ function generateArticleProblems(count) {
 }
 
 function generateCaseProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.caseSentences].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'fillBlank',
         prompt: item.sentence,
         answer: item.answer,
@@ -269,8 +291,9 @@ function generateCaseProblems(count) {
 }
 
 function generateVerbProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.verbExercises].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'verb',
         prompt: item.prompt,
         answer: item.answer,
@@ -279,8 +302,9 @@ function generateVerbProblems(count) {
 }
 
 function generatePrepositionProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.prepositionExercises].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'fillBlank',
         prompt: item.sentence,
         answer: item.answer,
@@ -289,8 +313,9 @@ function generatePrepositionProblems(count) {
 }
 
 function generateAdjectiveProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.adjectiveExercises].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'fillBlank',
         prompt: item.sentence,
         answer: item.answer,
@@ -318,8 +343,9 @@ function generateReadingProblems() {
 }
 
 function generateVocabularyProblems(count) {
+    const limitedCount = getDemoLimit(count);
     const shuffled = [...germanContent.vocabularyPairs].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(item => ({
+    return shuffled.slice(0, limitedCount).map(item => ({
         type: 'vocabulary',
         prompt: `What does "<strong>${item.german}</strong>" mean in English?`,
         answer: item.english

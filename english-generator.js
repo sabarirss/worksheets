@@ -6,6 +6,26 @@ let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
 
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
+
 // Word banks for different levels
 const wordBanks = {
     pictureWords: [
@@ -215,6 +235,7 @@ const levelConfigs = {
 function generatePictureWordProblems(wordList, count) {
     const problems = [];
     const shuffled = [...wordList].sort(() => Math.random() - 0.5);
+    count = getDemoLimit(count);
 
     for (let i = 0; i < Math.min(count, shuffled.length); i++) {
         const item = shuffled[i];
@@ -232,6 +253,7 @@ function generatePictureWordProblems(wordList, count) {
 function generateSightWordProblems(wordList, count) {
     const problems = [];
     const shuffled = [...wordList].sort(() => Math.random() - 0.5);
+    count = getDemoLimit(count);
 
     for (let i = 0; i < Math.min(count, shuffled.length); i++) {
         problems.push({
@@ -244,6 +266,7 @@ function generateSightWordProblems(wordList, count) {
 }
 
 function generateSentenceFillProblems(count, difficulty) {
+    count = getDemoLimit(count);
     const sentences = [
         { text: 'The cat ___ on the mat.', answer: 'sat', options: ['sat', 'stand', 'jump'] },
         { text: 'I ___ a red ball.', answer: 'have', options: ['have', 'has', 'had'] },
@@ -269,6 +292,7 @@ function generateSentenceFillProblems(count, difficulty) {
 }
 
 function generateSynonymAntonymProblems(count) {
+    count = getDemoLimit(count);
     const problems = [];
     const halfCount = Math.floor(count / 2);
 
@@ -298,6 +322,7 @@ function generateSynonymAntonymProblems(count) {
 }
 
 function generatePartsOfSpeechProblems(count) {
+    count = getDemoLimit(count);
     const sentences = [
         { sentence: 'The big dog runs fast.', word: 'dog', answer: 'noun' },
         { sentence: 'The big dog runs fast.', word: 'big', answer: 'adjective' },
@@ -326,6 +351,7 @@ function generatePartsOfSpeechProblems(count) {
 }
 
 function generateReadingComprehension(count) {
+    count = getDemoLimit(count);
     const passages = [
         {
             text: 'Tom has a pet dog named Max. Max is a golden retriever. He loves to play fetch in the park. Every morning, Tom takes Max for a walk. Max is a very friendly dog.',
@@ -365,6 +391,7 @@ function generateReadingComprehension(count) {
 }
 
 function generateAdvancedGrammarProblems(count) {
+    count = getDemoLimit(count);
     const problems = [
         { prompt: 'Correct the sentence: "She don\'t like apples."', answer: 'She doesn\'t like apples.' },
         { prompt: 'Add punctuation: "what time is it"', answer: 'What time is it?' },

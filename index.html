@@ -88,6 +88,11 @@
             to { opacity: 1; }
         }
 
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.95; }
+        }
+
         @keyframes slideUp {
             from {
                 transform: translateY(50px);
@@ -180,6 +185,42 @@
             // Display user name
             document.getElementById('user-name-display').textContent = user.fullName;
 
+            // Display version badge
+            const version = user.version || 'demo';
+            const versionBadge = document.getElementById('version-badge');
+
+            // Check for admin demo preview mode
+            const isAdminDemoPreview = user.role === 'admin' && localStorage.getItem('adminDemoPreview') === 'true';
+
+            if (isAdminDemoPreview) {
+                // Admin in demo preview mode
+                versionBadge.textContent = '🔍 DEMO PREVIEW MODE (Click to disable)';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(255, 193, 7, 0.95)';
+                versionBadge.style.border = '2px solid #ff9800';
+                versionBadge.style.animation = 'pulse 2s infinite';
+                versionBadge.style.cursor = 'pointer';
+                versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 193, 7, 1)'; };
+                versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
+                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+            } else if (version === 'demo') {
+                versionBadge.textContent = '📦 Demo Version (2 pages per activity)';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(255, 152, 0, 0.9)';
+                versionBadge.style.border = 'none';
+                versionBadge.style.animation = 'none';
+                versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 152, 0, 1)'; };
+                versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 152, 0, 0.9)'; };
+            } else if (version === 'full') {
+                versionBadge.textContent = '⭐ Full Version';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(76, 175, 80, 0.9)';
+                versionBadge.style.border = 'none';
+                versionBadge.style.animation = 'none';
+                versionBadge.style.cursor = 'default';
+                versionBadge.onclick = null;
+            }
+
             // Show admin button if user is admin
             if (user.role === 'admin') {
                 document.getElementById('admin-btn').style.display = 'block';
@@ -241,10 +282,14 @@
 
     <div class="container">
         <div class="user-header" id="user-header">
-            <div class="user-info" onclick="window.location.href='settings.html'" style="cursor: pointer; transition: all 0.3s; padding: 10px; border-radius: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='transparent'">
-                <span style="font-size: 1.3em;">👤</span>
-                <strong id="user-name-display"></strong>
-                <span style="font-size: 0.8em; opacity: 0.8; margin-left: 5px;">⚙️</span>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="user-info" onclick="window.location.href='settings.html'" style="cursor: pointer; transition: all 0.3s; padding: 10px; border-radius: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='transparent'">
+                    <span style="font-size: 1.3em;">👤</span>
+                    <strong id="user-name-display"></strong>
+                    <span style="font-size: 0.8em; opacity: 0.8; margin-left: 5px;">⚙️</span>
+                </div>
+                <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings.html'" title="Click to upgrade">
+                </div>
             </div>
             <div class="user-actions">
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">

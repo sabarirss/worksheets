@@ -37,6 +37,8 @@ async function initializeAuth() {
                 role: 'admin',
                 fullName: 'Administrator',
                 age: 13, // Admin has access to all content
+                version: 'full', // Admin always has full version
+                versionUpgradeRequested: false,
                 modules: {
                     // All modules assigned for admin
                     math: true,
@@ -308,7 +310,17 @@ async function createUser(userData) {
             email: email,
             role: userData.role || 'student',
             fullName: userData.fullName || userData.username,
+            version: 'demo', // New users start with demo version
+            versionUpgradeRequested: false,
             modules: userData.modules || {
+                math: true,
+                english: false,
+                aptitude: false,
+                stories: false,
+                'emotional-quotient': false,
+                german: false
+            },
+            enabledModules: userData.enabledModules || {
                 math: true,
                 english: false,
                 aptitude: false,

@@ -281,6 +281,7 @@
                         <th>Full Name</th>
                         <th>Age</th>
                         <th>Role</th>
+                        <th>Version</th>
                         <th>Modules Access</th>
                         <th>Created</th>
                         <th>Actions</th>
@@ -461,7 +462,7 @@
             const tbody = document.getElementById('users-tbody');
 
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No users found</td></tr>';
                 return;
             }
 
@@ -504,12 +505,40 @@
                 const fullName = user.fullName || 'N/A';
                 const age = user.age ? `${user.age} years` : 'Not set';
 
+                // Version display
+                const version = user.version || 'demo';
+                const versionUpgradeRequested = user.versionUpgradeRequested || false;
+
+                let versionHTML = '';
+                if (versionUpgradeRequested) {
+                    versionHTML = `
+                        <span style="background: #ff9800; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
+                            Demo (⏳ Upgrade Requested)
+                        </span><br>
+                        <button class="btn" onclick="approveVersionUpgrade('${username}')" style="background: #4caf50; color: white; padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
+                            ✓ Approve
+                        </button>
+                        <button class="btn" onclick="denyVersionUpgrade('${username}')" style="background: #f44336; color: white; padding: 6px 12px; font-size: 0.85em;">
+                            ✗ Deny
+                        </button>
+                    `;
+                } else {
+                    const versionBadgeColor = version === 'full' ? '#4caf50' : '#999';
+                    const versionText = version === 'full' ? 'Full' : 'Demo';
+                    versionHTML = `
+                        <span style="background: ${versionBadgeColor}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; display: inline-block;">
+                            ${versionText}
+                        </span>
+                    `;
+                }
+
                 return `
                     <tr>
                         <td><strong>${username}</strong></td>
                         <td>${fullName}</td>
                         <td>${age}</td>
                         <td><span class="user-role role-${user.role}">${user.role}</span></td>
+                        <td>${versionHTML}</td>
                         <td>${modulesList}</td>
                         <td>${createdDate}</td>
                         <td>
@@ -683,6 +712,69 @@
                     console.error('Delete error:', error);
                     alert('Error deleting user: ' + error.message);
                 }
+            }
+        }
+
+        // Approve version upgrade request
+        async function approveVersionUpgrade(username) {
+            if (!confirm(`Approve full version upgrade for "${username}"?`)) {
+                return;
+            }
+
+            try {
+                const userQuery = await firebase.firestore().collection('users')
+                    .where('username', '==', username)
+                    .limit(1)
+                    .get();
+
+                if (userQuery.empty) {
+                    alert('User not found');
+                    return;
+                }
+
+                await userQuery.docs[0].ref.update({
+                    version: 'full',
+                    versionUpgradeRequested: false,
+                    upgradeApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    upgradeApprovedBy: firebase.auth().currentUser.email
+                });
+
+                alert(`Full version approved for ${username}!`);
+                await loadUsers();
+            } catch (error) {
+                console.error('Error approving upgrade:', error);
+                alert('Error approving upgrade: ' + error.message);
+            }
+        }
+
+        // Deny version upgrade request
+        async function denyVersionUpgrade(username) {
+            if (!confirm(`Deny full version upgrade request for "${username}"?`)) {
+                return;
+            }
+
+            try {
+                const userQuery = await firebase.firestore().collection('users')
+                    .where('username', '==', username)
+                    .limit(1)
+                    .get();
+
+                if (userQuery.empty) {
+                    alert('User not found');
+                    return;
+                }
+
+                await userQuery.docs[0].ref.update({
+                    versionUpgradeRequested: false,
+                    upgradeDeniedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    upgradeDeniedBy: firebase.auth().currentUser.email
+                });
+
+                alert(`Upgrade request denied for ${username}`);
+                await loadUsers();
+            } catch (error) {
+                console.error('Error denying upgrade:', error);
+                alert('Error denying upgrade: ' + error.message);
             }
         }
 

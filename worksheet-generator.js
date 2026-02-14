@@ -28,6 +28,26 @@ function hideAllOperationLevels() {
 
 let currentWorksheet = null;
 let currentOperation = null;
+
+// Demo version limiting
+function isDemoMode() {
+    const user = getCurrentUser();
+    if (!user) return true; // Default to demo if no user
+
+    // Check for admin demo preview mode
+    if (user.role === 'admin') {
+        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
+        return adminDemoPreview; // Admin can toggle demo preview
+    }
+
+    // Treat users without version field as demo (for existing users)
+    const version = user.version || 'demo';
+    return version === 'demo';
+}
+
+function getDemoLimit(defaultCount) {
+    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
+}
 let currentPage = 1;
 let totalPages = 50;
 let timer = null;
@@ -298,9 +318,10 @@ function loadWorksheet(operation, level, page = 1) {
     const seed = hashCode(`${operation}-${level}-${page}`);
     seededRandom = new SeededRandom(seed);
 
-    // Generate problems
+    // Generate problems (limit to 2 in demo mode)
+    const problemCount = getDemoLimit(config.problemCount);
     const problems = [];
-    for (let i = 0; i < config.problemCount; i++) {
+    for (let i = 0; i < problemCount; i++) {
         problems.push(config.generator());
     }
 
