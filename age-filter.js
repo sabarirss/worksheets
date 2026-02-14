@@ -16,7 +16,7 @@ function getAgeGroup(age) {
 }
 
 // Determine minimum allowed level for math/english based on age
-// Kumon levels go: 6A (easiest) -> 5A -> 4A -> 3A -> 2A (hardest)
+// Levels go: 6A (easiest) -> 5A -> 4A -> 3A -> 2A (hardest)
 // Lower numbers = harder content
 function getMinLevel(age) {
     if (!age || age < 4) return 6;
@@ -423,7 +423,7 @@ function showParentSettingsForm() {
                     <li><strong>Age 8:</strong> Math/English 6A-3A, Easy + Medium content</li>
                     <li><strong>Age 9+:</strong> All math/English (6A-2A), Easy + Medium + Hard content</li>
                     <li><strong>Age 10+:</strong> All content including German B1 (adult level)</li>
-                    <li style="margin-top: 8px; font-size: 0.85em; color: #888;">Note: In Kumon system, 6A is easiest, 2A is hardest</li>
+                    <li style="margin-top: 8px; font-size: 0.85em; color: #888;">Note: 6A is the easiest level, 2A is the hardest level</li>
                 </ul>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 30px;">
