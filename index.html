@@ -60,15 +60,72 @@
     <script>
         // Wait for Firebase auth to initialize before checking
         console.log('INDEX.HTML: Setting up auth state listener');
-        firebase.auth().onAuthStateChanged(function(user) {
-            console.log('INDEX.HTML: Auth state changed, user:', user);
-            if (!user) {
+        firebase.auth().onAuthStateChanged(async function(firebaseUser) {
+            console.log('INDEX.HTML: Auth state changed, user:', firebaseUser);
+            if (!firebaseUser) {
                 console.log('INDEX.HTML: No user, redirecting to login');
                 window.location.href = 'login.html';
             } else {
-                console.log('INDEX.HTML: User authenticated:', user.email);
+                console.log('INDEX.HTML: User authenticated:', firebaseUser.email);
+
+                // Load user data from Firestore
+                const userDoc = await firebase.firestore().collection('users')
+                    .where('username', '==', firebaseUser.email.split('@')[0])
+                    .limit(1)
+                    .get();
+
+                if (!userDoc.empty) {
+                    const userData = userDoc.docs[0].data();
+                    console.log('INDEX.HTML: User data loaded:', userData);
+
+                    // Initialize UI with user data
+                    initializeUserInterface(userData);
+                }
             }
         });
+
+        function initializeUserInterface(user) {
+            // Display user name
+            document.getElementById('user-name-display').textContent = user.fullName;
+
+            // Show admin button if user is admin
+            if (user.role === 'admin') {
+                document.getElementById('admin-btn').style.display = 'block';
+            }
+
+            // Hide modules user doesn't have access to
+            const modules = user.modules || {};
+
+            if (!modules.math) {
+                const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
+                if (mathBtn) mathBtn.style.display = 'none';
+            }
+
+            if (!modules.english) {
+                const englishBtn = document.querySelector('button[onclick*="english.html"]');
+                if (englishBtn) englishBtn.style.display = 'none';
+            }
+
+            if (!modules.aptitude) {
+                const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+                if (aptitudeBtn) aptitudeBtn.style.display = 'none';
+            }
+
+            if (!modules.stories) {
+                const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+                if (storiesBtn) storiesBtn.style.display = 'none';
+            }
+
+            if (!modules['emotional-quotient']) {
+                const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+                if (eqBtn) eqBtn.style.display = 'none';
+            }
+
+            if (!modules.german) {
+                const germanBtn = document.querySelector('button[onclick*="german.html"]');
+                if (germanBtn) germanBtn.style.display = 'none';
+            }
+        }
     </script>
 
     <div class="container">
