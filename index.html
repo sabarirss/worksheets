@@ -68,18 +68,21 @@
             } else {
                 console.log('INDEX.HTML: User authenticated:', firebaseUser.email);
 
-                // Load user data from Firestore
+                // Load user data from Firestore by EMAIL (not username, since username can be custom)
                 const userDoc = await firebase.firestore().collection('users')
-                    .where('username', '==', firebaseUser.email.split('@')[0])
+                    .where('email', '==', firebaseUser.email.toLowerCase())
                     .limit(1)
                     .get();
 
                 if (!userDoc.empty) {
                     const userData = userDoc.docs[0].data();
                     console.log('INDEX.HTML: User data loaded:', userData);
+                    console.log('INDEX.HTML: User modules:', userData.modules);
 
                     // Initialize UI with user data
                     initializeUserInterface(userData);
+                } else {
+                    console.error('INDEX.HTML: User document not found in Firestore for email:', firebaseUser.email);
                 }
             }
         });

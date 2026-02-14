@@ -385,9 +385,9 @@
                 return;
             }
 
-            // Check if user is admin
+            // Check if user is admin (query by email, not username)
             const userDoc = await firebase.firestore().collection('users')
-                .where('username', '==', user.email.split('@')[0])
+                .where('email', '==', user.email.toLowerCase())
                 .limit(1)
                 .get();
 
