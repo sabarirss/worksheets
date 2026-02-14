@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German for Kids - Story Reading</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Firebase Auth & Storage -->
+    <script src="firebase-auth.js"></script>
+    <script src="firebase-storage.js"></script>
+
+    <style>
+        .german-kids-selection {
+            margin: 40px 0;
+        }
+
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 40px 20px;
+            cursor: pointer;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .story-container {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .story-title {
+            font-size: 2em;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .story-text {
+            font-size: 1.3em;
+            line-height: 2;
+            color: #333;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .story-illustration {
+            text-align: center;
+            font-size: 8em;
+            margin: 30px 0;
+        }
+
+        .vocabulary-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+
+        .vocabulary-box h3 {
+            color: #4caf50;
+            margin-top: 0;
+        }
+
+        .vocab-item {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .vocab-word {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .questions-section {
+            margin-top: 50px;
+        }
+
+        .question-box {
+            background: white;
+            border: 3px solid #764ba2;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border: 3px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            background: #ffd93d;
+            border-color: #ffd93d;
+            transform: translateX(10px);
+        }
+
+        .answer-btn.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .answer-btn.correct {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .answer-btn.incorrect {
+            background: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: #ffebee;
+            color: #e74c3c;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin: 30px 0;
+            font-size: 1.5em;
+        }
+
+        .story-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .story-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .story-icon {
+            font-size: 4em;
+            margin: 10px 0;
+        }
+
+        .story-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .story-description {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Wait for Firebase auth to initialize
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <div class="container">
+        <header>
+            <h1>🇩🇪 German for Kids</h1>
+            <p class="subtitle">Simple stories for ages 6-8 with fun questions!</p>
+        </header>
+
+        <div class="german-kids-selection" id="difficulty-selection">
+            <h2>Select Difficulty Level</h2>
+            <div class="difficulty-grid">
+                <button onclick="loadStoryList('easy')" class="difficulty-btn">
+                    ⭐ EASY<br>
+                    <span style="font-size: 0.8em;">Sehr Einfach</span>
+                </button>
+                <button onclick="loadStoryList('medium')" class="difficulty-btn">
+                    ⭐⭐ MEDIUM<br>
+                    <span style="font-size: 0.8em;">Mittel</span>
+                </button>
+                <button onclick="loadStoryList('hard')" class="difficulty-btn">
+                    ⭐⭐⭐ HARD<br>
+                    <span style="font-size: 0.8em;">Schwer</span>
+                </button>
+            </div>
+            <div class="navigation">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div id="story-selection" style="display: none;">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToDifficulty()">← Back to Difficulty Levels</button>
+            </div>
+            <h2 id="story-list-title">Choose a Story</h2>
+            <div class="story-list" id="story-list"></div>
+        </div>
+
+        <div id="story-area"></div>
+
+        <footer>
+            <p>Viel Spaß beim Lesen! (Have fun reading!) 📚✨</p>
+        </footer>
+    </div>
+
+    <script src="storage-manager.js"></script>
+    <script src="german-kids-generator.js"></script>
+</body>
+</html>
