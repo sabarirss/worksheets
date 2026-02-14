@@ -68,9 +68,20 @@ firebase.auth().onAuthStateChanged(async (firebaseUser) => {
         try {
             const userDoc = await firebase.firestore().collection('users').doc(firebaseUser.uid.substring(0, 20)).get();
             if (userDoc.exists) {
+                const userData = userDoc.data();
+
+                // Sync email verification status from Firebase Auth to Firestore
+                if (firebaseUser.emailVerified !== userData.emailVerified) {
+                    console.log('Syncing email verification status to Firestore');
+                    await userDoc.ref.update({
+                        emailVerified: firebaseUser.emailVerified
+                    });
+                    userData.emailVerified = firebaseUser.emailVerified;
+                }
+
                 currentUserCache = {
                     uid: firebaseUser.uid,
-                    ...userDoc.data()
+                    ...userData
                 };
             }
         } catch (error) {
@@ -134,6 +145,16 @@ async function login(username, password) {
         }
 
         const userData = userDoc.docs[0].data();
+
+        // Sync email verification status from Firebase Auth to Firestore
+        if (userCredential.user.emailVerified !== userData.emailVerified) {
+            console.log('Syncing email verification status to Firestore');
+            await userDoc.docs[0].ref.update({
+                emailVerified: userCredential.user.emailVerified
+            });
+            userData.emailVerified = userCredential.user.emailVerified;
+        }
+
         currentUserCache = {
             uid: userCredential.user.uid,
             ...userData
