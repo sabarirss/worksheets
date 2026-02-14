@@ -368,7 +368,7 @@
             <h2>👨‍👩‍👧 Parental Control</h2>
 
             <div class="parent-control-box">
-                <h3>🔒 Age Settings & Module Management</h3>
+                <h3>🔒 Age Settings & Package Management</h3>
                 <p style="color: #666; margin-bottom: 15px;">
                     Parents can manage their child's age settings and learning modules. This affects which content your child can access.
                     Requires parent verification.
@@ -517,9 +517,9 @@
                 </div>
             </div>
 
-            <!-- Module Management -->
+            <!-- Package Management -->
             <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Modules</h3>
+                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages</h3>
                 <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for your child:</p>
                 <div style="display: grid; gap: 10px;">
                     <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
@@ -847,7 +847,7 @@
                 // Get enabled modules (what parent has enabled) - fallback to modules if enabledModules doesn't exist
                 const enabledModules = currentUser.enabledModules || currentUser.modules || {};
 
-                // Module list
+                // Package list
                 const allModules = [
                     { key: 'math', id: 'panel-toggle-math' },
                     { key: 'english', id: 'panel-toggle-english' },
@@ -865,12 +865,12 @@
                     const label = checkbox.closest('label');
 
                     if (assignedModules[module.key]) {
-                        // Module is assigned by admin - show and enable it
+                        // Package is assigned by admin - show and enable it
                         label.style.display = 'flex';
                         checkbox.disabled = false;
                         checkbox.checked = enabledModules[module.key] || false;
                     } else {
-                        // Module not assigned by admin - hide it
+                        // Package not assigned by admin - hide it
                         label.style.display = 'none';
                     }
                 });

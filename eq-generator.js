@@ -499,7 +499,7 @@ function renderWorksheet() {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="Karthigai Selvi">
+                        <input type="text" id="student-name">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>

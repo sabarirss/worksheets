@@ -179,7 +179,7 @@ function showModuleManagement() {
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         ">
             <h3 style="margin: 0 0 20px 0; font-size: 1.5em; text-align: center;">
-                👨‍👩‍👧‍👦 Parent Mode - Manage Module Access
+                👨‍👩‍👧‍👦 Parent Mode - Manage Package Access
             </h3>
             <p style="text-align: center; margin-bottom: 20px; opacity: 0.9;">
                 Enable or disable modules for your child. Changes are saved automatically.
@@ -283,7 +283,7 @@ async function toggleModule(moduleName, enabled) {
 
         // Show success notification
         showNotification(
-            'Module Updated',
+            'Package Updated',
             `${moduleName.charAt(0).toUpperCase() + moduleName.slice(1)} ${enabled ? 'enabled' : 'disabled'}`,
             'success'
         );

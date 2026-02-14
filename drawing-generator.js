@@ -37,129 +37,738 @@ function getDemoLimit(defaultCount) {
     return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
 }
 
-// Drawing tutorials database with SVG visual steps
+// Drawing tutorials database with SVG visual steps - Age-based structure
 const drawingTutorials = {
-    easy: {
-        circle: {
-            name: 'Draw a Circle',
-            icon: '⭕',
-            steps: [
-                { text: 'Start at any point on your canvas', visual: 'circle-step1' },
-                { text: 'Move your pencil in a curved line', visual: 'circle-step2' },
-                { text: 'Keep going around in a smooth curve', visual: 'circle-step3' },
-                { text: 'Connect back to your starting point', visual: 'circle-step4' },
-                { text: 'Perfect! You drew a circle!', visual: 'circle-step5' }
-            ]
+    '4-5': {
+        easy: {
+            circle: {
+                name: 'Draw a Circle',
+                icon: '⭕',
+                steps: [
+                    { text: 'Start at any point on your canvas', visual: 'circle-step1' },
+                    { text: 'Move your pencil in a curved line', visual: 'circle-step2' },
+                    { text: 'Keep going around in a smooth curve', visual: 'circle-step3' },
+                    { text: 'Connect back to your starting point', visual: 'circle-step4' },
+                    { text: 'Perfect! You drew a circle!', visual: 'circle-step5' }
+                ]
+            },
+            square: {
+                name: 'Draw a Square',
+                icon: '⬜',
+                steps: [
+                    { text: 'Start at the top left', visual: 'square-step1' },
+                    { text: 'Draw a line going right', visual: 'square-step2' },
+                    { text: 'Draw a line going down', visual: 'square-step3' },
+                    { text: 'Draw a line going left', visual: 'square-step4' },
+                    { text: 'Connect back to start. Great job!', visual: 'square-step5' }
+                ]
+            },
+            triangle: {
+                name: 'Draw a Triangle',
+                icon: '🔺',
+                steps: [
+                    { text: 'Start at the top point', visual: 'triangle-step1' },
+                    { text: 'Draw a slanted line down to the left', visual: 'triangle-step2' },
+                    { text: 'Draw a straight line to the right', visual: 'triangle-step3' },
+                    { text: 'Connect back to the top. Perfect!', visual: 'triangle-step4' }
+                ]
+            }
         },
-        sun: {
-            name: 'Draw a Sun',
-            icon: '☀️',
-            steps: [
-                { text: 'Draw a circle in the middle', visual: 'sun-step1' },
-                { text: 'Draw 4 lines at top, bottom, left, and right', visual: 'sun-step2' },
-                { text: 'Add 4 more lines in between (8 total rays)', visual: 'sun-step3' },
-                { text: 'Make the rays all the same length', visual: 'sun-step4' },
-                { text: 'Add a happy face! Your sun is done!', visual: 'sun-step5' }
-            ]
+        medium: {
+            sun: {
+                name: 'Draw a Sun',
+                icon: '☀️',
+                steps: [
+                    { text: 'Draw a circle in the middle', visual: 'sun-step1' },
+                    { text: 'Draw 4 lines at top, bottom, left, and right', visual: 'sun-step2' },
+                    { text: 'Add 4 more lines in between (8 total rays)', visual: 'sun-step3' },
+                    { text: 'Make the rays all the same length', visual: 'sun-step4' },
+                    { text: 'Add a happy face! Your sun is done!', visual: 'sun-step5' }
+                ]
+            },
+            moon: {
+                name: 'Draw a Moon',
+                icon: '🌙',
+                steps: [
+                    { text: 'Draw a circle', visual: 'moon-step1' },
+                    { text: 'Draw another circle overlapping on the right', visual: 'moon-step2' },
+                    { text: 'Erase the right circle to make a crescent', visual: 'moon-step3' },
+                    { text: 'Add a sleepy face. Goodnight!', visual: 'moon-step4' }
+                ]
+            },
+            heart: {
+                name: 'Draw a Heart',
+                icon: '❤️',
+                steps: [
+                    { text: 'Draw two bumps at the top', visual: 'heart-step1' },
+                    { text: 'Curve down on the left side', visual: 'heart-step2' },
+                    { text: 'Curve down on the right side', visual: 'heart-step3' },
+                    { text: 'Meet at a point at the bottom. Love it!', visual: 'heart-step4' }
+                ]
+            }
         },
-        house: {
-            name: 'Draw a House',
-            icon: '🏠',
-            steps: [
-                { text: 'Draw a large square for the house', visual: 'house-step1' },
-                { text: 'Draw a triangle on top for the roof', visual: 'house-step2' },
-                { text: 'Draw a rectangle for the door', visual: 'house-step3' },
-                { text: 'Add two square windows on each side', visual: 'house-step4' },
-                { text: 'Add a doorknob circle. Done!', visual: 'house-step5' }
-            ]
-        },
-        tree: {
-            name: 'Draw a Tree',
-            icon: '🌳',
-            steps: [
-                { text: 'Draw two vertical lines for the trunk', visual: 'tree-step1' },
-                { text: 'Connect the lines at the bottom', visual: 'tree-step2' },
-                { text: 'Draw a fluffy cloud shape on top', visual: 'tree-step3' },
-                { text: 'Make it round and full', visual: 'tree-step4' },
-                { text: 'Add bark lines on the trunk. Beautiful!', visual: 'tree-step5' }
-            ]
-        },
-        flower: {
-            name: 'Draw a Flower',
-            icon: '🌸',
-            steps: [
-                { text: 'Draw a small circle in the center', visual: 'flower-step1' },
-                { text: 'Draw 5 oval petals around it', visual: 'flower-step2' },
-                { text: 'Make petals point outward', visual: 'flower-step3' },
-                { text: 'Draw a long stem line down', visual: 'flower-step4' },
-                { text: 'Add two leaves on the stem. Pretty!', visual: 'flower-step5' }
-            ]
+        hard: {
+            house: {
+                name: 'Draw a House',
+                icon: '🏠',
+                steps: [
+                    { text: 'Draw a large square for the house', visual: 'house-step1' },
+                    { text: 'Draw a triangle on top for the roof', visual: 'house-step2' },
+                    { text: 'Draw a rectangle for the door', visual: 'house-step3' },
+                    { text: 'Add two square windows on each side', visual: 'house-step4' },
+                    { text: 'Add a doorknob circle. Done!', visual: 'house-step5' }
+                ]
+            },
+            tree: {
+                name: 'Draw a Tree',
+                icon: '🌳',
+                steps: [
+                    { text: 'Draw two vertical lines for the trunk', visual: 'tree-step1' },
+                    { text: 'Connect the lines at the bottom', visual: 'tree-step2' },
+                    { text: 'Draw a fluffy cloud shape on top', visual: 'tree-step3' },
+                    { text: 'Make it round and full', visual: 'tree-step4' },
+                    { text: 'Add bark lines on the trunk. Beautiful!', visual: 'tree-step5' }
+                ]
+            },
+            flower: {
+                name: 'Draw a Flower',
+                icon: '🌸',
+                steps: [
+                    { text: 'Draw a small circle in the center', visual: 'flower-step1' },
+                    { text: 'Draw 5 oval petals around it', visual: 'flower-step2' },
+                    { text: 'Make petals point outward', visual: 'flower-step3' },
+                    { text: 'Draw a long stem line down', visual: 'flower-step4' },
+                    { text: 'Add two leaves on the stem. Pretty!', visual: 'flower-step5' }
+                ]
+            }
         }
     },
-    medium: {
-        cat: {
-            name: 'Draw a Cat',
-            icon: '🐱',
-            steps: [
-                { text: 'Draw a circle for the head', visual: 'cat-step1' },
-                { text: 'Add two triangle ears on top', visual: 'cat-step2' },
-                { text: 'Draw an oval body below', visual: 'cat-step3' },
-                { text: 'Add four legs', visual: 'cat-step4' },
-                { text: 'Add eyes, nose, and whiskers', visual: 'cat-step5' },
-                { text: 'Draw a curved tail. Meow!', visual: 'cat-step6' }
-            ]
+    '6': {
+        easy: {
+            fish: {
+                name: 'Draw a Fish',
+                icon: '🐠',
+                steps: [
+                    { text: 'Draw an oval for the body', visual: 'fish-step1' },
+                    { text: 'Add a triangle tail at the back', visual: 'fish-step2' },
+                    { text: 'Draw fins on top and bottom', visual: 'fish-step3' },
+                    { text: 'Add an eye and mouth', visual: 'fish-step4' },
+                    { text: 'Add scales pattern. Swim!', visual: 'fish-step5' }
+                ]
+            },
+            bird: {
+                name: 'Draw a Bird',
+                icon: '🐦',
+                steps: [
+                    { text: 'Draw a circle for the head', visual: 'bird-step1' },
+                    { text: 'Add an oval body below', visual: 'bird-step2' },
+                    { text: 'Draw a small triangle beak', visual: 'bird-step3' },
+                    { text: 'Add a wing shape', visual: 'bird-step4' },
+                    { text: 'Draw stick legs and an eye. Tweet!', visual: 'bird-step5' }
+                ]
+            },
+            snail: {
+                name: 'Draw a Snail',
+                icon: '🐌',
+                steps: [
+                    { text: 'Draw a spiral shell', visual: 'snail-step1' },
+                    { text: 'Draw a long curved body', visual: 'snail-step2' },
+                    { text: 'Add two antennae on top', visual: 'snail-step3' },
+                    { text: 'Draw eyes and smile. Slow and steady!', visual: 'snail-step4' }
+                ]
+            }
         },
-        car: {
-            name: 'Draw a Car',
-            icon: '🚗',
-            steps: [
-                { text: 'Draw a long rectangle for the body', visual: 'car-step1' },
-                { text: 'Add a smaller rectangle on top for windows', visual: 'car-step2' },
-                { text: 'Round the corners', visual: 'car-step3' },
-                { text: 'Draw two circles for wheels', visual: 'car-step4' },
-                { text: 'Add hubcaps inside wheels', visual: 'car-step5' },
-                { text: 'Add headlights. Vroom vroom!', visual: 'car-step6' }
-            ]
+        medium: {
+            cat: {
+                name: 'Draw a Cat',
+                icon: '🐱',
+                steps: [
+                    { text: 'Draw a circle for the head', visual: 'cat-step1' },
+                    { text: 'Add two triangle ears on top', visual: 'cat-step2' },
+                    { text: 'Draw an oval body below', visual: 'cat-step3' },
+                    { text: 'Add four legs', visual: 'cat-step4' },
+                    { text: 'Add eyes, nose, and whiskers', visual: 'cat-step5' },
+                    { text: 'Draw a curved tail. Meow!', visual: 'cat-step6' }
+                ]
+            },
+            dog: {
+                name: 'Draw a Dog',
+                icon: '🐕',
+                steps: [
+                    { text: 'Draw a circle for the head', visual: 'dog-step1' },
+                    { text: 'Add two floppy ears', visual: 'dog-step2' },
+                    { text: 'Draw an oval body', visual: 'dog-step3' },
+                    { text: 'Add four legs', visual: 'dog-step4' },
+                    { text: 'Draw eyes, nose, and tongue', visual: 'dog-step5' },
+                    { text: 'Add a wagging tail. Woof!', visual: 'dog-step6' }
+                ]
+            },
+            butterfly: {
+                name: 'Draw a Butterfly',
+                icon: '🦋',
+                steps: [
+                    { text: 'Draw a small oval for the body', visual: 'butterfly-step1' },
+                    { text: 'Add a circle on top for the head', visual: 'butterfly-step2' },
+                    { text: 'Draw two antennae', visual: 'butterfly-step3' },
+                    { text: 'Draw left wing shapes', visual: 'butterfly-step4' },
+                    { text: 'Draw matching right wings', visual: 'butterfly-step5' },
+                    { text: 'Add patterns inside. Beautiful!', visual: 'butterfly-step6' }
+                ]
+            }
         },
-        butterfly: {
-            name: 'Draw a Butterfly',
-            icon: '🦋',
-            steps: [
-                { text: 'Draw a small oval for the body', visual: 'butterfly-step1' },
-                { text: 'Add a circle on top for the head', visual: 'butterfly-step2' },
-                { text: 'Draw two antennae', visual: 'butterfly-step3' },
-                { text: 'Draw left wing shapes', visual: 'butterfly-step4' },
-                { text: 'Draw matching right wings', visual: 'butterfly-step5' },
-                { text: 'Add patterns inside. Beautiful!', visual: 'butterfly-step6' }
-            ]
+        hard: {
+            car: {
+                name: 'Draw a Car',
+                icon: '🚗',
+                steps: [
+                    { text: 'Draw a long rectangle for the body', visual: 'car-step1' },
+                    { text: 'Add a smaller rectangle on top for windows', visual: 'car-step2' },
+                    { text: 'Round the corners', visual: 'car-step3' },
+                    { text: 'Draw two circles for wheels', visual: 'car-step4' },
+                    { text: 'Add hubcaps inside wheels', visual: 'car-step5' },
+                    { text: 'Add headlights. Vroom vroom!', visual: 'car-step6' }
+                ]
+            },
+            boat: {
+                name: 'Draw a Boat',
+                icon: '⛵',
+                steps: [
+                    { text: 'Draw a curved line for the bottom', visual: 'boat-step1' },
+                    { text: 'Add sides going up in a V shape', visual: 'boat-step2' },
+                    { text: 'Draw a mast in the middle', visual: 'boat-step3' },
+                    { text: 'Add a triangle sail', visual: 'boat-step4' },
+                    { text: 'Draw waves below. Sail away!', visual: 'boat-step5' }
+                ]
+            },
+            rocket: {
+                name: 'Draw a Rocket',
+                icon: '🚀',
+                steps: [
+                    { text: 'Draw a long rectangle for the body', visual: 'rocket-step1' },
+                    { text: 'Add a triangle nose cone on top', visual: 'rocket-step2' },
+                    { text: 'Draw two side fins', visual: 'rocket-step3' },
+                    { text: 'Add a window circle', visual: 'rocket-step4' },
+                    { text: 'Draw flames at the bottom. Blast off!', visual: 'rocket-step5' }
+                ]
+            }
         }
     },
-    hard: {
-        dolphin: {
-            name: 'Draw a Dolphin',
-            icon: '🐬',
-            steps: [
-                { text: 'Draw a curved banana shape for the body', visual: 'dolphin-step1' },
-                { text: 'Add a rounded nose (rostrum)', visual: 'dolphin-step2' },
-                { text: 'Draw a curved dorsal fin on top', visual: 'dolphin-step3' },
-                { text: 'Add a forked tail fin at the back', visual: 'dolphin-step4' },
-                { text: 'Draw two side flippers', visual: 'dolphin-step5' },
-                { text: 'Add eye and smile line', visual: 'dolphin-step6' },
-                { text: 'Add shading and details. Splash!', visual: 'dolphin-step7' }
-            ]
+    '7': {
+        easy: {
+            dinosaur: {
+                name: 'Draw a Dinosaur',
+                icon: '🦕',
+                steps: [
+                    { text: 'Draw a large oval for the body', visual: 'dinosaur-step1' },
+                    { text: 'Add a long neck and small head', visual: 'dinosaur-step2' },
+                    { text: 'Draw four thick legs', visual: 'dinosaur-step3' },
+                    { text: 'Add a long tail', visual: 'dinosaur-step4' },
+                    { text: 'Draw eye and spots. Roar!', visual: 'dinosaur-step5' }
+                ]
+            },
+            elephant: {
+                name: 'Draw an Elephant',
+                icon: '🐘',
+                steps: [
+                    { text: 'Draw a big circle for the body', visual: 'elephant-step1' },
+                    { text: 'Add a circle for the head', visual: 'elephant-step2' },
+                    { text: 'Draw a long curved trunk', visual: 'elephant-step3' },
+                    { text: 'Add big ears', visual: 'elephant-step4' },
+                    { text: 'Draw four legs and eye. Trumpet!', visual: 'elephant-step5' }
+                ]
+            },
+            giraffe: {
+                name: 'Draw a Giraffe',
+                icon: '🦒',
+                steps: [
+                    { text: 'Draw an oval for the body', visual: 'giraffe-step1' },
+                    { text: 'Add a very long neck', visual: 'giraffe-step2' },
+                    { text: 'Draw a small head at the top', visual: 'giraffe-step3' },
+                    { text: 'Add four long legs', visual: 'giraffe-step4' },
+                    { text: 'Draw spots all over. Tall!', visual: 'giraffe-step5' }
+                ]
+            }
         },
-        castle: {
-            name: 'Draw a Castle',
-            icon: '🏰',
-            steps: [
-                { text: 'Draw a large rectangle for the main building', visual: 'castle-step1' },
-                { text: 'Add two tall tower rectangles on sides', visual: 'castle-step2' },
-                { text: 'Draw triangular roofs on towers', visual: 'castle-step3' },
-                { text: 'Add battlements (squares) on top', visual: 'castle-step4' },
-                { text: 'Draw a drawbridge at the bottom', visual: 'castle-step5' },
-                { text: 'Add windows throughout', visual: 'castle-step6' },
-                { text: 'Add flags and details. Majestic!', visual: 'castle-step7' }
-            ]
+        medium: {
+            castle: {
+                name: 'Draw a Castle',
+                icon: '🏰',
+                steps: [
+                    { text: 'Draw a large rectangle for the main building', visual: 'castle-step1' },
+                    { text: 'Add two tall tower rectangles on sides', visual: 'castle-step2' },
+                    { text: 'Draw triangular roofs on towers', visual: 'castle-step3' },
+                    { text: 'Add battlements (squares) on top', visual: 'castle-step4' },
+                    { text: 'Draw a drawbridge at the bottom', visual: 'castle-step5' },
+                    { text: 'Add windows throughout', visual: 'castle-step6' },
+                    { text: 'Add flags and details. Majestic!', visual: 'castle-step7' }
+                ]
+            },
+            robot: {
+                name: 'Draw a Robot',
+                icon: '🤖',
+                steps: [
+                    { text: 'Draw a square for the head', visual: 'robot-step1' },
+                    { text: 'Add two circle eyes and antenna', visual: 'robot-step2' },
+                    { text: 'Draw a rectangle body', visual: 'robot-step3' },
+                    { text: 'Add rectangle arms and hands', visual: 'robot-step4' },
+                    { text: 'Draw rectangle legs', visual: 'robot-step5' },
+                    { text: 'Add buttons and details. Beep boop!', visual: 'robot-step6' }
+                ]
+            },
+            mushroom: {
+                name: 'Draw a Mushroom',
+                icon: '🍄',
+                steps: [
+                    { text: 'Draw a curved cap on top', visual: 'mushroom-step1' },
+                    { text: 'Add a thick stem below', visual: 'mushroom-step2' },
+                    { text: 'Draw lines under the cap', visual: 'mushroom-step3' },
+                    { text: 'Add dots on the cap', visual: 'mushroom-step4' },
+                    { text: 'Draw grass around it. Magical!', visual: 'mushroom-step5' }
+                ]
+            }
+        },
+        hard: {
+            dragon: {
+                name: 'Draw a Dragon',
+                icon: '🐉',
+                steps: [
+                    { text: 'Draw a long serpent body', visual: 'dragon-step1' },
+                    { text: 'Add a fierce head with horns', visual: 'dragon-step2' },
+                    { text: 'Draw large wings on the back', visual: 'dragon-step3' },
+                    { text: 'Add four clawed legs', visual: 'dragon-step4' },
+                    { text: 'Draw a pointed tail', visual: 'dragon-step5' },
+                    { text: 'Add scales and spikes', visual: 'dragon-step6' },
+                    { text: 'Draw fire breath. Legendary!', visual: 'dragon-step7' }
+                ]
+            },
+            unicorn: {
+                name: 'Draw a Unicorn',
+                icon: '🦄',
+                steps: [
+                    { text: 'Draw a horse head', visual: 'unicorn-step1' },
+                    { text: 'Add a spiral horn on top', visual: 'unicorn-step2' },
+                    { text: 'Draw the neck and body', visual: 'unicorn-step3' },
+                    { text: 'Add four legs', visual: 'unicorn-step4' },
+                    { text: 'Draw a flowing mane', visual: 'unicorn-step5' },
+                    { text: 'Add a long tail', visual: 'unicorn-step6' },
+                    { text: 'Add stars around it. Magical!', visual: 'unicorn-step7' }
+                ]
+            },
+            owl: {
+                name: 'Draw an Owl',
+                icon: '🦉',
+                steps: [
+                    { text: 'Draw a large oval body', visual: 'owl-step1' },
+                    { text: 'Add a rounded head on top', visual: 'owl-step2' },
+                    { text: 'Draw two large circle eyes', visual: 'owl-step3' },
+                    { text: 'Add ear tufts on top', visual: 'owl-step4' },
+                    { text: 'Draw wings on sides', visual: 'owl-step5' },
+                    { text: 'Add feet and beak', visual: 'owl-step6' },
+                    { text: 'Draw feather details. Wise!', visual: 'owl-step7' }
+                ]
+            }
+        }
+    },
+    '8': {
+        easy: {
+            dolphin: {
+                name: 'Draw a Dolphin',
+                icon: '🐬',
+                steps: [
+                    { text: 'Draw a curved banana shape for the body', visual: 'dolphin-step1' },
+                    { text: 'Add a rounded nose (rostrum)', visual: 'dolphin-step2' },
+                    { text: 'Draw a curved dorsal fin on top', visual: 'dolphin-step3' },
+                    { text: 'Add a forked tail fin at the back', visual: 'dolphin-step4' },
+                    { text: 'Draw two side flippers', visual: 'dolphin-step5' },
+                    { text: 'Add eye and smile line', visual: 'dolphin-step6' },
+                    { text: 'Add shading and details. Splash!', visual: 'dolphin-step7' }
+                ]
+            },
+            shark: {
+                name: 'Draw a Shark',
+                icon: '🦈',
+                steps: [
+                    { text: 'Draw a torpedo-shaped body', visual: 'shark-step1' },
+                    { text: 'Add a pointed nose', visual: 'shark-step2' },
+                    { text: 'Draw a tall dorsal fin on top', visual: 'shark-step3' },
+                    { text: 'Add a crescent tail', visual: 'shark-step4' },
+                    { text: 'Draw side fins', visual: 'shark-step5' },
+                    { text: 'Add eye and gills', visual: 'shark-step6' },
+                    { text: 'Draw sharp teeth. Fierce!', visual: 'shark-step7' }
+                ]
+            },
+            turtle: {
+                name: 'Draw a Turtle',
+                icon: '🐢',
+                steps: [
+                    { text: 'Draw an oval shell', visual: 'turtle-step1' },
+                    { text: 'Add a hexagon pattern on shell', visual: 'turtle-step2' },
+                    { text: 'Draw the head sticking out', visual: 'turtle-step3' },
+                    { text: 'Add four flippers', visual: 'turtle-step4' },
+                    { text: 'Draw a small tail', visual: 'turtle-step5' },
+                    { text: 'Add eye and smile. Slow and steady!', visual: 'turtle-step6' }
+                ]
+            }
+        },
+        medium: {
+            landscape: {
+                name: 'Draw a Landscape',
+                icon: '🏞️',
+                steps: [
+                    { text: 'Draw a horizon line across', visual: 'landscape-step1' },
+                    { text: 'Add hills in the background', visual: 'landscape-step2' },
+                    { text: 'Draw trees of different sizes', visual: 'landscape-step3' },
+                    { text: 'Add a path or river', visual: 'landscape-step4' },
+                    { text: 'Draw clouds in the sky', visual: 'landscape-step5' },
+                    { text: 'Add grass and flowers', visual: 'landscape-step6' },
+                    { text: 'Shade for depth. Scenic!', visual: 'landscape-step7' }
+                ]
+            },
+            beach: {
+                name: 'Draw a Beach Scene',
+                icon: '🏖️',
+                steps: [
+                    { text: 'Draw the horizon line (sea meets sky)', visual: 'beach-step1' },
+                    { text: 'Add waves in the water', visual: 'beach-step2' },
+                    { text: 'Draw sand in the foreground', visual: 'beach-step3' },
+                    { text: 'Add a palm tree', visual: 'beach-step4' },
+                    { text: 'Draw a sun or clouds', visual: 'beach-step5' },
+                    { text: 'Add beach items (umbrella, shells)', visual: 'beach-step6' },
+                    { text: 'Shade the sand. Relaxing!', visual: 'beach-step7' }
+                ]
+            },
+            garden: {
+                name: 'Draw a Garden',
+                icon: '🌺',
+                steps: [
+                    { text: 'Draw a fence at the back', visual: 'garden-step1' },
+                    { text: 'Add different types of flowers', visual: 'garden-step2' },
+                    { text: 'Draw tall sunflowers', visual: 'garden-step3' },
+                    { text: 'Add bushes and shrubs', visual: 'garden-step4' },
+                    { text: 'Draw a path through the garden', visual: 'garden-step5' },
+                    { text: 'Add butterflies and bees', visual: 'garden-step6' },
+                    { text: 'Color it bright. Blooming!', visual: 'garden-step7' }
+                ]
+            }
+        },
+        hard: {
+            portrait: {
+                name: 'Draw a Portrait Face',
+                icon: '👤',
+                steps: [
+                    { text: 'Draw an oval for the head', visual: 'portrait-step1' },
+                    { text: 'Add guidelines (cross in the center)', visual: 'portrait-step2' },
+                    { text: 'Draw the eyes on the horizontal line', visual: 'portrait-step3' },
+                    { text: 'Add the nose below center', visual: 'portrait-step4' },
+                    { text: 'Draw the mouth', visual: 'portrait-step5' },
+                    { text: 'Add ears on the sides', visual: 'portrait-step6' },
+                    { text: 'Draw hair and refine features', visual: 'portrait-step7' },
+                    { text: 'Shade for depth. Realistic!', visual: 'portrait-step8' }
+                ]
+            },
+            figure: {
+                name: 'Draw a Human Figure',
+                icon: '🧍',
+                steps: [
+                    { text: 'Draw stick figure skeleton', visual: 'figure-step1' },
+                    { text: 'Add oval head', visual: 'figure-step2' },
+                    { text: 'Build torso with shapes', visual: 'figure-step3' },
+                    { text: 'Add arms with joints', visual: 'figure-step4' },
+                    { text: 'Draw legs with joints', visual: 'figure-step5' },
+                    { text: 'Add hands and feet', visual: 'figure-step6' },
+                    { text: 'Refine proportions', visual: 'figure-step7' },
+                    { text: 'Add clothes and details', visual: 'figure-step8' }
+                ]
+            },
+            dancer: {
+                name: 'Draw a Dancer',
+                icon: '💃',
+                steps: [
+                    { text: 'Draw action pose skeleton', visual: 'dancer-step1' },
+                    { text: 'Show movement with curved lines', visual: 'dancer-step2' },
+                    { text: 'Add head with tilt', visual: 'dancer-step3' },
+                    { text: 'Draw flowing body shapes', visual: 'dancer-step4' },
+                    { text: 'Add extended arms', visual: 'dancer-step5' },
+                    { text: 'Draw legs in motion', visual: 'dancer-step6' },
+                    { text: 'Add flowing costume', visual: 'dancer-step7' },
+                    { text: 'Shade for movement. Graceful!', visual: 'dancer-step8' }
+                ]
+            }
+        }
+    },
+    '9+': {
+        easy: {
+            cartoon: {
+                name: 'Draw a Cartoon Character',
+                icon: '😄',
+                steps: [
+                    { text: 'Draw large expressive eyes', visual: 'cartoon-step1' },
+                    { text: 'Add simple head shape', visual: 'cartoon-step2' },
+                    { text: 'Draw exaggerated features', visual: 'cartoon-step3' },
+                    { text: 'Add simplified body', visual: 'cartoon-step4' },
+                    { text: 'Draw with bold lines', visual: 'cartoon-step5' },
+                    { text: 'Add personality pose', visual: 'cartoon-step6' },
+                    { text: 'Color with flat colors. Fun!', visual: 'cartoon-step7' }
+                ]
+            },
+            manga: {
+                name: 'Draw Manga Eyes',
+                icon: '👁️',
+                steps: [
+                    { text: 'Draw large oval shape', visual: 'manga-step1' },
+                    { text: 'Add thick upper eyelid', visual: 'manga-step2' },
+                    { text: 'Draw large pupil', visual: 'manga-step3' },
+                    { text: 'Add multiple highlights', visual: 'manga-step4' },
+                    { text: 'Draw eyelashes', visual: 'manga-step5' },
+                    { text: 'Shade the iris', visual: 'manga-step6' },
+                    { text: 'Add emotion. Expressive!', visual: 'manga-step7' }
+                ]
+            },
+            chibi: {
+                name: 'Draw Chibi Style',
+                icon: '🧒',
+                steps: [
+                    { text: 'Draw huge head (2/3 of body)', visual: 'chibi-step1' },
+                    { text: 'Add big cute eyes', visual: 'chibi-step2' },
+                    { text: 'Draw tiny body', visual: 'chibi-step3' },
+                    { text: 'Add short limbs', visual: 'chibi-step4' },
+                    { text: 'Keep features simple', visual: 'chibi-step5' },
+                    { text: 'Add cute accessories', visual: 'chibi-step6' },
+                    { text: 'Color brightly. Adorable!', visual: 'chibi-step7' }
+                ]
+            }
+        },
+        medium: {
+            perspective: {
+                name: 'Draw in Perspective',
+                icon: '📐',
+                steps: [
+                    { text: 'Draw horizon line', visual: 'perspective-step1' },
+                    { text: 'Mark vanishing point', visual: 'perspective-step2' },
+                    { text: 'Draw guidelines to point', visual: 'perspective-step3' },
+                    { text: 'Sketch box in perspective', visual: 'perspective-step4' },
+                    { text: 'Add more boxes', visual: 'perspective-step5' },
+                    { text: 'Draw building from boxes', visual: 'perspective-step6' },
+                    { text: 'Add details', visual: 'perspective-step7' },
+                    { text: 'Create depth. Dimensional!', visual: 'perspective-step8' }
+                ]
+            },
+            shading: {
+                name: 'Master Shading',
+                icon: '🎨',
+                steps: [
+                    { text: 'Draw a sphere outline', visual: 'shading-step1' },
+                    { text: 'Identify light source', visual: 'shading-step2' },
+                    { text: 'Mark highlight area', visual: 'shading-step3' },
+                    { text: 'Add midtones', visual: 'shading-step4' },
+                    { text: 'Darken shadow side', visual: 'shading-step5' },
+                    { text: 'Add cast shadow', visual: 'shading-step6' },
+                    { text: 'Blend smoothly', visual: 'shading-step7' },
+                    { text: 'Create 3D effect. Realistic!', visual: 'shading-step8' }
+                ]
+            },
+            shadows: {
+                name: 'Draw Shadows',
+                icon: '🌗',
+                steps: [
+                    { text: 'Draw simple object', visual: 'shadows-step1' },
+                    { text: 'Choose light direction', visual: 'shadows-step2' },
+                    { text: 'Find shadow angle', visual: 'shadows-step3' },
+                    { text: 'Draw shadow shape', visual: 'shadows-step4' },
+                    { text: 'Fade shadow away from object', visual: 'shadows-step5' },
+                    { text: 'Add ambient occlusion', visual: 'shadows-step6' },
+                    { text: 'Blend naturally. Grounded!', visual: 'shadows-step7' }
+                ]
+            }
+        },
+        hard: {
+            detailed: {
+                name: 'Draw Detailed Animal',
+                icon: '🦁',
+                steps: [
+                    { text: 'Study animal anatomy', visual: 'detailed-step1' },
+                    { text: 'Sketch basic structure', visual: 'detailed-step2' },
+                    { text: 'Add muscle definition', visual: 'detailed-step3' },
+                    { text: 'Draw fur/feather direction', visual: 'detailed-step4' },
+                    { text: 'Add detailed textures', visual: 'detailed-step5' },
+                    { text: 'Render eyes with life', visual: 'detailed-step6' },
+                    { text: 'Shade for volume', visual: 'detailed-step7' },
+                    { text: 'Add fine details. Lifelike!', visual: 'detailed-step8' }
+                ]
+            },
+            stilllife: {
+                name: 'Draw Still Life',
+                icon: '🍎',
+                steps: [
+                    { text: 'Arrange objects', visual: 'stilllife-step1' },
+                    { text: 'Sketch composition', visual: 'stilllife-step2' },
+                    { text: 'Get proportions right', visual: 'stilllife-step3' },
+                    { text: 'Study light and shadow', visual: 'stilllife-step4' },
+                    { text: 'Add surface textures', visual: 'stilllife-step5' },
+                    { text: 'Render reflections', visual: 'stilllife-step6' },
+                    { text: 'Shade with gradients', visual: 'stilllife-step7' },
+                    { text: 'Add fine details. Artistic!', visual: 'stilllife-step8' }
+                ]
+            },
+            scene: {
+                name: 'Draw Complex Scene',
+                icon: '🖼️',
+                steps: [
+                    { text: 'Plan composition', visual: 'scene-step1' },
+                    { text: 'Establish perspective', visual: 'scene-step2' },
+                    { text: 'Block in major shapes', visual: 'scene-step3' },
+                    { text: 'Add middle ground elements', visual: 'scene-step4' },
+                    { text: 'Detail foreground', visual: 'scene-step5' },
+                    { text: 'Create atmospheric depth', visual: 'scene-step6' },
+                    { text: 'Add lighting mood', visual: 'scene-step7' },
+                    { text: 'Final details and polish', visual: 'scene-step8' },
+                    { text: 'Complete artwork. Masterpiece!', visual: 'scene-step9' }
+                ]
+            }
+        }
+    },
+    '10+': {
+        easy: {
+            anatomy: {
+                name: 'Draw Anatomy Basics',
+                icon: '🦴',
+                steps: [
+                    { text: 'Study skeletal structure', visual: 'anatomy-step1' },
+                    { text: 'Learn muscle groups', visual: 'anatomy-step2' },
+                    { text: 'Understand proportions (8 heads tall)', visual: 'anatomy-step3' },
+                    { text: 'Draw simplified skeleton', visual: 'anatomy-step4' },
+                    { text: 'Add muscle masses', visual: 'anatomy-step5' },
+                    { text: 'Study joint movement', visual: 'anatomy-step6' },
+                    { text: 'Practice different poses', visual: 'anatomy-step7' },
+                    { text: 'Apply to figure drawing. Foundation!', visual: 'anatomy-step8' }
+                ]
+            },
+            gesture: {
+                name: 'Draw Gesture & Movement',
+                icon: '🏃',
+                steps: [
+                    { text: 'Capture action line (line of motion)', visual: 'gesture-step1' },
+                    { text: 'Draw quickly (30 seconds)', visual: 'gesture-step2' },
+                    { text: 'Show weight distribution', visual: 'gesture-step3' },
+                    { text: 'Emphasize flow', visual: 'gesture-step4' },
+                    { text: 'Keep it loose', visual: 'gesture-step5' },
+                    { text: 'Capture energy', visual: 'gesture-step6' },
+                    { text: 'Practice many poses', visual: 'gesture-step7' },
+                    { text: 'Build visual library. Dynamic!', visual: 'gesture-step8' }
+                ]
+            },
+            proportions: {
+                name: 'Master Proportions',
+                icon: '📏',
+                steps: [
+                    { text: 'Learn head measurement unit', visual: 'proportions-step1' },
+                    { text: 'Adult is 7.5-8 heads tall', visual: 'proportions-step2' },
+                    { text: 'Eyes are halfway down head', visual: 'proportions-step3' },
+                    { text: 'Shoulders are 2-3 heads wide', visual: 'proportions-step4' },
+                    { text: 'Arms reach mid-thigh', visual: 'proportions-step5' },
+                    { text: 'Legs are half total height', visual: 'proportions-step6' },
+                    { text: 'Study male vs female differences', visual: 'proportions-step7' },
+                    { text: 'Apply to drawing. Accurate!', visual: 'proportions-step8' }
+                ]
+            }
+        },
+        medium: {
+            realistic: {
+                name: 'Draw Realistic Portrait',
+                icon: '👩',
+                steps: [
+                    { text: 'Study facial anatomy', visual: 'realistic-step1' },
+                    { text: 'Get proportions exact', visual: 'realistic-step2' },
+                    { text: 'Map features carefully', visual: 'realistic-step3' },
+                    { text: 'Draw structure first', visual: 'realistic-step4' },
+                    { text: 'Add skin texture', visual: 'realistic-step5' },
+                    { text: 'Render eyes with depth', visual: 'realistic-step6' },
+                    { text: 'Master hair flow', visual: 'realistic-step7' },
+                    { text: 'Shade for form', visual: 'realistic-step8' },
+                    { text: 'Capture likeness. Photorealistic!', visual: 'realistic-step9' }
+                ]
+            },
+            expression: {
+                name: 'Draw Facial Expressions',
+                icon: '😊😢😠',
+                steps: [
+                    { text: 'Study emotion muscles', visual: 'expression-step1' },
+                    { text: 'Draw neutral face', visual: 'expression-step2' },
+                    { text: 'Learn happiness (raise cheeks)', visual: 'expression-step3' },
+                    { text: 'Draw sadness (lower features)', visual: 'expression-step4' },
+                    { text: 'Show anger (furrow brows)', visual: 'expression-step5' },
+                    { text: 'Surprise (raise brows, open mouth)', visual: 'expression-step6' },
+                    { text: 'Practice subtle emotions', visual: 'expression-step7' },
+                    { text: 'Combine multiple feelings', visual: 'expression-step8' },
+                    { text: 'Convey personality. Expressive!', visual: 'expression-step9' }
+                ]
+            },
+            hands: {
+                name: 'Draw Hands',
+                icon: '✋',
+                steps: [
+                    { text: 'Study hand bone structure', visual: 'hands-step1' },
+                    { text: 'Break into basic shapes', visual: 'hands-step2' },
+                    { text: 'Palm is square', visual: 'hands-step3' },
+                    { text: 'Fingers have 3 segments', visual: 'hands-step4' },
+                    { text: 'Thumb is 2 segments', visual: 'hands-step5' },
+                    { text: 'Draw from different angles', visual: 'hands-step6' },
+                    { text: 'Practice various gestures', visual: 'hands-step7' },
+                    { text: 'Add knuckles and details', visual: 'hands-step8' },
+                    { text: 'Master foreshortening. Challenging!', visual: 'hands-step9' }
+                ]
+            }
+        },
+        hard: {
+            composition: {
+                name: 'Master Composition',
+                icon: '🎭',
+                steps: [
+                    { text: 'Learn rule of thirds', visual: 'composition-step1' },
+                    { text: 'Create focal point', visual: 'composition-step2' },
+                    { text: 'Use leading lines', visual: 'composition-step3' },
+                    { text: 'Balance elements', visual: 'composition-step4' },
+                    { text: 'Control negative space', visual: 'composition-step5' },
+                    { text: 'Create depth layers', visual: 'composition-step6' },
+                    { text: 'Guide viewer\'s eye', visual: 'composition-step7' },
+                    { text: 'Establish mood', visual: 'composition-step8' },
+                    { text: 'Refine and polish', visual: 'composition-step9' },
+                    { text: 'Complete vision. Professional!', visual: 'composition-step10' }
+                ]
+            },
+            lighting: {
+                name: 'Master Light Study',
+                icon: '💡',
+                steps: [
+                    { text: 'Understand light types', visual: 'lighting-step1' },
+                    { text: 'Study direct light', visual: 'lighting-step2' },
+                    { text: 'Learn diffuse light', visual: 'lighting-step3' },
+                    { text: 'Master rim lighting', visual: 'lighting-step4' },
+                    { text: 'Create mood with color temperature', visual: 'lighting-step5' },
+                    { text: 'Render form with light', visual: 'lighting-step6' },
+                    { text: 'Add atmospheric effects', visual: 'lighting-step7' },
+                    { text: 'Study time of day', visual: 'lighting-step8' },
+                    { text: 'Control contrast', visual: 'lighting-step9' },
+                    { text: 'Master dramatic lighting. Cinematic!', visual: 'lighting-step10' }
+                ]
+            },
+            final: {
+                name: 'Create Final Artwork',
+                icon: '🖌️',
+                steps: [
+                    { text: 'Develop concept and story', visual: 'final-step1' },
+                    { text: 'Research and gather references', visual: 'final-step2' },
+                    { text: 'Create thumbnail compositions', visual: 'final-step3' },
+                    { text: 'Refine chosen composition', visual: 'final-step4' },
+                    { text: 'Create detailed sketch', visual: 'final-step5' },
+                    { text: 'Plan lighting and colors', visual: 'final-step6' },
+                    { text: 'Render with technique', visual: 'final-step7' },
+                    { text: 'Add textures and details', visual: 'final-step8' },
+                    { text: 'Polish and refine', visual: 'final-step9' },
+                    { text: 'Add final touches', visual: 'final-step10' },
+                    { text: 'Complete masterpiece. Portfolio ready!', visual: 'final-step11' }
+                ]
+            }
         }
     }
 };
@@ -752,7 +1361,7 @@ const visualGuides = {
 };
 
 /**
- * Load tutorial list for selected difficulty
+ * Load tutorial list for selected difficulty (age-based)
  */
 function loadTutorialList(difficulty) {
     currentDifficulty = difficulty;
@@ -777,7 +1386,8 @@ function loadTutorialList(difficulty) {
     const tutorialList = document.getElementById('tutorial-list');
     tutorialList.innerHTML = '';
 
-    const tutorials = drawingTutorials[difficulty];
+    // Get tutorials for current age and difficulty
+    const tutorials = drawingTutorials[currentAge][difficulty];
 
     for (const [key, tutorial] of Object.entries(tutorials)) {
         const card = document.createElement('div');
@@ -805,7 +1415,7 @@ function loadDrawingTutorial(tutorialKey) {
 
     tutorialSelection.style.display = 'none';
 
-    const tutorial = drawingTutorials[currentDifficulty][tutorialKey];
+    const tutorial = drawingTutorials[currentAge][currentDifficulty][tutorialKey];
 
     worksheetArea.innerHTML = `
         <div class="navigation" style="margin-bottom: 20px;">
@@ -890,9 +1500,9 @@ function loadDrawingTutorial(tutorialKey) {
                            style="width: 80%; cursor: pointer;">
                 </div>
                 <div class="canvas-controls">
-                    <button class="canvas-btn" onclick="changeBrushSize('small')" title="Small Brush">🖌️ S</button>
-                    <button class="canvas-btn" onclick="changeBrushSize('medium')" title="Medium Brush">🖌️ M</button>
-                    <button class="canvas-btn" onclick="changeBrushSize('large')" title="Large Brush">🖌️ L</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('small')" title="Small Brush" style="font-size: 0.8em;">⚫</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('medium')" title="Medium Brush" style="font-size: 1.3em;">⚫</button>
+                    <button class="canvas-btn" onclick="changeBrushSize('large')" title="Large Brush" style="font-size: 1.8em;">⚫</button>
                 </div>
                 <div class="canvas-controls">
                     <button class="canvas-btn" style="background: #4caf50; color: white;" onclick="savePDF()">💾 Save as PDF</button>
@@ -912,7 +1522,7 @@ function loadDrawingTutorial(tutorialKey) {
  * Update the displayed step
  */
 function updateStep() {
-    const tutorial = drawingTutorials[currentDifficulty][currentTutorial];
+    const tutorial = drawingTutorials[currentAge][currentDifficulty][currentTutorial];
     const step = tutorial.steps[currentStep];
 
     // Update step number
@@ -924,7 +1534,20 @@ function updateStep() {
     if (visualFunction) {
         visualGuide.innerHTML = visualFunction();
     } else {
-        visualGuide.innerHTML = '<p style="color: #999;">Visual guide not available</p>';
+        // Show helpful placeholder with step text
+        visualGuide.innerHTML = `
+            <svg viewBox="0 0 300 300" class="step-visual" style="background: #f8f9fa;">
+                <text x="150" y="130" text-anchor="middle" fill="#667eea" font-size="20" font-weight="bold">
+                    Step ${currentStep + 1}
+                </text>
+                <text x="150" y="160" text-anchor="middle" fill="#666" font-size="14">
+                    ${step.text.substring(0, 40)}${step.text.length > 40 ? '...' : ''}
+                </text>
+                <text x="150" y="190" text-anchor="middle" fill="#999" font-size="12" font-style="italic">
+                    Draw on your canvas below!
+                </text>
+            </svg>
+        `;
     }
 
     // Update step text
@@ -957,7 +1580,7 @@ function updateStep() {
  * Go to next step
  */
 function nextStep() {
-    const tutorial = drawingTutorials[currentDifficulty][currentTutorial];
+    const tutorial = drawingTutorials[currentAge][currentDifficulty][currentTutorial];
     if (currentStep < tutorial.steps.length - 1) {
         currentStep++;
         updateStep();
@@ -1220,7 +1843,7 @@ function changeColor(color) {
         // Show eraser size slider
         const eraserSlider = document.getElementById('eraser-size-container');
         if (eraserSlider) {
-            eraserSlider.style.display = 'block';
+            eraserSlider.style.display = 'flex';
         }
     } else {
         // Normal drawing mode
@@ -1269,51 +1892,93 @@ function changeBrushSize(size) {
  * Save as PDF
  */
 function savePDF() {
-    const tutorial = drawingTutorials[currentDifficulty][currentTutorial];
-    const canvasImage = canvas.toDataURL('image/png');
+    try {
+        // Validate all required data exists
+        if (!currentAge || !currentDifficulty || !currentTutorial) {
+            alert('Error: Drawing tutorial information is missing. Please try again.');
+            return;
+        }
 
-    const content = `
-        <div style="font-family: Arial, sans-serif; padding: 30px;">
-            <h1 style="text-align: center; color: #667eea;">${tutorial.icon} ${tutorial.name}</h1>
-            <h3 style="color: #764ba2;">Your Drawing:</h3>
-            <div style="text-align: center; margin: 20px 0;">
-                <img src="${canvasImage}" style="max-width: 500px; border: 3px solid #333; border-radius: 10px;">
+        const tutorial = drawingTutorials[currentAge]?.[currentDifficulty]?.[currentTutorial];
+        if (!tutorial) {
+            alert('Error: Could not find tutorial data. Please reload the page and try again.');
+            return;
+        }
+
+        if (!canvas) {
+            alert('Error: Canvas not found. Please try drawing something first.');
+            return;
+        }
+
+        const canvasImage = canvas.toDataURL('image/png');
+
+        // Check if canvas is blank
+        if (!canvasImage || canvasImage.length < 100) {
+            alert('Warning: Your canvas appears to be empty. The PDF will show a blank drawing.');
+        }
+
+        const content = `
+            <div style="font-family: Arial, sans-serif; padding: 30px;">
+                <h1 style="text-align: center; color: #667eea;">${tutorial.icon} ${tutorial.name}</h1>
+                <h3 style="color: #764ba2;">Your Drawing:</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    <img src="${canvasImage}" style="max-width: 500px; border: 3px solid #333; border-radius: 10px;" crossorigin="anonymous">
+                </div>
+                <h3 style="color: #667eea;">Steps You Followed:</h3>
+                <ol style="font-size: 14px; line-height: 1.8;">
+                    ${tutorial.steps.map(step => `<li>${step.text}</li>`).join('')}
+                </ol>
+                <p style="text-align: center; margin-top: 30px; color: #666;">
+                    <strong>Student:</strong> ${getCurrentUserFullName()}<br>
+                    <strong>Date:</strong> ${new Date().toLocaleDateString()}
+                </p>
             </div>
-            <h3 style="color: #667eea;">Steps You Followed:</h3>
-            <ol style="font-size: 14px; line-height: 1.8;">
-                ${tutorial.steps.map(step => `<li>${step.text}</li>`).join('')}
-            </ol>
-            <p style="text-align: center; margin-top: 30px; color: #666;">
-                <strong>Student:</strong> ${getCurrentUserFullName()}<br>
-                <strong>Date:</strong> ${new Date().toLocaleDateString()}
-            </p>
-        </div>
-    `;
+        `;
 
-    const element = document.createElement('div');
-    element.innerHTML = content;
-    document.body.appendChild(element);
+        const element = document.createElement('div');
+        element.innerHTML = content;
+        element.style.position = 'absolute';
+        element.style.left = '-9999px';
+        document.body.appendChild(element);
 
-    const opt = {
-        margin: 0.5,
-        filename: `${tutorial.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false
-        },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
+        const opt = {
+            margin: 0.5,
+            filename: `${tutorial.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                logging: true,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
 
-    // Wait a moment for image to be ready, then generate PDF
-    setTimeout(() => {
-        html2pdf().set(opt).from(element).save().then(() => {
-            // Remove the temporary element after PDF is generated
-            document.body.removeChild(element);
-        });
-    }, 100);
+        console.log('Starting PDF generation...');
+
+        // Wait for image to load, then generate PDF
+        setTimeout(() => {
+            html2pdf().set(opt).from(element).save()
+                .then(() => {
+                    console.log('PDF generated successfully');
+                    if (document.body.contains(element)) {
+                        document.body.removeChild(element);
+                    }
+                    alert('PDF saved successfully!');
+                })
+                .catch((error) => {
+                    console.error('PDF generation error:', error);
+                    if (document.body.contains(element)) {
+                        document.body.removeChild(element);
+                    }
+                    alert('Error generating PDF. Please try again or contact support.');
+                });
+        }, 200);
+    } catch (error) {
+        console.error('PDF save error:', error);
+        alert('Error saving PDF: ' + error.message);
+    }
 }
 
 /**

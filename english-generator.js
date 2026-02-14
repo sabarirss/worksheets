@@ -1475,7 +1475,7 @@ function saveCurrentWorksheet() {
     }
 
     const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
-    const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
+    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers

@@ -1217,7 +1217,7 @@ function saveCurrentWorksheet() {
     }
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
+    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers
@@ -1360,7 +1360,7 @@ function autoSavePage() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
+    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers
