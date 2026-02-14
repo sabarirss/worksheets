@@ -51,10 +51,13 @@ function backToWorksheetSelection() {
 }
 
 let currentWorksheet = null;
+let currentPage = 1;
+let totalPages = 20; // For writing practice
 let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
+let writingCanvases = [];
 
 // Demo version limiting
 function isDemoMode() {
@@ -234,6 +237,63 @@ const DIFFICULTY_LABELS = {
     'hard': 'Hard ⭐⭐⭐'
 };
 
+// Writing Practice Activities (organized by age appropriateness)
+const writingActivities = {
+    '4-5': {
+        letters: [
+            // Uppercase A-J
+            { prompt: 'Practice writing:', example: 'A', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'B', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'C', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'D', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'E', type: 'letter' },
+            // Lowercase a-e
+            { prompt: 'Practice writing:', example: 'a', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'b', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'c', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'd', type: 'letter' },
+            { prompt: 'Practice writing:', example: 'e', type: 'letter' }
+        ]
+    },
+    '6': {
+        words: [
+            { prompt: 'Practice writing the word:', example: 'cat', meaning: '🐱' },
+            { prompt: 'Practice writing the word:', example: 'dog', meaning: '🐶' },
+            { prompt: 'Practice writing the word:', example: 'sun', meaning: '☀️' },
+            { prompt: 'Practice writing the word:', example: 'red', meaning: '🔴' },
+            { prompt: 'Practice writing the word:', example: 'ball', meaning: '⚽' }
+        ]
+    },
+    '7': {
+        sentences: [
+            { prompt: 'Copy this sentence:', example: 'I like to read.' },
+            { prompt: 'Copy this sentence:', example: 'The cat is big.' },
+            { prompt: 'Copy this sentence:', example: 'We play together.' }
+        ]
+    },
+    '8': {
+        sentences: [
+            { prompt: 'Copy this sentence:', example: 'The boy runs very fast.' },
+            { prompt: 'Copy this sentence:', example: 'She reads her favorite book.' },
+            { prompt: 'Copy this sentence:', example: 'They like to play outside every day.' }
+        ]
+    },
+    '9+': {
+        creative: [
+            { prompt: 'Write about your favorite hobby:', example: '' },
+            { prompt: 'Describe a fun day with your family:', example: '' },
+            { prompt: 'What do you want to learn this year?', example: '' }
+        ]
+    },
+    '10+': {
+        creative: [
+            { prompt: 'Write a short story about an adventure:', example: '' },
+            { prompt: 'Describe your ideal future career:', example: '' },
+            { prompt: 'If you could change one thing in the world, what would it be and why?', example: '' }
+        ]
+    }
+};
+
 // Content Configurations (age-based with difficulty levels)
 const contentConfigs = {
     '4-5': {
@@ -257,6 +317,13 @@ const contentConfigs = {
             problemCount: 15,
             type: 'pictureWords',
             wordList: wordBanks.pictureWords
+        },
+        writing: {
+            name: 'Ages 4-5 - Writing Practice',
+            description: 'Letter tracing with ruled lines',
+            type: 'writing',
+            activities: writingActivities['4-5'].letters,
+            activitiesPerPage: 3
         }
     },
     '6': {
@@ -280,6 +347,13 @@ const contentConfigs = {
             problemCount: 12,
             type: 'sentenceCompletion',
             difficulty: 'medium'
+        },
+        writing: {
+            name: 'Age 6 - Writing Practice',
+            description: 'Simple words with ruled lines',
+            type: 'writing',
+            activities: writingActivities['6'].words,
+            activitiesPerPage: 3
         }
     },
     '7': {
@@ -302,6 +376,13 @@ const contentConfigs = {
             description: 'Synonyms & antonyms',
             problemCount: 15,
             type: 'synonymsAntonyms'
+        },
+        writing: {
+            name: 'Age 7 - Writing Practice',
+            description: 'Sentence copying with ruled lines',
+            type: 'writing',
+            activities: writingActivities['7'].sentences,
+            activitiesPerPage: 3
         }
     },
     '8': {
@@ -322,6 +403,13 @@ const contentConfigs = {
             description: 'Reading comprehension',
             problemCount: 8,
             type: 'readingComprehension'
+        },
+        writing: {
+            name: 'Age 8 - Writing Practice',
+            description: 'Sentence practice with ruled lines',
+            type: 'writing',
+            activities: writingActivities['8'].sentences,
+            activitiesPerPage: 3
         }
     },
     '9+': {
@@ -342,6 +430,13 @@ const contentConfigs = {
             description: 'Advanced writing',
             problemCount: 12,
             type: 'advancedGrammar'
+        },
+        writing: {
+            name: 'Ages 9+ - Writing Practice',
+            description: 'Creative writing with ruled lines',
+            type: 'writing',
+            activities: writingActivities['9+'].creative,
+            activitiesPerPage: 2
         }
     },
     '10+': {
@@ -362,6 +457,13 @@ const contentConfigs = {
             description: 'Creative writing',
             problemCount: 8,
             type: 'advancedGrammar'
+        },
+        writing: {
+            name: 'Ages 10+ - Writing Practice',
+            description: 'Advanced creative writing with ruled lines',
+            type: 'writing',
+            activities: writingActivities['10+'].creative,
+            activitiesPerPage: 2
         }
     }
 };
@@ -544,20 +646,19 @@ function generateAdvancedGrammarProblems(count) {
 }
 
 // Load worksheet for specific age group and difficulty
-function loadWorksheet(ageGroup, difficulty) {
-    // Special handling for writing practice
-    if (ageGroup === 'writing') {
-        document.querySelector('.level-selection').style.display = 'none';
-        document.body.innerHTML = generateWritingWorksheet();
-        setTimeout(() => {
-            initializeAllCanvases();
-        }, 100);
-        return;
-    }
-
+function loadWorksheet(ageGroup, difficulty, page = 1) {
     const config = contentConfigs[ageGroup]?.[difficulty];
     if (!config) {
         console.error(`No config found for: ${ageGroup}, ${difficulty}`);
+        return;
+    }
+
+    currentPage = page;
+
+    // Handle writing practice with pages
+    if (config.type === 'writing') {
+        totalPages = isDemoMode() ? 2 : 50;
+        renderWritingWorksheet(ageGroup, difficulty, page);
         return;
     }
 
@@ -597,6 +698,300 @@ function loadWorksheet(ageGroup, difficulty) {
     };
 
     renderWorksheet();
+}
+
+// Navigate between writing practice pages
+function navigateWritingPage(direction) {
+    const newPage = currentPage + direction;
+    if (newPage < 1 || newPage > totalPages) return;
+    loadWorksheet(selectedAgeGroup, selectedDifficulty, newPage);
+}
+
+// Render writing practice worksheet with pages
+function renderWritingWorksheet(ageGroup, difficulty, page) {
+    const config = contentConfigs[ageGroup]?.[difficulty];
+    if (!config) return;
+
+    const today = new Date().toLocaleDateString();
+    const activities = config.activities;
+    const activitiesPerPage = config.activitiesPerPage;
+
+    // Generate activities for this page
+    const startIdx = (page - 1) * activitiesPerPage;
+    const pageActivities = [];
+
+    // Cycle through activities to fill 50 pages
+    for (let i = 0; i < activitiesPerPage; i++) {
+        const activityIdx = (startIdx + i) % activities.length;
+        pageActivities.push(activities[activityIdx]);
+    }
+
+    // Generate HTML for writing canvases
+    let problemsHTML = '';
+    pageActivities.forEach((activity, index) => {
+        const canvasId = `writing-canvas-${index}`;
+        const meaningEmoji = activity.meaning ? `<span style="font-size: 2em; margin-left: 10px;">${activity.meaning}</span>` : '';
+
+        problemsHTML += `
+            <div class="writing-problem">
+                <div class="problem-header">
+                    <span class="problem-number">${index + 1}.</span>
+                    <span class="problem-title">${activity.prompt}</span>
+                </div>
+                ${activity.example ? `
+                    <div class="writing-example">
+                        <span style="font-size: 1.3em; font-weight: bold;">${activity.example}</span>
+                        ${meaningEmoji}
+                    </div>
+                ` : ''}
+                <div class="writing-canvas-container">
+                    <canvas id="${canvasId}" class="writing-canvas" width="800" height="200"></canvas>
+                    <button class="clear-btn" onclick="clearWritingCanvas('${canvasId}')">Clear</button>
+                </div>
+            </div>
+        `;
+    });
+
+    const html = `
+        <div class="worksheet-container">
+            <div class="worksheet-header">
+                <div class="worksheet-info">
+                    <h2>✍️ ${config.name}</h2>
+                    <p>${config.description}</p>
+                    <p>Page ${page} of ${totalPages}</p>
+                </div>
+                <div class="student-info">
+                    <div class="info-row">
+                        <strong>Name:</strong>
+                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
+                    </div>
+                    <div class="info-row">
+                        <strong>Date:</strong>
+                        <input type="text" value="${today}" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="top-navigation" style="margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
+                <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="navigateWritingPage(-1)" ${page <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">⬅️ Previous</button>
+                    <span class="page-counter" style="font-weight: bold; font-size: 1.1em;">📄 Page ${page} of ${totalPages}</span>
+                    <button onclick="navigateWritingPage(1)" ${page >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next ➡️</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-buttons">
+                    <button onclick="clearAllWritingCanvases()">Clear All</button>
+                    <button onclick="saveWritingPDF()">Save as PDF</button>
+                </div>
+            </div>
+
+            <div class="problems-container">${problemsHTML}</div>
+
+            <div class="navigation" style="margin-top: 30px; text-align: center;">
+                <button onclick="backToWorksheetSelection()" style="padding: 12px 30px;">← Back to Difficulty</button>
+            </div>
+        </div>
+    `;
+
+    // Hide navigation and show worksheet container
+    document.getElementById('age-groups').style.display = 'none';
+    document.getElementById('difficulties').style.display = 'none';
+
+    let worksheetContainer = document.getElementById('worksheet-content');
+    if (!worksheetContainer) {
+        worksheetContainer = document.createElement('div');
+        worksheetContainer.id = 'worksheet-content';
+        document.body.appendChild(worksheetContainer);
+    }
+
+    worksheetContainer.innerHTML = html;
+    worksheetContainer.style.display = 'block';
+
+    // Initialize writing canvases
+    setTimeout(() => {
+        initializeAllWritingCanvases();
+    }, 100);
+}
+
+// Initialize writing canvases with ruled lines
+function initializeWritingCanvas(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Draw ruled lines
+    drawRuledLines(canvas);
+
+    // Store canvas info
+    writingCanvases.push({ id: canvasId, canvas: canvas, ctx: ctx });
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const pos = getPosition(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+
+        const pos = getPosition(e);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function getPosition(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
+}
+
+function drawRuledLines(canvas) {
+    const ctx = canvas.getContext('2d');
+    const height = canvas.height;
+    const width = canvas.width;
+
+    ctx.fillStyle = '#f8f9ff';
+    ctx.fillRect(0, 0, width, height);
+
+    const topLine = height * 0.25;
+    const midLine = height * 0.45;
+    const baseLine = height * 0.55;
+    const bottomLine = height * 0.75;
+
+    ctx.strokeStyle = '#aaa';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(50, topLine);
+    ctx.lineTo(width - 10, topLine);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(50, midLine);
+    ctx.lineTo(width - 10, midLine);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(50, baseLine);
+    ctx.lineTo(width - 10, baseLine);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#aaa';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(50, bottomLine);
+    ctx.lineTo(width - 10, bottomLine);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ff6b6b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(50, 0);
+    ctx.lineTo(50, height);
+    ctx.stroke();
+}
+
+function clearWritingCanvas(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawRuledLines(canvas);
+}
+
+function clearAllWritingCanvases() {
+    if (confirm('Clear all writing? This cannot be undone.')) {
+        writingCanvases.forEach(item => clearWritingCanvas(item.id));
+    }
+}
+
+function initializeAllWritingCanvases() {
+    writingCanvases = [];
+    const allCanvases = document.querySelectorAll('.writing-canvas');
+    allCanvases.forEach(canvas => initializeWritingCanvas(canvas.id));
+}
+
+function saveWritingPDF() {
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const filename = `Writing_Practice_Page${currentPage}_${timestamp}.pdf`;
+
+    const controls = document.querySelector('.controls');
+    const navigation = document.querySelectorAll('.navigation');
+    const topNav = document.querySelector('.top-navigation');
+
+    const controlsDisplay = controls.style.display;
+    const topNavDisplay = topNav ? topNav.style.display : '';
+    controls.style.display = 'none';
+    if (topNav) topNav.style.display = 'none';
+    navigation.forEach(nav => nav.style.display = 'none');
+
+    const element = document.querySelector('.worksheet-container');
+    const opt = {
+        margin: 0.5,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        controls.style.display = controlsDisplay;
+        if (topNav) topNav.style.display = topNavDisplay;
+        navigation.forEach(nav => nav.style.display = '');
+    });
 }
 
 // Render the worksheet
