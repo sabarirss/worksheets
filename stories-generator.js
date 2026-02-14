@@ -137,12 +137,12 @@ const storyData = {
 
 // Generate stories dynamically
 function generateStories(category, difficulty, count = 100) {
-    // First, get unique hand-written stories from database
-    const uniqueStoriesForCategory = uniqueStories[category] && uniqueStories[category][difficulty]
-        ? [...uniqueStories[category][difficulty]]
-        : [];
+    const stories = [];
 
-    const stories = [...uniqueStoriesForCategory];
+    // First, get unique hand-written stories from database if available
+    if (typeof uniqueStories !== 'undefined' && uniqueStories[category] && uniqueStories[category][difficulty]) {
+        stories.push(...uniqueStories[category][difficulty]);
+    }
 
     // If we need more stories to reach count, generate template-based ones
     const remainingCount = count - stories.length;
