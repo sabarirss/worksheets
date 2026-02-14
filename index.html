@@ -59,10 +59,14 @@
 <body>
     <script>
         // Wait for Firebase auth to initialize before checking
+        console.log('INDEX.HTML: Setting up auth state listener');
         firebase.auth().onAuthStateChanged(function(user) {
+            console.log('INDEX.HTML: Auth state changed, user:', user);
             if (!user) {
-                // Not authenticated, redirect to login
+                console.log('INDEX.HTML: No user, redirecting to login');
                 window.location.href = 'login.html';
+            } else {
+                console.log('INDEX.HTML: User authenticated:', user.email);
             }
         });
     </script>
