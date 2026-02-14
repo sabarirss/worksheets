@@ -90,6 +90,26 @@ function filterLevelButtons() {
             }
         }
     });
+
+    // Filter all other difficulty buttons (drawing, emotional-quotient, german-kids)
+    const allDifficultyButtons = document.querySelectorAll('.difficulty-btn');
+    allDifficultyButtons.forEach(button => {
+        const onclick = button.getAttribute('onclick') || '';
+        const buttonText = button.textContent || '';
+
+        let shouldHide = false;
+
+        // Check onclick attribute for difficulty level
+        if (onclick.includes("'medium'") || onclick.includes('"medium"') || buttonText.toLowerCase().includes('medium')) {
+            shouldHide = (ageGroup === 'easy');
+        } else if (onclick.includes("'hard'") || onclick.includes('"hard"') || buttonText.toLowerCase().includes('hard') || buttonText.toLowerCase().includes('advanced')) {
+            shouldHide = (ageGroup !== 'hard');
+        }
+
+        if (shouldHide) {
+            button.style.display = 'none';
+        }
+    });
 }
 
 // Filter subject/module buttons on index page
@@ -139,6 +159,9 @@ function initAgeFilter() {
                 }
                 if (document.querySelector('.subject-grid')) {
                     filterSubjectButtons();
+                }
+                if (document.querySelector('.difficulty-grid') || document.querySelector('.difficulty-btn')) {
+                    filterLevelButtons(); // Reuse same filter for difficulty buttons
                 }
             } else {
                 console.warn('User age not set. Please update profile with age.');
@@ -282,10 +305,41 @@ function saveNewAge() {
     closeParentSettings();
 }
 
+// Check if user has permission to access current page
+function checkPageAccess() {
+    const userAge = getUserAge();
+
+    if (!userAge) {
+        console.log('No age set, allowing access to all pages');
+        return; // Allow access if age not set
+    }
+
+    const currentPage = window.location.pathname.split('/').pop();
+
+    // Block German B1 for children under 10
+    if (currentPage === 'german.html' && userAge < 10) {
+        alert('This module is for ages 10 and above. Please ask a parent to update your age settings if you are ready for this content.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Block advanced modules for children under 8
+    const advancedPages = ['german-kids.html', 'emotional-quotient.html'];
+    if (advancedPages.includes(currentPage) && userAge < 8) {
+        alert('This module is for ages 8 and above. Please ask a parent to update your age settings when you are ready.');
+        window.location.href = 'index.html';
+        return;
+    }
+}
+
 // Auto-initialize when script loads
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAgeFilter);
+    document.addEventListener('DOMContentLoaded', () => {
+        checkPageAccess();
+        initAgeFilter();
+    });
 } else {
+    checkPageAccess();
     initAgeFilter();
 }
 
