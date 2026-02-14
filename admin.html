@@ -502,7 +502,7 @@
             editingUsername = null;
         }
 
-        function handleSubmitUser(event) {
+        async function handleSubmitUser(event) {
             event.preventDefault();
 
             const username = document.getElementById('user-username').value.trim();
@@ -519,33 +519,44 @@
                 german: document.getElementById('module-german').checked
             };
 
+            // Show loading state
+            const submitBtn = document.getElementById('submit-btn-text');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+
             let result;
 
-            if (editingUsername) {
-                // Update existing user
-                result = updateUser(editingUsername, {
-                    fullName: fullName,
-                    password: password,
-                    role: role,
-                    modules: modules
-                });
-            } else {
-                // Create new user
-                result = createUser({
-                    username: username,
-                    fullName: fullName,
-                    password: password,
-                    role: role,
-                    modules: modules
-                });
-            }
+            try {
+                if (editingUsername) {
+                    // Update existing user
+                    result = await updateUser(editingUsername, {
+                        fullName: fullName,
+                        password: password,
+                        role: role,
+                        modules: modules
+                    });
+                } else {
+                    // Create new user
+                    result = await createUser({
+                        username: username,
+                        fullName: fullName,
+                        password: password,
+                        role: role,
+                        modules: modules
+                    });
+                }
 
-            if (result.success) {
-                closeModal();
-                loadUsers();
-                alert(editingUsername ? 'User updated successfully!' : 'User created successfully!');
-            } else {
-                alert('Error: ' + result.error);
+                if (result.success) {
+                    closeModal();
+                    loadUsers();
+                    alert(editingUsername ? 'User updated successfully!' : 'User created successfully!');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.textContent = originalText;
             }
         }
 
