@@ -494,9 +494,9 @@
             document.getElementById('user-modal').classList.add('active');
         }
 
-        function openEditUserModal(username) {
+        async function openEditUserModal(username) {
             editingUsername = username;
-            const user = getUser(username);
+            const user = await getUser(username);
 
             document.getElementById('modal-title').textContent = 'Edit User';
             document.getElementById('submit-btn-text').textContent = 'Update User';
