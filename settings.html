@@ -518,16 +518,21 @@
             };
 
             let html = '<div style="display: flex; flex-wrap: wrap;">';
+            let enabledCount = 0;
 
+            // Only show enabled modules
             for (const [key, enabled] of Object.entries(modules)) {
-                const name = moduleNames[key] || key;
-                html += `<span class="module-badge ${enabled ? '' : 'disabled'}">${name}</span>`;
+                if (enabled) {
+                    const name = moduleNames[key] || key;
+                    html += `<span class="module-badge">${name}</span>`;
+                    enabledCount++;
+                }
             }
 
             html += '</div>';
 
-            if (Object.keys(modules).length === 0) {
-                html = '<p style="color: #999;">No modules assigned yet. Contact admin to enable modules.</p>';
+            if (enabledCount === 0) {
+                html = '<p style="color: #999;">No modules enabled yet. Use Parental Control to enable modules.</p>';
             }
 
             document.getElementById('modules-display').innerHTML = html;
