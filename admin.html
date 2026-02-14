@@ -439,6 +439,12 @@
             }
 
             tbody.innerHTML = users.map(user => {
+                // Skip users without username
+                if (!user.username) {
+                    console.warn('User without username:', user);
+                    return '';
+                }
+
                 const modules = user.modules || {};
                 const modulesList = Object.keys(modules)
                     .map(mod => {
@@ -454,21 +460,34 @@
                         return `<span class="module-badge ${enabled ? '' : 'disabled'}">${names[mod] || mod}</span>`;
                     }).join('');
 
-                const createdDate = new Date(user.createdAt).toLocaleDateString();
+                // Handle createdAt safely
+                let createdDate = 'N/A';
+                if (user.createdAt) {
+                    try {
+                        // Handle Firestore Timestamp
+                        const timestamp = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
+                        createdDate = timestamp.toLocaleDateString();
+                    } catch (e) {
+                        console.warn('Error parsing createdAt:', e);
+                    }
+                }
+
                 const isAdmin = user.username === 'admin';
+                const username = user.username || 'unknown';
+                const fullName = user.fullName || 'N/A';
 
                 return `
                     <tr>
-                        <td><strong>${user.username}</strong></td>
-                        <td>${user.fullName}</td>
+                        <td><strong>${username}</strong></td>
+                        <td>${fullName}</td>
                         <td><span class="user-role role-${user.role}">${user.role}</span></td>
                         <td>${modulesList}</td>
                         <td>${createdDate}</td>
                         <td>
-                            <button class="btn btn-secondary" onclick="openEditUserModal('${user.username}')" style="padding: 8px 16px; margin-right: 5px;">
+                            <button class="btn btn-secondary" onclick="openEditUserModal('${username}')" style="padding: 8px 16px; margin-right: 5px;">
                                 Edit
                             </button>
-                            ${!isAdmin ? `<button class="btn btn-danger" onclick="confirmDeleteUser('${user.username}')" style="padding: 8px 16px;">Delete</button>` : ''}
+                            ${!isAdmin ? `<button class="btn btn-danger" onclick="confirmDeleteUser('${username}')" style="padding: 8px 16px;">Delete</button>` : ''}
                         </td>
                     </tr>
                 `;

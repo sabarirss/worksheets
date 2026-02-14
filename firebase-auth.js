@@ -371,16 +371,27 @@ async function updateUser(username, updates) {
 
 // Delete user (admin only)
 async function deleteUser(username) {
+    console.log('deleteUser called with username:', username);
+
+    if (!username) {
+        console.error('deleteUser: username is undefined or empty');
+        return { success: false, error: 'Username is required' };
+    }
+
     if (username === 'admin') {
         return { success: false, error: 'Cannot delete admin user' };
     }
 
     try {
+        console.log('Querying Firestore for user:', username);
+
         // Find user by username
         const userQuery = await firebase.firestore().collection('users')
             .where('username', '==', username)
             .limit(1)
             .get();
+
+        console.log('Query result empty?', userQuery.empty);
 
         if (userQuery.empty) {
             return { success: false, error: 'User not found' };
@@ -389,10 +400,14 @@ async function deleteUser(username) {
         const userDoc = userQuery.docs[0];
         const userData = userDoc.data();
 
+        console.log('Found user data:', userData);
+
         // Delete user's worksheets from Firestore
+        console.log('Deleting worksheets for:', username);
         await deleteUserWorksheets(username);
 
         // Delete user document from Firestore
+        console.log('Deleting user document');
         await userDoc.ref.delete();
 
         // Note: Firebase Auth account cannot be deleted from client-side code
