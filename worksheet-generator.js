@@ -367,12 +367,12 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🏠 Back to Levels</button>
-                <div class="page-navigation" style="display: inline-block; margin-left: 20px;">
-                    <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>⬅️ Previous</button>
-                    <span class="page-counter">📄 Page ${currentPage} of ${totalPages}</span>
-                    <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>Next ➡️</button>
+            <div class="top-navigation" style="margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <button class="back-btn" onclick="location.reload()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">🏠 Back to Levels</button>
+                <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">⬅️ Previous</button>
+                    <span class="page-counter" style="font-weight: bold; font-size: 1.1em;">📄 Page ${currentPage} of ${totalPages}</span>
+                    <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next ➡️</button>
                 </div>
             </div>
 
@@ -766,31 +766,51 @@ function updateCompletionBadge(operation, level) {
 
 // Navigate between pages
 function navigatePage(direction) {
-    console.log('navigatePage called with direction:', direction);
-    console.log('currentWorksheet:', currentWorksheet);
-    console.log('currentPage:', currentPage, 'totalPages:', totalPages);
+    try {
+        console.log('==========================================');
+        console.log('navigatePage called with direction:', direction);
+        console.log('currentWorksheet:', currentWorksheet);
+        console.log('currentPage:', currentPage, 'totalPages:', totalPages);
 
-    if (!currentWorksheet) {
-        console.error('navigatePage: currentWorksheet is null');
-        return;
+        if (!currentWorksheet) {
+            console.error('navigatePage: currentWorksheet is null');
+            alert('Error: Worksheet not loaded properly. Please reload the page.');
+            return;
+        }
+
+        const newPage = currentPage + direction;
+        console.log('newPage would be:', newPage);
+
+        // Check bounds
+        if (newPage < 1) {
+            console.log('navigatePage: Already at first page');
+            return;
+        }
+        if (newPage > totalPages) {
+            console.log('navigatePage: Already at last page');
+            return;
+        }
+
+        // Auto-save current page before navigating
+        console.log('Auto-saving current page...');
+        try {
+            autoSavePage();
+            console.log('Auto-save completed');
+        } catch (saveError) {
+            console.error('Error during auto-save:', saveError);
+            // Continue anyway
+        }
+
+        // Load new page
+        console.log('About to load worksheet:', currentWorksheet.operation, currentWorksheet.level, newPage);
+        loadWorksheet(currentWorksheet.operation, currentWorksheet.level, newPage);
+        console.log('loadWorksheet called successfully');
+        console.log('==========================================');
+    } catch (error) {
+        console.error('ERROR in navigatePage:', error);
+        console.error('Error stack:', error.stack);
+        alert('Navigation error: ' + error.message);
     }
-
-    const newPage = currentPage + direction;
-    console.log('newPage would be:', newPage);
-
-    // Check bounds
-    if (newPage < 1 || newPage > totalPages) {
-        console.log('navigatePage: Out of bounds, returning');
-        return;
-    }
-
-    // Auto-save current page before navigating
-    console.log('Auto-saving current page...');
-    autoSavePage();
-
-    // Load new page
-    console.log('Loading worksheet:', currentWorksheet.operation, currentWorksheet.level, newPage);
-    loadWorksheet(currentWorksheet.operation, currentWorksheet.level, newPage);
 }
 
 // Auto-save current page
