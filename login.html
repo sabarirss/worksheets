@@ -193,18 +193,31 @@
         </div>
     </div>
 
-    <script src="auth.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Firebase Auth -->
+    <script src="firebase-auth.js"></script>
+
     <script>
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', function() {
-            const user = getCurrentUser();
-            if (user) {
-                // Already logged in, redirect to home
-                window.location.href = 'index.html';
-            }
+            // Wait for Firebase auth to initialize
+            setTimeout(() => {
+                const user = getCurrentUser();
+                if (user) {
+                    // Already logged in, redirect to home
+                    window.location.href = 'index.html';
+                }
+            }, 500);
         });
 
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
 
             const username = document.getElementById('username').value.trim();
@@ -220,12 +233,22 @@
             loginForm.style.display = 'none';
             loading.style.display = 'block';
 
-            // Simulate slight delay for better UX
-            setTimeout(() => {
-                const result = login(username, password);
+            try {
+                // Login with Firebase
+                const result = await login(username, password);
 
                 if (result.success) {
-                    // Successful login
+                    // Successful login - try to migrate localStorage worksheets
+                    try {
+                        if (typeof migrateFromLocalStorage === 'function') {
+                            const migrationResult = await migrateFromLocalStorage();
+                            console.log(migrationResult.message);
+                        }
+                    } catch (migrationError) {
+                        console.warn('Migration skipped:', migrationError);
+                    }
+
+                    // Redirect to home
                     window.location.href = 'index.html';
                 } else {
                     // Failed login
@@ -238,7 +261,13 @@
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
                 }
-            }, 500);
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.style.display = 'block';
+                loginForm.style.display = 'block';
+                loading.style.display = 'none';
+            }
         }
 
         // Enter key submit
