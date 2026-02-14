@@ -487,6 +487,10 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="location.reload()">← Back to Modules</button>
+            </div>
+
             <div class="worksheet-header">
                 <div class="worksheet-info">
                     <h2>${config.name}</h2>
@@ -532,11 +536,6 @@ function renderWorksheet() {
                 <div class="answer-key-grid">
                     ${answerKeyHTML}
                 </div>
-            </div>
-
-            <div class="navigation">
-                <button onclick="location.reload()">Back to Modules</button>
-                <button onclick="loadWorksheet('${level}')">Generate New Worksheet</button>
             </div>
         </div>
     `;

@@ -441,7 +441,6 @@ function renderWorksheet() {
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                ${currentPage >= totalPages ? '<button class="generate-more-btn" onclick="generateMorePages()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); margin-left: 20px;">➕ Generate 50 More Pages</button>' : ''}
             </div>
         </div>
     `;

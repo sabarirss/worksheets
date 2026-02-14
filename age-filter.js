@@ -216,8 +216,159 @@ async function updateChildAge(newAge) {
     }
 }
 
-// Show parent settings modal
+// Check if parent PIN is set
+async function hasParentPin() {
+    const user = getCurrentUser && getCurrentUser();
+    if (!user) return false;
+
+    try {
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).get();
+        return userDoc.exists && userDoc.data().parentPin;
+    } catch (error) {
+        console.error('Error checking parent PIN:', error);
+        return false;
+    }
+}
+
+// Verify parent PIN
+async function verifyParentPin(inputPin) {
+    const user = getCurrentUser && getCurrentUser();
+    if (!user) return false;
+
+    try {
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).get();
+        if (!userDoc.exists) return false;
+
+        const storedPin = userDoc.data().parentPin;
+        return storedPin && storedPin === inputPin;
+    } catch (error) {
+        console.error('Error verifying parent PIN:', error);
+        return false;
+    }
+}
+
+// Show PIN entry modal
+function showPinEntry() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%;">
+            <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Verification</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Enter your 4-digit parent PIN to access age settings.
+            </p>
+            <div style="margin: 20px 0;">
+                <input
+                    type="password"
+                    id="parent-pin-input"
+                    maxlength="4"
+                    placeholder="Enter 4-digit PIN"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.5em; text-align: center; letter-spacing: 10px;"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                >
+            </div>
+            <div id="pin-error" style="color: #e74c3c; font-weight: bold; margin: 10px 0; display: none;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="verifyPinAndOpenSettings()" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    Verify
+                </button>
+                <button onclick="closePinEntry()" style="flex: 1; padding: 12px; background: #ddd; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    Cancel
+                </button>
+            </div>
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; font-size: 0.9em; color: #856404;">
+                    <strong>Forgot PIN?</strong><br>
+                    Please contact your account administrator.
+                </p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Focus on input
+    setTimeout(() => {
+        const input = document.getElementById('parent-pin-input');
+        if (input) input.focus();
+    }, 100);
+
+    // Store modal reference
+    window.pinEntryModal = modal;
+}
+
+function closePinEntry() {
+    if (window.pinEntryModal) {
+        window.pinEntryModal.remove();
+        window.pinEntryModal = null;
+    }
+}
+
+async function verifyPinAndOpenSettings() {
+    const pinInput = document.getElementById('parent-pin-input');
+    const errorDiv = document.getElementById('pin-error');
+
+    if (!pinInput || !pinInput.value) {
+        if (errorDiv) {
+            errorDiv.textContent = 'Please enter your PIN';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    const inputPin = pinInput.value.trim();
+
+    if (inputPin.length !== 4 || !/^\d{4}$/.test(inputPin)) {
+        if (errorDiv) {
+            errorDiv.textContent = 'PIN must be 4 digits';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    const isValid = await verifyParentPin(inputPin);
+
+    if (isValid) {
+        closePinEntry();
+        showParentSettingsForm();
+    } else {
+        if (errorDiv) {
+            errorDiv.textContent = 'Incorrect PIN. Please try again.';
+            errorDiv.style.display = 'block';
+        }
+        pinInput.value = '';
+        pinInput.focus();
+    }
+}
+
+// Show parent settings modal (after PIN verification)
 function showParentSettings() {
+    // Check if user has parent PIN set
+    hasParentPin().then(hasPinSet => {
+        if (hasPinSet) {
+            // Show PIN entry modal
+            showPinEntry();
+        } else {
+            // First time setup - create PIN
+            showSetupParentPin();
+        }
+    });
+}
+
+function showParentSettingsForm() {
     const userAge = getUserAge();
     const currentAge = userAge || 'Not set';
 
@@ -303,6 +454,158 @@ function closeParentSettings() {
     if (window.parentSettingsModal) {
         window.parentSettingsModal.remove();
         window.parentSettingsModal = null;
+    }
+}
+
+// Show setup parent PIN modal (first time)
+function showSetupParentPin() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%;">
+            <h2 style="margin-top: 0; color: #667eea;">🔐 Set Up Parent PIN</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Create a 4-digit PIN to protect age settings. You'll need this PIN to change your child's age or access parent controls.
+            </p>
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">
+                    Create PIN (4 digits):
+                </label>
+                <input
+                    type="password"
+                    id="setup-pin-input"
+                    maxlength="4"
+                    placeholder="Enter 4 digits"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.5em; text-align: center; letter-spacing: 10px;"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                >
+            </div>
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">
+                    Confirm PIN:
+                </label>
+                <input
+                    type="password"
+                    id="confirm-pin-input"
+                    maxlength="4"
+                    placeholder="Re-enter 4 digits"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.5em; text-align: center; letter-spacing: 10px;"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                >
+            </div>
+            <div id="setup-pin-error" style="color: #e74c3c; font-weight: bold; margin: 10px 0; display: none;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="saveParentPin()" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    Create PIN
+                </button>
+                <button onclick="closeSetupPin()" style="flex: 1; padding: 12px; background: #ddd; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    Cancel
+                </button>
+            </div>
+            <div style="margin-top: 20px; padding: 15px; background: #d1ecf1; border-radius: 8px; border-left: 4px solid #0c5460;">
+                <p style="margin: 0; font-size: 0.9em; color: #0c5460;">
+                    <strong>⚠️ Important:</strong> Remember this PIN! You'll need it to change age settings later.
+                </p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Focus on first input
+    setTimeout(() => {
+        const input = document.getElementById('setup-pin-input');
+        if (input) input.focus();
+    }, 100);
+
+    // Store modal reference
+    window.setupPinModal = modal;
+}
+
+function closeSetupPin() {
+    if (window.setupPinModal) {
+        window.setupPinModal.remove();
+        window.setupPinModal = null;
+    }
+}
+
+async function saveParentPin() {
+    const pinInput = document.getElementById('setup-pin-input');
+    const confirmInput = document.getElementById('confirm-pin-input');
+    const errorDiv = document.getElementById('setup-pin-error');
+
+    if (!pinInput || !confirmInput) {
+        return;
+    }
+
+    const pin = pinInput.value.trim();
+    const confirm = confirmInput.value.trim();
+
+    // Validation
+    if (!pin || !confirm) {
+        if (errorDiv) {
+            errorDiv.textContent = 'Please enter PIN in both fields';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+        if (errorDiv) {
+            errorDiv.textContent = 'PIN must be exactly 4 digits';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    if (pin !== confirm) {
+        if (errorDiv) {
+            errorDiv.textContent = 'PINs do not match';
+            errorDiv.style.display = 'block';
+        }
+        confirmInput.value = '';
+        confirmInput.focus();
+        return;
+    }
+
+    // Save PIN to Firebase
+    const user = getCurrentUser && getCurrentUser();
+    if (!user) {
+        alert('You must be logged in to set up parent PIN');
+        return;
+    }
+
+    try {
+        const userDoc = firebase.firestore().collection('users').doc(user.uid.substring(0, 20));
+        await userDoc.update({
+            parentPin: pin
+        });
+
+        console.log('Parent PIN set successfully');
+        closeSetupPin();
+
+        // Now show parent settings form
+        showParentSettingsForm();
+    } catch (error) {
+        console.error('Error saving parent PIN:', error);
+        if (errorDiv) {
+            errorDiv.textContent = 'Failed to save PIN. Please try again.';
+            errorDiv.style.display = 'block';
+        }
     }
 }
 

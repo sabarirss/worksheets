@@ -585,7 +585,6 @@ function renderWorksheet() {
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button onclick="loadWorksheet('${level}')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">🔄 Generate New Worksheet</button>
             </div>
         </div>
     `;
