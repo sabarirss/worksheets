@@ -137,12 +137,21 @@ const storyData = {
 
 // Generate stories dynamically
 function generateStories(category, difficulty, count = 100) {
-    const stories = [];
+    // First, get unique hand-written stories from database
+    const uniqueStoriesForCategory = uniqueStories[category] && uniqueStories[category][difficulty]
+        ? [...uniqueStories[category][difficulty]]
+        : [];
 
-    if (category === 'animals') {
-        stories.push(...generateAnimalStories(difficulty, count));
-    } else {
-        stories.push(...generateGenericCategoryStories(category, difficulty, count));
+    const stories = [...uniqueStoriesForCategory];
+
+    // If we need more stories to reach count, generate template-based ones
+    const remainingCount = count - stories.length;
+    if (remainingCount > 0) {
+        if (category === 'animals') {
+            stories.push(...generateAnimalStories(difficulty, remainingCount));
+        } else {
+            stories.push(...generateGenericCategoryStories(category, difficulty, remainingCount));
+        }
     }
 
     return stories;
@@ -312,8 +321,13 @@ function showStories(difficulty) {
         card.className = 'story-card';
         card.onclick = () => readStory(index);
 
+        // Handle both unique stories (with 'image') and generated stories (with 'illustration')
+        const cardIconHTML = story.image
+            ? `<img src="${story.image}" alt="${story.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;">`
+            : `<div style="font-size: 3em;">${story.illustration || '📖'}</div>`;
+
         card.innerHTML = `
-            <div class="story-card-icon">${story.illustration}</div>
+            <div class="story-card-icon">${cardIconHTML}</div>
             <div class="story-card-title">${story.title}</div>
         `;
         container.appendChild(card);
@@ -337,15 +351,22 @@ function readStory(index) {
     document.getElementById('story-list').style.display = 'none';
     document.getElementById('story-reader').style.display = 'block';
 
+    // Handle both unique stories (with 'image' and 'story') and generated stories (with 'illustration' and 'text')
+    const illustrationHTML = story.image
+        ? `<img src="${story.image}" alt="${story.title}" style="max-width: 100%; border-radius: 10px; margin: 20px 0;">`
+        : `<div class="story-icon" style="font-size: 8em;">${story.illustration || '📖'}</div>`;
+
+    const storyText = story.story || story.text || '';
+
     document.getElementById('story-content').innerHTML = `
         <div class="story-meta">Story ${index + 1} of ${currentList.length}</div>
         <h1 class="story-title">${story.title}</h1>
         <div class="story-illustration">
             <div class="story-scene">
-                <div class="story-icon" style="font-size: 8em;">${story.illustration}</div>
+                ${illustrationHTML}
             </div>
         </div>
-        <div class="story-text">${story.text}</div>
+        <div class="story-text">${storyText}</div>
         <div class="story-moral">
             <h3>✨ Lesson ✨</h3>
             <p>${story.moral}</p>
