@@ -15,12 +15,16 @@ function getAgeGroup(age) {
     return 'hard';                     // Ages 10+: Hard
 }
 
-// Determine maximum level for math/english based on age
-function getMaxLevel(age) {
-    if (!age || age < 4) return '7A';
-    if (age <= 6) return '7A';      // Ages 4-6: Up to 7A
-    if (age <= 9) return '9A';      // Ages 7-9: Up to 9A
-    return '10A';                    // Ages 10+: All levels
+// Determine minimum allowed level for math/english based on age
+// Kumon levels go: 6A (easiest) -> 5A -> 4A -> 3A -> 2A (hardest)
+// Lower numbers = harder content
+function getMinLevel(age) {
+    if (!age || age < 4) return 6;
+    if (age <= 5) return 6;          // Ages 4-5: Only 6A (easiest)
+    if (age === 6) return 5;         // Age 6: 6A, 5A
+    if (age === 7) return 4;         // Age 7: 6A, 5A, 4A
+    if (age === 8) return 3;         // Age 8: 6A, 5A, 4A, 3A
+    return 2;                         // Age 9+: All levels including 2A
 }
 
 // Filter level buttons based on age
@@ -33,9 +37,9 @@ function filterLevelButtons() {
     }
 
     const ageGroup = getAgeGroup(userAge);
-    const maxLevel = getMaxLevel(userAge);
+    const minLevel = getMinLevel(userAge);
 
-    console.log(`Filtering content for age ${userAge} (group: ${ageGroup}, max level: ${maxLevel})`);
+    console.log(`Filtering content for age ${userAge} (group: ${ageGroup}, min level: ${minLevel}A, showing ${minLevel}A-6A)`);
 
     // Filter math/english level buttons
     const levelButtons = document.querySelectorAll('.level-btn');
@@ -58,16 +62,17 @@ function filterLevelButtons() {
                 button.style.display = 'none';
             }
         }
-        // Check if this is a level button (6A-10A)
+        // Check if this is a level button (6A, 5A, 4A, 3A, 2A)
+        // Lower numbers = harder, so hide levels BELOW minLevel
         else {
             const match = buttonText.match(/(\d+)A/);
             if (match) {
-                const level = match[1] + 'A';
                 const levelNum = parseInt(match[1]);
-                const maxLevelNum = parseInt(maxLevel.replace('A', ''));
 
-                if (levelNum > maxLevelNum) {
+                // Hide if level is too hard (number too low)
+                if (levelNum < minLevel) {
                     button.style.display = 'none';
+                    console.log(`Hiding level ${levelNum}A (too hard for age ${userAge})`);
                 }
             }
         }
@@ -130,15 +135,19 @@ function filterSubjectButtons() {
         console.log('Hiding German B1 for young child');
     }
 
-    // Advanced modules for older kids
-    const advancedModules = ['german-kids.html', 'emotional-quotient.html'];
-    advancedModules.forEach(module => {
-        const button = document.querySelector(`.subject-btn[onclick*="${module}"]`);
-        if (button && userAge < 8) {
-            button.style.display = 'none';
-            console.log(`Hiding ${module} for young child`);
-        }
-    });
+    // German Kids is for ages 6+ (suitable for early learners)
+    const germanKidsButton = document.querySelector('.subject-btn[onclick*="german-kids.html"]');
+    if (germanKidsButton && userAge < 6) {
+        germanKidsButton.style.display = 'none';
+        console.log('Hiding German Kids for child under 6');
+    }
+
+    // Emotional Quotient is for ages 7+ (requires emotional understanding)
+    const eqButton = document.querySelector('.subject-btn[onclick*="emotional-quotient.html"]');
+    if (eqButton && userAge < 7) {
+        eqButton.style.display = 'none';
+        console.log('Hiding Emotional Quotient for young child');
+    }
 }
 
 // Initialize age filtering when page loads
@@ -257,9 +266,13 @@ function showParentSettings() {
             <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <strong style="color: #667eea;">Age Guidelines:</strong>
                 <ul style="margin: 10px 0; color: #666; font-size: 0.9em;">
-                    <li>Ages 4-6: Easy content (Levels 6A-7A, Easy stories)</li>
-                    <li>Ages 7-9: Easy + Medium (Levels 6A-9A, Easy + Medium stories)</li>
-                    <li>Ages 10+: All content (All levels, all stories, German)</li>
+                    <li><strong>Ages 4-5:</strong> Math/English 6A only, Easy stories & aptitude</li>
+                    <li><strong>Age 6:</strong> Math/English 6A-5A, Easy content, German Kids available</li>
+                    <li><strong>Age 7:</strong> Math/English 6A-4A, Easy + Medium, Emotional Quotient available</li>
+                    <li><strong>Age 8:</strong> Math/English 6A-3A, Easy + Medium content</li>
+                    <li><strong>Age 9+:</strong> All math/English (6A-2A), Easy + Medium + Hard content</li>
+                    <li><strong>Age 10+:</strong> All content including German B1 (adult level)</li>
+                    <li style="margin-top: 8px; font-size: 0.85em; color: #888;">Note: In Kumon system, 6A is easiest, 2A is hardest</li>
                 </ul>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 30px;">
@@ -323,10 +336,16 @@ function checkPageAccess() {
         return;
     }
 
-    // Block advanced modules for children under 8
-    const advancedPages = ['german-kids.html', 'emotional-quotient.html'];
-    if (advancedPages.includes(currentPage) && userAge < 8) {
-        alert('This module is for ages 8 and above. Please ask a parent to update your age settings when you are ready.');
+    // Block German Kids for children under 6
+    if (currentPage === 'german-kids.html' && userAge < 6) {
+        alert('This module is for ages 6 and above. Please ask a parent to update your age settings when you are ready.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Block Emotional Quotient for children under 7
+    if (currentPage === 'emotional-quotient.html' && userAge < 7) {
+        alert('This module is for ages 7 and above. Please ask a parent to update your age settings when you are ready.');
         window.location.href = 'index.html';
         return;
     }
