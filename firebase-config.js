@@ -1,13 +1,14 @@
 // Firebase Configuration
-// Replace these values with your Firebase project configuration
+// Configured for worksheets-app-76ee9
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDq6Wjv8tts2dm-8q4tsC7fT2HS-aO2a7c",
+    authDomain: "worksheets-app-76ee9.firebaseapp.com",
+    projectId: "worksheets-app-76ee9",
+    storageBucket: "worksheets-app-76ee9.firebasestorage.app",
+    messagingSenderId: "371230982221",
+    appId: "1:371230982221:web:d1da320f7fa61e72b55c04",
+    measurementId: "G-5R8B7ZJJLF"
 };
 
 // Initialize Firebase
