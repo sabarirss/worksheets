@@ -135,25 +135,16 @@ const storyData = {
     }
 };
 
-// Generate stories dynamically
-function generateStories(category, difficulty, count = 100) {
+// Generate stories dynamically - ONLY unique hand-written stories
+function generateStories(category, difficulty) {
     const stories = [];
 
-    // First, get unique hand-written stories from database if available
+    // Get ONLY unique hand-written stories from database
     if (typeof uniqueStories !== 'undefined' && uniqueStories[category] && uniqueStories[category][difficulty]) {
         stories.push(...uniqueStories[category][difficulty]);
     }
 
-    // If we need more stories to reach count, generate template-based ones
-    const remainingCount = count - stories.length;
-    if (remainingCount > 0) {
-        if (category === 'animals') {
-            stories.push(...generateAnimalStories(difficulty, remainingCount));
-        } else {
-            stories.push(...generateGenericCategoryStories(category, difficulty, remainingCount));
-        }
-    }
-
+    // NO template generation - only show unique quality stories
     return stories;
 }
 
@@ -290,10 +281,10 @@ function selectCategory(category) {
 function showStories(difficulty) {
     currentDifficulty = difficulty;
 
-    // Generate 100 stories for the selected category and difficulty
-    console.log('Generating stories for:', currentCategory, difficulty);
-    currentList = generateStories(currentCategory, difficulty, 100);
-    console.log('Generated', currentList.length, 'stories');
+    // Get unique stories for the selected category and difficulty
+    console.log('Loading stories for:', currentCategory, difficulty);
+    currentList = generateStories(currentCategory, difficulty);
+    console.log('Loaded', currentList.length, 'unique stories');
 
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-list').style.display = 'block';
