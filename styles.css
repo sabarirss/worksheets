@@ -1019,7 +1019,7 @@ footer {
     position: absolute;
     top: -5px;
     right: -5px;
-    background: rgba(255, 68, 68, 0.9);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: 2px solid white;
     width: 24px;
@@ -1039,7 +1039,7 @@ footer {
 }
 
 .eraser-btn:hover {
-    background: rgba(204, 0, 0, 0.95);
+    background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
     transform: scale(1.1);
 }
 
