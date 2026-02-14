@@ -14,9 +14,13 @@
             <p class="subtitle">German B1 Level - DTZ Test Preparation</p>
         </header>
 
-        <div class="level-selection">
+        <div class="level-selection" id="main-selection">
             <h2>Practice Modules</h2>
             <div class="level-grid">
+                <button onclick="loadA1Stories()" class="level-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <span class="level-name">📖 A1 Geschichten (A1 Stories)</span>
+                    <span class="level-desc">Beginner Stories with Comprehension Questions</span>
+                </button>
                 <button onclick="loadWorksheet('articles')" class="level-btn">
                     <span class="level-name">Artikel (Articles)</span>
                     <span class="level-desc">der, die, das - Definite & Indefinite Articles</span>
@@ -95,6 +99,41 @@
             </div>
         </div>
 
+        <!-- A1 Stories Section -->
+        <div id="a1-stories-section" style="display: none;">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToMainSelection()">← Back to Practice Modules</button>
+            </div>
+
+            <div id="a1-difficulty-selection">
+                <h2>A1 Stories - Select Difficulty</h2>
+                <div class="level-grid">
+                    <button onclick="loadA1StoryList('easy')" class="level-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                        <span class="level-name">⭐ Einfach (Easy)</span>
+                        <span class="level-desc">Very Simple Stories</span>
+                    </button>
+                    <button onclick="loadA1StoryList('medium')" class="level-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
+                        <span class="level-name">⭐⭐ Mittel (Medium)</span>
+                        <span class="level-desc">Simple Stories</span>
+                    </button>
+                    <button onclick="loadA1StoryList('hard')" class="level-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <span class="level-name">⭐⭐⭐ Schwer (Hard)</span>
+                        <span class="level-desc">More Complex A1 Stories</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="a1-story-selection" style="display: none;">
+                <div class="navigation" style="margin-bottom: 20px;">
+                    <button onclick="backToA1Difficulty()">← Back to Difficulty Levels</button>
+                </div>
+                <h2 id="a1-story-list-title">Choose a Story</h2>
+                <div id="a1-story-list" class="level-grid"></div>
+            </div>
+
+            <div id="a1-story-content"></div>
+        </div>
+
         <footer>
             <p>Viel Erfolg! - Good luck with your German studies!</p>
         </footer>
@@ -102,5 +141,6 @@
 
     <script src="german-b1-extended.js"></script>
     <script src="german-generator.js"></script>
+    <script src="german-a1-stories.js"></script>
 </body>
 </html>
