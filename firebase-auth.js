@@ -346,21 +346,11 @@ async function updateUser(username, updates) {
         const userDoc = userQuery.docs[0];
         const userData = userDoc.data();
 
-        // If password is being updated
+        // Note: Password updates not supported from client-side
+        // Firebase Auth doesn't allow updating other users' passwords from client SDK
+        // To update passwords, user must use "Forgot Password" or Admin SDK via Cloud Function
         if (updates.password) {
-            if (updates.password.length < SECURITY_CONFIG.passwordMinLength) {
-                return {
-                    success: false,
-                    error: `Password must be at least ${SECURITY_CONFIG.passwordMinLength} characters long`
-                };
-            }
-
-            // Update password in Firebase Auth
-            const user = await firebase.auth().getUserByEmail(userData.email);
-            await firebase.auth().updateUser(user.uid, {
-                password: updates.password
-            });
-
+            console.warn('Password updates not supported from client-side. Use password reset instead.');
             delete updates.password; // Don't store password in Firestore
         }
 

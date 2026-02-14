@@ -523,7 +523,8 @@
             document.getElementById('user-username').value = user.username;
             document.getElementById('user-username').disabled = true;
             document.getElementById('user-fullname').value = user.fullName;
-            document.getElementById('user-password').value = user.password;
+            document.getElementById('user-password').value = ''; // Clear password field (not stored in Firestore)
+            document.getElementById('user-password').placeholder = 'Leave blank to keep current password';
             document.getElementById('user-role').value = user.role;
 
             // Set module checkboxes
@@ -571,12 +572,18 @@
             try {
                 if (editingUsername) {
                     // Update existing user
-                    result = await updateUser(editingUsername, {
+                    const updates = {
                         fullName: fullName,
-                        password: password,
                         role: role,
                         modules: modules
-                    });
+                    };
+
+                    // Only include password if it's not empty (password changes not supported from client)
+                    if (password && password.trim().length > 0) {
+                        updates.password = password;
+                    }
+
+                    result = await updateUser(editingUsername, updates);
                 } else {
                     // Create new user
                     result = await createUser({
