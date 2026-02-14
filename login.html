@@ -234,10 +234,16 @@
             loading.style.display = 'block';
 
             try {
+                console.log('Attempting login for:', username);
+
                 // Login with Firebase
                 const result = await login(username, password);
 
+                console.log('Login result:', result);
+
                 if (result.success) {
+                    console.log('Login successful! Redirecting...');
+
                     // Successful login - try to migrate localStorage worksheets
                     try {
                         if (typeof migrateFromLocalStorage === 'function') {
@@ -252,21 +258,31 @@
                     window.location.href = 'index.html';
                 } else {
                     // Failed login
+                    console.error('Login failed:', result.error);
                     errorMsg.textContent = result.error;
                     errorMsg.style.display = 'block';
                     loginForm.style.display = 'block';
                     loading.style.display = 'none';
+
+                    // Also show alert for visibility
+                    alert('Login failed: ' + result.error);
 
                     // Clear password field
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                errorMsg.textContent = 'An error occurred. Please try again.';
+                console.error('Login exception:', error);
+                console.error('Error details:', error.message, error.code, error.stack);
+
+                const errorText = error.message || 'An error occurred. Please try again.';
+                errorMsg.textContent = errorText;
                 errorMsg.style.display = 'block';
                 loginForm.style.display = 'block';
                 loading.style.display = 'none';
+
+                // Show alert for visibility
+                alert('Login error: ' + errorText);
             }
         }
 
