@@ -54,6 +54,49 @@
             background: white;
             color: #667eea;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -99,6 +142,9 @@
                 document.getElementById('admin-btn').style.display = 'block';
             }
 
+            // Initialize parent mode
+            initializeParentMode(user);
+
             // Hide modules user doesn't have access to
             const modules = user.modules || {};
             console.log('Modules to check:', modules);
@@ -133,6 +179,16 @@
                 if (germanBtn) germanBtn.style.display = 'none';
             }
 
+            if (!modules.drawing) {
+                const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
+                if (drawingBtn) drawingBtn.style.display = 'none';
+            }
+
+            if (!modules['german-kids']) {
+                const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
+                if (germanKidsBtn) germanKidsBtn.style.display = 'none';
+            }
+
             // TODO: Fix completion badges to show page progress instead of marking entire level complete
             // Disabled for now as it's misleading (shows complete after saving just 1 page)
             // setTimeout(() => addCompletionBadges(), 100);
@@ -146,12 +202,62 @@
                 <strong id="user-name-display"></strong>
             </div>
             <div class="user-actions">
+                <button class="header-btn" id="parent-mode-btn" style="display: none;" onclick="toggleParentMode()">
+                    🔒 Parent Mode
+                </button>
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
                     ⚙️ Admin Panel
                 </button>
                 <button class="header-btn" onclick="logout()">
                     Logout
                 </button>
+            </div>
+        </div>
+
+        <!-- Parent Mode Verification Modal -->
+        <div id="parent-mode-modal" class="modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Mode Verification</h2>
+                <p style="color: #666; line-height: 1.6;">
+                    Parent Mode allows you to manage which modules are available to your child.
+                    To verify you are a parent/guardian, please enter your date of birth.
+                </p>
+                <div style="margin: 30px 0;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #2c3e50;">
+                        Date of Birth:
+                    </label>
+                    <input type="date" id="dob-input" style="
+                        width: 100%;
+                        padding: 15px;
+                        font-size: 1.1em;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        box-sizing: border-box;
+                    ">
+                    <p id="dob-error" style="color: #e74c3c; margin-top: 10px; display: none; font-weight: bold;"></p>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button onclick="closeParentModeModal()" style="
+                        padding: 12px 30px;
+                        border: 2px solid #ddd;
+                        background: white;
+                        color: #333;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1em;
+                        font-weight: bold;
+                    ">Cancel</button>
+                    <button onclick="verifyAndEnableParentMode()" style="
+                        padding: 12px 30px;
+                        border: none;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 1em;
+                        font-weight: bold;
+                    ">Verify & Enable</button>
+                </div>
             </div>
         </div>
 
@@ -186,6 +292,14 @@
                 <button onclick="window.location.href='german.html'" class="subject-btn">
                     <span class="subject-name">🇩🇪 German (B1)</span>
                     <span class="subject-desc">DTZ Preparation - Grammar, Reading, Writing</span>
+                </button>
+                <button onclick="window.location.href='drawing.html'" class="subject-btn">
+                    <span class="subject-name">🎨 Drawing</span>
+                    <span class="subject-desc">Step-by-Step Art Tutorials with Canvas</span>
+                </button>
+                <button onclick="window.location.href='german-kids.html'" class="subject-btn">
+                    <span class="subject-name">🇩🇪 German Kids</span>
+                    <span class="subject-desc">Simple Stories for Ages 6-8</span>
                 </button>
             </div>
         </div>
@@ -338,6 +452,7 @@
 
     <script src="storage-manager.js"></script>
     <script src="handwriting-input.js"></script>
+    <script src="parent-mode.js"></script>
     <script src="worksheet-generator.js"></script>
     <script>
         // Add completion badges when worksheets load
