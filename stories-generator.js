@@ -163,17 +163,17 @@ function generateAnimalStories(difficulty, count) {
             const action = data.actions[i % data.actions.length];
             moral = data.morals[i % data.morals.length];
 
-            text = `${name} was a ${animal} who loved to help. One sunny day, ${name} ${action}. All the friends cheered! ${name} felt so happy. Everyone learned that ${moral.toLowerCase()}`;
+            text = `Once upon a time, there was a little ${animal} named ${name}. ${name} had a kind heart and always tried to help others whenever possible. One beautiful sunny morning, ${name} noticed something special happening. With a warm smile and gentle paws, ${name} ${action}. When all the friends saw what ${name} had done, they gathered around with big smiles on their faces. "Thank you, ${name}!" they said together. ${name} felt wonderful inside, knowing that even small acts of kindness can make everyone's day brighter. From that day on, all the animals remembered that ${moral.toLowerCase()}`;
         } else if (difficulty === 'medium') {
             const challenge = data.challenges[i % data.challenges.length];
             moral = data.morals[i % data.morals.length];
 
-            text = `${name} the ${animal} lived in a beautiful place. One day, ${name} ${challenge}. It was not easy, but ${name} never gave up. Other animals watched and were inspired. Through determination and heart, ${name} succeeded. Everyone learned an important lesson: ${moral.toLowerCase()}`;
+            text = `In a peaceful corner of the forest, there lived a thoughtful ${animal} named ${name}. Every morning, ${name} would wake up and explore the beautiful surroundings, grateful for the wonderful home they had. But one day, everything changed. ${name} discovered a situation that needed attention - something that required bravery and determination. Without hesitation, ${name} ${challenge}. The journey was difficult, and there were moments when ${name} felt like giving up. Yet deep inside, ${name} knew this was important. Other animals began to notice ${name}'s efforts and felt inspired by such courage. Some came forward to offer help and encouragement. Step by step, with patience and a brave heart, ${name} worked through every obstacle. When the challenge was finally overcome, everyone celebrated together. The experience taught them all something valuable: ${moral.toLowerCase()}`;
         } else {
             const concept = data.concepts[i % data.concepts.length];
             moral = data.morals[i % data.morals.length];
 
-            text = `In the vast wilderness, ${name} faced a profound challenge related to ${concept}. The situation required not just strength, but wisdom, compassion, and vision. ${name} made difficult decisions that affected the entire community. Through careful thought and selfless action, ${name} found a path forward. The experience taught everyone that ${moral.toLowerCase()} This story reminds us of our responsibility to protect and preserve the natural world.`;
+            text = `Deep in the vast wilderness, where ancient forests meet endless skies, lived a remarkable ${animal} known as ${name}. For many seasons, ${name} had lived peacefully among the community, watching the rhythms of nature and learning from the land. But as time passed, ${name} began to notice troubling changes. The delicate balance they had always known was shifting, and ${name} realized they were facing a profound challenge related to ${concept}. This was not something that could be solved with strength alone. It would require wisdom earned through experience, compassion for all living things, and the vision to see beyond the present moment. ${name} spent days and nights contemplating the situation, consulting with elders and listening to the concerns of younger members of the community. The decisions ahead were difficult, and ${name} knew that whatever path was chosen would affect not just today, but generations to come. With careful thought and a selfless spirit, ${name} began to take action. Some decisions were painful, requiring sacrifice and difficult choices. But through it all, ${name} remained guided by a deep commitment to the wellbeing of the entire community and the natural world they called home. Slowly, others began to understand ${name}'s vision. They came together, each contributing their own unique gifts to the cause. Through unity and shared purpose, they found a way forward that honored both tradition and the need for adaptation. When the story of ${name}'s leadership was told to future generations, it carried an important message: ${moral.toLowerCase()} Their tale serves as a powerful reminder of our connection to the natural world and our responsibility to protect it, not just for ourselves, but for all those who will come after us.`;
         }
 
         stories.push({
@@ -200,11 +200,11 @@ function generateGenericCategoryStories(category, difficulty, count) {
         let text;
 
         if (difficulty === 'easy') {
-            text = `This is about ${subject}. ${capitalize(subject)} was special. One day, ${subject} ${verb}. It made everyone smile. ${capitalize(subject)} was happy.`;
+            text = `Let me tell you a wonderful story! There was a very special ${subject} who lived nearby. Every single day was an adventure, and ${subject} loved making friends happy. One bright and beautiful morning, something amazing happened. The ${subject} ${verb}, bringing joy and wonder to everyone around. All the friends who saw this felt so happy and grateful. Their hearts filled with warmth, and they couldn't stop smiling! The ${subject} felt proud and content, knowing that even simple acts can bring so much happiness to others. What a lovely day it was!`;
         } else if (difficulty === 'medium') {
-            text = `Once there was ${subject} who wanted to make a difference. ${capitalize(subject)} decided to ${verb}. At first it was challenging, but ${subject} kept trying. Soon others joined in. Together they succeeded. ${capitalize(subject)} learned that ${moral.toLowerCase()}`;
+            text = `This is the story of a remarkable ${subject} who dreamed of making the world a better place. Every day, the ${subject} would look around and wonder, "What can I do to help?" One morning, inspiration struck! The ${subject} decided to take action and ${verb}. At first, the task seemed overwhelming. There were challenges and obstacles that made it difficult to continue. But the ${subject} refused to give up, remembering why this journey had begun in the first place. Day after day, the ${subject} worked with dedication and hope. Then something wonderful happened - others noticed these efforts and felt inspired to join in! Together, they shared ideas, supported each other through difficulties, and celebrated small victories along the way. What started as one ${subject}'s dream became a community effort. When they finally succeeded, the joy was shared by everyone. Through this experience, the ${subject} discovered an important truth: ${moral.toLowerCase()} It was a lesson that would be remembered forever.`;
         } else {
-            text = `In a world of endless possibilities, ${subject} embarked on a remarkable journey. The path ahead required ${verb}, facing both obstacles and opportunities. Through perseverance, creativity, and an open heart, ${subject} discovered profound truths. The experience transformed not just ${subject}, but everyone involved. This story teaches us that ${moral.toLowerCase()} It reminds us of our potential to make meaningful change in the world.`;
+            text = `In a world filled with infinite possibilities and untold wonders, there lived a thoughtful ${subject} with a vision for something greater. For years, the ${subject} had observed the world carefully, noticing both its beauty and its challenges, always wondering what role they might play in shaping a better future. Then one transformative day, clarity emerged. The ${subject} understood what needed to be done and embarked on a remarkable journey that would change everything. The path forward was complex and demanding. It required ${verb}, navigating through countless obstacles while remaining open to unexpected opportunities. There were moments of doubt when the weight of responsibility felt almost too heavy to bear. Yet the ${subject} pressed onward, drawing strength from deep convictions and an unwavering commitment to the cause. Along this journey, something profound began to happen. The ${subject}'s dedication and perseverance touched the hearts of others who had been watching from afar. One by one, people were moved to action, each bringing their own unique perspective and talents to contribute to the vision. What emerged was not just the achievement of a goal, but the transformation of an entire community. Hearts were opened, minds were expanded, and new possibilities were discovered. The ${subject} learned that true change comes not from one person acting alone, but from inspiring others to join in a shared purpose. The ripples of this journey extended far beyond what anyone could have imagined, touching lives and creating lasting impact. As the story spread to new listeners, it carried with it a powerful message: ${moral.toLowerCase()} This truth serves as a guiding light, reminding us that each of us holds the potential to make a meaningful difference in the world, and that our greatest achievements come when we work together with open hearts and determined spirits.`;
         }
 
         stories.push({
@@ -223,31 +223,31 @@ function getCategoryTemplates(category) {
         nature: {
             subjects: ['tree', 'flower', 'sun', 'rain', 'wind', 'river', 'mountain', 'ocean', 'cloud', 'star'],
             icons: ['🌳', '🌸', '☀️', '🌧️', '💨', '🌊', '⛰️', '🌊', '☁️', '⭐'],
-            verbs: ['grew tall', 'bloomed bright', 'shone warm', 'watered earth', 'blew gently', 'flowed free', 'stood strong', 'provided life', 'drifted by', 'twinkled'],
+            verbs: ['grew tall and strong', 'bloomed with beautiful colors', 'shone warm and bright', 'brought water to the earth', 'blew gently across the land', 'flowed freely through the valley', 'stood strong through all seasons', 'provided life to all creatures', 'drifted peacefully through the sky', 'twinkled with magical light'],
             morals: ['Nature provides for all.', 'Growth takes time.', 'Every season has purpose.', 'Life is interconnected.']
         },
         family: {
             subjects: ['mom', 'dad', 'grandma', 'grandpa', 'sister', 'brother', 'aunt', 'uncle', 'cousin', 'baby'],
             icons: ['👩', '👨', '👵', '👴', '👧', '👦', '👩', '👨', '👧', '👶'],
-            verbs: ['showed love', 'gave support', 'taught lessons', 'shared wisdom', 'offered help', 'listened carefully', 'created memories', 'brought joy'],
+            verbs: ['showed love in countless ways', 'gave support during difficult times', 'taught important life lessons', 'shared wisdom from experience', 'offered help without being asked', 'listened carefully with patience', 'created beautiful memories together', 'brought joy to the whole family'],
             morals: ['Family means love.', 'Together we are stronger.', 'Every member matters.', 'Love binds us together.']
         },
         adventures: {
             subjects: ['explorer', 'traveler', 'sailor', 'climber', 'diver', 'pilot', 'astronaut', 'adventurer'],
             icons: ['🧭', '🎒', '⛵', '🧗', '🤿', '✈️', '🚀', '🗺️'],
-            verbs: ['discovered new lands', 'sailed far seas', 'climbed high peaks', 'explored depths', 'flew through skies', 'reached for stars', 'ventured boldly'],
+            verbs: ['discovered amazing new lands', 'sailed across distant seas', 'climbed to the highest peaks', 'explored the deepest places', 'flew through endless skies', 'reached for the brightest stars', 'ventured boldly into the unknown'],
             morals: ['Exploration brings discovery.', 'Courage opens doors.', 'Adventure teaches lessons.', 'The journey matters.']
         },
         learning: {
             subjects: ['student', 'teacher', 'scientist', 'artist', 'writer', 'mathematician', 'musician', 'reader'],
             icons: ['👨‍🎓', '👩‍🏫', '🔬', '🎨', '✍️', '🔢', '🎵', '📖'],
-            verbs: ['learned new things', 'taught with care', 'made discoveries', 'created beauty', 'wrote stories', 'solved problems', 'made music', 'read widely'],
+            verbs: ['learned fascinating new things', 'taught others with patience and care', 'made incredible discoveries', 'created works of beauty', 'wrote inspiring stories', 'solved difficult problems', 'made beautiful music', 'read books from around the world'],
             morals: ['Learning never ends.', 'Knowledge is power.', 'Education opens minds.', 'Creativity enriches life.']
         },
         bedtime: {
             subjects: ['moon', 'star', 'dream', 'night', 'sleep', 'teddy bear', 'pillow', 'blanket', 'lullaby'],
             icons: ['🌙', '⭐', '💭', '🌃', '😴', '🧸', '🛏️', '🛏️', '🎵'],
-            verbs: ['brought peace', 'shone bright', 'guided sleep', 'wrapped warmly', 'sang softly', 'provided comfort', 'gave rest'],
+            verbs: ['brought peaceful dreams', 'shone bright in the darkness', 'gently guided everyone to sleep', 'wrapped everyone warmly and safely', 'sang the softest lullaby', 'provided comfort through the night', 'gave much-needed rest'],
             morals: ['Rest renews us.', 'Dreams inspire us.', 'Peace brings healing.', 'Sleep is essential.']
         }
     };
