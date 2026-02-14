@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step-by-Step Drawing Tutorials</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Firebase Auth & Storage -->
+    <script src="firebase-auth.js"></script>
+    <script src="firebase-storage.js"></script>
+
+    <style>
+        .drawing-selection {
+            margin: 40px 0;
+        }
+
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 40px 20px;
+            cursor: pointer;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .split-screen {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .split-screen {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .instructions-panel {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .canvas-panel {
+            background: white;
+            border: 3px solid #764ba2;
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .drawing-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .step-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .canvas-container {
+            border: 3px solid #333;
+            border-radius: 10px;
+            margin: 20px 0;
+            background: white;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .canvas-btn {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .canvas-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .tutorial-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .tutorial-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tutorial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .tutorial-icon {
+            font-size: 4em;
+            margin: 10px 0;
+        }
+
+        .tutorial-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .step-visual {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Wait for Firebase auth to initialize
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <div class="container">
+        <header>
+            <h1>🎨 Step-by-Step Drawing</h1>
+            <p class="subtitle">Learn to draw with easy tutorials!</p>
+        </header>
+
+        <div class="drawing-selection" id="difficulty-selection">
+            <h2>Select Difficulty Level</h2>
+            <div class="difficulty-grid">
+                <button onclick="loadTutorialList('easy')" class="difficulty-btn">
+                    ⭐ EASY<br>
+                    <span style="font-size: 0.8em;">Simple Shapes</span>
+                </button>
+                <button onclick="loadTutorialList('medium')" class="difficulty-btn">
+                    ⭐⭐ MEDIUM<br>
+                    <span style="font-size: 0.8em;">Basic Drawings</span>
+                </button>
+                <button onclick="loadTutorialList('hard')" class="difficulty-btn">
+                    ⭐⭐⭐ HARD<br>
+                    <span style="font-size: 0.8em;">Detailed Art</span>
+                </button>
+            </div>
+            <div class="navigation">
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+            </div>
+        </div>
+
+        <div id="tutorial-selection" style="display: none;">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToDifficulty()">← Back to Difficulty Levels</button>
+            </div>
+            <h2 id="tutorial-list-title">Choose a Tutorial</h2>
+            <div class="tutorial-list" id="tutorial-list"></div>
+        </div>
+
+        <div id="worksheet-area"></div>
+
+        <footer>
+            <p>Practice makes perfect! Keep drawing! 🎨✨</p>
+        </footer>
+    </div>
+
+    <script src="storage-manager.js"></script>
+    <script src="handwriting-input.js"></script>
+    <script src="drawing-generator.js"></script>
+</body>
+</html>
