@@ -24,7 +24,7 @@ function getCurrentUserFullName() {
  * @param {string} identifier - Unique identifier (e.g., "addition-6A", "7A", "mazes-easy")
  * @param {object} data - Worksheet data to save
  */
-function saveWorksheet(subject, identifier, data) {
+function saveWorksheetToStorage(subject, identifier, data) {
     const username = getCurrentUsername();
     if (!username) {
         console.error('No user logged in');
@@ -63,7 +63,7 @@ function saveWorksheet(subject, identifier, data) {
  * @param {string} identifier - Unique identifier
  * @returns {object|null} - Saved worksheet data or null if not found
  */
-function loadWorksheet(subject, identifier) {
+function loadWorksheetFromStorage(subject, identifier) {
     const username = getCurrentUsername();
     if (!username) {
         return null;

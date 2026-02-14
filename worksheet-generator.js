@@ -679,7 +679,7 @@ function saveCurrentWorksheet() {
         checkboxAnswers: {}
     };
 
-    if (saveWorksheet('math', identifier, data)) {
+    if (saveWorksheetToStorage('math', identifier, data)) {
         alert(`Page ${currentPage} saved successfully!`);
         updateCompletionBadge(currentWorksheet.operation, currentWorksheet.level);
     }
@@ -690,7 +690,7 @@ function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
-    const savedData = loadWorksheet('math', identifier);
+    const savedData = loadWorksheetFromStorage('math', identifier);
 
     if (!savedData) return;
 
@@ -842,7 +842,7 @@ function autoSavePage() {
         checkboxAnswers: {}
     };
 
-    saveWorksheet('math', identifier, data);
+    saveWorksheetToStorage('math', identifier, data);
 }
 
 // Generate more pages
