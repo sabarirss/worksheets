@@ -687,12 +687,25 @@ function saveCurrentWorksheet() {
 
 // Load saved worksheet
 function loadSavedWorksheet() {
-    if (!currentWorksheet) return;
+    console.log('=== LOAD SAVED START ===');
+    if (!currentWorksheet) {
+        console.error('loadSavedWorksheet: No currentWorksheet');
+        return;
+    }
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
-    const savedData = loadWorksheetFromStorage('math', identifier);
+    console.log('Loading identifier:', identifier);
 
-    if (!savedData) return;
+    const savedData = loadWorksheetFromStorage('math', identifier);
+    console.log('Loaded data:', savedData ? 'Found' : 'Not found');
+
+    if (!savedData) {
+        console.log('No saved data for this page');
+        console.log('=== LOAD SAVED END (no data) ===');
+        return;
+    }
+
+    console.log('Saved data has canvasAnswers:', savedData.canvasAnswers?.length || 0);
 
     // Restore student name and time
     const studentNameInput = document.getElementById('student-name');
@@ -708,14 +721,20 @@ function loadSavedWorksheet() {
 
     // Restore canvas answers
     if (savedData.canvasAnswers && savedData.canvasAnswers.length > 0) {
+        console.log('Restoring', savedData.canvasAnswers.length, 'canvas answers...');
         savedData.canvasAnswers.forEach(answer => {
             const canvas = document.getElementById(`answer-${answer.index}`);
+            console.log(`Restoring canvas ${answer.index}:`, canvas ? 'found' : 'NOT FOUND');
             if (canvas && canvas.getContext && answer.imageData) {
                 const ctx = canvas.getContext('2d');
                 const img = new Image();
                 img.onload = function() {
+                    console.log(`Canvas ${answer.index} image loaded, drawing...`);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
+                };
+                img.onerror = function() {
+                    console.error(`Canvas ${answer.index} image load FAILED`);
                 };
                 img.src = answer.imageData;
             }
@@ -733,6 +752,7 @@ function loadSavedWorksheet() {
             resultsDiv.style.display = 'block';
         }
     }
+    console.log('=== LOAD SAVED END ===');
 }
 
 // Clear all answers on current worksheet
@@ -815,9 +835,15 @@ function navigatePage(direction) {
 
 // Auto-save current page
 function autoSavePage() {
-    if (!currentWorksheet) return;
+    console.log('=== AUTO-SAVE START ===');
+    if (!currentWorksheet) {
+        console.error('autoSavePage: No currentWorksheet');
+        return;
+    }
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.level}-page${currentPage}`;
+    console.log('Auto-saving identifier:', identifier);
+
     const studentName = document.getElementById('student-name')?.value || 'Karthigai Selvi';
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
@@ -825,13 +851,22 @@ function autoSavePage() {
     const canvasAnswers = [];
     currentWorksheet.problems.forEach((problem, index) => {
         const canvas = document.getElementById(`answer-${index}`);
-        if (canvas && canvas.toDataURL) {
-            canvasAnswers.push({
-                index: index,
-                imageData: canvas.toDataURL('image/png')
-            });
+        if (canvas) {
+            console.log(`Canvas ${index}: found, has toDataURL:`, !!canvas.toDataURL);
+            if (canvas.toDataURL) {
+                const imageData = canvas.toDataURL('image/png');
+                console.log(`Canvas ${index} data length:`, imageData.length);
+                canvasAnswers.push({
+                    index: index,
+                    imageData: imageData
+                });
+            }
+        } else {
+            console.log(`Canvas ${index}: NOT FOUND`);
         }
     });
+
+    console.log('Total canvas answers collected:', canvasAnswers.length);
 
     const data = {
         completed: false, // Auto-save doesn't mark as completed
@@ -842,7 +877,10 @@ function autoSavePage() {
         checkboxAnswers: {}
     };
 
-    saveWorksheetToStorage('math', identifier, data);
+    console.log('Calling saveWorksheetToStorage...');
+    const result = saveWorksheetToStorage('math', identifier, data);
+    console.log('Save result:', result);
+    console.log('=== AUTO-SAVE END ===');
 }
 
 // Generate more pages
