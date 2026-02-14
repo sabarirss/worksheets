@@ -370,6 +370,224 @@ Diego smiled proudly. "The dam that stands isn't the one that never falls. It's 
                 moral: "Success comes not from never failing, but from continuing after every failure.",
                 ageGroup: "7-9",
                 structure: "Perseverance"
+            },
+
+            // Story 4: Transformation Structure
+            {
+                title: "The Caterpillar Who Was Afraid of Change",
+                image: "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=400",
+                story: `Cleo the caterpillar lived happily on her favorite leaf. She had everything she needed: fresh food, warm sunshine, and friends nearby.
+
+"Life is perfect," Cleo said to her friend Marco. "I hope nothing ever changes."
+
+But Marco, who was a bit older, looked worried. "Cleo, you know we all have to change eventually. We become butterflies."
+
+Cleo's many legs trembled. "But I don't want to! I like being a caterpillar. I like crawling on leaves. What if I don't like flying? What if I can't do it? What if I become a butterfly and hate it?"
+
+"Change is scary," Marco admitted. "But it's also natural. It's who we're meant to become."
+
+"Easy for you to say!" Cleo huffed. "You're not scared of anything."
+
+Marco smiled gently. "Actually, I'm terrified. I'm building my chrysalis tonight. Want to know a secret? I'm more scared than you are."
+
+"Really?" Cleo was surprised. Marco always seemed so brave.
+
+"Really. But being scared doesn't mean we shouldn't do it. Sometimes the best things in life are on the other side of our biggest fears."
+
+That night, Cleo watched Marco seal himself into his chrysalis. "See you on the other side," Marco called.
+
+Then everything went quiet. Marco's chrysalis hung on the branch, still and silent.
+
+"Marco?" Cleo called the next day. No answer.
+
+"Marco, are you okay in there?" she called the day after. Still nothing.
+
+Days passed. Cleo worried. What if something went wrong? What if Marco was stuck? What if transformation wasn't safe after all?
+
+Then one morning, Cleo felt a strange feeling in her own body. A pulling sensation. An urge to stop eating and find a quiet spot.
+
+"No, no, no," Cleo whispered. "I'm not ready!"
+
+But her body knew something her mind didn't. This wasn't optional. This was nature.
+
+With trembling legs, Cleo began to spin her chrysalis. "I'm so scared," she whispered. "But Marco did it. I can too."
+
+As the silk wrapped around her, Cleo felt herself falling into a deep sleep. Her last thought was: *I hope I wake up.*
+
+**Inside the Chrysalis**
+
+Time became strange. Was it minutes? Days? Years? Cleo couldn't tell.
+
+Her body felt like it was melting, dissolving, becoming liquid. This should have been terrifying, but somehow it felt... right. Like taking off a coat that had become too tight.
+
+She dreamed of flying, of seeing the world from above, of visiting flowers she'd only seen from below.
+
+And slowly, slowly, something new began to form. Wings. Delicate, folded, waiting.
+
+**Emergence**
+
+Cleo woke to pressure. Her chrysalis felt cramped, uncomfortable. She needed out.
+
+She pushed. Nothing happened. She pushed harder. Still nothing.
+
+Panic set in. *I'm trapped! I'll never get out!*
+
+But then she remembered Marco's words: *The best things in life are on the other side of our biggest fears.*
+
+Cleo pushed with everything she had. The chrysalis cracked. Light streamed in. She pushed more, wriggling and struggling.
+
+Finally, she broke free, tumbling onto the branch.
+
+She looked down at herself and gasped.
+
+Wings. Beautiful, colorful wings. And her body was completely different - sleek, graceful, transformed.
+
+"Cleo?" a voice called.
+
+She looked up. A magnificent butterfly hovered nearby. "Marco?"
+
+"It's me!" Marco laughed. "You did it! How do you feel?"
+
+Cleo carefully unfolded her new wings. They were damp and crinkled from being folded so long. "I feel... different. Strange. But also... amazing?"
+
+"Try moving your wings," Marco encouraged.
+
+Cleo fluttered them experimentally. Once. Twice. And then - she lifted off the branch!
+
+"I'm flying!" Cleo shouted, wobbling in the air. "I'm actually flying!"
+
+"You're a natural!" Marco flew beside her.
+
+Together they soared above the garden Cleo had only seen from the ground. The flowers looked different from up here - like colorful jewels scattered across green velvet.
+
+"Marco," Cleo said breathlessly. "You were right. I'm so glad I didn't stay a caterpillar."
+
+"You couldn't have stayed one even if you wanted to," Marco said gently. "That's the thing about growth - it happens whether we're ready or not. But we can choose whether to fight it or embrace it."
+
+Cleo landed on a flower, something she never could have reached as a caterpillar. "I wasted so much time being afraid of this. Of becoming who I was meant to be."
+
+"That time wasn't wasted," Marco said. "You needed to be a caterpillar first. That's how you got strong enough to become a butterfly. Every stage of life prepares us for the next."
+
+Cleo thought about the scared little caterpillar she'd been just weeks ago. That version of her was gone now, but without her, this butterfly version wouldn't exist.
+
+"I miss being a caterpillar sometimes," Cleo admitted. "It was simpler."
+
+"It's okay to miss who we were," Marco said. "But look around. Would you really want to go back?"
+
+Cleo looked at the vast sky, the distant trees, the endless flowers to explore. "No," she said finally. "No, I wouldn't."
+
+As they flew together through the warm afternoon air, Cleo understood something profound: change isn't about losing who you are. It's about becoming more of who you've always had the potential to be.
+
+The caterpillar wasn't gone. She was transformed. And that made all the difference.`,
+                moral: "Change is scary, but it's how we become who we're truly meant to be - and sometimes the best version of ourselves is on the other side of our fears.",
+                ageGroup: "7-9",
+                structure: "Transformation"
+            },
+
+            // Story 5: Quest with Internal Conflict Structure
+            {
+                title: "The Lion Who Lost His Roar",
+                image: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400",
+                story: `Leo the lion woke up one morning and tried to roar. But nothing came out except a tiny squeak.
+
+"What?" Leo tried again. "ROAR!" But only a whisper emerged.
+
+His roar was gone.
+
+Panic flooded through him. A lion without a roar? That was like a bird without wings, a fish without fins. His roar was who he was!
+
+"I need to find my roar," Leo declared. "I'll search the entire savanna if I have to."
+
+He set off immediately, asking everyone he met.
+
+"Elephant, have you seen my roar?"
+
+The elephant thought carefully. "I've never lost my trumpet, so I don't know. But maybe it rolled somewhere? Check near the watering hole?"
+
+Leo searched near the watering hole. No roar.
+
+"Giraffe, have you seen my roar?" Leo called up.
+
+"From up here, I can see very far," Giraffe said. "But I've never seen a roar. What does it look like?"
+
+Leo realized he didn't know. How do you describe a sound? "It's loud. And powerful. And... mine."
+
+"Have you checked inside yourself?" Giraffe asked gently.
+
+"That's ridiculous," Leo muttered, walking away. "Roars don't live inside. They come out."
+
+He searched for days. Under rocks. In caves. Behind bushes. His roar was nowhere.
+
+Finally, exhausted, Leo lay down under an acacia tree. A small mouse appeared.
+
+"You're Leo the lion!" Mouse squeaked. "The strongest, bravest lion in the savanna! I've always wanted to meet you."
+
+"I'm not strong or brave anymore," Leo said miserably. "I lost my roar. Without it, I'm nothing."
+
+Mouse looked confused. "But... your roar isn't what makes you strong. Your roar is just the sound of your strength."
+
+"It's the same thing!" Leo insisted.
+
+"Is it?" Mouse asked. "Did your roar make you brave, or did your bravery create your roar?"
+
+Leo had never thought about it that way.
+
+"When you saved those zebras from the wildfire last year," Mouse continued, "was it your roar that carried them to safety? Or your courage and your strength?"
+
+"Well, my strength, but—"
+
+"And when you stood up to those poachers to protect the cubs, did your roar stop them? Or did your fierce determination and willingness to fight?"
+
+Leo was quiet.
+
+"You've been searching everywhere for your roar," Mouse said softly. "But maybe you've been looking in the wrong places. Maybe your roar didn't leave. Maybe it's just quiet right now because you're scared. And that's okay. Even lions get scared."
+
+"I'm not scared!" Leo said automatically. Then he paused. "Well... maybe I am. I'm scared of being a lion without a roar. Scared that without it, I'm not really a lion at all."
+
+"But you are a lion," Mouse said. "Roar or no roar. Your value isn't in the noise you make. It's in who you are when everything goes quiet."
+
+Leo thought about this for a long time.
+
+"You know what's funny?" Mouse added. "I think you're braver now than when you had your roar."
+
+"How?"
+
+"Because you kept going even though you were scared. You searched the whole savanna. You asked for help. You didn't give up. That's real courage - not the loud kind, but the quiet kind that keeps trying even when things are hard."
+
+As Mouse spoke, Leo felt something shift inside his chest. Not a physical feeling, but an understanding.
+
+He thought about all the things he'd done in his life. The times he'd protected others. The times he'd been kind. The times he'd been brave. None of those moments were about his roar. His roar was just how he announced those qualities. But the qualities themselves? Those were always inside him.
+
+"Mouse," Leo said slowly, "thank you. I've been searching for something external - my roar - when what I really needed to find was something internal - the knowledge that I'm still me, roar or not."
+
+And in that moment of acceptance, of understanding, of releasing his fear...
+
+Leo took a deep breath.
+
+And he ROARED.
+
+The sound echoed across the savanna, powerful and deep. Birds scattered from trees. Antelopes looked up in alarm. The earth itself seemed to shake.
+
+Mouse tumbled backward. "Your roar! It's back!"
+
+But Leo understood now. "It never left. It was just buried under my fear. I was so scared of losing who I was that I couldn't access my own strength."
+
+"So what changed?" Mouse asked.
+
+"I stopped defining myself by my roar and remembered that my roar comes from me. Not the other way around."
+
+Leo looked down at the tiny mouse who'd taught a lion such a big lesson. "You're very wise for someone so small."
+
+Mouse laughed. "And you're very strong for someone who needed help from a mouse. But maybe that's the lesson - we all need help sometimes, and asking for it doesn't make us weak. It makes us wise."
+
+From that day forward, Leo's roar was as mighty as ever. But he learned something important: his roar wasn't his power. His power was what allowed him to roar.
+
+And on quiet days, when his roar was soft or silent, Leo didn't panic anymore. He knew his strength was always there, loud or quiet, because it came from within - from his courage, his heart, his determination to protect and serve his pride.
+
+The roar was just how the world heard what had always been there.`,
+                moral: "Your worth isn't in how loudly you can announce yourself - it's in the strength and courage you carry inside, whether anyone hears it or not.",
+                ageGroup: "7-9",
+                structure: "Quest with Internal Conflict"
             }
         ],
 
@@ -660,6 +878,96 @@ Oak realized that through all four seasons - growing, giving shade, showing beau
                 moral: "Every season of life has its own beauty and purpose, and change is natural and good.",
                 ageGroup: "4-6",
                 structure: "Cyclical/Seasonal"
+            },
+
+            // Story 4: Ecosystem/Interconnection Structure
+            {
+                title: "The Tiny Seed's Big Journey",
+                image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400",
+                story: `Sammy was a tiny maple seed with helicopter wings. She hung on her mother tree, watching the world below.
+
+"When will I fly, Mama?" Sammy asked every day.
+
+"When the autumn wind comes," Mama Tree said patiently. "Then you'll spin through the air and find your own place to grow."
+
+Finally, autumn arrived. A strong wind blew, and Sammy felt herself let go.
+
+"Goodbye, Mama!" Sammy called as she spun through the air. Her helicopter wings twirled beautifully.
+
+"Remember," Mama Tree called back, "wherever you land is exactly where you're meant to be!"
+
+Sammy spun and spun, traveling far from her mother tree. Finally, she landed softly on the forest floor.
+
+"This is perfect!" Sammy said. But then she looked around. All she could see were leaves and dirt. "Wait, how do I become a tree? I'm just a seed!"
+
+A friendly earthworm poked up from the soil. "Don't worry, little seed. We'll help you! First, you need to get under the soil where it's safe and warm."
+
+"But I can't dig," Sammy said.
+
+"I can!" said Earthworm. He wiggled and pushed, creating space in the soil. Slowly, Sammy sank down into the earth.
+
+It was dark under the soil. Sammy felt lonely and scared.
+
+"Hello?" she called softly.
+
+"We're here," whispered the Soil. "We're made of old leaves and broken rocks and tiny creatures. We have all the food a seed needs to grow. Just rest now."
+
+Sammy rested through the cold winter. She was scared she'd be buried forever. But then spring came!
+
+Rain dripped down through the soil. "Drink up!" said the raindrops. "You'll need water to grow."
+
+Sammy drank the rain and felt something amazing - her shell cracked open! A tiny root pushed down, and a tiny shoot pushed up.
+
+"I'm growing!" Sammy shouted.
+
+The root reached deeper. "Hello," said the Soil. "Take what you need. We've been saving nutrients just for you."
+
+The tiny shoot pushed up, up, up. Finally, it broke through the soil into sunlight!
+
+"Welcome!" said the Sun warmly. "I'll give you the energy to make your own food. That's my gift to growing things."
+
+Sammy's shoot grew tiny leaves. Using sunlight, water, and air, she made food for herself - just like Mama Tree had taught her!
+
+A bee buzzed by. "One day, when you're big, you'll make flowers. Then I'll help spread your pollen to other trees. We work together!"
+
+A bird landed on her tiny stem. "Oops, sorry, too small!" The bird flew to a nearby tree instead. "But someday you'll be big like this tree, and I'll build my nest in your branches!"
+
+Months passed. Sammy grew taller. A squirrel buried an acorn near her roots.
+
+"Hey!" Sammy said. "This is my spot!"
+
+"Don't worry," said the older tree nearby. "That squirrel forgot where he hid that acorn. It will grow into an oak tree, and you'll be friends. Trees are happier when we grow together."
+
+Years went by. Sammy grew from a tiny seedling into a young tree. She learned that becoming a tree wasn't something she did alone.
+
+The sun gave her energy. The rain gave her water. The soil gave her food. The earthworms kept the soil healthy. The bees would help her make seeds. The birds would rest in her branches and poop out seeds from other plants nearby. The squirrels would plant nuts that became her neighbors.
+
+Everyone helped everyone else.
+
+One autumn day, many years later, Sammy's own seeds were ready. They hung from her branches, each with its own helicopter wings.
+
+"When will we fly, Mama?" her seeds asked.
+
+"When the autumn wind comes," Sammy said with a smile. "Then you'll spin through the air and find your own place to grow."
+
+"Will we be scared?" one seed asked.
+
+"Maybe," Sammy said honestly. "I was scared when I first landed. I thought I had to become a tree all by myself. But then I learned the most important lesson: nothing in nature grows alone. The sun, the rain, the soil, the creatures - everyone works together. You'll have help too, even when you can't see it."
+
+The wind came, and Sammy's seeds began to let go, spinning away on their helicopter wings.
+
+"Goodbye!" they called.
+
+"Remember," Sammy called back, just like her mama had, "wherever you land is exactly where you're meant to be! And you'll never be alone - nature takes care of its own!"
+
+As Sammy watched her seeds fly away, she felt the sun on her leaves, the rain on her bark, and her roots deep in the soil, connected to all the other roots underground.
+
+She wasn't just a tree. She was part of everything - part of the forest, part of the cycle, part of the big, beautiful web of life where everyone helped everyone else.
+
+And that made her very happy indeed.`,
+                moral: "Nothing in nature grows alone - we're all connected and helped by countless others in ways we may not even see.",
+                ageGroup: "4-6",
+                structure: "Ecosystem/Interconnection"
             }
         ],
         medium: [
@@ -956,6 +1264,114 @@ And she did. Even though Maya was far away at college, she and Tommy talked ofte
                 moral: "The best gifts aren't perfect or fancy - they're the ones that show love and keep us connected.",
                 ageGroup: "4-6",
                 structure: "Three-Part Conflict Resolution"
+            },
+
+            // Story 3: Role Reversal Structure
+            {
+                title: "The Day Mia Became the Parent",
+                image: "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?w=400",
+                story: `Mia woke up on Saturday morning feeling excited. It was pajama day - no school, no rules, just relaxing!
+
+She ran downstairs expecting to find Mom making breakfast like always. Instead, Mom was sitting at the kitchen table with her head in her hands, looking very tired.
+
+"Mom? Are you okay?" Mia asked.
+
+Mom looked up and tried to smile. "I'm just not feeling well today, sweetie. I think I caught that flu that's going around."
+
+Mia felt worried. Mom was always the one who took care of everyone. What happens when Mom gets sick?
+
+"What should I do?" Mia asked.
+
+"Could you pour me a glass of water?" Mom said weakly. "And maybe wake your little brother gently? Tell him we're having a quiet day today."
+
+Mia poured the water and watched Mom slowly climb back upstairs to bed. This was strange. Mom never went back to bed during the day!
+
+She went to her brother's room. Tommy was five and always full of energy.
+
+"Tommy, wake up. Mom's sick, so we need to be quiet today, okay?"
+
+Tommy's eyes went wide. "Mom's SICK? Is she going to be okay?"
+
+"She'll be fine," Mia said, trying to sound confident like Mom always did. "She just needs rest. Can you help me today?"
+
+Tommy nodded seriously.
+
+Downstairs, Tommy looked around the kitchen. "I'm hungry. Where's breakfast?"
+
+Mia realized: Mom wasn't going to make breakfast today. She had to do it.
+
+"Okay," Mia said, thinking hard. "I can make toast! And I know where the cereal is."
+
+She made toast (slightly burned, but edible) and poured cereal for both of them. Tommy didn't complain - he could tell this was a special situation.
+
+After breakfast, Tommy said, "What do we do now? Mom usually plans Saturday activities."
+
+Mia thought. Mom always kept them busy and happy. What would Mom do?
+
+"How about we play quietly? And then we should check on Mom and bring her water."
+
+They played with building blocks in the living room. When Tommy started to get loud, Mia whispered, "Remember, Mom needs quiet to rest."
+
+Tommy nodded and whispered back, "Sorry."
+
+At lunch time, Mia realized she'd have to make lunch too. She found peanut butter and jelly and made sandwiches. The jelly dripped everywhere and the sandwiches looked messy, but she'd done it!
+
+After lunch, Tommy said, "Can we watch TV all day?"
+
+Mia almost said yes. But then she thought about what Mom would say. "Too much screen time isn't good for us. Let's do something else after one show, okay?"
+
+Tommy looked disappointed but agreed.
+
+That afternoon, Mia brought Mom more water and some crackers. Mom smiled weakly. "You're taking such good care of things, Mia. I'm proud of you."
+
+Those words made Mia feel warm inside, even though she was tired from being in charge all day.
+
+By dinner time, Mia was exhausted. Being the parent was hard work! She made cheese sandwiches (because that was the only thing she could cook) and cut up apple slices (carefully, like Mom taught her).
+
+When Tommy spilled his juice, Mia almost got mad. But then she remembered how Mom never yelled when Mia spilled things. Mom just said, "Accidents happen. Let's clean it up together."
+
+So Mia said the same thing to Tommy. His face lit up with relief, and they cleaned it up together.
+
+At bedtime, Tommy said, "I miss Mom tucking us in."
+
+"Me too," Mia admitted. "But we can tuck ourselves in tonight. Come on, I'll help you brush your teeth."
+
+After Tommy was in bed, Mia quietly went to Mom's room. "Mom? Do you need anything?"
+
+Mom looked much better than she had that morning. "No, sweetie. But I need to tell you something. Come sit."
+
+Mia sat on the edge of the bed.
+
+"Today you learned something very important," Mom said softly. "You learned what it means to take care of others. Being the grown-up isn't always fun, is it?"
+
+Mia shook her head. "It's hard! You have to think about everything - food, activities, keeping Tommy happy, making good choices. I got tired!"
+
+Mom smiled. "That's what parents do every single day. And you did it beautifully. You showed patience, responsibility, and love. I'm so proud of you."
+
+"I appreciate you more now," Mia said. "I never realized how much you do."
+
+"That's the gift of today," Mom said. "Sometimes we don't understand how much someone does until we try to do it ourselves."
+
+The next day, Mom felt better and was back to normal. But Mia wasn't back to normal - she'd changed.
+
+When Mom made breakfast, Mia said, "Thank you, Mom."
+
+When Mom planned activities, Mia said, "That's a great idea, Mom."
+
+When Mom handled problems calmly, Mia thought, "I want to be like that when I grow up."
+
+Tommy noticed the change. "Why are you being so nice to Mom?"
+
+"Because," Mia explained, "I learned that being the parent is the hardest job in the world. And Mom does it every single day, even when she's tired, and she makes it look easy. That's pretty amazing."
+
+Years later, when Mia became a parent herself, she remembered the day she was eight years old and Mom got sick. She remembered how hard it was to be in charge for just one day.
+
+And every time parenting felt difficult, she thought about her own mom, who made it look effortless day after day, year after year, with love and patience.
+
+That one day taught Mia a lesson that lasted forever: the people who take care of us do so much more than we realize, and they deserve our appreciation every single day.`,
+                moral: "We don't always see how much others do for us until we try to walk in their shoes - and that's when gratitude truly begins.",
+                ageGroup: "4-6",
+                structure: "Role Reversal"
             }
         ],
         medium: [
@@ -1226,6 +1642,80 @@ Lily hugged her grandmother tight. She'd discovered that the quiet grandma who b
                 moral: "People have amazing stories inside them if we're curious enough to discover them.",
                 ageGroup: "4-6",
                 structure: "Secret/Revelation"
+            },
+
+            // Story 2: Discovery/Exploration Structure
+            {
+                title: "The Secret Path in the Woods",
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400",
+                story: `Maya loved exploring the woods behind her house. She knew every tree, every rock, every turn in the path. Or so she thought.
+
+One Saturday morning, while following a butterfly, Maya noticed something she'd never seen before: a narrow path hidden behind thick bushes.
+
+"That's strange," Maya whispered. "I've been here a hundred times. How did I miss this?"
+
+The path was covered with soft moss and wound between tall trees. Sunlight filtered through the leaves like golden rain.
+
+Maya knew she should probably tell her parents before exploring a new path. But it was right here in her familiar woods, just a few steps from the main trail. What harm could there be?
+
+She stepped onto the mossy path.
+
+The deeper she walked, the more magical everything seemed. Mushrooms grew in perfect circles. A family of deer watched her calmly without running away. Even the air felt different - fresher, sweeter somehow.
+
+"This is amazing!" Maya said aloud.
+
+After five minutes of walking, the path opened into a small clearing Maya had definitely never seen before. In the center stood an enormous oak tree, wider than her whole house!
+
+"Wow," Maya breathed.
+
+She walked around the tree, running her hand along its rough bark. That's when she noticed something carved into the trunk: *"For adventurers brave enough to look beyond the obvious. - Explorer Maria Chen, 1987"*
+
+"1987?" Maya did the math. "That's over thirty years ago!"
+
+She found more carvings as she looked: *"Best hiding spot ever! - Tommy, 1995"* and *"Where dreams feel real. - Sarah & James, 2003"* and *"This tree gives the best advice. Try it! - Alex, 2010"*
+
+Dozens of names, spanning decades. All these people had found this secret place, just like she had!
+
+Maya sat down against the tree trunk, just like the carvings suggested. She closed her eyes.
+
+"Tree," she whispered, feeling a bit silly, "do you have any advice for me?"
+
+The tree didn't answer with words. Trees can't talk. But sitting there, quiet and still, Maya's own thoughts became clear.
+
+She'd been worried about starting a new school next month. Worried that she wouldn't fit in, that she wouldn't make friends, that everything would be too different.
+
+But sitting against this ancient tree, surrounded by names of strangers who'd become temporary friends through their shared discovery, Maya realized something: new doesn't have to be scary. Sometimes new paths lead to the best adventures.
+
+This tree had been here for hundreds of years. It had seen countless explorers come and go. And it was still here, strong and steady, offering shelter to anyone brave enough to find it.
+
+"Thank you," Maya whispered to the tree.
+
+She pulled out a small pocketknife her dad had given her for emergencies. Carefully, respectfully, she carved into the tree: *"For future adventurers: be brave, stay curious. - Maya, 2024"*
+
+As she walked back down the mossy path, Maya felt different. The same woods she'd explored a hundred times suddenly felt full of possibilities. How many other secret paths had she walked past without noticing?
+
+When she reached home, she told her parents about the hidden path and the incredible tree.
+
+"Can we go see it together?" Mom asked excitedly.
+
+But when they went back to look for the path, they couldn't find it. The bushes looked solid, with no gap between them.
+
+"It was right here!" Maya insisted. "I know it was!"
+
+Dad looked thoughtful. "You know, your grandmother once told me about a special place in these woods that only appeared to people who were ready to find it. I never believed her until now."
+
+"Do you think it's magic?" Maya asked.
+
+"Maybe," Dad said. "Or maybe you were so focused on the butterfly that you noticed things you normally walked right past. Either way, you found something special. And that's what matters."
+
+That night, lying in bed, Maya thought about the tree and all the names carved into it. Someday, maybe years from now, another kid would find that path. They'd see her name among all the others and know they weren't alone in their adventures.
+
+The thought made Maya smile. Some discoveries are meant to be shared across time - a message from past adventurers to future ones: *Keep exploring. Keep being curious. The world is full of wonders hiding in plain sight, waiting for someone brave enough to look a little closer.*
+
+And Maya fell asleep dreaming of all the secret paths she had yet to find - in woods, in life, in the adventure of growing up.`,
+                moral: "The world is full of hidden wonders waiting for those curious and brave enough to look beyond the obvious.",
+                ageGroup: "4-6",
+                structure: "Discovery/Exploration"
             }
         ],
         medium: [
@@ -1751,6 +2241,124 @@ Years later, when Mr. Williams retired, he kept a photo on his desk - Zara's pla
                 moral: "Sometimes students teach teachers, and the best learning happens when we're brave enough to question the rules.",
                 ageGroup: "7-9",
                 structure: "Reversal/Ironic"
+            },
+
+            // Story 3: Failure-to-Success Narrative
+            {
+                title: "The Spelling Bee Champion Who Couldn't Spell",
+                image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400",
+                story: `Everyone expected Jake to win the school spelling bee. He'd won the last two years in a row and studied words every night.
+
+But this year, something was different. Jake's mind kept wandering. The words he used to memorize easily now slipped away. Letters got jumbled in his head.
+
+At the regional spelling bee, disaster struck.
+
+"Playwright," the judge said.
+
+Jake knew this word. He'd studied it a hundred times. But standing on stage, his mind went blank. "P-L-A-Y..." he started confidently, then paused. Was it W-R-I-T-E or W-R-I-G-H-T?
+
+"W-R-I-T-E," he finished.
+
+"I'm sorry, that's incorrect," the judge said.
+
+Jake's face burned with embarrassment. He'd lost in the first round. Him! The two-time champion!
+
+That night, Jake threw his spelling book across the room. "What's the point?" he said to his mom. "I'm terrible at this now. I'm done with spelling bees forever."
+
+Mom picked up the book. "You're really upset."
+
+"I studied so hard! Everyone expected me to win again, and I lost in the FIRST ROUND to an easy word!"
+
+"What do you think went wrong?" Mom asked gently.
+
+"I don't know!" Jake said, frustrated. "I knew the word! But on stage, my brain just... froze."
+
+"That's called performance anxiety," Mom said. "Even champions experience it. What if instead of quitting, you figured out how to handle the anxiety?"
+
+"I don't want to do another spelling bee," Jake insisted. "I'm done embarrassing myself."
+
+Mom didn't push. But the next day, Jake's teacher, Mr. Rodriguez, asked to talk with him.
+
+"I heard what happened at the regional bee," Mr. Rodriguez said. "Want to know something? I used to have terrible stage fright."
+
+"You?" Jake was surprised. Mr. Rodriguez always seemed so confident.
+
+"Yep. I failed my first teaching interview because I got so nervous I forgot my own name." Mr. Rodriguez laughed. "But I learned something important: talent isn't enough if anxiety blocks you from using it. So I learned strategies."
+
+"Like what?" Jake asked, curious despite himself.
+
+"Breathing techniques. Visualization. Reframing failure as feedback. Want me to teach you?"
+
+Over the next few months, Mr. Rodriguez worked with Jake. Not on spelling - Jake already knew the words. On mental strategies.
+
+"When you feel panic rising, breathe in for four counts, hold for four, out for four," Mr. Rodriguez taught him. "Your brain can't panic and count at the same time."
+
+They practiced visualization: Jake would close his eyes and imagine standing on stage, feeling calm and confident, spelling words correctly.
+
+Most importantly, Mr. Rodriguez changed how Jake thought about failure.
+
+"Failure isn't the opposite of success," he said. "It's part of success. You didn't fail that spelling bee - you got valuable feedback. Your brain was telling you: 'Hey, we need better strategies for handling pressure.'"
+
+Jake wasn't sure he believed it, but he kept practicing.
+
+The next year, Jake entered the school spelling bee again. His hands shook as he walked on stage.
+
+"Breathe," he told himself. "Four counts in. Four counts out."
+
+The first word came: "Accommodate."
+
+Jake's old panic started rising. But he breathed. He visualized himself calm. He remembered: this is just feedback, not failure.
+
+"A-C-C-O-M-M-O-D-A-T-E," he spelled clearly.
+
+"Correct!"
+
+Jake made it through round after round. When he reached the finals against a seventh-grader named Maya, he felt nervous but not panicked.
+
+"Conscientious," the judge said.
+
+Jake breathed. Visualized. Focused.
+
+"C-O-N-S-C-I-E-N-T-I-O-U-S."
+
+"Correct! Jake is our school champion!"
+
+The audience applauded, but Jake didn't feel the same pride as before. Something was different.
+
+Later, he found Maya looking disappointed. "You spelled so well," Jake said. "You almost had me."
+
+"I got nervous on that last word," Maya admitted. "I knew it, but my brain froze."
+
+Jake smiled. "I know exactly what that feels like. Want to know what helped me?"
+
+He shared everything Mr. Rodriguez had taught him about breathing, visualization, and reframing failure.
+
+Maya's eyes lit up. "That's so helpful! Thank you!"
+
+At regionals, Jake did well - but didn't win. He came in third place. Old Jake would have been devastated. But new Jake felt... proud?
+
+"Third place is great!" he told his mom.
+
+"I'm glad you're not upset," Mom said, surprised.
+
+"I'm not upset because I know something now," Jake explained. "Last year, I lost in the first round and wanted to quit. This year, I came in third. That's not failure - that's growth. And next year, who knows? Maybe I'll come in second. Or first. Or maybe I'll come in fifth, but I'll have learned even more about handling pressure."
+
+Mr. Rodriguez smiled when Jake told him. "You get it now. Success isn't about never losing. It's about learning from every experience and getting better each time."
+
+"Plus," Jake added, "I taught Maya those strategies, and she said they really helped her. That felt as good as winning."
+
+"Now you're really getting it," Mr. Rodriguez said. "The best success is when you can help others succeed too."
+
+Years later, Jake became a teacher himself. He kept a small trophy on his desk - not one of his spelling bee first-place trophies, but his third-place trophy from regionals.
+
+Students would ask, "Why do you display your third-place trophy instead of the first-place ones?"
+
+Jake would smile. "Because this trophy represents the most important lesson I ever learned: failure isn't the opposite of success. It's the teacher that shows you how to get there. I won my first championships easily. But I earned this third-place trophy by failing, learning, and trying again. That makes it my most valuable trophy of all."
+
+And every year, Jake would teach his students not just their subjects, but the same lesson Mr. Rodriguez taught him: Talent is good. Hard work is better. But resilience - the ability to fail, learn, and keep trying - that's what turns ordinary students into extraordinary people.`,
+                moral: "Failure isn't the opposite of success - it's the best teacher showing you how to get there. What matters is learning, growing, and trying again.",
+                ageGroup: "7-9",
+                structure: "Failure-to-Success Narrative"
             }
         ],
         hard: [
