@@ -1277,7 +1277,7 @@ function savePDF() {
             <h1 style="text-align: center; color: #667eea;">${tutorial.icon} ${tutorial.name}</h1>
             <h3 style="color: #764ba2;">Your Drawing:</h3>
             <div style="text-align: center; margin: 20px 0;">
-                <img src="${canvasImage}" style="max-width: 100%; border: 3px solid #333; border-radius: 10px;">
+                <img src="${canvasImage}" style="max-width: 500px; border: 3px solid #333; border-radius: 10px;">
             </div>
             <h3 style="color: #667eea;">Steps You Followed:</h3>
             <ol style="font-size: 14px; line-height: 1.8;">
@@ -1292,16 +1292,28 @@ function savePDF() {
 
     const element = document.createElement('div');
     element.innerHTML = content;
+    document.body.appendChild(element);
 
     const opt = {
         margin: 0.5,
         filename: `${tutorial.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false
+        },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save();
+    // Wait a moment for image to be ready, then generate PDF
+    setTimeout(() => {
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Remove the temporary element after PDF is generated
+            document.body.removeChild(element);
+        });
+    }, 100);
 }
 
 /**
