@@ -129,6 +129,9 @@
                 const germanBtn = document.querySelector('button[onclick*="german.html"]');
                 if (germanBtn) germanBtn.style.display = 'none';
             }
+
+            // Add completion badges after UI is initialized
+            setTimeout(() => addCompletionBadges(), 100);
         }
     </script>
 
@@ -333,52 +336,9 @@
     <script src="handwriting-input.js"></script>
     <script src="worksheet-generator.js"></script>
     <script>
-        // Initialize user interface
-        document.addEventListener('DOMContentLoaded', function() {
-            const user = getCurrentUser();
-
-            // Display user name
-            document.getElementById('user-name-display').textContent = user.fullName;
-
-            // Show admin button if user is admin
-            if (user.role === 'admin') {
-                document.getElementById('admin-btn').style.display = 'block';
-            }
-
-            // Hide modules user doesn't have access to
-            const modules = user.modules || {};
-
-            if (!modules.math) {
-                const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
-                if (mathBtn) mathBtn.style.display = 'none';
-            }
-
-            if (!modules.english) {
-                const englishBtn = document.querySelector('button[onclick*="english.html"]');
-                if (englishBtn) englishBtn.style.display = 'none';
-            }
-
-            if (!modules.aptitude) {
-                const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
-                if (aptitudeBtn) aptitudeBtn.style.display = 'none';
-            }
-
-            if (!modules.stories) {
-                const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
-                if (storiesBtn) storiesBtn.style.display = 'none';
-            }
-
-            if (!modules['emotional-quotient']) {
-                const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
-                if (eqBtn) eqBtn.style.display = 'none';
-            }
-
-            if (!modules.german) {
-                const germanBtn = document.querySelector('button[onclick*="german.html"]');
-                if (germanBtn) germanBtn.style.display = 'none';
-            }
-
-            // Add completion badges on page load
+        // Add completion badges when worksheets load
+        // This runs after user authentication is complete
+        function addCompletionBadges() {
             const completedWorksheets = getCompletedWorksheets('math');
 
             completedWorksheets.forEach(identifier => {
@@ -395,7 +355,7 @@
                     });
                 }
             });
-        });
+        }
     </script>
 </body>
 </html>
