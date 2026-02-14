@@ -123,6 +123,9 @@
                     console.log('INDEX.HTML: User data loaded:', userData);
                     console.log('INDEX.HTML: User modules:', userData.modules);
 
+                    // Ensure enabledModules exists (initialize for existing users)
+                    await ensureEnabledModules(firebaseUser.uid, userData);
+
                     // Initialize UI with user data
                     initializeUserInterface(userData);
                 } else {
@@ -130,6 +133,44 @@
                 }
             }
         });
+
+        // Ensure enabledModules field exists for user (migration for existing users)
+        async function ensureEnabledModules(uid, userData) {
+            // If enabledModules already exists, nothing to do
+            if (userData.enabledModules) {
+                console.log('enabledModules already exists');
+                return;
+            }
+
+            console.log('Initializing enabledModules for existing user');
+
+            // For existing users without enabledModules, initialize with only math enabled
+            // This ensures parents must explicitly enable other modules
+            const enabledModules = {
+                math: true,  // Only math enabled by default
+                english: false,
+                aptitude: false,
+                stories: false,
+                'emotional-quotient': false,
+                german: false,
+                drawing: false,
+                'german-kids': false
+            };
+
+            try {
+                // Update Firestore
+                await firebase.firestore().collection('users').doc(uid.substring(0, 20)).update({
+                    enabledModules: enabledModules
+                });
+
+                // Update local userData object
+                userData.enabledModules = enabledModules;
+
+                console.log('enabledModules initialized:', enabledModules);
+            } catch (error) {
+                console.error('Error initializing enabledModules:', error);
+            }
+        }
 
         function initializeUserInterface(user) {
             console.log('Initializing UI for user:', user.username);
@@ -148,9 +189,9 @@
             initializeParentMode(user);
 
             // Show only enabled modules (what parent has enabled for child)
-            // Fallback to modules for backward compatibility
-            const modules = user.enabledModules || user.modules || {};
-            console.log('Modules to display:', modules);
+            // enabledModules should always exist now thanks to ensureEnabledModules()
+            const modules = user.enabledModules || {};
+            console.log('Enabled modules to display:', modules);
 
             if (!modules.math) {
                 const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');

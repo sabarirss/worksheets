@@ -506,6 +506,31 @@
                 const userData = userDoc.data();
                 userData.uid = firebaseUser.uid; // Add UID for updates
 
+                // Ensure enabledModules exists (initialize for existing users)
+                if (!userData.enabledModules) {
+                    console.log('Initializing enabledModules for existing user');
+                    const enabledModules = {
+                        math: true,  // Only math enabled by default
+                        english: false,
+                        aptitude: false,
+                        stories: false,
+                        'emotional-quotient': false,
+                        german: false,
+                        drawing: false,
+                        'german-kids': false
+                    };
+
+                    try {
+                        await firebase.firestore().collection('users').doc(firebaseUser.uid.substring(0, 20)).update({
+                            enabledModules: enabledModules
+                        });
+                        userData.enabledModules = enabledModules;
+                        console.log('enabledModules initialized');
+                    } catch (error) {
+                        console.error('Error initializing enabledModules:', error);
+                    }
+                }
+
                 currentUser = userData;
 
                 // Populate fields
@@ -519,7 +544,7 @@
                 document.getElementById('current-age-display').value = ageDisplay;
 
                 // Display enabled modules (what parent has enabled for child)
-                displayModules(userData.enabledModules || userData.modules || {});
+                displayModules(userData.enabledModules || {});
             } catch (error) {
                 console.error('Error loading user profile:', error);
                 showError('Failed to load user data: ' + error.message);
