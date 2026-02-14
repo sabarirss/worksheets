@@ -104,18 +104,19 @@ function getCurrentUser() {
 async function login(username, password) {
     try {
         let email;
-        let lookupUsername = username;
+        // Convert username to lowercase for case-insensitive login
+        let lookupUsername = username.toLowerCase();
 
         // Determine the email to use for authentication
         if (username.includes('@')) {
-            // Already an email, use as-is
-            email = username;
+            // Already an email, use as-is (emails are case-insensitive by nature)
+            email = username.toLowerCase();
             // Extract username from email for Firestore lookup
-            lookupUsername = username.split('@')[0];
+            lookupUsername = username.split('@')[0].toLowerCase();
         } else {
-            // Look up user's real email from Firestore
+            // Look up user's real email from Firestore (using lowercase username)
             const userQuery = await firebase.firestore().collection('users')
-                .where('username', '==', username)
+                .where('username', '==', lookupUsername)
                 .limit(1)
                 .get();
 
