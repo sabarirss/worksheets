@@ -579,6 +579,41 @@ footer {
     border-color: #1976d2;
 }
 
+/* Emotional Quotient Styles */
+.emotion-btn {
+    padding: 15px 25px;
+    margin: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: 3px solid #ddd;
+    border-radius: 12px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.emotion-btn:hover {
+    background: #ffd93d;
+    border-color: #ffd93d;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 217, 61, 0.4);
+}
+
+.emotion-btn.selected {
+    background: #4caf50;
+    color: white;
+    border-color: #4caf50;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.emotion-btn.selected:hover {
+    background: #45a049;
+    border-color: #45a049;
+}
+
 /* Logic Problem Styles */
 .logic-question {
     font-size: 1.2em;
