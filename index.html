@@ -85,6 +85,9 @@
         });
 
         function initializeUserInterface(user) {
+            console.log('Initializing UI for user:', user.username);
+            console.log('User modules:', user.modules);
+
             // Display user name
             document.getElementById('user-name-display').textContent = user.fullName;
 
@@ -95,6 +98,7 @@
 
             // Hide modules user doesn't have access to
             const modules = user.modules || {};
+            console.log('Modules to check:', modules);
 
             if (!modules.math) {
                 const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');

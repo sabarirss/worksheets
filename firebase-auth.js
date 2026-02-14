@@ -280,14 +280,16 @@ async function createUser(userData) {
             fullName: userData.fullName || userData.username,
             modules: userData.modules || {
                 math: true,
-                english: true,
-                aptitude: true,
-                stories: true,
+                english: false,
+                aptitude: false,
+                stories: false,
                 'emotional-quotient': false,
                 german: false
             },
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
+        console.log('Creating user with modules:', newUser.modules);
 
         await firebase.firestore().collection('users').doc(userCredential.user.uid.substring(0, 20)).set(newUser);
 
