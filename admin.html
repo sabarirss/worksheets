@@ -583,15 +583,20 @@
             }
         }
 
-        function confirmDeleteUser(username) {
+        async function confirmDeleteUser(username) {
             if (confirm(`Are you sure you want to delete user "${username}"? This will also delete all their saved worksheets.`)) {
-                const result = deleteUser(username);
+                try {
+                    const result = await deleteUser(username);
 
-                if (result.success) {
-                    loadUsers();
-                    alert('User deleted successfully!');
-                } else {
-                    alert('Error: ' + result.error);
+                    if (result.success) {
+                        await loadUsers();
+                        alert('User deleted successfully!');
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    alert('Error deleting user: ' + error.message);
                 }
             }
         }
