@@ -47,32 +47,32 @@ function backToWorksheetSelection() {
 // Activity Generators
 function generateEasyActivities() {
     return [
-        // Basic emotion recognition
+        // Basic emotion identification (self-focus)
         {
             type: 'emotion-face',
             emoji: '😊',
-            question: 'How does this face feel?',
+            question: 'What emotion is this?',
             options: ['Happy', 'Sad', 'Angry'],
             answer: 'Happy'
         },
         {
             type: 'emotion-face',
             emoji: '😢',
-            question: 'How does this face feel?',
+            question: 'This person is feeling...',
             options: ['Happy', 'Sad', 'Angry'],
             answer: 'Sad'
         },
         {
             type: 'emotion-face',
             emoji: '😠',
-            question: 'How does this face feel?',
+            question: 'Which emotion do you see?',
             options: ['Happy', 'Sad', 'Angry'],
             answer: 'Angry'
         },
         {
             type: 'emotion-face',
             emoji: '😨',
-            question: 'How does this face feel?',
+            question: 'What is this face showing?',
             options: ['Scared', 'Happy', 'Sleepy'],
             answer: 'Scared'
         },
@@ -146,25 +146,25 @@ function generateEasyActivities() {
 
 function generateMediumActivities() {
     return [
-        // More complex emotions
+        // Understanding others' emotions (empathy focus - "they" not "you")
         {
             type: 'emotion-face',
             emoji: '😰',
-            question: 'How does this face feel?',
+            question: 'Your friend shows this face before a test. They probably feel...',
             options: ['Worried', 'Happy', 'Angry', 'Sleepy'],
             answer: 'Worried'
         },
         {
             type: 'emotion-face',
             emoji: '😤',
-            question: 'How does this face feel?',
+            question: 'When your brother makes this face, it means he is...',
             options: ['Frustrated', 'Happy', 'Surprised', 'Tired'],
             answer: 'Frustrated'
         },
         {
             type: 'emotion-face',
             emoji: '🥺',
-            question: 'How does this face feel?',
+            question: 'If your classmate looks like this after losing a game, they feel...',
             options: ['Disappointed', 'Excited', 'Proud', 'Angry'],
             answer: 'Disappointed'
         },
@@ -269,20 +269,20 @@ function generateMediumActivities() {
 
 function generateHardActivities() {
     return [
-        // Complex emotion recognition
+        // Complex emotional reasoning (multiple emotions, regulation)
         {
             type: 'emotion-face',
             emoji: '😏',
-            question: 'How does this face feel?',
-            options: ['Confident', 'Sad', 'Scared', 'Crying'],
-            answer: 'Confident'
+            question: 'This expression shows confidence. What should you do if you feel this way before a competition?',
+            options: ['Use it to perform your best', 'Show off to others', 'Make fun of competitors', 'Give up trying'],
+            answer: 'Use it to perform your best'
         },
         {
             type: 'emotion-face',
             emoji: '🤔',
-            question: 'How does this face feel?',
-            options: ['Confused or thinking', 'Very happy', 'Very angry', 'Sleeping'],
-            answer: 'Confused or thinking'
+            question: 'When you feel confused like this about homework, what\'s the most helpful response?',
+            options: ['Ask questions to understand better', 'Get angry at the homework', 'Give up immediately', 'Copy someone else\'s work'],
+            answer: 'Ask questions to understand better'
         },
         // Complex scenarios with multiple perspectives
         {
@@ -392,8 +392,47 @@ function generateHardActivities() {
             question: 'What shows good emotional and social skills?',
             options: ['Talk to them kindly about helping', 'Do all the work yourself', 'Kick them out of the group', 'Tell the teacher immediately without talking first'],
             answer: 'Talk to them kindly about helping'
+        },
+        // Mixed emotions and emotional complexity
+        {
+            type: 'mixed-emotion',
+            text: 'You won the game, but your best friend lost and is sad.',
+            question: 'What TWO emotions might you feel at the same time?',
+            options: ['Only happy', 'Happy AND sympathetic', 'Only sad', 'Angry at your friend'],
+            answer: 'Happy AND sympathetic'
+        },
+        {
+            type: 'mixed-emotion',
+            text: 'Your family is moving to a new house. You\'ll have a bigger room but leave your friends.',
+            question: 'It\'s normal to feel...',
+            options: ['Only excited', 'Only sad', 'Excited AND sad at the same time', 'Nothing at all'],
+            answer: 'Excited AND sad at the same time'
+        },
+        {
+            type: 'mixed-emotion',
+            text: 'You want to try out for the school play but feel nervous about performing.',
+            question: 'This situation shows...',
+            options: ['You should only do things that don\'t scare you', 'Wanting something and feeling scared are both okay', 'Feeling nervous means you shouldn\'t try', 'Brave people never feel nervous'],
+            answer: 'Wanting something and feeling scared are both okay'
+        },
+        {
+            type: 'emotional-growth',
+            text: 'Last year you were scared of swimming, but now you enjoy it.',
+            question: 'This shows that...',
+            options: ['You were wrong to be scared before', 'Emotions never change', 'Being scared means you\'re weak', 'Emotions can change as we grow and practice'],
+            answer: 'Emotions can change as we grow and practice'
         }
     ];
+}
+
+// Shuffle array using Fisher-Yates algorithm
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
 }
 
 // Load activities based on difficulty
@@ -408,6 +447,17 @@ function loadActivities(difficulty) {
     } else {
         activities = generateHardActivities();
     }
+
+    // Shuffle options for each activity so correct answer isn't always in same position
+    activities = activities.map(activity => {
+        if (activity.options && activity.options.length > 0) {
+            return {
+                ...activity,
+                options: shuffleArray(activity.options)
+            };
+        }
+        return activity;
+    });
 
     currentWorksheet = {
         difficulty,

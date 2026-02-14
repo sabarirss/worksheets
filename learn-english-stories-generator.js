@@ -1132,61 +1132,62 @@ const storyDatabase = {
         },
         {
             id: 2,
-            title: "The Time Capsule Discovery",
-            icon: "📦",
+            title: "The Debate Championship",
+            icon: "🎤",
             level: "Advanced Reader",
-            wordCount: 380,
-            grammarFocus: "Narrative structure, varied sentence types, conditional sentences",
-            vocabulary: ["renovations", "coincidence", "decades", "generations", "perspective"],
+            wordCount: 420,
+            grammarFocus: "Persuasive language, complex argumentation, formal speech patterns",
+            vocabulary: ["articulate", "counterargument", "rhetoric", "substantiate", "perspective"],
             content: [
-                "When the old community center announced renovations, nobody expected to find a piece of history hidden in its walls.",
-                "Thirteen-year-old Aisha volunteered to help catalog items during the renovation. She enjoyed learning about the building's history.",
-                "One afternoon, while workers were removing old floorboards, they discovered a metal box embedded in the concrete foundation.",
-                '"Stop everything!" called out Mr. Peterson, the project manager. "We need to open this carefully."',
-                "The box was a time capsule from 1950, exactly seventy-five years ago. Inside were letters, photographs, newspaper clippings, and predictions about the future written by students from the local middle school.",
-                "Aisha carefully examined each item with cotton gloves. One letter particularly caught her attention.",
-                '"Dear Future Friend," it began. "My name is Margaret Chen, and I\'m twelve years old. I wonder what the world will be like when you read this."',
-                "The letter described Margaret's daily life: walking to school, listening to radio programs, and helping her parents in their family store. She dreamed of becoming a scientist, even though few women worked in science at that time.",
-                "Aisha felt a connection across the decades. She realized that Margaret's dreams and worries weren't so different from her own.",
-                "The newspaper clippings revealed community concerns about new technologies and changing society. People worried whether television would replace radio, and whether cars would make horses obsolete.",
-                '"If they could see us now with our smartphones and internet!" Aisha thought, amused.',
-                "But what fascinated Aisha most was a section titled 'Our Predictions for 2025.' Some were surprisingly accurate: they predicted computers in homes and video phone calls. Others were wildly imaginative: flying cars and robot servants.",
-                "Aisha had an idea. Why not create a response? She proposed that the current students write letters back to the past, describing how their predictions came true (or didn't) and what life is really like now.",
-                "The project became a school-wide initiative. Students researched the 1950s, compared life then and now, and reflected on what future generations might think of their time.",
-                "Aisha also tried to find Margaret Chen. After some research online, she discovered that Margaret had indeed become a scientist—a pioneering environmental researcher who had published important work on climate change.",
-                "Aisha wrote to Dr. Chen, now 87 years old, telling her about the time capsule. Dr. Chen wrote back, delighted that her childhood message had been found.",
-                "The experience taught Aisha that while technology changes rapidly, human hopes, dreams, and curiosity remain constant across generations. She decided to include a letter of her own in a new time capsule, to be opened in 2100."
+                "The annual National Youth Debate Championship was unlike any competition Marcus had ever faced. Standing before three hundred people required not just knowledge, but the ability to think on your feet.",
+                "Marcus and his debate partner, Elena, had spent months preparing for this moment. Their topic: 'Should artificial intelligence have legal rights as technology becomes more sophisticated?'",
+                "The proposition seemed straightforward until you considered its implications. If AI systems could think, learn, and create, did they deserve protection under law? Or would granting them rights diminish what it means to be human?",
+                "Their opponents, a team from the state champions, argued passionately that consciousness and sentience were uniquely human qualities. 'AI might mimic intelligence,' their lead speaker declared, 'but it lacks genuine understanding, emotion, and moral agency.'",
+                "Elena opened their rebuttal with a thought-provoking question: 'How do we define consciousness? If we can't fully explain human consciousness scientifically, how can we be certain that advanced AI doesn't possess its own form of awareness?'",
+                "Marcus followed with historical context. 'Throughout history, societies have denied rights to various groups by claiming they lacked full consciousness or humanity. We later recognized these denials as grave moral failures.'",
+                "The opposition countered skillfully. 'You're conflating biological consciousness with programmed responses. An AI might pass the Turing test, but that doesn't mean it experiences subjective reality. It's simulating, not experiencing.'",
+                "The debate intensified during the cross-examination period. Questions flew back and forth, each side probing for weaknesses in the other's logic.",
+                "'If an AI creates art, writes poetry, or composes music,' Elena asked, 'who owns that creation? The AI, its programmer, or the company that owns the system?'",
+                "Their opponent paused, then responded, 'Ownership and rights are separate issues. A corporation owns software, but that doesn't mean the software deserves rights. It's a tool, albeit an sophisticated one.'",
+                "Marcus seized on this. 'But tools don't learn and adapt independently. Modern AI systems modify their own code, develop unexpected solutions, and even surprise their creators. At what point does a tool become something more?'",
+                "The final speeches approached. Marcus knew they needed to synthesize their arguments into a compelling conclusion.",
+                "'This debate isn't really about AI,' he began his closing statement. 'It's about how we prepare for a future where the line between artificial and natural intelligence becomes increasingly blurred. By establishing ethical frameworks now, we prevent future crises.'",
+                "'We're not suggesting AI should vote or hold office,' Elena added. 'We're proposing limited protections—the right not to be maliciously corrupted, destroyed without cause, or exploited. These protections benefit humanity by ensuring responsible AI development.'",
+                "The judges deliberated for twenty minutes. When they announced the decision, Marcus's heart raced. 'The championship goes to... the proposition team!'",
+                "But something unexpected happened. The opposing team's captain approached them afterward. 'You changed my mind,' she admitted. 'I still don't have all the answers, but your arguments made me realize this issue is more complex than I thought.'",
+                "That moment meant more to Marcus than the trophy. True victory in debate wasn't about winning—it was about elevating the conversation, challenging assumptions, and helping people think more deeply about important issues.",
+                "As they left the stage, Elena smiled. 'You know what's ironic? We taught each other as much as we taught the audience. That's the real power of debate—it forces you to understand perspectives you initially opposed.'"
             ],
             questions: [
                 {
-                    question: "What was Aisha doing at the community center?",
-                    options: ["Attending classes", "Helping with renovation cataloging", "Playing sports", "Working part-time"],
+                    question: "What was the debate topic?",
+                    options: ["Should schools use more technology?", "Should AI have legal rights?", "Is AI better than humans?", "Should we ban AI development?"],
                     correct: 1
                 },
                 {
-                    question: "How old was the time capsule?",
-                    options: ["Fifty years", "Seventy-five years", "One hundred years", "Sixty years"],
+                    question: "What historical comparison did Marcus make?",
+                    options: ["Industrial revolution", "Space exploration", "Societies denying rights to groups", "Ancient philosophy"],
+                    correct: 2
+                },
+                {
+                    question: "What distinction did the opposition emphasize?",
+                    options: ["Old vs new technology", "Simulating vs experiencing consciousness", "Expensive vs cheap AI", "Safe vs dangerous AI"],
                     correct: 1
                 },
                 {
-                    question: "What did Margaret Chen dream of becoming?",
-                    options: ["A teacher", "A writer", "A scientist", "An artist"],
-                    correct: 2
-                },
-                {
-                    question: "Which prediction from 1950 was accurate?",
-                    options: ["Flying cars", "Robot servants", "Computers in homes", "Time travel"],
-                    correct: 2
-                },
-                {
-                    question: "What did Aisha learn from the experience?",
-                    options: ["Technology never changes", "The past was better", "Human curiosity remains constant across generations", "Science is too difficult"],
-                    correct: 2
-                },
-                {
-                    question: "What happened to Margaret Chen?",
-                    options: ["She became a teacher", "She became a famous scientist", "She never pursued her dreams", "She moved away"],
+                    question: "What unexpected event happened after the debate?",
+                    options: ["The judges changed their decision", "The opposing captain said they changed her mind", "Marcus withdrew from competition", "The debate was cancelled"],
                     correct: 1
+                },
+                {
+                    question: "According to Marcus's closing, what is the real purpose of this debate?",
+                    options: ["To ban AI", "To prepare ethical frameworks for the future", "To prove humans are superior", "To win a trophy"],
+                    correct: 1
+                },
+                {
+                    question: "What did Elena say was the real power of debate?",
+                    options: ["Winning trophies", "Getting famous", "Understanding opposing perspectives", "Proving you're right"],
+                    correct: 2
                 }
             ]
         }]

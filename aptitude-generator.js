@@ -158,46 +158,46 @@ function generatePatternPuzzles(count, difficulty) {
     let patterns = [];
 
     if (difficulty === 'easy') {
-        // Simple 2-item patterns
+        // Simple alternating patterns (AB AB AB... what's next?)
         patterns = [
-            { pattern: ['🔴', '🔵'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
-            { pattern: ['⭐', '🌙'], answer: '⭐', options: ['⭐', '🌙', '☀️'] },
-            { pattern: ['🍎', '🍊'], answer: '🍎', options: ['🍎', '🍊', '🍋'] },
-            { pattern: ['😊', '😢'], answer: '😊', options: ['😊', '😢', '😡'] },
-            { pattern: ['🐶', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭'] },
-            { pattern: ['🌞', '🌙'], answer: '🌞', options: ['🌞', '🌙', '⭐'] },
-            { pattern: ['1️⃣', '2️⃣'], answer: '1️⃣', options: ['1️⃣', '2️⃣', '3️⃣'] },
-            { pattern: ['🔺', '⭕'], answer: '🔺', options: ['🔺', '⭕', '⬜'] }
+            { pattern: ['🔴', '🔵', '🔴', '🔵'], answer: '🔴', options: ['🔴', '🔵', '🟢'], reason: 'Pattern alternates: red, blue, red, blue...' },
+            { pattern: ['⭐', '🌙', '⭐', '🌙'], answer: '⭐', options: ['⭐', '🌙', '☀️'], reason: 'Pattern alternates: star, moon, star, moon...' },
+            { pattern: ['🍎', '🍊', '🍎', '🍊'], answer: '🍎', options: ['🍎', '🍊', '🍋'], reason: 'Pattern alternates: apple, orange, apple, orange...' },
+            { pattern: ['😊', '😢', '😊', '😢'], answer: '😊', options: ['😊', '😢', '😡'], reason: 'Pattern alternates: happy, sad, happy, sad...' },
+            { pattern: ['🐶', '🐱', '🐶', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭'], reason: 'Pattern alternates: dog, cat, dog, cat...' },
+            { pattern: ['🌞', '🌙', '🌞', '🌙'], answer: '🌞', options: ['🌞', '🌙', '⭐'], reason: 'Pattern alternates: sun, moon, sun, moon...' },
+            { pattern: ['🔺', '⭕', '🔺', '⭕'], answer: '🔺', options: ['🔺', '⭕', '⬜'], reason: 'Pattern alternates: triangle, circle, triangle, circle...' },
+            { pattern: ['🚗', '🚌', '🚗', '🚌'], answer: '🚗', options: ['🚗', '🚌', '🚕'], reason: 'Pattern alternates: car, bus, car, bus...' }
         ];
     } else if (difficulty === 'medium') {
-        // 3-item patterns
+        // Patterns with grouping/counting (AAB AAB AAB... what's next?)
         patterns = [
-            { pattern: ['🔴', '🔵', '🟢'], answer: '🔴', options: ['🔴', '🔵', '🟢', '🟡'] },
-            { pattern: ['⭐', '🌙', '☀️'], answer: '⭐', options: ['⭐', '🌙', '☀️', '💫'] },
-            { pattern: ['🍎', '🍊', '🍋'], answer: '🍎', options: ['🍎', '🍊', '🍋', '🍇'] },
-            { pattern: ['😊', '😢', '😡'], answer: '😊', options: ['😊', '😢', '😡', '🤔'] },
-            { pattern: ['🐶', '🐱', '🐭'], answer: '🐶', options: ['🐶', '🐱', '🐭', '🐰'] },
-            { pattern: ['🌞', '🌙', '⭐'], answer: '🌞', options: ['🌞', '🌙', '⭐', '💫'] },
-            { pattern: ['1️⃣', '2️⃣', '3️⃣'], answer: '1️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'] },
-            { pattern: ['🔺', '⭕', '⬜'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'] },
-            { pattern: ['🚗', '🚙', '🚕'], answer: '🚗', options: ['🚗', '🚙', '🚕', '🚌'] },
-            { pattern: ['🌸', '🌺', '🌻'], answer: '🌸', options: ['🌸', '🌺', '🌻', '🌷'] }
+            { pattern: ['🔴', '🔴', '🔵', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Pattern groups: two reds, one blue, two reds, one blue...' },
+            { pattern: ['⭐', '🌙', '🌙', '⭐', '🌙'], answer: '🌙', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Pattern groups: star, two moons, star, two moons...' },
+            { pattern: ['🍎', '🍊', '🍋', '🍎', '🍊'], answer: '🍋', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Pattern cycles through 3: apple, orange, lemon, apple, orange...' },
+            { pattern: ['😊', '😊', '😊', '😢', '😊'], answer: '😊', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern groups: three happy, one sad, three happy...' },
+            { pattern: ['🐶', '🐱', '🐭', '🐶', '🐱'], answer: '🐭', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Pattern cycles through 3: dog, cat, mouse, dog, cat...' },
+            { pattern: ['1️⃣', '2️⃣', '2️⃣', '1️⃣', '2️⃣'], answer: '2️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Pattern groups: one, two twos, one, two twos...' },
+            { pattern: ['🔺', '🔺', '⭕', '⭕', '🔺'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Pattern groups: two triangles, two circles, two triangles...' },
+            { pattern: ['🌸', '🌺', '🌻', '🌷', '🌸'], answer: '🌺', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Pattern cycles through 4 flowers in order' },
+            { pattern: ['A', 'B', 'C', 'A', 'B'], answer: 'C', options: ['A', 'B', 'C', 'D'], reason: 'Pattern cycles through ABC sequence' },
+            { pattern: ['🟦', '🟥', '🟥', '🟦', '🟥'], answer: '🟥', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Pattern groups: blue, two reds, blue, two reds...' }
         ];
     } else {
-        // Complex patterns with variations
+        // Complex patterns with multiple rules (increasing, decreasing, nesting)
         patterns = [
-            { pattern: ['🔴', '🔴', '🔵'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
-            { pattern: ['⭐', '⭐', '🌙', '🌙'], answer: '⭐', options: ['⭐', '🌙', '☀️'] },
-            { pattern: ['🍎', '🍊', '🍊', '🍎'], answer: '🍊', options: ['🍎', '🍊', '🍋'] },
-            { pattern: ['😊', '😊', '😢'], answer: '😊', options: ['😊', '😢', '😡'] },
-            { pattern: ['🐶', '🐱', '🐶', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭'] },
-            { pattern: ['🌞', '🌙', '🌞', '🌙', '🌞'], answer: '🌙', options: ['🌞', '🌙', '⭐'] },
-            { pattern: ['1️⃣', '2️⃣', '3️⃣', '1️⃣', '2️⃣'], answer: '3️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'] },
-            { pattern: ['🔺', '⭕', '⭕', '🔺'], answer: '⭕', options: ['🔺', '⭕', '⬜'] },
-            { pattern: ['🚗', '🚙', '🚗', '🚙'], answer: '🚗', options: ['🚗', '🚙', '🚕'] },
-            { pattern: ['🌸', '🌺', '🌸', '🌺', '🌸'], answer: '🌺', options: ['🌸', '🌺', '🌻'] },
-            { pattern: ['A', 'B', 'B', 'A'], answer: 'B', options: ['A', 'B', 'C'] },
-            { pattern: ['🟦', '🟥', '🟥', '🟦', '🟥'], answer: '🟥', options: ['🟦', '🟥', '🟩'] }
+            { pattern: ['🔴', '🔵', '🔵', '🔴', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Growing pattern: 1 red, 2 blues, 3 reds, next is blues' },
+            { pattern: ['⭐', '🌙', '⭐', '⭐', '🌙', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Complex: star-moon-stars pattern increases' },
+            { pattern: ['🍎', '🍊', '🍊', '🍋', '🍋', '🍋'], answer: '🍎', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Each fruit appears one more time, then restart' },
+            { pattern: ['😊', '😊', '😢', '😡', '😡', '😡'], answer: '😢', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern: 2 happy, 1 sad, 3 angry, then decreases back' },
+            { pattern: ['🐶', '🐱', '🐭', '🐭', '🐱', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Reverse countdown: dog-cat-2mice-2cats-next is dogs' },
+            { pattern: ['1️⃣', '1️⃣', '2️⃣', '2️⃣', '2️⃣', '3️⃣'], answer: '3️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Numbers increase: 2 ones, 3 twos, next is threes' },
+            { pattern: ['🔺', '⭕', '⭕', '⬜', '⬜', '⬜'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Each shape appears one more time, then cycle restarts' },
+            { pattern: ['🌸', '🌺', '🌺', '🌻', '🌻', '🌻'], answer: '🌷', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Growing sequence: 1 flower, 2 flowers, 3 flowers, next 4' },
+            { pattern: ['A', 'B', 'B', 'C', 'C', 'C'], answer: 'D', options: ['A', 'B', 'C', 'D'], reason: 'Increasing pattern: A once, B twice, C thrice, D four times' },
+            { pattern: ['🟦', '🟥', '🟥', '🟩', '🟩', '🟩'], answer: '🟨', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Each color appears one more time than the last' },
+            { pattern: ['⬆️', '➡️', '⬇️', '⬇️', '➡️', '➡️'], answer: '⬆️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: 'Arrows rotate and repeat: up-right-2downs-2rights-3ups' },
+            { pattern: ['🔴', '🔵', '🔴', '🟢', '🔴', '🟡'], answer: '🔴', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Red appears every other position, others change' }
         ];
     }
 
@@ -289,6 +289,7 @@ function generateMatchingPuzzles(count, difficulty) {
     let pairs = [];
 
     if (difficulty === 'easy') {
+        // Direct, obvious animal-food associations
         pairs = [
             { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🥕'], reason: 'Cats drink milk' },
             { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻'], reason: 'Dogs love bones' },
@@ -298,32 +299,34 @@ function generateMatchingPuzzles(count, difficulty) {
             { left: '🐰', right: '🥕', options: ['🥕', '🦴', '🥛'], reason: 'Rabbits eat carrots' }
         ];
     } else if (difficulty === 'medium') {
+        // Functional relationships and cause-effect
         pairs = [
-            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🍌', '🍯'], reason: 'Cats drink milk' },
-            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻', '🍌'], reason: 'Dogs love bones' },
-            { left: '🐝', right: '🌻', options: ['🌻', '🍯', '🦴', '⭐'], reason: 'Bees collect nectar from flowers' },
-            { left: '🐻', right: '🍯', options: ['🍯', '🍌', '🌻', '💧'], reason: 'Bears love honey' },
-            { left: '🐒', right: '🍌', options: ['🍌', '🍯', '🥛', '✏️'], reason: 'Monkeys eat bananas' },
-            { left: '☀️', right: '🌞', options: ['🌞', '⭐', '🌙', '💧'], reason: 'Sun shines during the day' },
-            { left: '🌙', right: '⭐', options: ['⭐', '🌞', '💧', '✏️'], reason: 'Stars appear with the moon at night' },
-            { left: '🔥', right: '💧', options: ['💧', '🔥', '⭐', '🖌️'], reason: 'Water puts out fire' },
-            { left: '📚', right: '✏️', options: ['✏️', '🖌️', '💧', '🥛'], reason: 'We write in books with pencils' },
-            { left: '🎨', right: '🖌️', options: ['🖌️', '✏️', '🌻', '💧'], reason: 'We paint art with brushes' }
-        ];
-    } else {
-        pairs = [
-            { left: '🌧️', right: '☂️', options: ['☂️', '🧈', '🔋', '🤒'], reason: 'We use umbrellas when it rains' },
-            { left: '🍞', right: '🧈', options: ['🧈', '🍞', '🥛', '☂️'], reason: 'We spread butter on bread' },
+            { left: '🌧️', right: '☂️', options: ['☂️', '🧈', '🔋', '✏️'], reason: 'We use umbrellas when it rains' },
             { left: '🔑', right: '🔒', options: ['🔒', '🔑', '🎶', '👓'], reason: 'Keys open locks' },
-            { left: '🎵', right: '🎶', options: ['🎶', '🎵', '🔋', '📖'], reason: 'Music notes create melodies' },
             { left: '📱', right: '🔋', options: ['🔋', '📱', '🛬', '👓'], reason: 'Phones need batteries to work' },
+            { left: '🔥', right: '💧', options: ['💧', '🔥', '⭐', '🖌️'], reason: 'Water puts out fire' },
+            { left: '📚', right: '✏️', options: ['✏️', '🖌️', '💧', '🔋'], reason: 'We write in books with pencils' },
+            { left: '🎨', right: '🖌️', options: ['🖌️', '✏️', '🌻', '💧'], reason: 'We paint art with brushes' },
             { left: '✈️', right: '🛬', options: ['🛬', '✈️', '🔋', '🥅'], reason: 'Airplanes land at airports' },
             { left: '🌡️', right: '🤒', options: ['🤒', '👓', '☂️', '🔒'], reason: 'Thermometers check if you have a fever' },
-            { left: '🔍', right: '👓', options: ['👓', '🔍', '🤒', '🥅'], reason: 'Both magnifying glass and glasses help us see' },
             { left: '⚽', right: '🥅', options: ['🥅', '⚽', '📖', '🛬'], reason: 'Soccer balls go into goals' },
-            { left: '🎓', right: '📖', options: ['📖', '🎓', '🍞', '🥛'], reason: 'Graduation caps represent learning from books' },
-            { left: '🌾', right: '🍞', options: ['🍞', '🌾', '🥛', '☂️'], reason: 'Bread is made from wheat' },
-            { left: '🐄', right: '🥛', options: ['🥛', '🐄', '🧈', '🍞'], reason: 'Cows give us milk' }
+            { left: '🌾', right: '🍞', options: ['🍞', '🌾', '🥛', '☂️'], reason: 'Bread is made from wheat' }
+        ];
+    } else {
+        // Abstract relationships, opposites, and analogies
+        pairs = [
+            { left: '☀️', right: '🌙', options: ['🌙', '⭐', '🌞', '💧'], reason: 'Opposites: sun (day) and moon (night)' },
+            { left: '🔥', right: '❄️', options: ['❄️', '🔥', '💧', '⭐'], reason: 'Opposites: hot fire and cold ice' },
+            { left: '😊', right: '😢', options: ['😢', '😊', '😡', '🤔'], reason: 'Opposites: happy and sad emotions' },
+            { left: '⬆️', right: '⬇️', options: ['⬇️', '⬆️', '➡️', '⬅️'], reason: 'Opposites: up and down directions' },
+            { left: '🔊', right: '🔇', options: ['🔇', '🔊', '🔋', '💡'], reason: 'Opposites: loud and silent' },
+            { left: '💡', right: '🌑', options: ['🌑', '💡', '⭐', '🔥'], reason: 'Opposites: light bulb (bright) and darkness' },
+            { left: '🏃', right: '🧘', options: ['🧘', '🏃', '🛌', '🚶'], reason: 'Opposites: running (active) and meditating (still)' },
+            { left: '📈', right: '📉', options: ['📉', '📈', '📊', '💹'], reason: 'Opposites: chart going up vs going down' },
+            { left: '🔓', right: '🔒', options: ['🔒', '🔓', '🔑', '🚪'], reason: 'Opposites: unlocked and locked' },
+            { left: '🌱', right: '🍂', options: ['🍂', '🌱', '🌳', '🌸'], reason: 'Life cycle: young sprout vs fallen leaf' },
+            { left: '🐣', right: '🐔', options: ['🐔', '🐣', '🥚', '🐓'], reason: 'Growth: baby chick becomes adult chicken' },
+            { left: '🌅', right: '🌇', options: ['🌇', '🌅', '🌃', '🌆'], reason: 'Time: sunrise (beginning) vs sunset (ending)' }
         ];
     }
 
