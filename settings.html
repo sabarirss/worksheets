@@ -477,26 +477,46 @@
         });
 
         async function loadUserProfile() {
-            const user = getCurrentUser && getCurrentUser();
-            if (!user) {
-                showError('Failed to load user data');
-                return;
+            try {
+                const firebaseUser = firebase.auth().currentUser;
+                if (!firebaseUser) {
+                    showError('Not authenticated');
+                    return;
+                }
+
+                // Fetch user data from Firestore by email
+                const userQuery = await firebase.firestore().collection('users')
+                    .where('email', '==', firebaseUser.email.toLowerCase())
+                    .limit(1)
+                    .get();
+
+                if (userQuery.empty) {
+                    showError('User profile not found');
+                    return;
+                }
+
+                const userDoc = userQuery.docs[0];
+                const userData = userDoc.data();
+                userData.uid = firebaseUser.uid; // Add UID for updates
+
+                currentUser = userData;
+
+                // Populate fields
+                document.getElementById('username').value = userData.username || '';
+                document.getElementById('fullname').value = userData.fullName || '';
+                document.getElementById('email').value = userData.email || '';
+                document.getElementById('role').value = userData.role || 'student';
+
+                // Display current age
+                const ageDisplay = userData.age ? `${userData.age} years old` : 'Not set';
+                document.getElementById('current-age-display').value = ageDisplay;
+
+                // Display modules
+                displayModules(userData.modules || {});
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                showError('Failed to load user data: ' + error.message);
             }
-
-            currentUser = user;
-
-            // Populate fields
-            document.getElementById('username').value = user.username || '';
-            document.getElementById('fullname').value = user.fullName || '';
-            document.getElementById('email').value = user.email || '';
-            document.getElementById('role').value = user.role || 'student';
-
-            // Display current age
-            const ageDisplay = user.age ? `${user.age} years old` : 'Not set';
-            document.getElementById('current-age-display').value = ageDisplay;
-
-            // Display modules
-            displayModules(user.modules || {});
         }
 
         function displayModules(modules) {
@@ -543,10 +563,8 @@
                     fullName: fullName
                 });
 
-                // Update cache
-                if (currentUserCache) {
-                    currentUserCache.fullName = fullName;
-                }
+                // Update local cache
+                currentUser.fullName = fullName;
 
                 showSuccess('Profile updated successfully!');
             } catch (error) {
@@ -607,10 +625,8 @@
                     age: parseInt(newAge)
                 });
 
-                // Update cache
-                if (currentUserCache) {
-                    currentUserCache.age = parseInt(newAge);
-                }
+                // Update local cache
+                currentUser.age = parseInt(newAge);
 
                 closeChangeAgeModal();
                 showSuccess('Age updated successfully! Page will reload to apply new content filters.');
@@ -742,10 +758,8 @@
 
                 await userDoc.update(updates);
 
-                // Update cache
-                if (currentUserCache) {
-                    currentUserCache.modules = { ...currentUserCache.modules, ...moduleChanges };
-                }
+                // Update local cache
+                currentUser.modules = { ...currentUser.modules, ...moduleChanges };
 
                 closeModuleManagementModal();
                 showSuccess('Module access updated successfully! Page will reload to apply changes.');
