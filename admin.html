@@ -502,11 +502,16 @@
             document.getElementById('submit-btn-text').textContent = 'Create User';
             document.getElementById('user-form').reset();
 
-            // Set default checked modules
+            // Make password required when creating new user
+            const passwordField = document.getElementById('user-password');
+            passwordField.setAttribute('required', 'required');
+            passwordField.placeholder = '';
+
+            // Set default checked modules (only Math)
             document.getElementById('module-math').checked = true;
-            document.getElementById('module-english').checked = true;
-            document.getElementById('module-aptitude').checked = true;
-            document.getElementById('module-stories').checked = true;
+            document.getElementById('module-english').checked = false;
+            document.getElementById('module-aptitude').checked = false;
+            document.getElementById('module-stories').checked = false;
             document.getElementById('module-emotional').checked = false;
             document.getElementById('module-german').checked = false;
 
@@ -523,8 +528,13 @@
             document.getElementById('user-username').value = user.username;
             document.getElementById('user-username').disabled = true;
             document.getElementById('user-fullname').value = user.fullName;
-            document.getElementById('user-password').value = ''; // Clear password field (not stored in Firestore)
-            document.getElementById('user-password').placeholder = 'Leave blank to keep current password';
+
+            // Make password optional when editing
+            const passwordField = document.getElementById('user-password');
+            passwordField.value = ''; // Clear password field (not stored in Firestore)
+            passwordField.placeholder = 'Leave blank to keep current password';
+            passwordField.removeAttribute('required'); // Not required when editing
+
             document.getElementById('user-role').value = user.role;
 
             // Set module checkboxes
