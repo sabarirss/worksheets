@@ -148,6 +148,86 @@ Whenever you see a giraffe's long neck, remember: it came from never giving up, 
                 moral: "When we keep trying and never give up, we can achieve amazing things.",
                 ageGroup: "4-6",
                 structure: "Pourquoi/Origin"
+            },
+
+            // Story 6: Cumulative/Chain Structure
+            {
+                title: "The Helpful Beaver",
+                image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400",
+                story: `Benny the beaver found a shiny red apple floating in the stream. "What a perfect apple!" he said.
+
+Just then, he heard crying. A little mouse sat by the water, tears rolling down her whiskers.
+
+"What's wrong?" Benny asked kindly.
+
+"I'm so hungry, but I'm too small to find food," Mouse sniffled.
+
+Benny looked at his perfect apple. Then he smiled. "Here, you can have this!"
+
+Mouse's eyes lit up. "Thank you! Now I can help too!" She shared half the apple with a hungry caterpillar who was too tired to find leaves.
+
+The caterpillar ate and felt strong again. "Thank you! Now I can help!" He crawled to a bird's nest and showed Baby Bird where the juiciest berries grew.
+
+Baby Bird ate the berries and felt energized. "Thank you! Now I can help!" She flew up high and spotted a rabbit caught in a thorny bush. Baby Bird called for help.
+
+Rabbit was freed and said, "Thank you! Now I can help!" She hopped to a fox who had a thorn in his paw and helped pull it out.
+
+Fox felt better and said, "Thank you! Now I can help!" He protected a beaver dam from falling logs during a storm.
+
+That beaver was Benny! When Fox explained how he was helping because someone had helped Mouse, who helped Caterpillar, who helped Bird, who helped Rabbit, who helped Fox, Benny was amazed.
+
+"I just shared one apple," Benny said, "and it created a whole chain of kindness!"
+
+"That's how kindness works," Fox smiled. "One good deed grows into many."
+
+From that day on, Benny understood that even small acts of kindness can travel far, touching more hearts than we ever imagine.`,
+                moral: "Small acts of kindness create ripples that spread farther than we can see.",
+                ageGroup: "4-6",
+                structure: "Cumulative/Chain"
+            },
+
+            // Story 7: Character vs. Character Structure
+            {
+                title: "The Race Between Hare and Tortoise (Reimagined)",
+                image: "https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?w=400",
+                story: `Hare and Tortoise lived in the same meadow but couldn't have been more different. Hare was fast and always in a hurry. Tortoise was slow and took his time with everything.
+
+One day, Hare laughed at Tortoise. "You're so SLOW! Watch how fast I can run!" Hare zoomed around the meadow three times while Tortoise took one step.
+
+Tortoise didn't get angry. Instead, he said calmly, "Speed isn't everything, friend."
+
+"Oh yeah?" Hare challenged. "Let's race! First one to the big oak tree wins!"
+
+"Alright," Tortoise agreed. "Let's race tomorrow at sunrise."
+
+All the meadow animals came to watch. "Ready, set, GO!" shouted the wise owl.
+
+Hare shot forward like lightning, leaving Tortoise far behind. "This is too easy!" Hare laughed. He was so far ahead that he decided to take a nap under a shady tree.
+
+Meanwhile, Tortoise kept going. Step by step, slow but steady. He didn't stop to rest. He didn't get distracted. He just kept moving forward.
+
+When Hare woke up, the sun was setting! He realized he'd slept too long. He raced toward the oak tree as fast as his legs could carry him.
+
+But when he got there, Tortoise was already sitting under the tree, eating a leaf sandwich.
+
+"But... how?" Hare panted, completely shocked.
+
+Tortoise smiled kindly. "While you were sleeping, I kept walking. I didn't need to be the fastest. I just needed to keep going."
+
+Hare felt embarrassed. "I'm sorry I made fun of you. You taught me something important today."
+
+"What's that?" Tortoise asked.
+
+"That being fast doesn't matter if you don't finish what you start. And maybe... we're different, but that doesn't make one of us better than the other."
+
+Tortoise nodded. "Exactly. The meadow needs your speed and my steadiness. Want to be friends?"
+
+Hare smiled, realizing that someone different from you can teach you important lessons. "I'd like that very much."
+
+From that day on, Hare and Tortoise were best friends. When speed was needed, Hare helped. When patience was needed, Tortoise showed the way. Together, they were stronger than either was alone.`,
+                moral: "Different strengths are valuable, and steady persistence often wins over quick starts without follow-through.",
+                ageGroup: "4-6",
+                structure: "Character vs. Character"
             }
         ],
 
@@ -196,7 +276,59 @@ Emma flew home, and though she had no magic feather to show, she had something b
                 structure: "Quest/Adventure"
             },
 
-            // Story 2: Perseverance Structure
+            // Story 2: Character vs. Society/Prejudice Structure
+            {
+                title: "The Wolf Who Wanted Friends",
+                image: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400",
+                story: `Luna was a young wolf who had just moved to a new forest. She was excited to make friends with the other animals.
+
+"Hello!" Luna called cheerfully to a group of rabbits. "Want to play?"
+
+The rabbits looked terrified and hopped away quickly. Luna felt confused and sad.
+
+She tried again with the deer. "I'm Luna! Would you like to—"
+
+"Stay away!" the deer interrupted, running off. "Everyone knows wolves are dangerous!"
+
+Luna sat alone by the stream, tears in her eyes. It didn't matter how friendly she was or how much she smiled. The other animals only saw "wolf" and assumed she was mean and scary.
+
+For days, Luna stayed away from everyone. She ate alone, played alone, and watched other animals having fun from a distance.
+
+Then one afternoon, Luna heard desperate chirping. A baby bird had fallen from its nest, and a snake was slithering toward it!
+
+Luna didn't think - she just ran. She carefully picked up the baby bird in her gentle mouth and placed it back in the nest, then scared the snake away.
+
+Mama Bird came back and gasped when she saw Luna near the nest. "Please don't hurt my baby!" she cried.
+
+"I would never!" Luna said, surprised. "I saved your baby from a snake."
+
+Baby Bird chirped, "The nice wolf helped me, Mama!"
+
+Mama Bird looked at Luna with new eyes. "You... saved my baby? But I thought wolves were dangerous."
+
+"Some might be," Luna said softly. "But I'm not. I just wanted friends."
+
+Word spread through the forest. The animals had a meeting that night.
+
+Old Owl spoke: "We judged Luna before knowing her. We saw 'wolf' and decided she must be bad. But she saved a life today. Perhaps we were wrong."
+
+Slowly, one by one, animals began apologizing to Luna. The rabbits shared their carrots. The deer invited her to their meadow. Even the mice, who were smallest and most afraid, brought her flowers.
+
+"We're sorry," they all said. "We should have given you a chance."
+
+Luna's eyes filled with happy tears. "Thank you for seeing me - the real me - not just what you expected."
+
+From that day on, Luna had many friends. And the forest animals learned an important lesson: you can't judge someone based on what they are or where they come from. You have to look at who they are in their heart.
+
+When new animals moved to the forest, Luna always remembered how it felt to be judged unfairly. She made sure to welcome them and give them a chance, no matter what type of animal they were.
+
+Because Luna knew that being different isn't bad - it's just different. And sometimes, the friends who seem most unlikely at first turn out to be the best friends of all.`,
+                moral: "Don't judge others by their appearance or reputation - give everyone a chance to show who they really are.",
+                ageGroup: "7-9",
+                structure: "Character vs. Society/Prejudice"
+            },
+
+            // Story 3: Perseverance Structure
             {
                 title: "Diego's Dam",
                 image: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=400",
@@ -242,7 +374,73 @@ Diego smiled proudly. "The dam that stands isn't the one that never falls. It's 
         ],
 
         hard: [
-            // Story 1: Character vs. Nature + Leadership
+            // Story 1: Self-Discovery/Identity Structure
+            {
+                title: "The Chameleon Who Forgot Her Colors",
+                image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=400",
+                story: `Cami the chameleon had a problem. She could change colors to match anything - green for leaves, brown for bark, gray for stones. She was so good at blending in that sometimes she forgot what color she actually was.
+
+"Who am I when I'm not being something else?" Cami wondered one day.
+
+She decided to find out. First, she tried asking other chameleons, but they all just changed colors to match their surroundings and couldn't understand her question.
+
+"Why does it matter?" they asked. "Blending in keeps us safe."
+
+"But I want to know my real self," Cami insisted.
+
+She went to the wise old gecko who lived by the pond. "Gecko, how do I find my true colors?"
+
+Gecko blinked slowly. "Interesting question. Tell me, Cami - when do you feel most like yourself?"
+
+Cami thought hard. "I'm not sure. I'm always busy being something else - green in the trees, brown on the ground. I change so much that I don't know what stays the same."
+
+"Then perhaps," Gecko suggested, "you need to stop changing for a while and just... be."
+
+But that was terrifying! Cami had spent her whole life blending in. What if her real self wasn't good enough? What if other animals didn't like her true colors?
+
+Still, Cami decided to try. She climbed to the top of a rock and made a promise: "For one whole day, I won't change my colors at all. Whatever color I am right now, that's who I'll be."
+
+She looked down at herself. Without thinking about blending in, her natural colors emerged - a beautiful pattern of turquoise, coral, and soft gold that she'd never really noticed before.
+
+"These are... my colors?" Cami whispered, amazed.
+
+As the day went on, staying one color felt strange at first. Birds could see her easily. Other animals noticed her. Cami felt vulnerable and exposed.
+
+But something unexpected happened. A butterfly landed on her head. "What beautiful colors!" Butterfly exclaimed. "I've never seen a chameleon show their true colors before!"
+
+A young frog hopped over. "You're so pretty! I always thought chameleons were just green or brown."
+
+More animals gathered, curious and admiring. They'd never really seen Cami before - they'd only seen her disguises.
+
+"I've lived here for years," said an old parrot, "and this is the first time I truly see you. Welcome, Cami. It's nice to finally meet the real you."
+
+Cami felt something shift inside her. She'd been so focused on fitting in and being what others expected that she'd never shown anyone who she really was.
+
+That evening, Cami returned to the gecko. "I learned something today," she said. "I can still blend in when I need to stay safe. But I also learned that my true colors are worth showing. They're beautiful, and they're mine."
+
+Gecko nodded wisely. "Many creatures spend their whole lives hiding who they really are because they're afraid. But true connection only happens when we're brave enough to be authentic."
+
+"What does authentic mean?" Cami asked.
+
+"It means being your real self, even when it's scary. It means knowing that you can adapt to different situations - you can still blend in when you need to - but you don't lose yourself in the process."
+
+From that day forward, Cami made a choice. When she needed camouflage for safety, she'd use it. But when she was among friends or in safe spaces, she showed her true colors - literally and figuratively.
+
+Other young chameleons noticed this and started asking questions. "Cami, how do you know when to blend in and when to stand out?"
+
+Cami thought carefully. "Blending in is a tool, not an identity. Use it when you need to, but never forget your true colors underneath. Your real self is always there, waiting for safe moments to shine."
+
+Years later, Cami became known as the chameleon who taught others about authentic living. She showed that you could be adaptable AND true to yourself - that fitting in didn't mean losing who you are.
+
+The forest changed because of Cami's courage. More animals began showing their true selves, and the community became richer for it. They discovered that differences weren't something to hide - they were something to celebrate.
+
+And whenever a young animal struggled with identity, trying to be what everyone else wanted them to be, someone would tell them Cami's story - about the chameleon who was brave enough to stop blending in and start being herself.`,
+                moral: "We can adapt to different situations while staying true to who we are - our real self is always valuable.",
+                ageGroup: "10-12",
+                structure: "Self-Discovery/Identity"
+            },
+
+            // Story 2: Character vs. Nature + Leadership
             {
                 title: "The Year the River Changed",
                 image: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=400",
@@ -328,7 +526,53 @@ As summer went on, Sam made new seeds of their own. "One day," Sam whispered to 
                 structure: "Transformation/Metamorphosis"
             },
 
-            // Story 2: Cyclical/Seasonal Structure
+            // Story 2: Fable Structure
+            {
+                title: "The Raindrop's Journey",
+                image: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=400",
+                story: `High up in a fluffy cloud, a tiny raindrop named Ripple lived with thousands of other raindrops.
+
+"I'm scared," Ripple said to his friend Splash. "Today we have to fall from the sky. What if I get hurt?"
+
+"It's just part of being a raindrop," Splash said. "We fall down, then someday we rise back up. That's how it works."
+
+"But I like it up here in the cloud where it's safe!" Ripple insisted.
+
+Just then, the cloud grew heavy, and raindrops began to fall. Splash let go first, laughing as she fell. "Come on, Ripple! It's an adventure!"
+
+Ripple held on tight, but finally, he couldn't hold on anymore. Down, down, down he fell, scared and spinning.
+
+But something wonderful happened. As Ripple fell, he saw things he'd never seen before - birds flying, mountains standing tall, forests spreading green below.
+
+"This is amazing!" Ripple shouted, no longer scared.
+
+SPLASH! Ripple landed in a mountain stream. The cold, rushing water carried him along with other raindrops.
+
+"Where are we going?" Ripple asked a raindrop who'd been in the stream longer.
+
+"To the river, then to the ocean, then back to the sky!" the older drop replied. "We're all on a journey, little one."
+
+As Ripple flowed down the stream, he watered flowers along the bank. The flowers said, "Thank you!" and bloomed more brightly.
+
+He joined a river and gave water to thirsty animals. A deer drinking at the riverbank said, "Thank you, little raindrop!"
+
+Finally, Ripple reached the ocean - vast, blue, and endless. He met Splash again! "You made it!" Splash cheered.
+
+Days passed. The sun shone warm on the ocean, and Ripple felt himself becoming lighter, rising up as invisible vapor.
+
+Up, up, up he went, back into the sky, into a new cloud, ready to fall again someday.
+
+"Now I understand," Ripple said to Splash, who'd also returned to the sky. "I was scared to fall because I didn't know where I was going. But falling wasn't the end - it was just part of the journey. Every part mattered."
+
+"Exactly," Splash smiled. "And along the way, we helped flowers grow, animals drink, and rivers flow. Being scared of change meant I might have missed out on making a difference."
+
+From that day on, whenever it was time to fall from the clouds, Ripple wasn't scared anymore. He knew that every journey - even scary ones - leads somewhere important. And sometimes, letting go of where you are is the only way to become what you're meant to be.`,
+                moral: "Change can be scary, but it's part of life's journey - and each stage has its own purpose and beauty.",
+                ageGroup: "4-6",
+                structure: "Fable"
+            },
+
+            // Story 3: Cyclical/Seasonal Structure
             {
                 title: "The Tree Through Four Seasons",
                 image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400",
@@ -359,7 +603,59 @@ Oak realized that through all four seasons - growing, giving shade, showing beau
             }
         ],
         medium: [
-            // Story 1: Cause-and-Effect Chain Structure
+            // Story 1: Comparison/Contrast Structure
+            {
+                title: "The Mountain and the Ocean",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400",
+                story: `Far away, where land met sky and water met shore, lived two ancient beings: Mountain and Ocean.
+
+Mountain stood tall and strong, never moving, watching over the land for thousands of years. "I am permanent," Mountain said proudly. "I provide stability. Animals build homes on me. Trees grow from my soil. I am solid and reliable."
+
+Ocean was always changing - waves rolling, tides flowing, currents swirling. "I am movement," Ocean said joyfully. "I adapt to everything. When storms come, I absorb them. When the moon pulls, I respond. I am flexible and free."
+
+For centuries, they lived side by side but never really understood each other.
+
+One day, a terrible storm came. Rain pounded Mountain, and wind howled through Ocean.
+
+Mountain stood firm and unchanging. "This is what I do best," Mountain thought. "I don't bend or break. I endure."
+
+But as days of rain continued, Mountain began to erode. Rocks tumbled down, and soil washed away. "I'm... changing," Mountain realized with surprise. "Even I am not permanent."
+
+Meanwhile, Ocean raged and churned. Huge waves crashed against the shore. "This is what I do best," Ocean thought. "I flow with the storm's energy."
+
+But as the storm continued, Ocean grew exhausted. The constant movement was wearing Ocean down. "I need... rest," Ocean realized. "Even I cannot move forever."
+
+When the storm finally passed, both Mountain and Ocean were changed.
+
+Mountain had new valleys carved by water, creating beautiful new landscapes. "The change made me more beautiful," Mountain said in wonder. "I thought permanence was strength, but sometimes change creates new possibilities."
+
+Ocean found moments of stillness, with calm pools reflecting the sky like mirrors. "The stillness gives me peace," Ocean said. "I thought movement was freedom, but sometimes being still lets me see myself clearly."
+
+They finally spoke to each other with new understanding.
+
+"I judged you for never changing," Ocean admitted. "I thought you were stubborn and rigid."
+
+"And I judged you for always changing," Mountain confessed. "I thought you were unstable and unreliable."
+
+"But now I see," they said together, "that we both need what the other has."
+
+From that day forward, Mountain learned to embrace slow changes - seasons shifting, rocks weathering, new life growing. And Ocean learned to value moments of calm - quiet tides, peaceful mornings, still reflections.
+
+Birds who flew between them carried messages back and forth. "Mountain is learning to flow like you!" they told Ocean. "Ocean is learning to be steady like you!" they told Mountain.
+
+Young trees growing on Mountain's slopes would ask, "Should we be strong and unchanging like Mountain, or flexible and flowing like Ocean?"
+
+And Mountain and Ocean would answer together: "Be both. Have deep roots that keep you grounded, but let your branches dance in the wind. The strongest beings know when to stand firm and when to bend."
+
+Travelers who visited the place where Mountain and Ocean met would feel something special - a perfect balance between earth and water, between staying and going, between who we've always been and who we're becoming.
+
+And they'd understand that life isn't about choosing between being solid like a mountain or flowing like an ocean. The wisest path is learning when to be each, and understanding that we contain multitudes - we can be many things at once, and that's not contradictory, it's complete.`,
+                moral: "Strength comes from balance - being solid when needed, flexible when necessary, and understanding both have value.",
+                ageGroup: "7-9",
+                structure: "Comparison/Contrast"
+            },
+
+            // Story 2: Cause-and-Effect Chain Structure
             {
                 title: "The Day the Wind Stopped",
                 image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400",
@@ -518,7 +814,59 @@ And she did. Even though Maya was far away at college, she and Tommy talked ofte
             }
         ],
         medium: [
-            // Story 1: Parallel/Multiple Perspective Structure
+            // Story 1: Rags-to-Riches/Transformation Structure
+            {
+                title: "The Gift Nobody Wanted",
+                image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400",
+                story: `Emma's family didn't have much money. While her classmates got new toys and the latest gadgets, Emma wore hand-me-down clothes and brought packed lunches in reused containers.
+
+The hardest time was during the winter gift exchange at school. Everyone brought beautifully wrapped presents worth at least twenty dollars. Emma's family could barely afford five.
+
+"I don't want to participate," Emma told her mom, tears in her eyes. "My gift will be the worst one."
+
+Mom hugged her gently. "The value of a gift isn't measured in dollars, sweetie. It's measured in thought and heart. What's something you could give that comes from you?"
+
+Emma thought for days. She couldn't afford anything fancy. Then she remembered - she loved to draw, and her art teacher said she had real talent.
+
+Emma spent two weeks creating a custom portrait for whoever would receive her gift. She drew a beautiful scene of a child's bedroom window, looking out at stars, with the child reading a book by lamplight. Under it, she carefully wrote: "May your dreams be as endless as the stars."
+
+On gift exchange day, Emma wrapped her drawing in simple brown paper with a ribbon she'd saved from last year. When it sat next to all the shiny, perfect presents, it looked plain and small.
+
+The gifts were randomly distributed. A girl named Sophia got Emma's present. Emma's heart sank - Sophia was the most popular girl in class, always wearing designer clothes and carrying expensive things.
+
+Sophia tore open the wrapping paper and stopped. She stared at the drawing for a long moment. The classroom went quiet.
+
+"This is..." Sophia's voice cracked. "This is the most beautiful thing I've ever received."
+
+Emma looked up, shocked. "Really?"
+
+Tears rolled down Sophia's cheeks. "My mom is sick in the hospital. Every night, I read by my window and wish on stars that she'll get better. This drawing... it's like you somehow knew. It's exactly what I needed."
+
+Sophia walked over and hugged Emma tight. "Thank you. Store-bought gifts are forgotten, but this? I'll keep this forever."
+
+The other kids started looking at Emma's drawing. "You made this yourself?" "It's amazing!" "That's so much better than just buying something!"
+
+Emma's teacher called her aside later. "Emma, you gave from your heart, not your wallet. That's true generosity. Want to know a secret? The gifts that mean the most are never the expensive ones. They're the ones where someone gave their time, their talent, and their thought."
+
+That evening, Emma told her mom everything. "I was embarrassed about not having money for an expensive gift. But my gift meant more because I made it myself."
+
+Mom smiled proudly. "Being wealthy isn't about having money. It's about having the ability to give something meaningful. You're richer than you know, Emma. You have talent, creativity, kindness, and empathy. Those are treasures money can't buy."
+
+The next week, Sophia asked Emma to draw a portrait of her mom. "I want to put it in her hospital room, to remind her someone is thinking of her."
+
+Emma agreed immediately. Soon, other classmates were asking for custom drawings. Emma started a small business, charging just a little bit for each piece, with all profits going to families who couldn't afford things.
+
+Years later, Emma became a famous illustrator. Magazines interviewed her and asked about her success.
+
+"It started," Emma would say, "with a gift exchange when I thought I had nothing valuable to give. I learned that wealth isn't what you have in your pocket - it's what you have in your heart and hands. The most valuable gifts are the ones where you give a piece of yourself."
+
+And Emma kept that original brown-paper-wrapped drawing photograph in her studio - a reminder that sometimes having less money means you learn to give more of yourself, and that's a lesson worth more than any amount of wealth.`,
+                moral: "True wealth comes from giving your heart, time, and talent - not from how much money you spend.",
+                ageGroup: "7-9",
+                structure: "Rags-to-Riches/Transformation"
+            },
+
+            // Story 2: Parallel/Multiple Perspective Structure
             {
                 title: "The Same Day, Different Eyes",
                 image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400",
@@ -646,7 +994,61 @@ Lily hugged her grandmother tight. She'd discovered that the quiet grandma who b
             }
         ],
         medium: [
-            // Story 1: Apprenticeship/Learning Structure
+            // Story 1: Character vs. Supernatural/Magic Structure
+            {
+                title: "The Compass That Always Pointed Home",
+                image: "https://images.unsplash.com/photo-1476900966873-ab8ffb46df6b?w=400",
+                story: `Eleven-year-old Kai found the old compass in his grandmother's attic, buried under dusty books and forgotten memories. It was brass and beautiful, with strange symbols around its edge.
+
+"Can I have this, Grandma?" Kai asked.
+
+Grandma looked at the compass and smiled mysteriously. "That compass is special. It doesn't point north like regular compasses. It always points home."
+
+"That's silly," Kai laughed. "Why would I need a compass to find home? I know where I live!"
+
+"Home isn't always a place," Grandma said softly. "Sometimes home is a feeling. Sometimes it's a person. Sometimes it's where you need to be, not where you think you should go."
+
+Kai didn't understand, but he loved how the compass looked, so he kept it in his pocket.
+
+The next week, Kai went on a school camping trip. He'd never been away from his family overnight before, and as the bus drove further from the city, Kai felt more and more nervous.
+
+That night in the tent, while other kids slept, Kai felt homesick. He pulled out the compass. Instead of spinning wildly, the needle pointed steadily in one direction - not toward his house, but toward a quiet spot by the lake.
+
+"That's weird," Kai whispered. But curiosity overcame fear, so he carefully left the tent and followed where the compass led.
+
+At the lake's edge sat Mr. Chen, their teacher, looking at the stars with tears on his cheeks.
+
+"Mr. Chen? Are you okay?" Kai asked.
+
+Mr. Chen looked surprised but smiled gently. "I'm alright, Kai. Just... my daughter lives far away now, and I miss her. Sometimes at night, I feel a little homesick too."
+
+"You get homesick?" Kai was shocked. "But you're a grown-up!"
+
+"Growing up doesn't mean you stop missing the people you love," Mr. Chen said. "It just means you learn to carry that missing feeling and keep going."
+
+They sat together, looking at stars, and Kai felt less alone. The compass in his pocket grew warm, and when he looked at it again, the needle now pointed back toward his tent.
+
+Over the next few days, the compass kept pointing in unexpected directions. It led Kai to a classmate sitting alone who needed a friend. It led him to a bird's nest that had fallen, which he could help back into a tree. It led him to a clearing where he found wild berries to share with his group.
+
+Each time Kai followed the compass, he found something or someone that needed kindness or help. And each time, afterward, he felt more at home in the forest, less scared, more brave.
+
+On the last day of camp, Kai's best friend Marco said, "I thought you'd hate camping, but you seem so happy here."
+
+Kai looked at the compass. "I learned something. Home isn't just my house. Home is anywhere I'm being my best self - anywhere I'm helping others, being brave, or connecting with people."
+
+When Kai returned and gave the compass back to Grandma, she asked, "Did you figure out its magic?"
+
+"It doesn't really point to home," Kai said slowly. "It points to where I need to be to become the person I want to be. It points to moments where I can make a difference."
+
+Grandma's eyes twinkled. "Ah, so you understand. Home isn't always where we start. Sometimes home is who we become along the journey. The compass didn't give you magic - it helped you see the magic was in you all along."
+
+Kai kept the compass, and whenever he felt lost or unsure - even in his own room - he'd hold it and remember: home isn't just a place on a map. Home is anywhere you're brave enough to be kind, curious enough to help, and wise enough to know that sometimes the best adventures lead you exactly where you need to be.`,
+                moral: "Home isn't just where we live - it's anywhere we're brave, kind, and true to ourselves.",
+                ageGroup: "7-9",
+                structure: "Character vs. Supernatural/Magic"
+            },
+
+            // Story 2: Apprenticeship/Learning Structure
             {
                 title: "The Map Maker's Student",
                 image: "https://images.unsplash.com/photo-1569163139394-de4798aa62b6?w=400",
@@ -790,7 +1192,63 @@ Mom hugged him tight. "Now you've learned the most important lesson of all."`,
             }
         ],
         medium: [
-            // Story 1: Reversal/Ironic Structure
+            // Story 1: Humorous/Absurdist Structure
+            {
+                title: "The Day Everything Went Backwards",
+                image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400",
+                story: `Something very strange happened at Riverside Elementary on Tuesday morning. At exactly 9:00 AM, time started going backwards.
+
+Not for everyone - just for ten-year-old Mira's class.
+
+It started during the spelling test. Mrs. Rodriguez wrote "ELEPHANT" on the board. But when Mira looked at her paper, she saw "TNAHPELE."
+
+"Mrs. Rodriguez," Mira raised her hand. "Something's wrong with the—"
+
+But the words came out of her mouth backwards: "—eht htiw gnorw s'gnihtemos, zeugnirdoR .srM"
+
+Everyone in class stopped and stared. They were all speaking backwards!
+
+Mrs. Rodriguez tried to fix it, but everything she did went in reverse. When she wrote forward, the letters appeared backward. When she walked toward the front, she ended up at the back.
+
+The principal came on the PA system: "!namron kcab nruter lliw sgniht litnu moor ruoy ni yatS" (Stay in your room until things return back normal!)
+
+At first, everyone panicked. But then Mira noticed something interesting. When she thought backwards, things worked normally.
+
+"!em wollof - aedi na evah I" (I have an idea - follow me!) she said to her friend Jake.
+
+Mira walked backward through the door (which made her go forward). She climbed up the stairs by going down them. She opened her locker by closing it.
+
+"This is so weird!" Jake said - or rather, "!driew os si sihT!"
+
+Then Mira had a brilliant idea. "What if we do our hardest assignment - the math problems we've been avoiding - while everything's backwards? Maybe it'll be easier!"
+
+They tried their most difficult multiplication problem, but thinking about it backwards. Suddenly, the answer became clear! The complicated problem that had stumped them for days was simple when approached from a different direction.
+
+"It's like," Mira said slowly (or quickly, depending on how you looked at it), "sometimes when we can't solve a problem going forward, we need to think about it backwards!"
+
+Word spread through the classroom. Students started working on assignments they'd found impossible - but approaching them from the end back to the beginning. The girl who couldn't write a story found it easy when she started with the ending. The boy who struggled with reading comprehension understood everything when he read the last sentence first.
+
+At exactly 10:00 AM, everything snapped back to normal.
+
+"What just happened?" Mrs. Rodriguez asked, completely confused.
+
+The students looked at each other and grinned. "We learned something awesome!" Mira exclaimed. "When we're stuck on a problem, sometimes we need to think backwards - start at the end and work our way to the beginning, or look at things from a completely different direction!"
+
+Mrs. Rodriguez was skeptical until she looked at everyone's work. The students had solved problems they'd struggled with for weeks!
+
+"I don't understand how," Mrs. Rodriguez admitted, "but you've all just discovered an important learning strategy. Sometimes the best way forward is to think backwards."
+
+From that day on, whenever Mira got stuck on homework, she'd remember the backwards day. She'd try approaching problems from the end, or from unusual angles, or by doing everything in reverse order.
+
+Her grades improved, but more importantly, she learned that there's no one "right" way to think. Sometimes being a little backwards is exactly what you need to move forward.
+
+And whenever she told people about the day time went backwards, they'd say, "That's impossible!" And Mira would smile and reply, "The impossible just means you haven't thought about it backwards yet."`,
+                moral: "When you're stuck, try thinking about problems from a different direction - sometimes backwards thinking leads to forward progress.",
+                ageGroup: "7-9",
+                structure: "Humorous/Absurdist"
+            },
+
+            // Story 2: Reversal/Ironic Structure
             {
                 title: "The Student Who Taught the Teacher",
                 image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400",
@@ -903,7 +1361,63 @@ And the moon stayed right there, keeping watch, just as it had for thousands of 
                 structure: "Comfort/Reassurance"
             },
 
-            // Story 2: Dream Journey Structure
+            // Story 2: Fractured/Retelling Structure
+            {
+                title: "The Night Sky's Lullaby",
+                image: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400",
+                story: `High above the world, the Night Sky was preparing for bedtime. Yes, even the sky needs to sleep!
+
+"Time for bed," Moon said gently to all the stars.
+
+But the stars weren't ready. "We're not tired!" they twinkled brightly. "We want to stay up and shine!"
+
+Moon smiled knowingly. "I understand. But even stars need rest so they can shine brightly tomorrow night. Let me sing you a lullaby."
+
+The stars giggled. "The Moon singing? That's silly!"
+
+But Moon began to hum, a soft melody that sounded like distant waves and gentle wind. One by one, the stars began to quiet down, listening.
+
+"Twinkle, twinkle, little star," Moon sang, "how I wonder what you are..."
+
+"Hey!" said a young star. "That's a song about US!"
+
+"Yes," Moon said softly. "Every lullaby is about someone special. This one reminds you that you're wonderful and unique, and that someone is always watching over you with love."
+
+The stars felt warm and sleepy. Their twinkling grew softer and slower.
+
+"Up above the world so high, like a diamond in the sky..."
+
+One by one, the stars began to close their glowing eyes. Their light dimmed to a peaceful, gentle glow.
+
+Down below on Earth, a little girl named Lily was looking up at the sky. She'd been having trouble sleeping, but watching the stars grow dim and peaceful made her feel calm too.
+
+"Mom," Lily whispered. "Look! The stars are going to sleep."
+
+Her mom looked up. "You're right. Even the stars need rest. And if the stars can sleep peacefully, so can you."
+
+Lily closed her eyes, imagining she was a little star being sung to sleep by the gentle Moon.
+
+Back in the sky, Moon finished the lullaby. All the stars were now sleeping soundly, their light soft and restful.
+
+"Good night, little stars," Moon whispered. "Rest well. Tomorrow night, you'll shine even brighter."
+
+And Moon stayed awake through the night, keeping watch over the sleeping stars, just like parents watch over their sleeping children.
+
+When morning came and the stars woke up, they were full of energy and ready to shine brightly again.
+
+"Thank you for the lullaby, Moon," they said. "We had the most wonderful dreams!"
+
+"That's the magic of rest," Moon said gently. "When we sleep peacefully, we wake up ready for new adventures."
+
+That night, when Lily went to bed, she looked up at the stars and whispered, "Good night, stars. Sleep well like you did last night."
+
+And somehow, knowing that even the stars needed sleep and lullabies made Lily feel less alone. We all need rest, from the tiniest baby to the biggest star in the sky. And there's always someone watching over us with love while we sleep.`,
+                moral: "Everyone needs rest, even the brightest stars - and someone is always watching over you with love.",
+                ageGroup: "4-6",
+                structure: "Fractured/Retelling"
+            },
+
+            // Story 3: Dream Journey Structure
             {
                 title: "Where Do Dreams Come From?",
                 image: "https://images.unsplash.com/photo-1502139214982-d0ad755818d8?w=400",
@@ -945,7 +1459,63 @@ And Sophie, already drifting through the gates of her Dream Garden, smiled in he
                 structure: "Dream Journey"
             }
         ],
-        medium: [],
+        medium: [
+            // Story 1: Nested/Frame Story Structure
+            {
+                title: "The Storyteller's Secret",
+                image: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=400",
+                story: `Every night before bed, Grandpa would tell Sofia a story. But tonight felt different. Sofia could tell something was bothering Grandpa.
+
+"Grandpa, are you okay?" Sofia asked, snuggled under her covers.
+
+Grandpa sat on the edge of her bed and sighed. "I'm getting older, mija. Sometimes I worry that when I'm gone, all my stories will disappear with me."
+
+"Then we'll write them down!" Sofia said quickly.
+
+"Stories aren't just words on a page," Grandpa said gently. "They're alive. They change with each telling, and they carry feelings that writing can't capture."
+
+"Then teach me how to tell them," Sofia insisted. "If I learn your stories, they'll live forever."
+
+Grandpa's eyes lit up. "Alright. But first, I need to tell you about the storyteller's secret. Lean in close."
+
+Sofia leaned in eagerly.
+
+"Once, there was a young shepherd boy who loved stories more than anything. But his village had no books, and no one remembered the old tales anymore. One night, the boy was watching his sheep when he met an old woman by the road.
+
+'Why do you look so sad?' the woman asked.
+
+'Because all the stories are disappearing,' the boy said. 'No one tells them anymore, and I'm afraid they'll be lost forever.'
+
+The woman smiled mysteriously. 'Stories never disappear, child. They just hide in unexpected places. Would you like to know where?'
+
+'Yes, please!' the boy said.
+
+'Stories hide in the wrinkles of old hands - each line is a memory. They hide in recipes passed down through families - each ingredient carries a tale. They hide in lullabies sung to babies - each note holds love. They hide in the way someone laughs, the way they walk, the phrases they repeat. If you pay attention, you'll find stories everywhere.'
+
+The boy understood. From that day forward, he listened carefully to everything. He learned stories from his grandmother's cooking, his father's work songs, his mother's way of folding clothes. He gathered thousands of stories, not by reading books, but by watching people live their lives.
+
+When the boy grew old, people called him the greatest storyteller in the land. 'Where did you learn so many tales?' they'd ask.
+
+'From paying attention,' he'd say. 'Every person is a book. Every life is a story. I just learned to read them.'"
+
+Grandpa finished and looked at Sofia. "Do you understand now, mija?"
+
+Sofia thought carefully. "You're not just telling me stories. You're teaching me to see stories everywhere - in you, in Grandma, in our family, in myself."
+
+"Exactly!" Grandpa's voice was filled with pride. "So even when I'm gone, the stories won't disappear. Because you'll carry them in the way you remember me, in the traditions we share, in the love that connects our family. And someday, you'll tell your grandchildren, and the stories will change and grow, but they'll never die."
+
+"Grandpa?" Sofia said softly. "I think I just learned the storyteller's secret. Stories don't live in words. They live in people."
+
+"You understand perfectly," Grandpa whispered, tucking her in. "Now close your eyes and let tonight's story settle into your dreams. Tomorrow, we'll make new stories together."
+
+As Sofia drifted off to sleep, she realized something magical. She wasn't just listening to Grandpa's stories - she was becoming part of them. And one day, she'd pass them on, adding her own chapters to the never-ending tale of their family.
+
+The storyteller's secret wasn't just about remembering stories. It was about understanding that we're all storytellers, and life itself is the greatest story of all - one that continues through every person who lives it, loves it, and shares it with the next generation.`,
+                moral: "Stories live in people, not just books - and we keep them alive by sharing them with love.",
+                ageGroup: "7-9",
+                structure: "Nested/Frame Story"
+            }
+        ],
         hard: []
     }
 };
