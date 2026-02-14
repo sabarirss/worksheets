@@ -187,6 +187,10 @@
             </button>
         </form>
 
+        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 0.95em;">
+            Don't have an account? <a href="signup.html" style="color: #667eea; text-decoration: none; font-weight: bold;">Sign Up</a>
+        </div>
+
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Signing in...</p>
@@ -242,7 +246,24 @@
                 console.log('Login result:', result);
 
                 if (result.success) {
-                    console.log('Login successful! Redirecting...');
+                    console.log('Login successful! Checking email verification...');
+
+                    // Check if email is verified (skip for admin)
+                    const firebaseUser = firebase.auth().currentUser;
+                    if (result.user.role !== 'admin' && firebaseUser && !firebaseUser.emailVerified) {
+                        // Email not verified
+                        await firebase.auth().signOut();
+
+                        errorMsg.innerHTML = `
+                            <strong>Email not verified</strong><br>
+                            Please check your email and click the verification link.<br>
+                            <a href="#" onclick="resendVerification('${firebaseUser.email}'); return false;" style="color: #667eea; text-decoration: underline;">Resend verification email</a>
+                        `;
+                        errorMsg.style.display = 'block';
+                        loginForm.style.display = 'block';
+                        loading.style.display = 'none';
+                        return;
+                    }
 
                     // Successful login - try to migrate localStorage worksheets
                     try {
@@ -283,6 +304,27 @@
 
                 // Show alert for visibility
                 alert('Login error: ' + errorText);
+            }
+        }
+
+        // Resend verification email
+        async function resendVerification(email) {
+            try {
+                const errorMsg = document.getElementById('error-message');
+                errorMsg.textContent = 'Sending verification email...';
+                errorMsg.style.display = 'block';
+
+                // User needs to be signed in to resend
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    await user.sendEmailVerification();
+                    errorMsg.innerHTML = '<strong>Verification email sent!</strong><br>Please check your inbox.';
+                } else {
+                    errorMsg.textContent = 'Please try logging in again to resend verification email.';
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                document.getElementById('error-message').textContent = 'Failed to send email. Please try again later.';
             }
         }
 
