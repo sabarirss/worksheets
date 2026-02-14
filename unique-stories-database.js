@@ -374,7 +374,67 @@ Diego smiled proudly. "The dam that stands isn't the one that never falls. It's 
         ],
 
         hard: [
-            // Story 1: Self-Discovery/Identity Structure
+            // Story 1: Nested/Frame Story + Moral Complexity
+            {
+                title: "The Fox and the Grapes: A New Perspective",
+                image: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400",
+                story: `Everyone knew the story of the fox and the grapes. A fox saw delicious grapes hanging high on a vine, couldn't reach them, and walked away saying, "Those grapes are probably sour anyway."
+
+Thirteen-year-old Amir heard this fable in class. His teacher asked, "What's the moral of this story?"
+
+Everyone raised their hands. "Don't make excuses!" "If you can't have something, don't pretend you didn't want it!" "The fox was lying to himself!"
+
+But Amir raised his hand hesitantly. "I... I think there might be another way to look at it."
+
+The class turned to him, curious. Even the teacher looked interested. "Go on, Amir."
+
+"What if," Amir said slowly, "the fox was actually being wise? What if he really couldn't get those grapes no matter how hard he tried? Maybe walking away and telling himself they were sour was the only way he could move on and find food somewhere else. Maybe it's not lying to yourself - maybe it's... surviving disappointment?"
+
+The classroom went silent. Amir worried he'd said something wrong.
+
+But his teacher smiled. "That's a very mature observation, Amir. Tell me - why do you think about it that way?"
+
+Amir hesitated, then decided to be honest. "Because... my family couldn't afford the school trip to the science museum. All my friends went. When they came back and told me how amazing it was, I kept thinking, 'I bet it wasn't that great anyway.' Was I being like the fox? Was I lying to myself?"
+
+Several students looked down, uncomfortable. Some had been on that trip.
+
+The teacher sat on her desk, thinking. "Class, Amir has just taught us something important. Stories don't have just one meaning. The lesson we take depends on our own experiences. Some people hear the fox story and think it's about making excuses. Others hear it and think it's about coping with disappointment. Both can be true."
+
+She turned to Amir. "Were you lying to yourself about the museum?"
+
+Amir thought hard. "I don't know. Maybe a little. But also... thinking it wasn't that great helped me stop feeling so sad. It helped me enjoy the things I could do instead of being angry about what I couldn't."
+
+"That's called cognitive reframing," the teacher explained. "Sometimes our minds help us cope by changing how we think about situations. It can be healthy - or it can prevent us from trying harder. The key is knowing the difference."
+
+A student named Sarah raised her hand. "So how do you know which one it is? When is it good to think like the fox, and when is it bad?"
+
+The teacher smiled. "That's the question, isn't it? Let's explore that together."
+
+She drew a line on the board. "On one end, we have giving up too easily and making excuses. On the other end, we have accepting reality and moving forward healthily. Where's the line between them?"
+
+The class discussed it for the rest of the period. They realized it depended on many things: Could you actually reach the grapes if you tried harder? Were the grapes worth the effort? Did you have other options? Were you learning from failure or just avoiding it?
+
+By the end, everyone understood that the fox's story was more complicated than it seemed. Sometimes walking away from something you can't have is wisdom. Sometimes it's weakness. Sometimes it's both.
+
+After class, Sarah approached Amir. "I went on that trip. It was pretty cool. But you know what? You're right that it wasn't life-changing or anything. And also..." she looked embarrassed. "I'm sorry you couldn't come. We should have asked if everyone could afford it before planning it."
+
+Amir felt something shift. "Thanks. And hey, it's okay. I was sad about it, but I also did other things that weekend. I helped my dad fix our car and learned a lot. Maybe I would have missed that if I'd gone on the trip."
+
+Walking home, Amir thought about the fox again. Maybe the real lesson wasn't about the grapes at all. Maybe it was about understanding that every story has multiple sides, every situation has different truths, and wisdom means knowing when to keep trying and when to let go.
+
+That evening, Amir told his little sister the story of the fox and the grapes. When he finished, she asked, "So what's the lesson?"
+
+Amir smiled. "That depends. What do you think?"
+
+And as his sister thought about it, Amir realized he'd learned something his teacher hadn't explicitly said: the best stories don't give us answers. They make us think. They make us question. They teach us that life is complex, and sometimes the wisest response is not knowing for certain, but thinking deeply about all the possibilities.
+
+The fox walked away from those grapes. But maybe, just maybe, he walked toward something better - and the story he told himself helped him get there.`,
+                moral: "Stories have multiple meanings depending on our perspective - wisdom comes from understanding complexity, not seeking simple answers.",
+                ageGroup: "10-12",
+                structure: "Nested/Frame Story + Moral Complexity"
+            },
+
+            // Story 2: Self-Discovery/Identity Structure
             {
                 title: "The Chameleon Who Forgot Her Colors",
                 image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=400",
@@ -703,7 +763,92 @@ And all the animals learned that everything in nature is connected - like a spid
                 structure: "Cause-and-Effect Chain"
             }
         ],
-        hard: []
+        hard: [
+            // Story 1: Character vs. Nature + Environmental Theme
+            {
+                title: "The Last Tree on the Hill",
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400",
+                story: `Grandmother Oak was the oldest tree on Clearwater Hill - perhaps the oldest tree in the entire region. For three hundred years, she had stood watch over the valley, providing shelter, food, and shade to countless creatures.
+
+But now, Grandmother Oak stood alone. Where once a thriving forest had surrounded her, now only stumps remained. The logging company had taken every other tree, leaving barren hillsides and eroding soil.
+
+Twelve-year-old Mika visited Grandmother Oak every day after school. She'd press her hand against the rough bark and whisper, "I'm sorry. I'm so sorry they took your forest."
+
+One autumn day, Mika arrived to find yellow tape around Grandmother Oak and a sign: "SCHEDULED FOR REMOVAL - DEVELOPMENT PROJECT."
+
+No. This couldn't happen. Mika ran home, tears streaming down her face.
+
+"Mom! They're going to cut down Grandmother Oak!"
+
+Her mother sighed sadly. "I know, honey. They're building a shopping center. The tree is in the way."
+
+"Can't they build around it?"
+
+"The developers said it would cost too much."
+
+Mika felt helpless and angry. One tree. Just one tree left, and they couldn't even save that?
+
+That night, Mika couldn't sleep. She thought about everything Grandmother Oak had witnessed - centuries of seasons, generations of animals, countless sunrises and sunsets. Three hundred years of life, ended for a parking lot.
+
+Then Mika had an idea.
+
+The next day at school, she approached her science teacher, Ms. Rodriguez. "Can you help me do a study on Grandmother Oak? Like, measure what she does for the environment?"
+
+Ms. Rodriguez looked intrigued. "What did you have in mind?"
+
+Together with her class, Mika spent two weeks studying the tree:
+- They measured how much oxygen it produced (enough for two people year-round)
+- They counted the species it supported (47 different types of birds, insects, and mammals lived in or around it)
+- They calculated how its roots prevented soil erosion (saving thousands of tons of topsoil from washing away)
+- They documented its historical significance (mentioned in town records from 1723)
+- They estimated its carbon storage (equivalent to taking three cars off the road for a year)
+
+Mika compiled everything into a report. But when she presented it to the town council, the developer just shrugged.
+
+"That's very impressive research, young lady. But this project will create jobs and increase tax revenue. One tree, however nice, can't compete with economic development."
+
+Mika felt crushed. Facts and data weren't enough.
+
+Then an elderly man stood up in the audience. Mika recognized him - Mr. Chen, who ran the bookstore downtown.
+
+"May I say something?" Mr. Chen asked. "I'm 83 years old. My grandfather brought me to that tree when I was five. He'd been brought there by his grandfather. That tree has been a meeting place, a landmark, and a friend to this town for generations."
+
+He paused, his voice cracking with emotion. "When we cut down that tree, we're not just removing wood. We're erasing our town's memory. We're telling our children that nothing matters more than money. We're saying that three hundred years of life is worth less than a few parking spaces."
+
+The room was silent.
+
+Mr. Chen continued. "I own the empty lot next to my bookstore. Same size as where you want to build. I'll sell it to you for half price if you leave the tree alone."
+
+The developer looked surprised. "That lot is worth—"
+
+"I know what it's worth," Mr. Chen interrupted. "But that tree? It's priceless. And when I'm gone, I want to know I did something that mattered."
+
+Slowly, other voices joined in. The town librarian offered to help with costs. A local business owner pledged fundraising. Even some who'd initially supported the development changed their minds.
+
+The developer realized he was facing a united community. After a tense negotiation, a compromise was reached: they'd use Mr. Chen's lot and redesign the shopping center to incorporate Grandmother Oak as a central feature - a living monument in the courtyard.
+
+The night before construction began at the new site, Mika visited Grandmother Oak one last time before the tape came down.
+
+She pressed her hand against the bark. "You're going to be okay," she whispered. "We saved you."
+
+The wind rustled through Grandmother Oak's leaves, and Mika could swear she felt the tree respond - a deep, slow pulse like a heartbeat beneath her palm.
+
+Ms. Rodriguez, who'd come to document the moment, spoke softly. "You know what you did here, Mika? You showed people something important. Facts matter - your research was crucial. But what really changed minds was helping people remember their connection to the tree. You reminded them why it mattered."
+
+"I almost gave up," Mika admitted. "When the data wasn't enough, I thought we'd lost."
+
+"That's the thing about environmental work," Ms. Rodriguez said. "Science tells us what we're losing. But it's stories - memories, emotions, connections - that inspire people to care enough to act."
+
+Years later, when Mika studied environmental science in college, she would remember this lesson. She learned that protecting nature isn't just about presenting facts. It's about helping people remember their relationship with the natural world - about bridging the heart and the mind.
+
+And Grandmother Oak? She still stands, now at the center of Clearwater Shopping Plaza. Benches surround her. Children play beneath her branches. A plaque tells her history. Developers initially worried she'd be "in the way," but she became the plaza's most beloved feature - the reason people come, stay, and remember.
+
+Sometimes, when elderly people visit, they touch her bark the way Mika once did. And maybe, just maybe, they feel that same slow heartbeat - the pulse of life that connects us all to the natural world, if only we take time to listen.`,
+                moral: "Protecting nature requires both facts and heart - we must help people remember their connection to the natural world.",
+                ageGroup: "10-12",
+                structure: "Character vs. Nature + Environmental Theme"
+            }
+        ]
     },
 
     family: {
@@ -948,7 +1093,97 @@ And breakfast that morning was much, much better.`,
                 structure: "Parallel/Multiple Perspective"
             }
         ],
-        hard: []
+        hard: [
+            // Story 1: Bildungsroman/Coming-of-Age
+            {
+                title: "The Summer Everything Changed",
+                image: "https://images.unsplash.com/photo-1502139214982-d0ad755818d8?w=400",
+                story: `Lena was eleven when her parents sat her down for "the talk." Not that talk - this was worse.
+
+"We're getting divorced," Mom said, her voice carefully steady.
+
+Lena felt the world tilt. "But... why?"
+
+"We still love you very much," Dad added quickly. "This isn't about you."
+
+But it felt like it was about her. Her whole life - her home, her family, everything she thought was solid - was breaking apart.
+
+The worst part? Lena had to spend the summer with her grandmother in a tiny coastal town she'd only visited once. Mom and Dad needed "time to sort things out."
+
+Grandmother Iris lived in a weathered house by the sea. She was nothing like Lena's other grandmother - no cookies, no fussing, just quiet and a bit strange.
+
+"Your room is upstairs," Iris said when Lena arrived. "Dinner is at six. I go tide-pooling at dawn if you're interested."
+
+Lena wasn't interested. She wasn't interested in anything.
+
+The first week, Lena barely spoke. She stayed in her room, texting friends back home, crying, and feeling sorry for herself. The divorce was ruining her life. Her parents were ruining her life. This boring town was ruining her summer.
+
+One morning, unable to sleep, Lena went downstairs and found Iris preparing to leave.
+
+"Tide-pooling?" Iris asked.
+
+Lena shrugged. "I guess."
+
+The beach was foggy and mysterious at dawn. Iris moved between rocks with surprising agility for someone her age, crouching to examine pools left by the receding tide.
+
+"Look here," Iris said softly.
+
+Lena peered into the pool. A tiny crab was molting - shedding its old shell to grow a new, larger one. It looked vulnerable and strange, soft and exposed.
+
+"Crabs have to do this to grow," Iris explained. "The old shell doesn't fit anymore. So they break out of it. It's painful and dangerous - they're defenseless while the new shell hardens. But without it, they couldn't grow."
+
+Something about the crab's vulnerability made Lena's eyes water. "What if it doesn't survive the molting?"
+
+"Sometimes they don't," Iris said honestly. "Growing always involves risk. But staying in a shell that's too small isn't really surviving either - it's just existing."
+
+They explored in silence. Lena watched starfish, anemones, tiny fish darting through the shallows. Everything in these pools was adapting, surviving, growing in its own way.
+
+As days passed, Lena found herself waking up for tide-pooling. It became their routine - silent walks to the beach, quiet observations, occasional conversations that felt more honest than any Lena had ever had.
+
+One morning, Lena finally asked what she'd been wondering. "Grandma, were you ever divorced?"
+
+"Twice," Iris said simply.
+
+"Twice? But... how did you survive it?"
+
+Iris smiled sadly. "Not easily. The first time, I thought my life was over. I was your mother's age - mid-thirties, with a young child, feeling like I'd failed at the most important thing. I was angry, hurt, and lost."
+
+"What did you do?"
+
+"I came here. To this beach. Every morning, I'd walk and watch the tide. The tide always comes back, you know. It goes out, and you think it's gone forever. But it returns. Different, but still the tide."
+
+Lena thought about this. "And the second divorce?"
+
+"That was different. By then, I understood something: endings aren't failures. Sometimes they're just endings. Some relationships are meant to be a chapter, not the whole book."
+
+"Do you think Mom and Dad's marriage was just a chapter?"
+
+Iris considered this carefully. "I think it was a chapter that gave us you. That's not nothing, Lena. You're not a side effect of their marriage - you're the best thing that came from it. And that doesn't end because they do."
+
+Lena felt tears spilling over. "I'm so angry at them."
+
+"You're allowed to be angry. You're allowed to be sad. You're allowed to feel however you feel." Iris put an arm around her. "But eventually, you'll also get to decide who you want to become because of this. Pain changes us - but we get some choice in how."
+
+The summer unfolded slowly. Lena learned to kayak, helped Iris with her tide-pool documentation project (she was a retired marine biologist), and made friends with other kids in town. She learned their parents had messy lives too - divorce, illness, job loss, all kinds of hard things.
+
+One evening, watching the sunset, Lena asked, "Grandma, do you think I'll be okay?"
+
+Iris looked at her granddaughter - really looked, seeing not just a child but a person in the process of becoming. "I think you're like that crab we saw. Your old shell - the family you knew, the life you had - it broke. Right now you're soft and vulnerable, and it hurts. But you're also growing. A new shell is forming. It'll be different than the old one, but it'll be yours, and it'll fit who you're becoming."
+
+"What if I don't want to grow? What if I just want things back the way they were?"
+
+"Then you'd stay small forever," Iris said gently. "And Lena, you're meant for bigger things than that."
+
+When summer ended and Lena returned home - to two separate homes now - something had shifted. The divorce still hurt. Her parents' choices still affected her. But she wasn't just a victim of their decisions anymore. She was someone learning to navigate change, to find stability within herself instead of in circumstances.
+
+Years later, when Lena faced other hard changes - moves, breakups, losses - she would think of that summer. She'd remember the molting crab, the returning tide, and Iris's quiet wisdom. She'd remember that growth often looks like breaking, that change can hurt and still be necessary, and that we all have more strength than we think - we just sometimes need a summer by the sea to discover it.
+
+And sometimes, when life got hard, Lena would go to the ocean, watch the tide, and remember: it always comes back. Different, but still the tide. Just like us.`,
+                moral: "Growing through pain is hard, but we can choose how change shapes us - and we're stronger than we know.",
+                ageGroup: "10-12",
+                structure: "Bildungsroman/Coming-of-Age"
+            }
+        ]
     },
 
     adventures: {
