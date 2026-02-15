@@ -66,20 +66,30 @@ async function loadProfileSelector(parentUid) {
             selectChild(children[0].id, children[0]);
             selectedChildId = children[0].id;
         } else {
-            // Child is already selected, just update module visibility
+            // Child is already selected, refresh localStorage with latest data from Firestore
             const selectedChildData = children.find(c => c.id === selectedChildId);
-            if (selectedChildData && typeof updateModuleVisibility === 'function') {
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    firebase.firestore().collection('users').doc(user.uid).get()
-                        .then(doc => {
-                            const userData = doc.data();
-                            updateModuleVisibility(selectedChildData, userData);
-                        })
-                        .catch(err => {
-                            console.error('Error fetching user data:', err);
-                            updateModuleVisibility(selectedChildData, null);
-                        });
+            if (selectedChildData) {
+                // Update localStorage with fresh data to ensure version, inputMode, etc. are current
+                localStorage.setItem('selectedChild', JSON.stringify({
+                    id: selectedChildId,
+                    ...selectedChildData
+                }));
+                console.log('Refreshed selected child data from Firestore');
+
+                // Update module visibility
+                if (typeof updateModuleVisibility === 'function') {
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        firebase.firestore().collection('users').doc(user.uid).get()
+                            .then(doc => {
+                                const userData = doc.data();
+                                updateModuleVisibility(selectedChildData, userData);
+                            })
+                            .catch(err => {
+                                console.error('Error fetching user data:', err);
+                                updateModuleVisibility(selectedChildData, null);
+                            });
+                    }
                 }
             }
         }
@@ -200,8 +210,26 @@ function closeProfileDropdownOutside(event) {
 }
 
 // Select a child from the dropdown
-function selectChildFromDropdown(childId, name, age, gender) {
-    selectChild(childId, { name, age, gender });
+async function selectChildFromDropdown(childId, name, age, gender) {
+    // Fetch full child data from Firestore to ensure we have version, inputMode, modules, etc.
+    try {
+        const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+        if (childDoc.exists) {
+            const fullChildData = {
+                id: childId,
+                ...childDoc.data()
+            };
+            selectChild(childId, fullChildData);
+        } else {
+            // Fallback if document doesn't exist
+            console.warn('Child document not found, using partial data');
+            selectChild(childId, { name, age, gender });
+        }
+    } catch (error) {
+        console.error('Error fetching child data:', error);
+        // Fallback to partial data on error
+        selectChild(childId, { name, age, gender });
+    }
 
     // Reload the profile selector to update UI
     const user = firebase.auth().currentUser;
