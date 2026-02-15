@@ -140,6 +140,30 @@ function generateEasyActivities() {
             question: 'What should you say?',
             options: ['Thank you', 'Give me more', 'Nothing'],
             answer: 'Thank you'
+        },
+        // Additional easy activities
+        {
+            type: 'scenario',
+            situation: '🏃',
+            text: 'You are playing a game and you win!',
+            question: 'How do you feel?',
+            options: ['Proud', 'Sad', 'Scared'],
+            answer: 'Proud'
+        },
+        {
+            type: 'empathy',
+            situation: '🎉',
+            text: 'It\'s your friend\'s birthday today.',
+            question: 'What should you do?',
+            options: ['Wish them happy birthday', 'Ignore them', 'Be sad'],
+            answer: 'Wish them happy birthday'
+        },
+        {
+            type: 'social',
+            text: 'You accidentally step on someone\'s foot.',
+            question: 'What should you do?',
+            options: ['Say sorry', 'Run away', 'Laugh'],
+            answer: 'Say sorry'
         }
     ];
 }
@@ -326,14 +350,6 @@ function generateHardActivities() {
             options: ['Everyone makes mistakes, you did great!', 'You messed up badly', 'I would never forget my lines', 'Don\'t try acting again'],
             answer: 'Everyone makes mistakes, you did great!'
         },
-        {
-            type: 'empathy',
-            situation: '🆕',
-            text: 'A new student doesn\'t speak much English and sits alone at lunch.',
-            question: 'What shows emotional intelligence?',
-            options: ['Sit with them and be friendly with gestures', 'Ignore them because it\'s hard to talk', 'Make fun of how they talk', 'Tell them to go away'],
-            answer: 'Sit with them and be friendly with gestures'
-        },
         // Complex social situations
         {
             type: 'social',
@@ -348,13 +364,6 @@ function generateHardActivities() {
             question: 'What\'s the most mature response?',
             options: ['Calmly tell the truth to people who matter', 'Spread rumors about them back', 'Get very angry and yell', 'Cry and hide'],
             answer: 'Calmly tell the truth to people who matter'
-        },
-        {
-            type: 'social',
-            text: 'Your teacher blamed you for something you didn\'t do.',
-            question: 'What should you do?',
-            options: ['Respectfully explain what really happened', 'Yell at the teacher', 'Blame another student', 'Accept punishment without speaking'],
-            answer: 'Respectfully explain what really happened'
         },
         // Self-awareness and regulation
         {
@@ -371,13 +380,6 @@ function generateHardActivities() {
             options: ['Tell a teacher or adult calmly', 'Hit them', 'Bother them back', 'Keep being annoyed but do nothing'],
             answer: 'Tell a teacher or adult calmly'
         },
-        {
-            type: 'self-regulation',
-            text: 'You feel jealous because your friend got something you wanted.',
-            question: 'How should you handle jealousy?',
-            options: ['Recognize the feeling but be happy for them', 'Stop being their friend', 'Try to take it from them', 'Tell everyone they don\'t deserve it'],
-            answer: 'Recognize the feeling but be happy for them'
-        },
         // Understanding consequences
         {
             type: 'consequence',
@@ -385,13 +387,6 @@ function generateHardActivities() {
             question: 'What\'s the most thoughtful response?',
             options: ['Talk to your friend privately about it', 'Announce it to the class', 'Help them cheat more', 'Ignore it completely'],
             answer: 'Talk to your friend privately about it'
-        },
-        {
-            type: 'consequence',
-            text: 'You\'re in a group project and one person isn\'t doing any work.',
-            question: 'What shows good emotional and social skills?',
-            options: ['Talk to them kindly about helping', 'Do all the work yourself', 'Kick them out of the group', 'Tell the teacher immediately without talking first'],
-            answer: 'Talk to them kindly about helping'
         },
         // Mixed emotions and emotional complexity
         {
@@ -407,13 +402,6 @@ function generateHardActivities() {
             question: 'It\'s normal to feel...',
             options: ['Only excited', 'Only sad', 'Excited AND sad at the same time', 'Nothing at all'],
             answer: 'Excited AND sad at the same time'
-        },
-        {
-            type: 'mixed-emotion',
-            text: 'You want to try out for the school play but feel nervous about performing.',
-            question: 'This situation shows...',
-            options: ['You should only do things that don\'t scare you', 'Wanting something and feeling scared are both okay', 'Feeling nervous means you shouldn\'t try', 'Brave people never feel nervous'],
-            answer: 'Wanting something and feeling scared are both okay'
         },
         {
             type: 'emotional-growth',

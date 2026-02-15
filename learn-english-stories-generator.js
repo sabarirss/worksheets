@@ -478,10 +478,59 @@ const storyDatabase = {
                     correct: 3
                 }
             ]
+        },
+        {
+            id: 3,
+            title: "The Lost and Found Mystery",
+            icon: "🔍",
+            level: "Developing Reader",
+            wordCount: 185,
+            grammarFocus: "Past tense, mystery vocabulary, problem-solving",
+            vocabulary: ["investigate", "clue", "suspect", "evidence", "solution"],
+            content: [
+                "Strange things were happening at school. Items kept disappearing from the lost and found box.",
+                "First, Jenny's blue scarf vanished. Then Mark's favorite book disappeared. Finally, the principal's stapler went missing!",
+                "My friends and I decided to investigate. We called ourselves the Mystery Club.",
+                "I started keeping a notebook. I wrote down when things disappeared and who was nearby.",
+                "The pattern was clear. Items always disappeared on Tuesday afternoons, right after lunch.",
+                "On Tuesday, we watched the lost and found box carefully. We pretended to read books in the hallway.",
+                "At 1:30 PM, we saw something surprising. A small orange cat jumped through the open window!",
+                "The cat went straight to the lost and found box. She grabbed Jenny's scarf in her mouth and jumped back out.",
+                "We followed the cat outside. She ran behind the school building to a cozy spot under the stairs.",
+                "There we found all the missing items! The cat had made a comfortable nest with the scarf, book, and other soft things.",
+                "The cat wasn't stealing. She was just building a home. She looked at us with big, scared eyes.",
+                "We told Mrs. Peterson, the school nurse. She recognized the cat. 'That's Whiskers! She used to live nearby.'",
+                "Mrs. Peterson explained that Whiskers' family had moved away. The poor cat was homeless.",
+                "The principal decided Whiskers could be the school cat. We made her a proper bed with blankets.",
+                "We returned everyone's belongings. Jenny was so happy she donated her old scarf to Whiskers!",
+                "The mystery was solved, and Whiskers found a new home. Everyone was happy with this solution."
+            ],
+            questions: [
+                {
+                    question: "When did items disappear from the lost and found?",
+                    options: ["Monday mornings", "Tuesday afternoons", "Wednesday evenings", "Friday mornings"],
+                    correct: 1
+                },
+                {
+                    question: "Who was taking the items?",
+                    options: ["A student", "A teacher", "A cat named Whiskers", "The janitor"],
+                    correct: 2
+                },
+                {
+                    question: "Why was the cat taking items?",
+                    options: ["To play with them", "To build a nest", "To hide them", "To sell them"],
+                    correct: 1
+                },
+                {
+                    question: "What happened to Whiskers at the end?",
+                    options: ["She ran away", "She became the school cat", "She was taken to a shelter", "She went back to her family"],
+                    correct: 1
+                }
+            ]
         }],
         hard: [
         {
-            id: 3,
+            id: 4,
             title: "The Science Fair Project",
             icon: "🔬",
             level: "Developing Reader",
@@ -711,6 +760,78 @@ const storyDatabase = {
                         "Predictions are always wrong"
                     ],
                     correct: 0
+                }
+            ]
+        },
+        {
+            id: 2,
+            title: "The Recycling Revolution",
+            icon: "♻️",
+            level: "Confident Reader",
+            wordCount: 290,
+            grammarFocus: "Persuasive writing, environmental vocabulary, cause and effect",
+            vocabulary: ["sustainability", "initiative", "reduce", "implement", "impact"],
+            content: [
+                "When Maya walked home from school, she always noticed the overflowing trash bins in the park. Mountains of plastic bottles, cans, and paper littered the ground.",
+                "One day, she couldn't ignore it anymore. 'Our neighborhood needs a better recycling program,' Maya thought determinedly.",
+                "Maya started researching. She discovered that their town only collected recycling once a month, and many people didn't know which items were recyclable.",
+                "She decided to create a presentation for the town council. For two weeks, Maya gathered information about successful recycling programs in other cities.",
+                "She learned that towns with weekly recycling pickup and clear education programs reduced their waste by 60 percent. The statistics were impressive.",
+                "Maya prepared charts showing how much money the town could save by reducing landfill usage. She also calculated the environmental benefits.",
+                "On presentation day, Maya's hands trembled as she stood before the council members. But she remembered why this mattered.",
+                "'Every week, our town produces five tons of recyclable materials that end up in landfills,' Maya began confidently.",
+                "She showed photographs of the littered park. Then she displayed her research about successful programs in nearby towns.",
+                "'If we implement weekly recycling pickup and place clearly labeled bins throughout town, we can reduce waste significantly,' Maya explained.",
+                "She proposed partnering with local schools to educate children about recycling. 'Young people can teach their families,' she added.",
+                "Council Member Rodriguez asked, 'How much would this cost?'",
+                "Maya had prepared for this question. She presented her budget analysis showing that savings from reduced landfill fees would cover most costs within two years.",
+                "The council was impressed. They discussed Maya's proposal seriously. After deliberation, they voted unanimously to implement her plan!",
+                "Three months later, new recycling bins appeared throughout town. The parks became cleaner. Recycling rates increased dramatically.",
+                "Maya's teacher asked her to share her experience with the class. 'I learned that young people can make real change,' Maya said proudly.",
+                "'Research, preparation, and persistence made the difference. If you care about something, speak up! Adults will listen if you present your ideas clearly.'",
+                "The local newspaper featured Maya in an article titled 'Young Environmental Leader Inspires Change.' But Maya felt the clean parks were the real reward.",
+                "Now Maya is working on her next project: creating a community composting program. She believes one person's initiative can inspire an entire community."
+            ],
+            questions: [
+                {
+                    question: "What problem did Maya notice in her neighborhood?",
+                    options: [
+                        "Not enough schools",
+                        "Overflowing trash and lack of recycling",
+                        "Too many cars",
+                        "Broken playgrounds"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "How often did the town collect recycling before Maya's initiative?",
+                    options: ["Every week", "Once a month", "Twice a month", "Never"],
+                    correct: 1
+                },
+                {
+                    question: "What evidence did Maya use to support her proposal?",
+                    options: [
+                        "Only her opinion",
+                        "Photos and research from other towns",
+                        "What her parents said",
+                        "A survey of her classmates"
+                    ],
+                    correct: 1
+                },
+                {
+                    question: "What percentage of waste reduction did successful programs achieve?",
+                    options: ["30 percent", "40 percent", "50 percent", "60 percent"],
+                    correct: 3
+                },
+                {
+                    question: "What did Maya learn from this experience?",
+                    options: [
+                        "Adults never listen to children",
+                        "Recycling is too expensive",
+                        "Young people can make real change with research and persistence",
+                        "Only government can solve environmental problems"
+                    ],
+                    correct: 2
                 }
             ]
         }]
