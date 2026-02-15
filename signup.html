@@ -145,8 +145,8 @@
 <body>
     <div class="signup-container">
         <div class="signup-logo">📚</div>
-        <h1 class="signup-title">Create Account</h1>
-        <p class="signup-subtitle">Sign up to start learning</p>
+        <h1 class="signup-title">Parent Sign Up</h1>
+        <p class="signup-subtitle">Create your parent account to manage your children's learning</p>
 
         <div class="error-message" id="error-message"></div>
         <div class="success-message" id="success-message"></div>
@@ -217,59 +217,33 @@
                 >
             </div>
 
-            <div class="form-group">
-                <label for="child-age">Child's Age</label>
-                <select
-                    id="child-age"
-                    name="child-age"
-                    required
-                    style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; background: white; cursor: pointer;"
-                >
-                    <option value="">Select child's age</option>
-                    <option value="4">4 years old</option>
-                    <option value="5">5 years old</option>
-                    <option value="6">6 years old</option>
-                    <option value="7">7 years old</option>
-                    <option value="8">8 years old</option>
-                    <option value="9">9 years old</option>
-                    <option value="10">10 years old</option>
-                    <option value="11">11 years old</option>
-                    <option value="12">12 years old</option>
-                    <option value="13">13+ years old</option>
-                </select>
-                <div class="password-requirements">Content will be filtered based on child's age</div>
+            <div class="form-group" style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 5px solid #2196f3;">
+                <p style="margin: 0; color: #1565c0; font-weight: bold;">
+                    👨‍👩‍👧‍👦 Parent/Guardian Account
+                </p>
+                <p style="margin: 10px 0 0 0; color: #555; font-size: 0.95em;">
+                    After signing up, you can create profiles for your children and manage their learning progress.
+                </p>
             </div>
 
-            <div class="form-group">
-                <label for="parent-pin">Parent PIN (4 digits)</label>
-                <input
-                    type="password"
-                    id="parent-pin"
-                    name="parent-pin"
-                    placeholder="Create 4-digit PIN"
-                    required
-                    maxlength="4"
-                    pattern="[0-9]{4}"
-                    title="Must be exactly 4 digits"
-                    inputmode="numeric"
-                    style="letter-spacing: 8px; text-align: center; font-size: 1.2em;"
-                >
-                <div class="password-requirements">🔒 Required to change age settings later</div>
-            </div>
-
-            <div class="form-group">
-                <label for="confirm-parent-pin">Confirm Parent PIN</label>
-                <input
-                    type="password"
-                    id="confirm-parent-pin"
-                    name="confirm-parent-pin"
-                    placeholder="Re-enter 4-digit PIN"
-                    required
-                    maxlength="4"
-                    pattern="[0-9]{4}"
-                    inputmode="numeric"
-                    style="letter-spacing: 8px; text-align: center; font-size: 1.2em;"
-                >
+            <div class="form-group" style="margin-top: 25px;">
+                <label style="display: flex; align-items: start; cursor: pointer; font-weight: normal;">
+                    <input
+                        type="checkbox"
+                        id="terms-checkbox"
+                        name="terms-checkbox"
+                        required
+                        style="margin-right: 10px; margin-top: 4px; width: 20px; height: 20px; cursor: pointer;"
+                    >
+                    <span style="font-size: 0.95em; line-height: 1.6;">
+                        I have read and agree to the
+                        <a href="terms.html" target="_blank" style="color: #667eea; text-decoration: underline;">Terms and Conditions</a>.
+                        <strong>(Required)</strong><br>
+                        <span style="color: #666; font-size: 0.9em;">
+                            ⚠️ If creating an account for a child under 16, you confirm you are the parent/guardian and consent to their use of this service.
+                        </span>
+                    </span>
+                </label>
             </div>
 
             <button type="submit" class="signup-btn" id="signup-btn">
@@ -299,9 +273,6 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const childAge = parseInt(document.getElementById('child-age').value);
-            const parentPin = document.getElementById('parent-pin').value.trim();
-            const confirmParentPin = document.getElementById('confirm-parent-pin').value.trim();
 
             const errorMsg = document.getElementById('error-message');
             const successMsg = document.getElementById('success-message');
@@ -321,27 +292,6 @@
             // Validate passwords match
             if (password !== confirmPassword) {
                 errorMsg.textContent = 'Passwords do not match';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            // Validate age is selected
-            if (!childAge || isNaN(childAge)) {
-                errorMsg.textContent = 'Please select the child\'s age';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            // Validate parent PIN
-            if (!parentPin || !/^\d{4}$/.test(parentPin)) {
-                errorMsg.textContent = 'Parent PIN must be exactly 4 digits';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            // Validate parent PINs match
-            if (parentPin !== confirmParentPin) {
-                errorMsg.textContent = 'Parent PINs do not match';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -372,31 +322,18 @@
                 // Send email verification
                 await user.sendEmailVerification();
 
-                // Create user document in Firestore with default Math module only
+                // Create parent user document in Firestore with default Math module only
                 await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).set({
                     uid: user.uid,
                     username: username,
                     email: email,
                     fullName: fullName,
-                    age: childAge,
-                    parentPin: parentPin,
-                    role: 'student',
+                    role: 'parent', // Parent account
                     version: 'demo', // New users start with demo version
                     versionUpgradeRequested: false,
                     modules: {
                         // Modules assigned by admin (available to parent)
                         math: true,  // Only math assigned by default
-                        english: false,
-                        aptitude: false,
-                        stories: false,
-                        'emotional-quotient': false,
-                        german: false,
-                        drawing: false,
-                        'german-kids': false
-                    },
-                    enabledModules: {
-                        // Modules enabled by parent (visible to child)
-                        math: true,  // Math enabled by default
                         english: false,
                         aptitude: false,
                         stories: false,

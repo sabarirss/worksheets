@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Children Profiles</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .profiles-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .add-child-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: transform 0.2s;
+        }
+
+        .add-child-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .child-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .child-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .child-avatar {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .child-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .child-info {
+            color: #666;
+            font-size: 0.95em;
+            margin: 5px 0;
+        }
+
+        .child-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: #4caf50;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #45a049;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            font-size: 2em;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-auth.js"></script>
+</head>
+<body>
+    <div class="profiles-container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+
+        <div class="header">
+            <h1>👨‍👩‍👧‍👦 Manage Children Profiles</h1>
+            <p>Add and manage profiles for your children</p>
+        </div>
+
+        <button class="add-child-btn" onclick="showAddChildModal()">
+            ➕ Add New Child Profile
+        </button>
+
+        <div id="children-list" class="children-grid"></div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">👶</div>
+            <h3>No children profiles yet</h3>
+            <p>Click the button above to create your first child profile</p>
+        </div>
+    </div>
+
+    <!-- Add/Edit Child Modal -->
+    <div id="child-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Child Profile</h2>
+            </div>
+
+            <form id="child-form">
+                <div class="form-group">
+                    <label for="child-name">Child's Name *</label>
+                    <input type="text" id="child-name" required placeholder="Enter child's name">
+                </div>
+
+                <div class="form-group">
+                    <label for="child-gender">Gender</label>
+                    <select id="child-gender">
+                        <option value="boy">Boy 👦</option>
+                        <option value="girl">Girl 👧</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="child-dob">Date of Birth *</label>
+                    <input type="date" id="child-dob" required max="">
+                </div>
+
+                <div class="form-group">
+                    <label for="child-grade">Grade</label>
+                    <select id="child-grade">
+                        <option value="Pre-K">Pre-K</option>
+                        <option value="Kindergarten">Kindergarten</option>
+                        <option value="1st">1st Grade</option>
+                        <option value="2nd">2nd Grade</option>
+                        <option value="3rd">3rd Grade</option>
+                        <option value="4th">4th Grade</option>
+                        <option value="5th">5th Grade</option>
+                        <option value="6th">6th Grade</option>
+                        <option value="7th">7th Grade</option>
+                        <option value="8th">8th Grade</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
+                    <p style="margin: 0; color: #1565c0; font-size: 0.95em;">
+                        ℹ️ Age will be automatically calculated from date of birth
+                    </p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentEditChildId = null;
+        let parentUid = null;
+
+        // Check authentication
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                parentUid = user.uid;
+                loadChildren();
+            }
+        });
+
+        // Set max date to today
+        document.getElementById('child-dob').max = new Date().toISOString().split('T')[0];
+
+        async function loadChildren() {
+            const childrenList = document.getElementById('children-list');
+            const emptyState = document.getElementById('empty-state');
+
+            try {
+                const snapshot = await firebase.firestore()
+                    .collection('children')
+                    .where('parent_uid', '==', parentUid)
+                    .orderBy('created_at', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    childrenList.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                childrenList.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    const child = doc.data();
+                    const childCard = createChildCard(doc.id, child);
+                    childrenList.appendChild(childCard);
+                });
+
+            } catch (error) {
+                console.error('Error loading children:', error);
+                alert('Error loading children profiles');
+            }
+        }
+
+        function createChildCard(id, child) {
+            const card = document.createElement('div');
+            card.className = 'child-card';
+
+            const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
+            const age = calculateAge(child.date_of_birth);
+
+            card.innerHTML = `
+                <div class="child-avatar">${avatar}</div>
+                <div class="child-name">${child.name}</div>
+                <div class="child-info">Age: ${age} years old</div>
+                <div class="child-info">Grade: ${child.grade}</div>
+                <div class="child-info">Born: ${formatDate(child.date_of_birth)}</div>
+                <div class="child-actions">
+                    <button class="edit-btn" onclick="editChild('${id}')">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteChild('${id}', '${child.name}')">🗑️ Delete</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function calculateAge(dateOfBirth) {
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            return age;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function showAddChildModal() {
+            currentEditChildId = null;
+            document.getElementById('modal-title').textContent = 'Add Child Profile';
+            document.getElementById('child-form').reset();
+            document.getElementById('child-modal').style.display = 'flex';
+        }
+
+        async function editChild(childId) {
+            currentEditChildId = childId;
+            document.getElementById('modal-title').textContent = 'Edit Child Profile';
+
+            try {
+                const doc = await firebase.firestore().collection('children').doc(childId).get();
+                const child = doc.data();
+
+                document.getElementById('child-name').value = child.name;
+                document.getElementById('child-gender').value = child.gender;
+                document.getElementById('child-dob').value = child.date_of_birth;
+                document.getElementById('child-grade').value = child.grade;
+
+                document.getElementById('child-modal').style.display = 'flex';
+            } catch (error) {
+                console.error('Error loading child:', error);
+                alert('Error loading child profile');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('child-modal').style.display = 'none';
+            currentEditChildId = null;
+        }
+
+        document.getElementById('child-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('child-name').value.trim();
+            const gender = document.getElementById('child-gender').value;
+            const dateOfBirth = document.getElementById('child-dob').value;
+            const grade = document.getElementById('child-grade').value;
+
+            const childData = {
+                name: name,
+                gender: gender,
+                date_of_birth: dateOfBirth,
+                age: calculateAge(dateOfBirth),
+                grade: grade,
+                parent_uid: parentUid
+            };
+
+            try {
+                if (currentEditChildId) {
+                    // Update existing child
+                    await firebase.firestore().collection('children').doc(currentEditChildId).update({
+                        ...childData,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    // Create new child
+                    await firebase.firestore().collection('children').add({
+                        ...childData,
+                        created_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                closeModal();
+                loadChildren();
+            } catch (error) {
+                console.error('Error saving child:', error);
+                alert('Error saving child profile');
+            }
+        });
+
+        async function deleteChild(childId, childName) {
+            if (!confirm(`Are you sure you want to delete ${childName}'s profile?\n\nThis will also delete all their worksheet progress and cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                // Delete child document
+                await firebase.firestore().collection('children').doc(childId).delete();
+
+                // TODO: Also delete all worksheets for this child from storage
+
+                loadChildren();
+            } catch (error) {
+                console.error('Error deleting child:', error);
+                alert('Error deleting child profile');
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('child-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

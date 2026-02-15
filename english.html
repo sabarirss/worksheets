@@ -203,15 +203,13 @@
         .handwriting-example {
             background: white;
             padding: 20px;
-            padding-left: 30px;
             border-radius: 8px;
             position: relative;
             height: 100px;
             display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
+            align-items: center;
+            justify-content: center;
             gap: 15px;
-            padding-top: 28px;
             /* Ruled lines background - matching canvas colors */
             background-image:
                 linear-gradient(to right, transparent 0%, transparent 5%, #e74c3c 5%, #e74c3c 95%, transparent 95%),
@@ -225,15 +223,14 @@
 
         .handwritten-text {
             font-family: 'Caveat', cursive;
-            font-size: 2.8em;
+            font-size: 2.5em;
             font-weight: 700;
             color: #2c3e50;
             line-height: 1;
             text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
             margin: 0;
             padding: 0;
-            position: relative;
-            top: 32px;
+            transform: translateY(32px);
         }
 
         /* Mobile responsive */
@@ -257,14 +254,13 @@
             }
 
             .handwritten-text {
-                font-size: 2.2em;
-                top: 26px;
+                font-size: 2em;
+                transform: translateY(26px);
             }
 
             .handwriting-example {
                 padding: 15px;
                 padding-left: 25px;
-                padding-top: 22px;
                 height: 80px;
                 background-size: 100% 2px;
                 background-position: 0 20%, 0 40%, 0 60%, 0 80%;

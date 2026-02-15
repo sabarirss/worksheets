@@ -22,20 +22,43 @@ class HandwritingInput {
 
     setupCanvas() {
         // Light background
-        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillStyle = '#f8f9ff';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Add a subtle border guide
-        this.ctx.strokeStyle = '#e0e0e0';
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(0, 0, this.canvas.width, this.canvas.height);
+        // Four ruled lines for handwriting practice
+        const height = this.canvas.height;
+        const width = this.canvas.width;
 
-        // Add a baseline guide
-        this.ctx.strokeStyle = '#f0f0f0';
+        // Top line - RED (20%)
+        this.ctx.strokeStyle = '#e74c3c';
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
-        this.ctx.moveTo(0, this.canvas.height * 0.6);
-        this.ctx.lineTo(this.canvas.width, this.canvas.height * 0.6);
+        this.ctx.moveTo(5, height * 0.20);
+        this.ctx.lineTo(width - 5, height * 0.20);
+        this.ctx.stroke();
+
+        // Mid line - BLUE (40%)
+        this.ctx.strokeStyle = '#3498db';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(5, height * 0.40);
+        this.ctx.lineTo(width - 5, height * 0.40);
+        this.ctx.stroke();
+
+        // Base line - BLUE (60%)
+        this.ctx.strokeStyle = '#3498db';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(5, height * 0.60);
+        this.ctx.lineTo(width - 5, height * 0.60);
+        this.ctx.stroke();
+
+        // Bottom line - RED (80%)
+        this.ctx.strokeStyle = '#e74c3c';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(5, height * 0.80);
+        this.ctx.lineTo(width - 5, height * 0.80);
         this.ctx.stroke();
     }
 

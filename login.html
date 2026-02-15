@@ -187,7 +187,7 @@
             </button>
         </form>
 
-        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 0.95em;">
+        <div id="signup-link" style="margin-top: 20px; text-align: center; color: #666; font-size: 0.95em;">
             Don't have an account? <a href="signup.html" style="color: #667eea; text-decoration: none; font-weight: bold;">Sign Up</a>
         </div>
 
@@ -229,12 +229,14 @@
             const errorMsg = document.getElementById('error-message');
             const loginForm = document.getElementById('login-form');
             const loading = document.getElementById('loading');
+            const signupLink = document.getElementById('signup-link');
 
             // Hide error
             errorMsg.style.display = 'none';
 
-            // Show loading
+            // Show loading, hide form and signup link
             loginForm.style.display = 'none';
+            signupLink.style.display = 'none';
             loading.style.display = 'block';
 
             try {
@@ -261,6 +263,7 @@
                         `;
                         errorMsg.style.display = 'block';
                         loginForm.style.display = 'block';
+                        signupLink.style.display = 'block';
                         loading.style.display = 'none';
                         return;
                     }
@@ -283,6 +286,7 @@
                     errorMsg.textContent = result.error;
                     errorMsg.style.display = 'block';
                     loginForm.style.display = 'block';
+                    signupLink.style.display = 'block';
                     loading.style.display = 'none';
 
                     // Also show alert for visibility
@@ -300,6 +304,7 @@
                 errorMsg.textContent = errorText;
                 errorMsg.style.display = 'block';
                 loginForm.style.display = 'block';
+                signupLink.style.display = 'block';
                 loading.style.display = 'none';
 
                 // Show alert for visibility
