@@ -139,23 +139,35 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
     // Get 5 questions from younger age (easy difficulty)
     const youngerConfig = getConfigByAge(operation, youngerAge, 'easy');
     if (youngerConfig && youngerConfig.generator) {
-        const youngerProblems = youngerConfig.generator(5);
-        questions.push(...youngerProblems.map(p => ({
-            ...p,
-            sourceAge: youngerAge,
-            sourceDifficulty: 'easy'
-        })));
+        // Call generator 5 times to get 5 problems
+        for (let i = 0; i < 5; i++) {
+            const problem = youngerConfig.generator();
+            questions.push({
+                ...problem,
+                sourceAge: youngerAge,
+                sourceDifficulty: 'easy'
+            });
+        }
+        console.log(`Generated 5 questions from age ${youngerAge} (easy)`);
+    } else {
+        console.warn(`No generator found for ${operation} age ${youngerAge} (easy)`);
     }
 
     // Get 5 questions from current age (medium difficulty)
     const currentConfig = getConfigByAge(operation, ageGroup, 'medium');
     if (currentConfig && currentConfig.generator) {
-        const currentProblems = currentConfig.generator(5);
-        questions.push(...currentProblems.map(p => ({
-            ...p,
-            sourceAge: ageGroup,
-            sourceDifficulty: 'medium'
-        })));
+        // Call generator 5 times to get 5 problems
+        for (let i = 0; i < 5; i++) {
+            const problem = currentConfig.generator();
+            questions.push({
+                ...problem,
+                sourceAge: ageGroup,
+                sourceDifficulty: 'medium'
+            });
+        }
+        console.log(`Generated 5 questions from age ${ageGroup} (medium)`);
+    } else {
+        console.warn(`No generator found for ${operation} age ${ageGroup} (medium)`);
     }
 
     // Shuffle questions so they're mixed
