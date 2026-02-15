@@ -39,7 +39,8 @@ function getDemoLimit(defaultCount) {
 }
 
 // Drawing tutorials database with SVG visual steps - Age-based structure
-const drawingTutorials = {
+// Age-based drawing tutorials (INTERNAL - kept for future assessment system)
+const ageBasedDrawingTutorials = {
     '4-5': {
         easy: {
             circle: {
@@ -774,6 +775,50 @@ const drawingTutorials = {
     }
 };
 
+// Convert age-based drawing tutorials to level-based structure
+function buildLevelBasedDrawingTutorials() {
+    const levelTutorials = {};
+
+    for (const ageGroup in ageBasedDrawingTutorials) {
+        for (const difficulty in ageBasedDrawingTutorials[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            const tutorials = ageBasedDrawingTutorials[ageGroup][difficulty];
+            levelTutorials[key] = {};
+
+            // Copy each tutorial with level metadata
+            for (const tutorialKey in tutorials) {
+                levelTutorials[key][tutorialKey] = {
+                    ...tutorials[tutorialKey],
+                    level: level,
+                    ageEquivalent: ageGroup,
+                    difficultyEquivalent: difficulty
+                };
+            }
+        }
+    }
+    return levelTutorials;
+}
+
+const drawingTutorials = buildLevelBasedDrawingTutorials();
+
+// Helper functions for tutorial access
+function getTutorialsByLevel(level) {
+    return drawingTutorials[`level${level}`] || {};
+}
+
+function getTutorialsByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getTutorialsByLevel(level);
+}
+
+// Helper to get specific tutorial
+function getTutorial(ageGroup, difficulty, tutorialKey) {
+    const tutorials = getTutorialsByAge(ageGroup, difficulty);
+    return tutorials[tutorialKey];
+}
+
 /**
  * SVG Drawing Functions - Generate visual guides for each step
  */
@@ -1387,8 +1432,8 @@ function loadTutorialList(difficulty) {
     const tutorialList = document.getElementById('tutorial-list');
     tutorialList.innerHTML = '';
 
-    // Get tutorials for current age and difficulty
-    const tutorials = drawingTutorials[currentAge][difficulty];
+    // Get tutorials for current age and difficulty (maps to level internally)
+    const tutorials = getTutorialsByAge(currentAge, difficulty);
     const tutorialEntries = Object.entries(tutorials);
 
     // Limit to 2 tutorials in demo mode
@@ -1421,7 +1466,8 @@ function loadDrawingTutorial(tutorialKey) {
 
     tutorialSelection.style.display = 'none';
 
-    const tutorial = drawingTutorials[currentAge][currentDifficulty][tutorialKey];
+    // Get tutorial (maps to level internally)
+    const tutorial = getTutorial(currentAge, currentDifficulty, tutorialKey);
 
     worksheetArea.innerHTML = `
         <div class="navigation" style="margin-bottom: 20px;">
@@ -1532,7 +1578,8 @@ function loadDrawingTutorial(tutorialKey) {
  * Update the displayed step
  */
 function updateStep() {
-    const tutorial = drawingTutorials[currentAge][currentDifficulty][currentTutorial];
+    // Get tutorial (maps to level internally)
+    const tutorial = getTutorial(currentAge, currentDifficulty, currentTutorial);
     const step = tutorial.steps[currentStep];
 
     // Update step number
@@ -1590,7 +1637,8 @@ function updateStep() {
  * Go to next step
  */
 function nextStep() {
-    const tutorial = drawingTutorials[currentAge][currentDifficulty][currentTutorial];
+    // Get tutorial (maps to level internally)
+    const tutorial = getTutorial(currentAge, currentDifficulty, currentTutorial);
     if (currentStep < tutorial.steps.length - 1) {
         currentStep++;
         updateStep();
@@ -1909,7 +1957,8 @@ function savePDF() {
             return;
         }
 
-        const tutorial = drawingTutorials[currentAge]?.[currentDifficulty]?.[currentTutorial];
+        // Get tutorial (maps to level internally)
+        const tutorial = getTutorial(currentAge, currentDifficulty, currentTutorial);
         if (!tutorial) {
             alert('Error: Could not find tutorial data. Please reload the page and try again.');
             return;
