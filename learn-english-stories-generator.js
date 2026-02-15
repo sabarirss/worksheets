@@ -56,7 +56,8 @@ function backToStoryList() {
 
 // Story Database - Original educational stories
 // Organized by age group and difficulty level
-const storyDatabase = {
+// Age-based Learn English story database (INTERNAL - kept for future assessment system)
+const ageBasedLearnEnglishStories = {
     '4-5': {
         easy: [
         {
@@ -1316,11 +1317,45 @@ const storyDatabase = {
     }
 };
 
+// Convert age-based Learn English stories to level-based structure
+function buildLevelBasedLearnEnglishStories() {
+    const levelStories = {};
+
+    for (const ageGroup in ageBasedLearnEnglishStories) {
+        for (const difficulty in ageBasedLearnEnglishStories[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            const stories = ageBasedLearnEnglishStories[ageGroup][difficulty];
+            levelStories[key] = stories.map(story => ({
+                ...story,
+                level: level,
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty
+            }));
+        }
+    }
+    return levelStories;
+}
+
+const storyDatabase = buildLevelBasedLearnEnglishStories();
+
+// Helper functions for Learn English story access
+function getLearnEnglishStoriesByLevel(level) {
+    return storyDatabase[`level${level}`] || [];
+}
+
+function getLearnEnglishStoriesByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getLearnEnglishStoriesByLevel(level);
+}
+
 // Load story list for selected age group and difficulty
 function loadStoryList() {
     if (!currentAge || !currentDifficulty) return;
 
-    const stories = storyDatabase[currentAge]?.[currentDifficulty] || [];
+    // Get stories (maps to level internally)
+    const stories = getLearnEnglishStoriesByAge(currentAge, currentDifficulty);
 
     // Limit to 2 stories per age-difficulty in demo mode
     const limit = getDemoLimit(stories.length);
@@ -1366,7 +1401,8 @@ function loadStoryList() {
 function loadStory(storyId) {
     if (!currentAge || !currentDifficulty) return;
 
-    const stories = storyDatabase[currentAge]?.[currentDifficulty] || [];
+    // Get stories (maps to level internally)
+    const stories = getLearnEnglishStoriesByAge(currentAge, currentDifficulty);
     const story = stories.find(s => s.id === storyId);
     if (!story) return;
 
