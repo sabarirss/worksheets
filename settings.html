@@ -312,6 +312,23 @@
                 <div class="info-text" id="version-info-text">Demo version limited to 2 pages per activity</div>
             </div>
 
+            <!-- Input Mode Selection -->
+            <div class="form-group" id="input-mode-section">
+                <label for="input-mode">✍️ Input Mode</label>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="keyboard-label">
+                        <input type="radio" name="inputMode" value="keyboard" id="input-mode-keyboard" onchange="updateInputMode('keyboard')" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;">⌨️ Keyboard</span>
+                    </label>
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="stylus-label">
+                        <input type="radio" name="inputMode" value="pencil" id="input-mode-pencil" onchange="updateInputMode('pencil')" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;">✏️ Stylus</span>
+                        <span id="stylus-full-version-badge" style="font-size: 0.8em; color: #ff9800; margin-left: 8px; display: none;">(Full Version)</span>
+                    </label>
+                </div>
+                <div class="info-text">Select how you want to input answers in worksheets</div>
+            </div>
+
             <!-- Admin Demo Preview Toggle -->
             <div class="form-group" id="admin-demo-preview" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-top: 20px;">
                 <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; font-size: 1.1em;">
@@ -643,6 +660,33 @@
                     // Load and set current preview state
                     const isDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
                     document.getElementById('demo-preview-toggle').checked = isDemoPreview;
+                }
+
+                // Load input mode (for all users)
+                const inputMode = userData.inputMode || 'keyboard';
+                const keyboardRadio = document.getElementById('input-mode-keyboard');
+                const pencilRadio = document.getElementById('input-mode-pencil');
+                const keyboardLabel = document.getElementById('keyboard-label');
+                const stylusLabel = document.getElementById('stylus-label');
+                const stylusBadge = document.getElementById('stylus-full-version-badge');
+
+                // Set selected input mode
+                if (inputMode === 'pencil') {
+                    pencilRadio.checked = true;
+                    stylusLabel.style.borderColor = '#667eea';
+                    stylusLabel.style.background = '#f0f4ff';
+                } else {
+                    keyboardRadio.checked = true;
+                    keyboardLabel.style.borderColor = '#667eea';
+                    keyboardLabel.style.background = '#f0f4ff';
+                }
+
+                // Show "Full Version" badge for stylus if demo version
+                if (version === 'demo') {
+                    stylusBadge.style.display = 'inline';
+                    pencilRadio.disabled = true;
+                    stylusLabel.style.opacity = '0.5';
+                    stylusLabel.style.cursor = 'not-allowed';
                 }
 
                 // Hide Parental Control section for admin users
@@ -1090,6 +1134,62 @@
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
+        }
+
+        // Update input mode
+        async function updateInputMode(mode) {
+            if (!currentUser) return;
+
+            try {
+                // Check if switching to pencil mode with demo version
+                if (mode === 'pencil') {
+                    const version = currentUser.version || 'demo';
+                    if (version === 'demo') {
+                        alert('⚠️ Stylus mode is only available in Full Version.\n\nPlease upgrade to Full Version first.');
+                        // Reset to keyboard
+                        document.getElementById('input-mode-keyboard').checked = true;
+                        document.getElementById('keyboard-label').style.borderColor = '#667eea';
+                        document.getElementById('keyboard-label').style.background = '#f0f4ff';
+                        document.getElementById('stylus-label').style.borderColor = '#e0e0e0';
+                        document.getElementById('stylus-label').style.background = 'white';
+                        return;
+                    }
+                }
+
+                // Update in Firestore
+                const uid = currentUser.uid;
+                await firebase.firestore().collection('users').doc(uid).update({
+                    inputMode: mode,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update current user data
+                currentUser.inputMode = mode;
+
+                // Update UI styling
+                const keyboardLabel = document.getElementById('keyboard-label');
+                const stylusLabel = document.getElementById('stylus-label');
+
+                if (mode === 'pencil') {
+                    keyboardLabel.style.borderColor = '#e0e0e0';
+                    keyboardLabel.style.background = 'white';
+                    stylusLabel.style.borderColor = '#667eea';
+                    stylusLabel.style.background = '#f0f4ff';
+                } else {
+                    keyboardLabel.style.borderColor = '#667eea';
+                    keyboardLabel.style.background = '#f0f4ff';
+                    stylusLabel.style.borderColor = '#e0e0e0';
+                    stylusLabel.style.background = 'white';
+                }
+
+                // Show success message
+                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
+                showSuccess(`✓ Input mode changed to: ${modeIcon} ${modeName}`);
+            } catch (error) {
+                console.error('Error updating input mode:', error);
+                showError('Failed to update input mode: ' + error.message);
+            }
         }
 
         // Password change modal functions

@@ -1047,7 +1047,6 @@
                 const assignedCount = Object.values(assignedModules).filter(Boolean).length;
                 const enabledCount = Object.values(enabledModules).filter(Boolean).length;
 
-                const currentInputMode = child.inputMode || 'keyboard';
                 const currentVersion = child.version || 'demo';
 
                 return `
@@ -1061,36 +1060,6 @@
                                 <div class="child-info-line" style="color: #667eea; font-weight: bold; margin-top: 8px;">
                                     ✓ Assigned: ${assignedCount} | Enabled by Parent: ${enabledCount}
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Mode Selection -->
-                        <div class="modules-section" style="margin-bottom: 20px;">
-                            <div class="modules-title">✍️ Input Mode</div>
-                            <div style="color: #666; font-size: 0.9em; margin-bottom: 15px; padding: 10px; background: #fff9e6; border-radius: 8px;">
-                                ℹ️ Select how this child will input answers in worksheets
-                            </div>
-                            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                                <label style="display: flex; align-items: center; padding: 12px 20px; border: 2px solid ${currentInputMode === 'keyboard' ? '#667eea' : '#ddd'}; border-radius: 8px; cursor: pointer; background: ${currentInputMode === 'keyboard' ? '#f0f4ff' : 'white'}; flex: 1;">
-                                    <input type="radio"
-                                           name="inputMode-${child.id}"
-                                           value="keyboard"
-                                           ${currentInputMode === 'keyboard' ? 'checked' : ''}
-                                           onchange="updateChildInputMode('${child.id}', 'keyboard')"
-                                           style="margin-right: 10px;">
-                                    <span style="font-size: 1.2em;">⌨️ Keyboard</span>
-                                </label>
-                                <label style="display: flex; align-items: center; padding: 12px 20px; border: 2px solid ${currentInputMode === 'pencil' ? '#667eea' : '#ddd'}; border-radius: 8px; cursor: pointer; background: ${currentInputMode === 'pencil' ? '#f0f4ff' : 'white'}; flex: 1; ${currentVersion === 'demo' ? 'opacity: 0.5;' : ''}">
-                                    <input type="radio"
-                                           name="inputMode-${child.id}"
-                                           value="pencil"
-                                           ${currentInputMode === 'pencil' ? 'checked' : ''}
-                                           ${currentVersion === 'demo' ? 'disabled' : ''}
-                                           onchange="updateChildInputMode('${child.id}', 'pencil')"
-                                           style="margin-right: 10px;">
-                                    <span style="font-size: 1.2em;">✏️ Stylus</span>
-                                    ${currentVersion === 'demo' ? '<span style="font-size: 0.8em; color: #ff9800; margin-left: 8px;">(Full Version)</span>' : ''}
-                                </label>
                             </div>
                         </div>
 
@@ -1143,48 +1112,6 @@
                     </div>
                 `;
             }).join('');
-        }
-
-        async function updateChildInputMode(childId, mode) {
-            try {
-                console.log(`Updating input mode for child ${childId} to: ${mode}`);
-
-                // Check if switching to pencil mode
-                if (mode === 'pencil') {
-                    // Get child data to check version
-                    const childDoc = await firebase.firestore().collection('children').doc(childId).get();
-                    if (childDoc.exists) {
-                        const childData = childDoc.data();
-                        const version = childData.version || 'demo';
-
-                        if (version === 'demo') {
-                            alert('⚠️ Stylus mode is only available in Full Version.\n\nPlease upgrade to Full Version first.');
-                            // Reload to reset the radio button
-                            await loadParentsAndChildren();
-                            return;
-                        }
-                    }
-                }
-
-                // Update child document in Firestore
-                await firebase.firestore().collection('children').doc(childId).update({
-                    inputMode: mode,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                console.log(`✓ Input mode updated to: ${mode}`);
-
-                // Show success message
-                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
-                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
-                alert(`✓ Input mode changed to: ${modeIcon} ${modeName}`);
-
-                // Reload data to reflect changes
-                await loadParentsAndChildren();
-            } catch (error) {
-                console.error('Error updating input mode:', error);
-                alert('Error updating input mode: ' + error.message);
-            }
         }
 
         async function saveChildModules(childId) {
