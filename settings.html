@@ -637,10 +637,14 @@
                     document.getElementById('demo-preview-toggle').checked = isDemoPreview;
                 }
 
-                // Input mode is now managed per-child, hide from parent settings
+                // Input mode section: Show for admin only, hide for parents (they manage per-child)
                 const inputModeSection = document.getElementById('input-mode-section');
                 if (inputModeSection) {
-                    inputModeSection.style.display = 'none';
+                    if (userData.role === 'admin') {
+                        inputModeSection.style.display = 'block';
+                    } else {
+                        inputModeSection.style.display = 'none';
+                    }
                 }
 
                 // Hide Parental Control section for admin users
@@ -1102,20 +1106,46 @@
                         }
                     }
 
+                    // Get child's input mode
+                    const inputMode = child.inputMode || 'keyboard';
+
+                    // Input mode selection (only for full version)
+                    let inputModeSection = '';
+                    if (version === 'full') {
+                        inputModeSection = `
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                                <p style="margin: 0 0 10px 0; color: #666; font-size: 0.95em; font-weight: bold;">✍️ Input Mode:</p>
+                                <div style="display: flex; gap: 10px;">
+                                    <label style="display: flex; align-items: center; padding: 10px 15px; border: 2px solid ${inputMode === 'keyboard' ? '#667eea' : '#e0e0e0'}; border-radius: 8px; cursor: pointer; background: ${inputMode === 'keyboard' ? '#f0f4ff' : 'white'}; flex: 1; transition: all 0.3s;">
+                                        <input type="radio" name="inputMode-${childId}" value="keyboard" ${inputMode === 'keyboard' ? 'checked' : ''} onchange="updateChildInputMode('${childId}', '${child.name}', 'keyboard')" style="margin-right: 8px;">
+                                        <span>⌨️ Keyboard</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; padding: 10px 15px; border: 2px solid ${inputMode === 'pencil' ? '#667eea' : '#e0e0e0'}; border-radius: 8px; cursor: pointer; background: ${inputMode === 'pencil' ? '#f0f4ff' : 'white'}; flex: 1; transition: all 0.3s;">
+                                        <input type="radio" name="inputMode-${childId}" value="pencil" ${inputMode === 'pencil' ? 'checked' : ''} onchange="updateChildInputMode('${childId}', '${child.name}', 'pencil')" style="margin-right: 8px;">
+                                        <span>✏️ Stylus</span>
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     childCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">
-                                    ${child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶'} ${child.name}
-                                </h4>
-                                <div style="margin-bottom: 8px;">${versionBadge}</div>
-                                <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
-                                    ${version === 'demo' ? 'Limited to 2 pages per activity' : 'Unlimited access to all content'}
-                                </p>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">
+                                        ${child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶'} ${child.name}
+                                    </h4>
+                                    <div style="margin-bottom: 8px;">${versionBadge}</div>
+                                    <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                                        ${version === 'demo' ? 'Limited to 2 pages per activity' : 'Unlimited access to all content'}
+                                    </p>
+                                </div>
+                                <div>
+                                    ${actionButton}
+                                </div>
                             </div>
-                            <div>
-                                ${actionButton}
-                            </div>
+                            ${inputModeSection}
                         </div>
                     `;
 
@@ -1147,6 +1177,25 @@
             } catch (error) {
                 console.error('Error requesting upgrade:', error);
                 showError('Failed to request upgrade: ' + error.message);
+            }
+        }
+
+        // Update child's input mode
+        async function updateChildInputMode(childId, childName, mode) {
+            try {
+                await firebase.firestore().collection('children').doc(childId).update({
+                    inputMode: mode,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
+                showSuccess(`Input mode for ${childName} changed to ${modeIcon} ${modeName}`);
+
+                console.log(`Input mode updated for ${childName}: ${mode}`);
+            } catch (error) {
+                console.error('Error updating input mode:', error);
+                showError('Failed to update input mode: ' + error.message);
             }
         }
 

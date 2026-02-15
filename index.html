@@ -781,10 +781,7 @@
                     profileSelectorContainer.style.display = 'none';
                 }
 
-                // Initialize input mode toggle for admin (they don't have children)
-                if (typeof createInputModeToggle === 'function') {
-                    createInputModeToggle();
-                }
+                // Initialize input mode for admin (without creating header toggle)
                 if (typeof initializeInputMode === 'function') {
                     initializeInputMode();
                 }
@@ -887,10 +884,7 @@
                 setUserVersion(version);
             }
 
-            // Create and initialize input mode toggle UI
-            if (typeof createInputModeToggle === 'function') {
-                createInputModeToggle();
-            }
+            // Initialize input mode (without creating header toggle)
             if (typeof initializeInputMode === 'function') {
                 initializeInputMode();
             }
