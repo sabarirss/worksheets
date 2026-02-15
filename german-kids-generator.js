@@ -1,5 +1,6 @@
 // German Kids Story Generator - Simple stories with comprehension questions
 
+
 let currentAge = null;
 let currentDifficulty = '';
 let currentStory = '';

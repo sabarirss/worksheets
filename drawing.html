@@ -19,6 +19,8 @@
     <script src="firebase-auth.js"></script>
     <script src="firebase-storage.js"></script>
     <script src="age-filter.js"></script>
+    <script src="child-session-manager.js"></script>
+    <script src="profile-selector.js"></script>
 
     <style>
         .drawing-selection {
@@ -289,9 +291,12 @@
     </script>
 
     <div class="container">
-        <header>
-            <h1>🎨 Step-by-Step Drawing</h1>
-            <p class="subtitle">Learn to draw with easy tutorials!</p>
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>🎨 Step-by-Step Drawing</h1>
+                <p class="subtitle">Learn to draw with easy tutorials!</p>
+            </div>
+            <div id="profile-selector-container"></div>
         </header>
 
         <!-- Age Group Selection -->

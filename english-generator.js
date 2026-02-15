@@ -1,5 +1,6 @@
 // English Worksheet Generator
 
+
 // State variables for navigation
 let selectedAgeGroup = null;
 let selectedDifficulty = null;
@@ -2515,7 +2516,10 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
+                        <input type="text" id="student-name" value="${(() => {
+                            const child = getSelectedChild();
+                            return child ? child.name : getCurrentUserFullName();
+                        })()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>
@@ -2946,7 +2950,10 @@ function renderWorksheet() {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
+                        <input type="text" id="student-name" value="${(() => {
+                            const child = getSelectedChild();
+                            return child ? child.name : getCurrentUserFullName();
+                        })()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>
@@ -3156,7 +3163,11 @@ function savePDF() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    const filename = `English_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+    // Get child name for filename
+    const child = getSelectedChild();
+    const childName = child ? child.name.replace(/\s+/g, '_') : 'Student';
+
+    const filename = `English_${childName}_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
@@ -3230,7 +3241,8 @@ function saveCurrentWorksheet() {
     }
 
     const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
-    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
+    const child = getSelectedChild();
+    const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers

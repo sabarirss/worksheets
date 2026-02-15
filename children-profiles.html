@@ -295,7 +295,7 @@
             <form id="child-form">
                 <div class="form-group">
                     <label for="child-name">Child's Name *</label>
-                    <input type="text" id="child-name" required placeholder="Enter child's name">
+                    <input type="text" id="child-name" required placeholder="Enter child's name" maxlength="50">
                 </div>
 
                 <div class="form-group">
@@ -353,8 +353,52 @@
             } else {
                 parentUid = user.uid;
                 loadChildren();
+
+                // Check for first-time setup message
+                if (sessionStorage.getItem('firstTimeSetup') === 'true') {
+                    sessionStorage.removeItem('firstTimeSetup');
+                    showWelcomeMessage();
+                }
             }
         });
+
+        function showWelcomeMessage() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; text-align: center;">
+                    <div style="font-size: 4em; margin-bottom: 20px;">👋</div>
+                    <h2 style="color: #667eea; margin-bottom: 15px;">Welcome!</h2>
+                    <p style="color: #666; font-size: 1.1em; line-height: 1.6; margin-bottom: 30px;">
+                        Please create your first child profile to begin. This will help us personalize the learning experience with age-appropriate content.
+                    </p>
+                    <button onclick="this.parentElement.parentElement.remove(); showAddChildModal();" style="
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 15px 40px;
+                        border-radius: 10px;
+                        font-size: 1.1em;
+                        font-weight: bold;
+                        cursor: pointer;
+                    ">Create First Profile</button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
 
         // Set max date to today
         document.getElementById('child-dob').max = new Date().toISOString().split('T')[0];
@@ -471,6 +515,31 @@
             const dateOfBirth = document.getElementById('child-dob').value;
             const grade = document.getElementById('child-grade').value;
 
+            // Validation
+            if (!name || name.length === 0) {
+                alert('Please enter a name');
+                return;
+            }
+
+            if (name.length > 50) {
+                alert('Name is too long (maximum 50 characters)');
+                return;
+            }
+
+            if (!dateOfBirth) {
+                alert('Please select date of birth');
+                return;
+            }
+
+            // Prevent future dates
+            const selectedDate = new Date(dateOfBirth);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+            if (selectedDate > today) {
+                alert('Date of birth cannot be in the future');
+                return;
+            }
+
             const childData = {
                 name: name,
                 gender: gender,
@@ -512,12 +581,62 @@
                 // Delete child document
                 await firebase.firestore().collection('children').doc(childId).delete();
 
-                // TODO: Also delete all worksheets for this child from storage
+                // Delete all worksheets for this child
+                await deleteChildWorksheets(childId, childName);
 
                 loadChildren();
+                alert(`${childName}'s profile and all associated worksheets have been deleted successfully.`);
             } catch (error) {
                 console.error('Error deleting child:', error);
                 alert('Error deleting child profile');
+            }
+        }
+
+        async function deleteChildWorksheets(childId, childName) {
+            try {
+                console.log(`Deleting worksheets for child ${childId} (${childName})...`);
+
+                // Query all worksheets for this child from Firestore
+                const worksheetsSnapshot = await firebase.firestore()
+                    .collection('worksheets')
+                    .where('child_id', '==', childId)
+                    .get();
+
+                if (worksheetsSnapshot.empty) {
+                    console.log('No worksheets found for this child');
+                    return;
+                }
+
+                // Delete all worksheet documents in batches
+                const batch = firebase.firestore().batch();
+                let count = 0;
+
+                worksheetsSnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                    count++;
+                });
+
+                await batch.commit();
+                console.log(`Deleted ${count} worksheet(s) for ${childName}`);
+
+                // Also clean up from localStorage (saved worksheets)
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes(`_child_${childId}`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`Removed localStorage key: ${key}`);
+                });
+
+                console.log(`Worksheet cleanup complete for ${childName}`);
+            } catch (error) {
+                console.error('Error deleting child worksheets:', error);
+                // Don't throw - let parent deletion complete even if worksheet cleanup fails
             }
         }
 

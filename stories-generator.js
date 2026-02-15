@@ -1,6 +1,7 @@
 // Story Time - Dynamic Story Generation
 // Generates 100+ stories per difficulty level per category
 
+
 let currentAge = null;
 let currentCategory = null;
 let currentDifficulty = null;

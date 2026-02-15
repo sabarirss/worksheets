@@ -1,5 +1,6 @@
 // Emotional Quotient Activities Generator
 
+
 let currentAge = null;
 let currentDifficulty = null;
 let currentWorksheet = null;
@@ -564,7 +565,7 @@ function renderWorksheet() {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name">
+                        <input type="text" id="student-name" value="${getSelectedChild() ? getSelectedChild().name : getCurrentUserFullName()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>

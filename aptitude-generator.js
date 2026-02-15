@@ -1,5 +1,6 @@
 // Aptitude & Logic Puzzles - Complete with Difficulty Levels
 
+
 let currentAge = null;
 let currentType = null;
 let currentDifficulty = null;
@@ -747,7 +748,10 @@ function renderWorksheet() {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
+                        <input type="text" id="student-name" value="${(() => {
+                            const child = getSelectedChild();
+                            return child ? child.name : getCurrentUserFullName();
+                        })()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>
@@ -1159,7 +1163,8 @@ function saveCurrentWorksheet() {
     }
 
     const identifier = `${currentWorksheet.type}-${currentWorksheet.difficulty}`;
-    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
+    const child = getSelectedChild();
+    const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers (for counting and logic problems)

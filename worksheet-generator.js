@@ -1,4 +1,5 @@
 // Math Worksheet Generator
+// Note: getSelectedChild() is provided by profile-selector.js
 
 // State variables for navigation
 let selectedAgeGroup = null;
@@ -906,7 +907,10 @@ function renderWorksheet() {
                 <div class="student-info">
                     <div class="info-row">
                         <strong>Name:</strong>
-                        <input type="text" id="student-name" value="${getCurrentUserFullName()}">
+                        <input type="text" id="student-name" value="${(() => {
+                            const child = getSelectedChild();
+                            return child ? child.name : getCurrentUserFullName();
+                        })()}">
                     </div>
                     <div class="info-row">
                         <strong>Date:</strong>
@@ -1145,8 +1149,12 @@ function savePDF() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
+    // Get child name for filename
+    const child = getSelectedChild();
+    const childName = child ? child.name.replace(/\s+/g, '_') : 'Student';
+
     const operationName = currentWorksheet.operation.charAt(0).toUpperCase() + currentWorksheet.operation.slice(1);
-    const filename = `${operationName}_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_Page${currentPage}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+    const filename = `${operationName}_${childName}_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_Page${currentPage}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
 
     // Hide elements that shouldn't be in PDF
     const controls = document.querySelector('.controls');
@@ -1223,7 +1231,8 @@ function saveCurrentWorksheet() {
     }
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
+    const child = getSelectedChild();
+    const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers
@@ -1415,7 +1424,8 @@ function autoSavePage() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const studentName = document.getElementById('student-name')?.value || getCurrentUserFullName();
+    const child = getSelectedChild();
+    const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
     // Collect canvas answers

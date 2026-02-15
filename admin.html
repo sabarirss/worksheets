@@ -3,35 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - User Management</title>
+    <title>Admin Panel - Parent & Children Management</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
         .admin-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
         .admin-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #2c3e50;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         .admin-header h1 {
-            margin: 0;
-            font-size: 2em;
+            margin: 0 0 10px 0;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .admin-actions {
+        .admin-header p {
+            margin: 0;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .header-actions {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .btn {
@@ -64,66 +79,255 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .users-table {
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .search-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-filter input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .search-filter input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .parents-list {
             background: white;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f8f9fa;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
+        .parent-row {
             border-bottom: 1px solid #eee;
         }
 
-        th {
+        .parent-header {
+            padding: 20px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s;
+        }
+
+        .parent-header:hover {
+            background: #e9ecef;
+        }
+
+        .parent-info {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 40px 1fr 200px 150px 100px;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .expand-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .parent-row.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .parent-name {
             font-weight: bold;
-            color: #333;
-            text-transform: uppercase;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .parent-email {
+            color: #666;
             font-size: 0.9em;
         }
 
-        .user-role {
-            display: inline-block;
-            padding: 4px 12px;
+        .parent-stats {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .children-container {
+            display: none;
+            padding: 20px;
+            background: #fafbfc;
+        }
+
+        .parent-row.expanded .children-container {
+            display: block;
+        }
+
+        .child-card {
+            background: white;
+            border: 2px solid #e9ecef;
             border-radius: 12px;
-            font-size: 0.85em;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .child-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .child-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .child-avatar {
+            font-size: 3em;
+        }
+
+        .child-details {
+            flex: 1;
+        }
+
+        .child-name {
+            font-size: 1.3em;
             font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
         }
 
-        .role-admin {
-            background: #667eea;
-            color: white;
+        .child-info-line {
+            color: #666;
+            font-size: 0.95em;
+            margin: 3px 0;
         }
 
-        .role-student {
-            background: #38ef7d;
-            color: white;
+        .modules-section {
+            margin-top: 15px;
         }
 
-        .module-badge {
-            display: inline-block;
-            margin: 2px;
-            padding: 3px 8px;
+        .modules-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .module-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
             border-radius: 8px;
-            font-size: 0.75em;
-            background: #e3f2fd;
-            color: #1976d2;
+            border: 2px solid transparent;
+            transition: all 0.2s;
         }
 
-        .module-badge.disabled {
-            background: #fafafa;
+        .module-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .module-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .module-checkbox input[type="checkbox"]:checked {
+            accent-color: #667eea;
+        }
+
+        .module-checkbox label {
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .save-modules-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-modules-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .no-children {
+            text-align: center;
+            padding: 40px;
             color: #999;
+            font-style: italic;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
         }
 
         .modal {
@@ -189,25 +393,6 @@
             border-color: #667eea;
         }
 
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
         .modal-actions {
             display: flex;
             gap: 10px;
@@ -215,46 +400,41 @@
             margin-top: 30px;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+        @media (max-width: 768px) {
+            .parent-info {
+                grid-template-columns: 30px 1fr;
+                gap: 10px;
+            }
 
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+            .parent-stats,
+            .parent-email {
+                display: none;
+            }
 
-        .stat-value {
-            font-size: 3em;
-            font-weight: bold;
-            color: #667eea;
-            margin: 10px 0;
-        }
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .stat-label {
-            color: #666;
-            font-size: 1.1em;
+            .child-header {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <div>
-                <h1>👤 User Management</h1>
-                <p style="margin: 5px 0 0 0; opacity: 0.9;">Admin Panel</p>
-            </div>
-            <div>
+            <h1>Parent & Children Management</h1>
+            <p>Manage parent accounts, children profiles, and per-child module allocations</p>
+            <div class="header-actions">
                 <button class="btn btn-secondary" onclick="window.location.href='index.html'">
-                    ← Back to Home
+                    Back to Home
                 </button>
-                <button class="btn btn-danger" onclick="logout()" style="margin-left: 10px;">
+                <button class="btn btn-secondary" onclick="loadParentsAndChildren()">
+                    Refresh
+                </button>
+                <button class="btn btn-danger" onclick="logout()">
                     Logout
                 </button>
             </div>
@@ -264,136 +444,18 @@
             <!-- Stats will be populated here -->
         </div>
 
-        <div class="admin-actions">
-            <button class="btn btn-primary" onclick="openCreateUserModal()">
-                + Add New User
-            </button>
-            <button class="btn btn-secondary" onclick="loadUsers()">
-                🔄 Refresh
-            </button>
+        <div class="search-filter">
+            <input type="text" id="search-input" placeholder="Search parents by name or email..." onkeyup="filterParents()">
         </div>
 
-        <div class="users-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Full Name</th>
-                        <th>Age</th>
-                        <th>Role</th>
-                        <th>Version</th>
-                        <th>Modules Access</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="users-tbody">
-                    <!-- Users will be populated here -->
-                </tbody>
-            </table>
+        <div id="parents-list" class="parents-list">
+            <!-- Parents and children will be populated here -->
         </div>
-    </div>
 
-    <!-- Create/Edit User Modal -->
-    <div class="modal" id="user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title">Create New User</h2>
-            </div>
-
-            <form id="user-form" onsubmit="handleSubmitUser(event)">
-                <div class="form-group">
-                    <label for="user-username">Username *</label>
-                    <input type="text" id="user-username" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="user-fullname">Full Name *</label>
-                    <input type="text" id="user-fullname" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="user-password">Password *</label>
-                    <input type="password" id="user-password" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="user-role">Role *</label>
-                    <select id="user-role">
-                        <option value="student">Student</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="user-age">Child's Age</label>
-                    <select id="user-age" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; background: white; cursor: pointer;">
-                        <option value="">Not set</option>
-                        <option value="4">4 years old</option>
-                        <option value="5">5 years old</option>
-                        <option value="6">6 years old</option>
-                        <option value="7">7 years old</option>
-                        <option value="8">8 years old</option>
-                        <option value="9">9 years old</option>
-                        <option value="10">10 years old</option>
-                        <option value="11">11 years old</option>
-                        <option value="12">12 years old</option>
-                        <option value="13">13+ years old</option>
-                    </select>
-                    <small style="color: #666; font-size: 0.9em; display: block; margin-top: 5px;">Content will be filtered based on child's age</small>
-                </div>
-
-                <div class="form-group">
-                    <label>Package Access</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-math" checked>
-                            <label for="module-math">📐 Mathematics</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-english" checked>
-                            <label for="module-english">📚 English</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-aptitude" checked>
-                            <label for="module-aptitude">🧩 Aptitude</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-stories" checked>
-                            <label for="module-stories">📖 Stories</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-emotional">
-                            <label for="module-emotional">❤️ EQ</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-german">
-                            <label for="module-german">🇩🇪 German</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-drawing">
-                            <label for="module-drawing">🎨 Drawing</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-german-kids">
-                            <label for="module-german-kids">🇩🇪 German Kids</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="module-learn-english-stories">
-                            <label for="module-learn-english-stories">📚 Learn English Stories</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span id="submit-btn-text">Create User</span>
-                    </button>
-                </div>
-            </form>
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">👨‍👩‍👧‍👦</div>
+            <h3>No parent accounts found</h3>
+            <p>Parent accounts will appear here when created</p>
         </div>
     </div>
 
@@ -409,15 +471,17 @@
     <script src="firebase-auth.js"></script>
 
     <script>
+        let parentsData = [];
+        let childrenData = [];
+
         // Wait for Firebase auth and check admin access
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                // Not authenticated
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Check if user is admin (query by email, not username)
+            // Check if user is admin
             const userDoc = await firebase.firestore().collection('users')
                 .where('email', '==', user.email.toLowerCase())
                 .limit(1)
@@ -426,374 +490,279 @@
             if (userDoc.empty || userDoc.docs[0].data().role !== 'admin') {
                 alert('Access denied. Admin privileges required.');
                 window.location.href = 'index.html';
+                return;
             }
+
+            // Load data
+            loadParentsAndChildren();
         });
 
-        let editingUsername = null;
-
-        // Load users on page load
+        // Load parents and children on page load
         window.addEventListener('DOMContentLoaded', function() {
-            loadUsers();
-            updateStats();
+            loadParentsAndChildren();
         });
+
+        async function loadParentsAndChildren() {
+            try {
+                // Load all users with role='parent'
+                const parentsSnapshot = await firebase.firestore().collection('users')
+                    .where('role', '==', 'parent')
+                    .get();
+
+                parentsData = parentsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    uid: doc.data().uid,
+                    ...doc.data()
+                }));
+
+                // Load all children
+                const childrenSnapshot = await firebase.firestore().collection('children').get();
+                childrenData = childrenSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Update stats
+                await updateStats();
+
+                // Render parents list
+                renderParents();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading data. Check console for details.');
+            }
+        }
 
         async function updateStats() {
-            const users = await getAllUsers();
-            const totalUsers = users.length;
-            const admins = users.filter(u => u.role === 'admin').length;
-            const students = users.filter(u => u.role === 'student').length;
+            const totalParents = parentsData.length;
+            const totalChildren = childrenData.length;
+
+            // Count children with modules assigned
+            const childrenWithModules = childrenData.filter(child => {
+                const modules = child.modules || {};
+                return Object.values(modules).some(enabled => enabled);
+            }).length;
 
             const statsHTML = `
                 <div class="stat-card">
-                    <div class="stat-label">Total Users</div>
-                    <div class="stat-value">${totalUsers}</div>
+                    <div class="stat-label">Total Parents</div>
+                    <div class="stat-value">${totalParents}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Admins</div>
-                    <div class="stat-value">${admins}</div>
+                    <div class="stat-label">Total Children</div>
+                    <div class="stat-value">${totalChildren}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Students</div>
-                    <div class="stat-value">${students}</div>
+                    <div class="stat-label">Children with Modules</div>
+                    <div class="stat-value">${childrenWithModules}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Children/Parent</div>
+                    <div class="stat-value">${totalParents > 0 ? (totalChildren / totalParents).toFixed(1) : 0}</div>
                 </div>
             `;
 
             document.getElementById('stats-grid').innerHTML = statsHTML;
         }
 
-        async function loadUsers() {
-            const users = await getAllUsers();
-            const tbody = document.getElementById('users-tbody');
+        function renderParents() {
+            const parentsList = document.getElementById('parents-list');
+            const emptyState = document.getElementById('empty-state');
 
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No users found</td></tr>';
+            if (parentsData.length === 0) {
+                parentsList.style.display = 'none';
+                emptyState.style.display = 'block';
                 return;
             }
 
-            tbody.innerHTML = users.map(user => {
-                // Skip users without username
-                if (!user.username) {
-                    console.warn('User without username:', user);
-                    return '';
-                }
+            parentsList.style.display = 'block';
+            emptyState.style.display = 'none';
 
-                const modules = user.modules || {};
-                const modulesList = Object.keys(modules)
-                    .map(mod => {
-                        const enabled = modules[mod];
-                        const names = {
-                            math: '📐 Math',
-                            english: '📚 English',
-                            aptitude: '🧩 Aptitude',
-                            stories: '📖 Stories',
-                            'emotional-quotient': '❤️ EQ',
-                            german: '🇩🇪 German',
-                            drawing: '🎨 Drawing',
-                            'german-kids': '🇩🇪 German Kids',
-                            'learn-english-stories': '📚 Learn English'
-                        };
-                        return `<span class="module-badge ${enabled ? '' : 'disabled'}">${names[mod] || mod}</span>`;
-                    }).join('');
-
-                // Handle createdAt safely
-                let createdDate = 'N/A';
-                if (user.createdAt) {
-                    try {
-                        // Handle Firestore Timestamp
-                        const timestamp = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
-                        createdDate = timestamp.toLocaleDateString();
-                    } catch (e) {
-                        console.warn('Error parsing createdAt:', e);
-                    }
-                }
-
-                const isAdmin = user.username === 'admin';
-                const username = user.username || 'unknown';
-                const fullName = user.fullName || 'N/A';
-                const age = user.age ? `${user.age} years` : 'Not set';
-
-                // Version display
-                const version = user.version || 'demo';
-                const versionUpgradeRequested = user.versionUpgradeRequested || false;
-
-                let versionHTML = '';
-                if (versionUpgradeRequested) {
-                    versionHTML = `
-                        <span style="background: #ff9800; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
-                            Demo (⏳ Upgrade Requested)
-                        </span><br>
-                        <button class="btn" onclick="approveVersionUpgrade('${username}')" style="background: #4caf50; color: white; padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
-                            ✓ Approve
-                        </button>
-                        <button class="btn" onclick="denyVersionUpgrade('${username}')" style="background: #f44336; color: white; padding: 6px 12px; font-size: 0.85em;">
-                            ✗ Deny
-                        </button>
-                    `;
-                } else {
-                    const versionBadgeColor = version === 'full' ? '#4caf50' : '#999';
-                    const versionText = version === 'full' ? 'Full' : 'Demo';
-                    versionHTML = `
-                        <span style="background: ${versionBadgeColor}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; display: inline-block;">
-                            ${versionText}
-                        </span>
-                    `;
-                }
+            parentsList.innerHTML = parentsData.map(parent => {
+                const parentChildren = childrenData.filter(child => child.parent_uid === parent.uid);
+                const childCount = parentChildren.length;
 
                 return `
-                    <tr>
-                        <td><strong>${username}</strong></td>
-                        <td>${fullName}</td>
-                        <td>${age}</td>
-                        <td><span class="user-role role-${user.role}">${user.role}</span></td>
-                        <td>${versionHTML}</td>
-                        <td>${modulesList}</td>
-                        <td>${createdDate}</td>
-                        <td>
-                            <button class="btn btn-secondary" onclick="openEditUserModal('${username}')" style="padding: 8px 16px; margin-right: 5px;">
-                                Edit
-                            </button>
-                            ${!isAdmin ? `<button class="btn btn-danger" onclick="confirmDeleteUser('${username}')" style="padding: 8px 16px;">Delete</button>` : ''}
-                        </td>
-                    </tr>
+                    <div class="parent-row" id="parent-${parent.uid}">
+                        <div class="parent-header" onclick="toggleParent('${parent.uid}')">
+                            <div class="parent-info">
+                                <span class="expand-icon">▶</span>
+                                <div>
+                                    <div class="parent-name">${parent.fullName || parent.username || 'Unknown'}</div>
+                                    <div class="parent-email">${parent.email || ''}</div>
+                                </div>
+                                <div class="parent-stats">${childCount} ${childCount === 1 ? 'child' : 'children'}</div>
+                                <div class="parent-stats">Joined ${formatDate(parent.createdAt)}</div>
+                                <div>
+                                    <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); viewParentDetails('${parent.uid}')">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="children-container">
+                            ${renderChildren(parentChildren)}
+                        </div>
+                    </div>
                 `;
             }).join('');
-
-            updateStats();
         }
 
-        function openCreateUserModal() {
-            editingUsername = null;
-            document.getElementById('modal-title').textContent = 'Create New User';
-            document.getElementById('submit-btn-text').textContent = 'Create User';
-            document.getElementById('user-form').reset();
+        function renderChildren(children) {
+            if (children.length === 0) {
+                return '<div class="no-children">No children profiles yet. Parents can add children from their account.</div>';
+            }
 
-            // Make password required when creating new user
-            const passwordField = document.getElementById('user-password');
-            passwordField.setAttribute('required', 'required');
-            passwordField.placeholder = '';
+            return children.map(child => {
+                const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
+                const age = child.age || calculateAge(child.date_of_birth);
+                const modules = child.modules || {};
 
-            // Set default checked modules (only Math)
-            document.getElementById('module-math').checked = true;
-            document.getElementById('module-english').checked = false;
-            document.getElementById('module-aptitude').checked = false;
-            document.getElementById('module-stories').checked = false;
-            document.getElementById('module-emotional').checked = false;
-            document.getElementById('module-german').checked = false;
-            document.getElementById('module-drawing').checked = false;
-            document.getElementById('module-german-kids').checked = false;
-            document.getElementById('module-learn-english-stories').checked = false;
-
-            document.getElementById('user-modal').classList.add('active');
+                return `
+                    <div class="child-card">
+                        <div class="child-header">
+                            <div class="child-avatar">${avatar}</div>
+                            <div class="child-details">
+                                <div class="child-name">${child.name}</div>
+                                <div class="child-info-line">Age: ${age} years old | Grade: ${child.grade || 'Not set'}</div>
+                                <div class="child-info-line">Born: ${formatDate(child.date_of_birth)}</div>
+                            </div>
+                        </div>
+                        <div class="modules-section">
+                            <div class="modules-title">Assigned Modules / Packages</div>
+                            <div class="modules-grid">
+                                ${renderModuleCheckboxes(child.id, modules)}
+                            </div>
+                            <button class="save-modules-btn" onclick="saveChildModules('${child.id}')">
+                                Save Module Changes
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        async function openEditUserModal(username) {
-            editingUsername = username;
-            const user = await getUser(username);
+        function renderModuleCheckboxes(childId, modules) {
+            const availableModules = [
+                { id: 'math', name: '📐 Mathematics', key: 'math' },
+                { id: 'english', name: '📚 English', key: 'english' },
+                { id: 'aptitude', name: '🧩 Aptitude', key: 'aptitude' },
+                { id: 'stories', name: '📖 Stories', key: 'stories' },
+                { id: 'emotional-quotient', name: '❤️ Emotional Quotient', key: 'emotional-quotient' },
+                { id: 'german', name: '🇩🇪 German', key: 'german' },
+                { id: 'drawing', name: '🎨 Drawing', key: 'drawing' },
+                { id: 'german-kids', name: '🇩🇪 German Kids', key: 'german-kids' },
+                { id: 'learn-english-stories', name: '📚 Learn English Stories', key: 'learn-english-stories' }
+            ];
 
-            document.getElementById('modal-title').textContent = 'Edit User';
-            document.getElementById('submit-btn-text').textContent = 'Update User';
-
-            document.getElementById('user-username').value = user.username;
-            document.getElementById('user-username').disabled = true;
-            document.getElementById('user-fullname').value = user.fullName;
-
-            // Make password optional when editing
-            const passwordField = document.getElementById('user-password');
-            passwordField.value = ''; // Clear password field (not stored in Firestore)
-            passwordField.placeholder = 'Leave blank to keep current password';
-            passwordField.removeAttribute('required'); // Not required when editing
-
-            document.getElementById('user-role').value = user.role;
-            document.getElementById('user-age').value = user.age || '';
-
-            // Set module checkboxes
-            const modules = user.modules || {};
-            document.getElementById('module-math').checked = modules.math || false;
-            document.getElementById('module-english').checked = modules.english || false;
-            document.getElementById('module-aptitude').checked = modules.aptitude || false;
-            document.getElementById('module-stories').checked = modules.stories || false;
-            document.getElementById('module-emotional').checked = modules['emotional-quotient'] || false;
-            document.getElementById('module-german').checked = modules.german || false;
-            document.getElementById('module-drawing').checked = modules.drawing || false;
-            document.getElementById('module-german-kids').checked = modules['german-kids'] || false;
-            document.getElementById('module-learn-english-stories').checked = modules['learn-english-stories'] || false;
-
-            document.getElementById('user-modal').classList.add('active');
+            return availableModules.map(module => {
+                const checked = modules[module.key] ? 'checked' : '';
+                return `
+                    <div class="module-checkbox">
+                        <input type="checkbox"
+                               id="module-${childId}-${module.id}"
+                               data-child="${childId}"
+                               data-module="${module.key}"
+                               ${checked}>
+                        <label for="module-${childId}-${module.id}">${module.name}</label>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function closeModal() {
-            document.getElementById('user-modal').classList.remove('active');
-            document.getElementById('user-username').disabled = false;
-            editingUsername = null;
-        }
-
-        async function handleSubmitUser(event) {
-            event.preventDefault();
-
-            const username = document.getElementById('user-username').value.trim();
-            const fullName = document.getElementById('user-fullname').value.trim();
-            const password = document.getElementById('user-password').value;
-            const role = document.getElementById('user-role').value;
-            const age = document.getElementById('user-age').value;
-
-            const modules = {
-                math: document.getElementById('module-math').checked,
-                english: document.getElementById('module-english').checked,
-                aptitude: document.getElementById('module-aptitude').checked,
-                stories: document.getElementById('module-stories').checked,
-                'emotional-quotient': document.getElementById('module-emotional').checked,
-                german: document.getElementById('module-german').checked,
-                drawing: document.getElementById('module-drawing').checked,
-                'german-kids': document.getElementById('module-german-kids').checked,
-                'learn-english-stories': document.getElementById('module-learn-english-stories').checked
-            };
-
-            // Show loading state
-            const submitBtn = document.getElementById('submit-btn-text');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Processing...';
-
-            let result;
-
+        async function saveChildModules(childId) {
             try {
-                if (editingUsername) {
-                    // Update existing user
-                    const updates = {
-                        fullName: fullName,
-                        role: role,
-                        modules: modules
-                    };
+                // Gather all module checkboxes for this child
+                const checkboxes = document.querySelectorAll(`input[data-child="${childId}"]`);
+                const modules = {};
 
-                    // Include age if set
-                    if (age) {
-                        updates.age = parseInt(age);
-                    }
-
-                    // Only include password if it's not empty (password changes not supported from client)
-                    if (password && password.trim().length > 0) {
-                        updates.password = password;
-                    }
-
-                    result = await updateUser(editingUsername, updates);
-                } else {
-                    // Create new user
-                    const userData = {
-                        username: username,
-                        fullName: fullName,
-                        password: password,
-                        role: role,
-                        modules: modules
-                    };
-
-                    // Include age if set
-                    if (age) {
-                        userData.age = parseInt(age);
-                    }
-
-                    result = await createUser(userData);
-                }
-
-                if (result.success) {
-                    closeModal();
-                    loadUsers();
-                    alert(editingUsername ? 'User updated successfully!' : 'User created successfully!');
-                } else {
-                    alert('Error: ' + result.error);
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                submitBtn.textContent = originalText;
-            }
-        }
-
-        async function confirmDeleteUser(username) {
-            if (confirm(`Are you sure you want to delete user "${username}"? This will also delete all their saved worksheets.`)) {
-                try {
-                    const result = await deleteUser(username);
-
-                    if (result.success) {
-                        await loadUsers();
-                        alert('User deleted successfully!');
-                    } else {
-                        alert('Error: ' + result.error);
-                    }
-                } catch (error) {
-                    console.error('Delete error:', error);
-                    alert('Error deleting user: ' + error.message);
-                }
-            }
-        }
-
-        // Approve version upgrade request
-        async function approveVersionUpgrade(username) {
-            if (!confirm(`Approve full version upgrade for "${username}"?`)) {
-                return;
-            }
-
-            try {
-                const userQuery = await firebase.firestore().collection('users')
-                    .where('username', '==', username)
-                    .limit(1)
-                    .get();
-
-                if (userQuery.empty) {
-                    alert('User not found');
-                    return;
-                }
-
-                await userQuery.docs[0].ref.update({
-                    version: 'full',
-                    versionUpgradeRequested: false,
-                    upgradeApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    upgradeApprovedBy: firebase.auth().currentUser.email
+                checkboxes.forEach(checkbox => {
+                    const moduleKey = checkbox.getAttribute('data-module');
+                    modules[moduleKey] = checkbox.checked;
                 });
 
-                alert(`Full version approved for ${username}!`);
-                await loadUsers();
-            } catch (error) {
-                console.error('Error approving upgrade:', error);
-                alert('Error approving upgrade: ' + error.message);
-            }
-        }
-
-        // Deny version upgrade request
-        async function denyVersionUpgrade(username) {
-            if (!confirm(`Deny full version upgrade request for "${username}"?`)) {
-                return;
-            }
-
-            try {
-                const userQuery = await firebase.firestore().collection('users')
-                    .where('username', '==', username)
-                    .limit(1)
-                    .get();
-
-                if (userQuery.empty) {
-                    alert('User not found');
-                    return;
-                }
-
-                await userQuery.docs[0].ref.update({
-                    versionUpgradeRequested: false,
-                    upgradeDeniedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    upgradeDeniedBy: firebase.auth().currentUser.email
+                // Update child document in Firestore
+                await firebase.firestore().collection('children').doc(childId).update({
+                    modules: modules,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert(`Upgrade request denied for ${username}`);
-                await loadUsers();
+                alert('Modules updated successfully!');
+
+                // Reload data
+                await loadParentsAndChildren();
             } catch (error) {
-                console.error('Error denying upgrade:', error);
-                alert('Error denying upgrade: ' + error.message);
+                console.error('Error saving modules:', error);
+                alert('Error saving modules: ' + error.message);
             }
         }
 
-        // Close modal when clicking outside
-        document.getElementById('user-modal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeModal();
+        function toggleParent(parentUid) {
+            const parentRow = document.getElementById(`parent-${parentUid}`);
+            parentRow.classList.toggle('expanded');
+        }
+
+        function viewParentDetails(parentUid) {
+            const parent = parentsData.find(p => p.uid === parentUid);
+            if (!parent) return;
+
+            const details = `
+Parent Details:
+---------------
+Name: ${parent.fullName || 'N/A'}
+Email: ${parent.email || 'N/A'}
+Username: ${parent.username || 'N/A'}
+Role: ${parent.role || 'N/A'}
+Version: ${parent.version || 'demo'}
+Created: ${formatDate(parent.createdAt)}
+
+Would you like to view their children profiles?
+            `;
+
+            alert(details);
+        }
+
+        function filterParents() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+            const filteredParents = parentsData.filter(parent => {
+                const name = (parent.fullName || '').toLowerCase();
+                const email = (parent.email || '').toLowerCase();
+                const username = (parent.username || '').toLowerCase();
+                return name.includes(searchTerm) || email.includes(searchTerm) || username.includes(searchTerm);
+            });
+
+            // Temporarily update parentsData for rendering
+            const originalData = parentsData;
+            parentsData = filteredParents;
+            renderParents();
+            parentsData = originalData;
+        }
+
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 0;
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
             }
-        });
+
+            return age;
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+
+            try {
+                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return 'N/A';
+            }
+        }
     </script>
 </body>
 </html>

@@ -3,6 +3,15 @@
 
 // Get current user's age
 function getUserAge() {
+    // First try to get selected child's age
+    if (typeof getSelectedChild === 'function') {
+        const child = getSelectedChild();
+        if (child && child.age) {
+            return parseInt(child.age);
+        }
+    }
+
+    // Fallback to parent's age (for backward compatibility with old accounts)
     const user = getCurrentUser && getCurrentUser();
     return user && user.age ? parseInt(user.age) : null;
 }

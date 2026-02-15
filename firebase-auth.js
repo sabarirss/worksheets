@@ -218,6 +218,11 @@ async function login(username, password) {
 // Logout
 async function logout() {
     try {
+        // Clear selected child profile on logout (security)
+        if (typeof clearSelectedChild === 'function') {
+            clearSelectedChild();
+        }
+
         await firebase.auth().signOut();
         currentUserCache = null;
         window.location.href = 'login.html';

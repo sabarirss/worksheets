@@ -3,7 +3,13 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(git add:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(grep:*)",
+      "Bash(for file in worksheet-generator.js english-generator.js aptitude-generator.js stories-generator.js drawing-generator.js german-kids-generator.js eq-generator.js learn-english-stories-generator.js)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(for file in aptitude.html drawing.html emotional-quotient.html english.html german-kids.html german.html learn-english-stories.html stories.html)"
     ]
   }
 }

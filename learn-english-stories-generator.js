@@ -1,6 +1,7 @@
 // Learn English with Stories Generator
 // Original educational stories for different age groups
 
+
 let currentAge = null;
 let currentDifficulty = null;
 let currentStory = null;

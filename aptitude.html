@@ -18,6 +18,8 @@
     <script src="firebase-auth.js"></script>
     <script src="firebase-storage.js"></script>
     <script src="age-filter.js"></script>
+    <script src="child-session-manager.js"></script>
+    <script src="profile-selector.js"></script>
 </head>
 <body>
     <script>
@@ -29,9 +31,12 @@
         });
     </script>
     <div class="container">
-        <header>
-            <h1>🧩 Aptitude & Logic Puzzles</h1>
-            <p class="subtitle">Fun brain exercises with difficulty levels!</p>
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>🧩 Aptitude & Logic Puzzles</h1>
+                <p class="subtitle">Fun brain exercises with difficulty levels!</p>
+            </div>
+            <div id="profile-selector-container"></div>
         </header>
 
         <!-- Age Group Selection -->

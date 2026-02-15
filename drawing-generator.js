@@ -1,5 +1,6 @@
 // Drawing Tutorial Generator with Interactive Step-by-Step Visual Guides
 
+
 let currentAge = null;
 let currentDifficulty = '';
 let currentTutorial = '';
@@ -1939,7 +1940,10 @@ function savePDF() {
                 <!-- Student Info -->
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #667eea;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 16px;">
-                        <div><strong>👤 Name:</strong> ${getCurrentUserFullName()}</div>
+                        <div><strong>👤 Name:</strong> ${(() => {
+                            const child = getSelectedChild();
+                            return child ? child.name : getCurrentUserFullName();
+                        })()}</div>
                         <div><strong>📅 Date:</strong> ${dateStr}</div>
                         <div><strong>⏰ Time:</strong> ${timeStr}</div>
                         <div><strong>📊 Age Group:</strong> ${currentAge}</div>

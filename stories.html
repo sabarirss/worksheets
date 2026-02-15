@@ -19,6 +19,8 @@
     <!-- Firebase Auth -->
     <script src="firebase-auth.js"></script>
     <script src="age-filter.js"></script>
+    <script src="child-session-manager.js"></script>
+    <script src="profile-selector.js"></script>
     <style>
         /* Ensure emoji rendering */
         body {
@@ -36,9 +38,12 @@
         });
     </script>
     <div class="container">
-        <header>
-            <h1>📖 Story Time</h1>
-            <p class="subtitle">Hand-Written Quality Stories with Real Photos!</p>
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>📖 Story Time</h1>
+                <p class="subtitle">Hand-Written Quality Stories with Real Photos!</p>
+            </div>
+            <div id="profile-selector-container"></div>
         </header>
 
         <!-- Age Group Selection -->
