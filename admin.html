@@ -504,16 +504,16 @@
 
         async function loadParentsAndChildren() {
             try {
-                // Load all users with role='parent'
-                const parentsSnapshot = await firebase.firestore().collection('users')
-                    .where('role', '==', 'parent')
-                    .get();
+                // Load all users except admin (parents/students with children)
+                const allUsersSnapshot = await firebase.firestore().collection('users').get();
 
-                parentsData = parentsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    uid: doc.data().uid,
-                    ...doc.data()
-                }));
+                parentsData = allUsersSnapshot.docs
+                    .map(doc => ({
+                        id: doc.id,
+                        uid: doc.data().uid,
+                        ...doc.data()
+                    }))
+                    .filter(user => user.role !== 'admin'); // Exclude admin from parent list
 
                 // Load all children
                 const childrenSnapshot = await firebase.firestore().collection('children').get();
