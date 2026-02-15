@@ -558,6 +558,96 @@
         let currentUser = null;
         let parentalVerificationAction = null; // Track what action requires verification
 
+        // Update input mode for current selected child or admin
+        async function updateInputMode(mode) {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    showError('Not authenticated');
+                    return;
+                }
+
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                const isAdmin = userData && userData.role === 'admin';
+
+                if (isAdmin) {
+                    // Admin: save to their own profile
+                    await firebase.firestore().collection('users').doc(user.uid).update({
+                        inputMode: mode,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                    const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
+                    showSuccess(`Input mode changed to ${modeIcon} ${modeName}`);
+                    updateInputModeUI(mode);
+                } else {
+                    // Non-admin: get selected child and update their profile
+                    const child = getSelectedChild();
+                    if (!child) {
+                        showError('No child selected. Please select a child profile first.');
+                        return;
+                    }
+
+                    // Fetch full child data from Firestore to check version
+                    const childDoc = await firebase.firestore().collection('children').doc(child.id).get();
+                    if (!childDoc.exists) {
+                        showError('Child profile not found');
+                        return;
+                    }
+
+                    const childData = childDoc.data();
+
+                    // Check if pencil mode is allowed
+                    if (mode === 'pencil' && childData.version !== 'full') {
+                        showError(`✨ Pencil Mode requires Full Version! ${child.name} has ${childData.version || 'demo'} version.`);
+
+                        // Reset radio button to keyboard
+                        document.getElementById('input-mode-keyboard').checked = true;
+                        updateInputModeUI('keyboard');
+                        return;
+                    }
+
+                    // Save to child's Firestore document
+                    await firebase.firestore().collection('children').doc(child.id).update({
+                        inputMode: mode,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                    const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
+                    showSuccess(`Input mode for ${child.name} changed to ${modeIcon} ${modeName}`);
+                    updateInputModeUI(mode);
+                }
+            } catch (error) {
+                console.error('Error updating input mode:', error);
+                showError('Failed to update input mode: ' + error.message);
+            }
+        }
+
+        // Update input mode UI to reflect current selection
+        function updateInputModeUI(mode) {
+            const keyboardLabel = document.getElementById('keyboard-label');
+            const stylusLabel = document.getElementById('stylus-label');
+            const keyboardInput = document.getElementById('input-mode-keyboard');
+            const stylusInput = document.getElementById('input-mode-pencil');
+
+            if (mode === 'keyboard') {
+                keyboardLabel.style.borderColor = '#667eea';
+                keyboardLabel.style.background = '#f0f4ff';
+                stylusLabel.style.borderColor = '#e0e0e0';
+                stylusLabel.style.background = 'white';
+                keyboardInput.checked = true;
+            } else {
+                keyboardLabel.style.borderColor = '#e0e0e0';
+                keyboardLabel.style.background = 'white';
+                stylusLabel.style.borderColor = '#667eea';
+                stylusLabel.style.background = '#f0f4ff';
+                stylusInput.checked = true;
+            }
+        }
+
         // Wait for Firebase auth
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
@@ -1106,28 +1196,7 @@
                         }
                     }
 
-                    // Get child's input mode
-                    const inputMode = child.inputMode || 'keyboard';
-
-                    // Input mode selection (only for full version)
-                    let inputModeSection = '';
-                    if (version === 'full') {
-                        inputModeSection = `
-                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
-                                <p style="margin: 0 0 10px 0; color: #666; font-size: 0.95em; font-weight: bold;">✍️ Input Mode:</p>
-                                <div style="display: flex; gap: 10px;">
-                                    <label style="display: flex; align-items: center; padding: 10px 15px; border: 2px solid ${inputMode === 'keyboard' ? '#667eea' : '#e0e0e0'}; border-radius: 8px; cursor: pointer; background: ${inputMode === 'keyboard' ? '#f0f4ff' : 'white'}; flex: 1; transition: all 0.3s;">
-                                        <input type="radio" name="inputMode-${childId}" value="keyboard" ${inputMode === 'keyboard' ? 'checked' : ''} onchange="updateChildInputMode('${childId}', '${child.name}', 'keyboard')" style="margin-right: 8px;">
-                                        <span>⌨️ Keyboard</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; padding: 10px 15px; border: 2px solid ${inputMode === 'pencil' ? '#667eea' : '#e0e0e0'}; border-radius: 8px; cursor: pointer; background: ${inputMode === 'pencil' ? '#f0f4ff' : 'white'}; flex: 1; transition: all 0.3s;">
-                                        <input type="radio" name="inputMode-${childId}" value="pencil" ${inputMode === 'pencil' ? 'checked' : ''} onchange="updateChildInputMode('${childId}', '${child.name}', 'pencil')" style="margin-right: 8px;">
-                                        <span>✏️ Stylus</span>
-                                    </label>
-                                </div>
-                            </div>
-                        `;
-                    }
+                    // Input mode is managed in Child Profile Settings section, not here
 
                     childCard.innerHTML = `
                         <div>
@@ -1145,7 +1214,6 @@
                                     ${actionButton}
                                 </div>
                             </div>
-                            ${inputModeSection}
                         </div>
                     `;
 
@@ -1177,44 +1245,6 @@
             } catch (error) {
                 console.error('Error requesting upgrade:', error);
                 showError('Failed to request upgrade: ' + error.message);
-            }
-        }
-
-        // Update child's input mode
-        async function updateChildInputMode(childId, childName, mode) {
-            console.log('=== updateChildInputMode called ===');
-            console.log('Child ID:', childId);
-            console.log('Child Name:', childName);
-            console.log('Mode:', mode);
-
-            // Fetch full child data to verify version
-            try {
-                const childDoc = await firebase.firestore().collection('children').doc(childId).get();
-                if (childDoc.exists) {
-                    const childData = childDoc.data();
-                    console.log('Child version from Firestore:', childData.version);
-
-                    // Check if child has full version before allowing pencil mode
-                    if (mode === 'pencil' && childData.version !== 'full') {
-                        showError(`✨ Pencil Mode requires Full Version! Child "${childName}" has ${childData.version || 'demo'} version.`);
-                        console.error('Pencil mode denied - child does not have full version');
-                        return;
-                    }
-                }
-
-                await firebase.firestore().collection('children').doc(childId).update({
-                    inputMode: mode,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
-                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
-                showSuccess(`Input mode for ${childName} changed to ${modeIcon} ${modeName}`);
-
-                console.log(`Input mode updated for ${childName}: ${mode}`);
-            } catch (error) {
-                console.error('Error updating input mode:', error);
-                showError('Failed to update input mode: ' + error.message);
             }
         }
 
