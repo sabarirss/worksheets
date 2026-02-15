@@ -426,7 +426,7 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Load activities based on difficulty
+// Load activities based on difficulty and age
 function loadActivities(difficulty, page = 1) {
     currentDifficulty = difficulty;
     currentPage = page;
@@ -435,12 +435,26 @@ function loadActivities(difficulty, page = 1) {
     totalPages = getDemoLimit(50);
 
     let activities = [];
-    if (difficulty === 'easy') {
-        activities = generateEasyActivities();
-    } else if (difficulty === 'medium') {
-        activities = generateMediumActivities();
-    } else {
-        activities = generateHardActivities();
+
+    // Map age to age group
+    const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
+
+    // Try to load age-appropriate scenarios from ageBasedEQScenarios
+    if (typeof ageBasedEQScenarios !== 'undefined' &&
+        ageBasedEQScenarios[ageGroup] &&
+        ageBasedEQScenarios[ageGroup][difficulty]) {
+        activities = ageBasedEQScenarios[ageGroup][difficulty];
+    }
+
+    // Fallback to original generators if no age-based content
+    if (activities.length === 0) {
+        if (difficulty === 'easy') {
+            activities = generateEasyActivities();
+        } else if (difficulty === 'medium') {
+            activities = generateMediumActivities();
+        } else {
+            activities = generateHardActivities();
+        }
     }
 
     // Shuffle options for each activity so correct answer isn't always in same position
@@ -456,6 +470,7 @@ function loadActivities(difficulty, page = 1) {
 
     currentWorksheet = {
         difficulty,
+        age: currentAge,
         page: currentPage,
         activities: activities
     };
