@@ -157,51 +157,58 @@ function generateMazePuzzles(count, difficulty) {
     });
 }
 
-function generatePatternPuzzles(count, difficulty) {
-    let patterns = [];
+function generatePatternPuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    if (difficulty === 'easy') {
-        // Simple alternating patterns (AB AB AB... what's next?)
-        patterns = [
-            { pattern: ['🔴', '🔵', '🔴', '🔵'], answer: '🔴', options: ['🔴', '🔵', '🟢'], reason: 'Pattern alternates: red, blue, red, blue...' },
-            { pattern: ['⭐', '🌙', '⭐', '🌙'], answer: '⭐', options: ['⭐', '🌙', '☀️'], reason: 'Pattern alternates: star, moon, star, moon...' },
-            { pattern: ['🍎', '🍊', '🍎', '🍊'], answer: '🍎', options: ['🍎', '🍊', '🍋'], reason: 'Pattern alternates: apple, orange, apple, orange...' },
-            { pattern: ['😊', '😢', '😊', '😢'], answer: '😊', options: ['😊', '😢', '😡'], reason: 'Pattern alternates: happy, sad, happy, sad...' },
-            { pattern: ['🐶', '🐱', '🐶', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭'], reason: 'Pattern alternates: dog, cat, dog, cat...' },
-            { pattern: ['🌞', '🌙', '🌞', '🌙'], answer: '🌞', options: ['🌞', '🌙', '⭐'], reason: 'Pattern alternates: sun, moon, sun, moon...' },
-            { pattern: ['🔺', '⭕', '🔺', '⭕'], answer: '🔺', options: ['🔺', '⭕', '⬜'], reason: 'Pattern alternates: triangle, circle, triangle, circle...' },
-            { pattern: ['🚗', '🚌', '🚗', '🚌'], answer: '🚗', options: ['🚗', '🚌', '🚕'], reason: 'Pattern alternates: car, bus, car, bus...' }
-        ];
-    } else if (difficulty === 'medium') {
-        // Patterns with grouping/counting (AAB AAB AAB... what's next?)
-        patterns = [
-            { pattern: ['🔴', '🔴', '🔵', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Pattern groups: two reds, one blue, two reds, one blue...' },
-            { pattern: ['⭐', '🌙', '🌙', '⭐', '🌙'], answer: '🌙', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Pattern groups: star, two moons, star, two moons...' },
-            { pattern: ['🍎', '🍊', '🍋', '🍎', '🍊'], answer: '🍋', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Pattern cycles through 3: apple, orange, lemon, apple, orange...' },
-            { pattern: ['😊', '😊', '😊', '😢', '😊'], answer: '😊', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern groups: three happy, one sad, three happy...' },
-            { pattern: ['🐶', '🐱', '🐭', '🐶', '🐱'], answer: '🐭', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Pattern cycles through 3: dog, cat, mouse, dog, cat...' },
-            { pattern: ['1️⃣', '2️⃣', '2️⃣', '1️⃣', '2️⃣'], answer: '2️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Pattern groups: one, two twos, one, two twos...' },
-            { pattern: ['🔺', '🔺', '⭕', '⭕', '🔺'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Pattern groups: two triangles, two circles, two triangles...' },
-            { pattern: ['🌸', '🌺', '🌻', '🌷', '🌸'], answer: '🌺', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Pattern cycles through 4 flowers in order' },
-            { pattern: ['A', 'B', 'C', 'A', 'B'], answer: 'C', options: ['A', 'B', 'C', 'D'], reason: 'Pattern cycles through ABC sequence' },
-            { pattern: ['🟦', '🟥', '🟥', '🟦', '🟥'], answer: '🟥', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Pattern groups: blue, two reds, blue, two reds...' }
-        ];
+    // Load age-based patterns from aptitude-age-content.js
+    let patterns = [];
+    if (typeof ageBasedPatterns !== 'undefined' &&
+        ageBasedPatterns[ageGroup] &&
+        ageBasedPatterns[ageGroup][difficulty]) {
+        patterns = ageBasedPatterns[ageGroup][difficulty];
     } else {
-        // Complex patterns with multiple rules (increasing, decreasing, nesting)
-        patterns = [
-            { pattern: ['🔴', '🔵', '🔵', '🔴', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Growing pattern: 1 red, 2 blues, 3 reds, next is blues' },
-            { pattern: ['⭐', '🌙', '⭐', '⭐', '🌙', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Complex: star-moon-stars pattern increases' },
-            { pattern: ['🍎', '🍊', '🍊', '🍋', '🍋', '🍋'], answer: '🍎', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Each fruit appears one more time, then restart' },
-            { pattern: ['😊', '😊', '😢', '😡', '😡', '😡'], answer: '😢', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern: 2 happy, 1 sad, 3 angry, then decreases back' },
-            { pattern: ['🐶', '🐱', '🐭', '🐭', '🐱', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Reverse countdown: dog-cat-2mice-2cats-next is dogs' },
-            { pattern: ['1️⃣', '1️⃣', '2️⃣', '2️⃣', '2️⃣', '3️⃣'], answer: '3️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Numbers increase: 2 ones, 3 twos, next is threes' },
-            { pattern: ['🔺', '⭕', '⭕', '⬜', '⬜', '⬜'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Each shape appears one more time, then cycle restarts' },
-            { pattern: ['🌸', '🌺', '🌺', '🌻', '🌻', '🌻'], answer: '🌷', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Growing sequence: 1 flower, 2 flowers, 3 flowers, next 4' },
-            { pattern: ['A', 'B', 'B', 'C', 'C', 'C'], answer: 'D', options: ['A', 'B', 'C', 'D'], reason: 'Increasing pattern: A once, B twice, C thrice, D four times' },
-            { pattern: ['🟦', '🟥', '🟥', '🟩', '🟩', '🟩'], answer: '🟨', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Each color appears one more time than the last' },
-            { pattern: ['⬆️', '➡️', '⬇️', '⬇️', '➡️', '➡️'], answer: '⬆️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: 'Arrows rotate and repeat: up-right-2downs-2rights-3ups' },
-            { pattern: ['🔴', '🔵', '🔴', '🟢', '🔴', '🟡'], answer: '🔴', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Red appears every other position, others change' }
-        ];
+        // Fallback to hardcoded patterns if age-based content not available
+        if (difficulty === 'easy') {
+            patterns = [
+                { pattern: ['🔴', '🔵', '🔴', '🔵'], answer: '🔴', options: ['🔴', '🔵', '🟢'], reason: 'Pattern alternates: red, blue, red, blue...' },
+                { pattern: ['⭐', '🌙', '⭐', '🌙'], answer: '⭐', options: ['⭐', '🌙', '☀️'], reason: 'Pattern alternates: star, moon, star, moon...' },
+                { pattern: ['🍎', '🍊', '🍎', '🍊'], answer: '🍎', options: ['🍎', '🍊', '🍋'], reason: 'Pattern alternates: apple, orange, apple, orange...' },
+                { pattern: ['😊', '😢', '😊', '😢'], answer: '😊', options: ['😊', '😢', '😡'], reason: 'Pattern alternates: happy, sad, happy, sad...' },
+                { pattern: ['🐶', '🐱', '🐶', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭'], reason: 'Pattern alternates: dog, cat, dog, cat...' },
+                { pattern: ['🌞', '🌙', '🌞', '🌙'], answer: '🌞', options: ['🌞', '🌙', '⭐'], reason: 'Pattern alternates: sun, moon, sun, moon...' },
+                { pattern: ['🔺', '⭕', '🔺', '⭕'], answer: '🔺', options: ['🔺', '⭕', '⬜'], reason: 'Pattern alternates: triangle, circle, triangle, circle...' },
+                { pattern: ['🚗', '🚌', '🚗', '🚌'], answer: '🚗', options: ['🚗', '🚌', '🚕'], reason: 'Pattern alternates: car, bus, car, bus...' }
+            ];
+        } else if (difficulty === 'medium') {
+            patterns = [
+                { pattern: ['🔴', '🔴', '🔵', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Pattern groups: two reds, one blue, two reds, one blue...' },
+                { pattern: ['⭐', '🌙', '🌙', '⭐', '🌙'], answer: '🌙', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Pattern groups: star, two moons, star, two moons...' },
+                { pattern: ['🍎', '🍊', '🍋', '🍎', '🍊'], answer: '🍋', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Pattern cycles through 3: apple, orange, lemon, apple, orange...' },
+                { pattern: ['😊', '😊', '😊', '😢', '😊'], answer: '😊', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern groups: three happy, one sad, three happy...' },
+                { pattern: ['🐶', '🐱', '🐭', '🐶', '🐱'], answer: '🐭', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Pattern cycles through 3: dog, cat, mouse, dog, cat...' },
+                { pattern: ['1️⃣', '2️⃣', '2️⃣', '1️⃣', '2️⃣'], answer: '2️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Pattern groups: one, two twos, one, two twos...' },
+                { pattern: ['🔺', '🔺', '⭕', '⭕', '🔺'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Pattern groups: two triangles, two circles, two triangles...' },
+                { pattern: ['🌸', '🌺', '🌻', '🌷', '🌸'], answer: '🌺', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Pattern cycles through 4 flowers in order' },
+                { pattern: ['A', 'B', 'C', 'A', 'B'], answer: 'C', options: ['A', 'B', 'C', 'D'], reason: 'Pattern cycles through ABC sequence' },
+                { pattern: ['🟦', '🟥', '🟥', '🟦', '🟥'], answer: '🟥', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Pattern groups: blue, two reds, blue, two reds...' }
+            ];
+        } else {
+            patterns = [
+                { pattern: ['🔴', '🔵', '🔵', '🔴', '🔴', '🔴'], answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Growing pattern: 1 red, 2 blues, 3 reds, next is blues' },
+                { pattern: ['⭐', '🌙', '⭐', '⭐', '🌙', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️', '💫'], reason: 'Complex: star-moon-stars pattern increases' },
+                { pattern: ['🍎', '🍊', '🍊', '🍋', '🍋', '🍋'], answer: '🍎', options: ['🍎', '🍊', '🍋', '🍇'], reason: 'Each fruit appears one more time, then restart' },
+                { pattern: ['😊', '😊', '😢', '😡', '😡', '😡'], answer: '😢', options: ['😊', '😢', '😡', '🤔'], reason: 'Pattern: 2 happy, 1 sad, 3 angry, then decreases back' },
+                { pattern: ['🐶', '🐱', '🐭', '🐭', '🐱', '🐱'], answer: '🐶', options: ['🐶', '🐱', '🐭', '🐰'], reason: 'Reverse countdown: dog-cat-2mice-2cats-next is dogs' },
+                { pattern: ['1️⃣', '1️⃣', '2️⃣', '2️⃣', '2️⃣', '3️⃣'], answer: '3️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '4️⃣'], reason: 'Numbers increase: 2 ones, 3 twos, next is threes' },
+                { pattern: ['🔺', '⭕', '⭕', '⬜', '⬜', '⬜'], answer: '🔺', options: ['🔺', '⭕', '⬜', '🔶'], reason: 'Each shape appears one more time, then cycle restarts' },
+                { pattern: ['🌸', '🌺', '🌺', '🌻', '🌻', '🌻'], answer: '🌷', options: ['🌸', '🌺', '🌻', '🌷'], reason: 'Growing sequence: 1 flower, 2 flowers, 3 flowers, next 4' },
+                { pattern: ['A', 'B', 'B', 'C', 'C', 'C'], answer: 'D', options: ['A', 'B', 'C', 'D'], reason: 'Increasing pattern: A once, B twice, C thrice, D four times' },
+                { pattern: ['🟦', '🟥', '🟥', '🟩', '🟩', '🟩'], answer: '🟨', options: ['🟦', '🟥', '🟩', '🟨'], reason: 'Each color appears one more time than the last' },
+                { pattern: ['⬆️', '➡️', '⬇️', '⬇️', '➡️', '➡️'], answer: '⬆️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: 'Arrows rotate and repeat: up-right-2downs-2rights-3ups' },
+                { pattern: ['🔴', '🔵', '🔴', '🟢', '🔴', '🟡'], answer: '🔴', options: ['🔴', '🔵', '🟢', '🟡'], reason: 'Red appears every other position, others change' }
+            ];
+        }
     }
 
     return patterns.slice(0, count).map(p => ({
@@ -213,46 +220,86 @@ function generatePatternPuzzles(count, difficulty) {
     }));
 }
 
-function generateCountingPuzzles(count, difficulty) {
-    const items = [
-        { emoji: '🍎', label: 'apples' }, { emoji: '⭐', label: 'stars' },
-        { emoji: '🐶', label: 'dogs' }, { emoji: '🌸', label: 'flowers' },
-        { emoji: '🎈', label: 'balloons' }, { emoji: '🐝', label: 'bees' },
-        { emoji: '🍪', label: 'cookies' }, { emoji: '🦋', label: 'butterflies' }
-    ];
+function generateCountingPuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    const ranges = {
-        easy: { min: 3, max: 10 },
-        medium: { min: 10, max: 20 },
-        hard: { min: 20, max: 30 }
-    };
-
-    const range = ranges[difficulty];
-
-    return items.slice(0, count).map(item => {
-        const qty = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-        return {
-            type: 'counting',
-            emoji: item.emoji,
-            quantity: qty,
-            label: item.label,
-            answer: String(qty)
+    // Load age-based counting configuration from aptitude-age-content.js
+    let config;
+    if (typeof ageBasedCounting !== 'undefined' && ageBasedCounting[ageGroup]) {
+        config = ageBasedCounting[ageGroup];
+    } else {
+        // Fallback configuration
+        config = {
+            range: { min: 3, max: 20 },
+            items: ['🍎', '⭐', '🐶', '🌸', '🎈', '🐝', '🍪', '🦋']
         };
-    });
+    }
+
+    const { min, max } = config.range;
+
+    // Generate counting puzzles with age-appropriate numbers
+    const puzzles = [];
+    for (let i = 0; i < count; i++) {
+        const itemEmoji = config.items[i % config.items.length];
+        const qty = Math.floor(Math.random() * (max - min + 1)) + min;
+
+        puzzles.push({
+            type: 'counting',
+            emoji: itemEmoji,
+            quantity: qty,
+            label: getLabelFromEmoji(itemEmoji),
+            answer: String(qty)
+        });
+    }
+
+    return puzzles;
 }
 
-function generateSequencePuzzles(count, difficulty) {
+// Helper function to get label from emoji
+function getLabelFromEmoji(emoji) {
+    const emojiLabels = {
+        '🍎': 'apples', '⭐': 'stars', '🐶': 'dogs', '🌸': 'flowers',
+        '🚗': 'cars', '🏠': 'houses', '🎈': 'balloons', '🍪': 'cookies',
+        '🐱': 'cats', '🦋': 'butterflies', '🎨': 'art supplies', '📚': 'books',
+        '⚽': 'balls', '🎵': 'music notes', '🌈': 'rainbows', '🎯': 'targets',
+        '🎭': 'masks', '🎪': 'tents', '🎬': 'clappers', '🎤': 'microphones',
+        '🎲': 'dice', '🎰': 'slots', '🎳': 'pins', '🎮': 'games', '🎹': 'keyboards',
+        '🔢': 'numbers', '💯': 'hundreds', '📊': 'charts', '📈': 'graphs',
+        '💰': 'money', '🏆': 'trophies', '🌟': 'stars', '✨': 'sparkles',
+        '💎': 'gems', '🔷': 'diamonds', '🔶': 'shapes', '🔹': 'symbols',
+        '🔸': 'marks', '💠': 'badges', '🧮': 'abacuses', '📐': 'rulers',
+        '📏': 'measures', '🔬': 'microscopes'
+    };
+    return emojiLabels[emoji] || 'items';
+}
+
+function generateSequencePuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+
     let sequences = [];
 
     if (difficulty === 'easy') {
-        sequences = [
-            { seq: ['1️⃣', '2️⃣', '3️⃣'], answer: '4️⃣', options: ['4️⃣', '5️⃣', '2️⃣'] },
-            { seq: ['🔴', '🔴'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
-            { seq: ['A', 'B'], answer: 'C', options: ['C', 'D', 'B'] },
-            { seq: ['😊', '😊'], answer: '😊', options: ['😊', '😢', '😡'] },
-            { seq: ['🌱', '🌿'], answer: '🌳', options: ['🌳', '🌱', '🍃'] },
-            { seq: ['🐣', '🐥'], answer: '🐔', options: ['🐔', '🐣', '🥚'] }
-        ];
+        // Age 4-5: Very simple repeating patterns
+        if (ageGroup === '4-5') {
+            sequences = [
+                { seq: ['1️⃣', '2️⃣', '3️⃣'], answer: '4️⃣', options: ['4️⃣', '5️⃣', '2️⃣'] },
+                { seq: ['🔴', '🔴'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
+                { seq: ['😊', '😊'], answer: '😊', options: ['😊', '😢', '😡'] },
+                { seq: ['⭐', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️'] }
+            ];
+        } else {
+            // Age 6+: Simple sequences with variety
+            sequences = [
+                { seq: ['1️⃣', '2️⃣', '3️⃣'], answer: '4️⃣', options: ['4️⃣', '5️⃣', '2️⃣'] },
+                { seq: ['🔴', '🔴'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
+                { seq: ['A', 'B'], answer: 'C', options: ['C', 'D', 'B'] },
+                { seq: ['😊', '😊'], answer: '😊', options: ['😊', '😢', '😡'] },
+                { seq: ['🌱', '🌿'], answer: '🌳', options: ['🌳', '🌱', '🍃'] },
+                { seq: ['🐣', '🐥'], answer: '🐔', options: ['🐔', '🐣', '🥚'] }
+            ];
+        }
     } else if (difficulty === 'medium') {
         sequences = [
             { seq: ['2️⃣', '4️⃣', '6️⃣'], answer: '8️⃣', options: ['8️⃣', '7️⃣', '9️⃣'] },
@@ -288,11 +335,14 @@ function generateSequencePuzzles(count, difficulty) {
     }));
 }
 
-function generateMatchingPuzzles(count, difficulty) {
+function generateMatchingPuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+
     let pairs = [];
 
     if (difficulty === 'easy') {
-        // Direct, obvious animal-food associations
+        // Direct, obvious animal-food associations (suitable for all ages)
         pairs = [
             { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🥕'], reason: 'Cats drink milk' },
             { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻'], reason: 'Dogs love bones' },
@@ -342,7 +392,10 @@ function generateMatchingPuzzles(count, difficulty) {
     }));
 }
 
-function generateOddOnePuzzles(count, difficulty) {
+function generateOddOnePuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+
     let sets = [];
 
     if (difficulty === 'easy') {
@@ -388,7 +441,10 @@ function generateOddOnePuzzles(count, difficulty) {
     }));
 }
 
-function generateComparisonPuzzles(count, difficulty) {
+function generateComparisonPuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+
     let comparisons = [];
 
     if (difficulty === 'easy') {
@@ -412,10 +468,15 @@ function generateComparisonPuzzles(count, difficulty) {
             { item1: '🪶', item2: '🧱', question: 'Which is heavier?', answer: '🧱' }
         ];
     } else {
+        // Use age-appropriate numbers for hard mode
+        const range = getNumberRange(ageGroup);
+        const num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+        const num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+
         comparisons = [
             { item1: '🍪🍪🍪🍪🍪', item2: '🍪🍪🍪🍪🍪🍪🍪', question: 'Which has more?', answer: '🍪🍪🍪🍪🍪🍪🍪' },
-            { item1: '15', item2: '22', question: 'Which number is bigger?', answer: '22' },
-            { item1: '8', item2: '5', question: 'Which number is smaller?', answer: '5' },
+            { item1: num1.toString(), item2: num2.toString(), question: 'Which number is bigger?', answer: Math.max(num1, num2).toString() },
+            { item1: num1.toString(), item2: num2.toString(), question: 'Which number is smaller?', answer: Math.min(num1, num2).toString() },
             { item1: '🌊', item2: '💧', question: 'Which has more water?', answer: '🌊' },
             { item1: '🦕', item2: '🦖', question: 'Which is a carnivore?', answer: '🦖' },
             { item1: '🌙', item2: '☀️', question: 'Which comes at night?', answer: '🌙' },
@@ -432,26 +493,39 @@ function generateComparisonPuzzles(count, difficulty) {
         item2: c.item2,
         question: c.question,
         answer: c.answer,
-        reason: c.reason || c.question // Use reason if available, otherwise use question as reason
+        reason: c.reason || c.question
     }));
 }
 
-function generateLogicPuzzles(count, difficulty) {
+function generateLogicPuzzles(count, difficulty, age) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+    const range = getNumberRange(ageGroup);
+
     let puzzles = [];
 
     if (difficulty === 'easy') {
+        // Use age-appropriate numbers in math questions
+        const num1 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
+        const num2 = Math.min(range.max, Math.floor(Math.random() * 3) + 1);
+        const num3 = Math.min(range.max, Math.floor(Math.random() * 3) + 1);
+
         puzzles = [
-            { question: 'I have 2 apples. Mom gives me 1 more. How many do I have?', answer: '3' },
-            { question: 'There are 4 birds. 1 flies away. How many are left?', answer: '3' },
+            { question: `I have ${num1} apples. Mom gives me ${num2} more. How many do I have?`, answer: (num1 + num2).toString() },
+            { question: `There are ${num1 + num2} birds. ${num2} flies away. How many are left?`, answer: num1.toString() },
             { question: 'Count: 1, 2, 3, ___', answer: '4' },
             { question: 'What color is the sky?', answer: 'blue' },
             { question: 'How many legs does a dog have?', answer: '4' },
             { question: 'What comes after 5? (5, 6, ___)', answer: '7' }
         ];
     } else if (difficulty === 'medium') {
+        const num1 = Math.min(range.max, Math.floor(Math.random() * 10) + 1);
+        const num2 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
+        const num3 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
+
         puzzles = [
-            { question: 'I have 3 cookies. I eat 1. Then I get 2 more. How many do I have?', answer: '4' },
-            { question: 'There are 5 apples. I eat 2. How many are left?', answer: '3' },
+            { question: `I have ${num1} cookies. I eat ${num2}. Then I get ${num3} more. How many do I have?`, answer: (num1 - num2 + num3).toString() },
+            { question: `There are ${num1} apples. I eat ${num2}. How many are left?`, answer: (num1 - num2).toString() },
             { question: 'Count by 2s: 2, 4, 6, ___', answer: '8' },
             { question: 'I am big and yellow. I shine in the sky. What am I?', answer: 'sun' },
             { question: 'A cat has 4 legs. Two cats have ___ legs.', answer: '8' },
@@ -460,9 +534,13 @@ function generateLogicPuzzles(count, difficulty) {
             { question: 'If today is Sunday, yesterday was ___?', answer: 'Saturday' }
         ];
     } else {
+        const num1 = Math.min(range.max, Math.floor(Math.random() * 20) + 5);
+        const num2 = Math.min(range.max, Math.floor(Math.random() * 10) + 1);
+        const num3 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
+
         puzzles = [
-            { question: 'I have 7 toys. I give 2 to my sister and 1 to my brother. How many do I have?', answer: '4' },
-            { question: 'A basket has 12 eggs. 5 break. How many good eggs are left?', answer: '7' },
+            { question: `I have ${num1} toys. I give ${num2} to my sister and ${num3} to my brother. How many do I have?`, answer: (num1 - num2 - num3).toString() },
+            { question: `A basket has ${num1} eggs. ${num2} break. How many good eggs are left?`, answer: (num1 - num2).toString() },
             { question: 'Count by 5s: 5, 10, 15, ___', answer: '20' },
             { question: 'If 🐱 + 🐱 = 2, then 🐱 + 🐱 + 🐱 = ___', answer: '3' },
             { question: 'A triangle has ___ sides.', answer: '3' },
