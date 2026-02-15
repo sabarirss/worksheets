@@ -4,6 +4,8 @@ let currentAge = null;
 let currentType = null;
 let currentDifficulty = null;
 let currentWorksheet = null;
+let currentPage = 1;
+let totalPages = 50;
 let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
@@ -479,8 +481,12 @@ function generateLogicPuzzles(count, difficulty) {
 }
 
 // Load Puzzles
-function loadPuzzles(difficulty) {
+function loadPuzzles(difficulty, page = 1) {
     currentDifficulty = difficulty;
+    currentPage = page;
+
+    // Set page limit for demo mode (2 pages) vs full mode (50 pages)
+    totalPages = getDemoLimit(50);
 
     const counts = {
         easy: { patterns: 8, counting: 8, sequences: 6, matching: 6, oddone: 6, comparison: 6, logic: 6 },
@@ -504,10 +510,24 @@ function loadPuzzles(difficulty) {
     currentWorksheet = {
         type: currentType,
         difficulty,
+        page: currentPage,
         problems
     };
 
     renderWorksheet();
+}
+
+// Navigate between pages
+function changePage(direction) {
+    const newPage = currentPage + direction;
+
+    // Check bounds
+    if (newPage < 1 || newPage > totalPages) {
+        return;
+    }
+
+    // Load new page
+    loadPuzzles(currentDifficulty, newPage);
 }
 
 // Render Worksheet
@@ -736,9 +756,13 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
-                <button onclick="loadPuzzles('${difficulty}')">New ${difficulty.toUpperCase()} Set</button>
+            <div class="navigation" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
+                <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="changePage(-1)" id="prev-btn" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">← Previous Page</button>
+                    <span style="font-weight: bold; font-size: 1.2em;">Page <span id="current-page">${currentPage}</span> of <span id="total-pages">${totalPages}</span></span>
+                    <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next Page →</button>
+                </div>
             </div>
 
             <div class="controls">
