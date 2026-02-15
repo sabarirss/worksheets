@@ -65,6 +65,23 @@ async function loadProfileSelector(parentUid) {
         if (!selectedChildId || !children.find(c => c.id === selectedChildId)) {
             selectChild(children[0].id, children[0]);
             selectedChildId = children[0].id;
+        } else {
+            // Child is already selected, just update module visibility
+            const selectedChildData = children.find(c => c.id === selectedChildId);
+            if (selectedChildData && typeof updateModuleVisibility === 'function') {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    firebase.firestore().collection('users').doc(user.uid).get()
+                        .then(doc => {
+                            const userData = doc.data();
+                            updateModuleVisibility(selectedChildData, userData);
+                        })
+                        .catch(err => {
+                            console.error('Error fetching user data:', err);
+                            updateModuleVisibility(selectedChildData, null);
+                        });
+                }
+            }
         }
 
         // Render the profile selector
@@ -222,6 +239,25 @@ function selectChild(childId, childData) {
     // Start activity tracking (if session manager is loaded)
     if (typeof startActivityTracking === 'function') {
         startActivityTracking();
+    }
+
+    // Update module visibility based on this child's permissions
+    if (typeof updateModuleVisibility === 'function') {
+        // Get current user from Firebase
+        const user = firebase.auth().currentUser;
+        if (user) {
+            firebase.firestore().collection('users').doc(user.uid).get()
+                .then(doc => {
+                    const userData = doc.data();
+                    updateModuleVisibility(childData, userData);
+                })
+                .catch(err => {
+                    console.error('Error fetching user data:', err);
+                    updateModuleVisibility(childData, null);
+                });
+        } else {
+            updateModuleVisibility(childData, null);
+        }
     }
 }
 

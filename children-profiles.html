@@ -328,6 +328,51 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label for="child-version">Version</label>
+                    <select id="child-version">
+                        <option value="demo">Demo (Free)</option>
+                        <option value="full">Full (Paid)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Enabled Modules</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-math" checked>
+                            <span>📐 Math</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-english">
+                            <span>📝 English</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-aptitude">
+                            <span>🧩 Aptitude</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-stories">
+                            <span>📚 Stories</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-eq">
+                            <span>❤️ EQ</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-drawing">
+                            <span>🎨 Drawing</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="module-german-kids">
+                            <span>🇩🇪 German Kids</span>
+                        </label>
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 8px; font-size: 0.9em; color: #856404;">
+                        ℹ️ <strong>Note:</strong> German B1 is an admin-only module for adult learning and not available for children.
+                    </div>
+                </div>
+
                 <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
                     <p style="margin: 0; color: #1565c0; font-size: 0.95em;">
                         ℹ️ Age will be automatically calculated from date of birth
@@ -442,12 +487,24 @@
             const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
             const age = calculateAge(child.date_of_birth);
 
+            // Count enabled modules
+            const modules = child.enabledModules || { math: true };
+            const enabledCount = Object.values(modules).filter(Boolean).length;
+
+            // Get version
+            const version = child.version || 'demo';
+            const versionBadge = version === 'full'
+                ? '<span style="background: #4caf50; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">✨ Full</span>'
+                : '<span style="background: #ff9800; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">Demo</span>';
+
             card.innerHTML = `
                 <div class="child-avatar">${avatar}</div>
                 <div class="child-name">${child.name}</div>
                 <div class="child-info">Age: ${age} years old</div>
                 <div class="child-info">Grade: ${child.grade}</div>
                 <div class="child-info">Born: ${formatDate(child.date_of_birth)}</div>
+                <div class="child-info" style="margin-top: 10px;">${versionBadge}</div>
+                <div class="child-info" style="color: #667eea; font-weight: bold;">📚 ${enabledCount} module(s) enabled</div>
                 <div class="child-actions">
                     <button class="edit-btn" onclick="editChild('${id}')">✏️ Edit</button>
                     <button class="delete-btn" onclick="deleteChild('${id}', '${child.name}')">🗑️ Delete</button>
@@ -495,6 +552,30 @@
                 document.getElementById('child-dob').value = child.date_of_birth;
                 document.getElementById('child-grade').value = child.grade;
 
+                // Set version (default to demo if not set)
+                document.getElementById('child-version').value = child.version || 'demo';
+
+                // Set enabled modules (default all to false except math if not set)
+                const modules = child.enabledModules || {
+                    math: true,
+                    english: false,
+                    aptitude: false,
+                    stories: false,
+                    'emotional-quotient': false,
+                    drawing: false,
+                    german: false,
+                    'german-kids': false
+                };
+
+                document.getElementById('module-math').checked = modules.math;
+                document.getElementById('module-english').checked = modules.english;
+                document.getElementById('module-aptitude').checked = modules.aptitude;
+                document.getElementById('module-stories').checked = modules.stories;
+                document.getElementById('module-eq').checked = modules['emotional-quotient'];
+                document.getElementById('module-drawing').checked = modules.drawing;
+                // German B1 is admin-only, no checkbox to set
+                document.getElementById('module-german-kids').checked = modules['german-kids'];
+
                 document.getElementById('child-modal').style.display = 'flex';
             } catch (error) {
                 console.error('Error loading child:', error);
@@ -513,6 +594,7 @@
             const name = document.getElementById('child-name').value.trim();
             const gender = document.getElementById('child-gender').value;
             const dateOfBirth = document.getElementById('child-dob').value;
+            const version = document.getElementById('child-version').value;
             const grade = document.getElementById('child-grade').value;
 
             // Validation
@@ -540,13 +622,27 @@
                 return;
             }
 
+            // Collect enabled modules
+            const enabledModules = {
+                math: document.getElementById('module-math').checked,
+                english: document.getElementById('module-english').checked,
+                aptitude: document.getElementById('module-aptitude').checked,
+                stories: document.getElementById('module-stories').checked,
+                'emotional-quotient': document.getElementById('module-eq').checked,
+                drawing: document.getElementById('module-drawing').checked,
+                german: false,  // German B1 is admin-only, never enabled for children
+                'german-kids': document.getElementById('module-german-kids').checked
+            };
+
             const childData = {
                 name: name,
                 gender: gender,
                 date_of_birth: dateOfBirth,
                 age: calculateAge(dateOfBirth),
                 grade: grade,
-                parent_uid: parentUid
+                parent_uid: parentUid,
+                version: version,
+                enabledModules: enabledModules
             };
 
             try {

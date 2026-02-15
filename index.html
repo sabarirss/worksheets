@@ -859,6 +859,100 @@
             // Disabled for now as it's misleading (shows complete after saving just 1 page)
             // setTimeout(() => addCompletionBadges(), 100);
         }
+
+        // Update module visibility and version based on selected child
+        // This is called from profile-selector.js when a child is selected
+        function updateModuleVisibility(child, user) {
+            console.log('Updating module visibility for child:', child);
+
+            if (!child) {
+                // No child selected - hide all modules except for admin
+                if (user && user.role === 'admin') {
+                    // Admin can see all modules
+                    return;
+                }
+                document.querySelectorAll('.module-btn').forEach(btn => btn.style.display = 'none');
+                return;
+            }
+
+            // Get child's enabled modules (default to only math for existing children without this field)
+            const modules = child.enabledModules || { math: true };
+            console.log('Child enabled modules:', modules);
+
+            // Update version badge based on child's version
+            const version = child.version || 'demo';
+            const versionBadge = document.getElementById('version-badge');
+
+            // Initialize input mode manager with child's version
+            if (typeof setUserVersion === 'function') {
+                setUserVersion(version);
+            }
+
+            // Check if admin is in demo preview mode
+            const isAdminDemoPreview = user && user.role === 'admin' && localStorage.getItem('adminDemoPreview') === 'true';
+
+            if (isAdminDemoPreview) {
+                // Admin in demo preview mode
+                versionBadge.textContent = '🔍 DEMO PREVIEW MODE (Click to disable)';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(255, 193, 7, 0.95)';
+                versionBadge.style.border = '2px solid #ff9800';
+                versionBadge.style.animation = 'pulse 2s infinite';
+                versionBadge.style.cursor = 'pointer';
+                versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 193, 7, 1)'; };
+                versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
+                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+            } else if (version === 'demo') {
+                versionBadge.textContent = '📦 Demo Version (2 pages per activity)';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(255, 152, 0, 0.9)';
+                versionBadge.style.border = 'none';
+                versionBadge.style.animation = 'none';
+                versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 152, 0, 1)'; };
+                versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 152, 0, 0.9)'; };
+                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+            } else if (version === 'full') {
+                versionBadge.textContent = '⭐ Full Version';
+                versionBadge.style.display = 'block';
+                versionBadge.style.background = 'rgba(76, 175, 80, 0.9)';
+                versionBadge.style.border = 'none';
+                versionBadge.style.animation = 'none';
+                versionBadge.style.cursor = 'default';
+                versionBadge.onclick = null;
+            }
+
+            // Update each module's visibility based on child's permissions
+            const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
+            if (mathBtn) mathBtn.style.display = modules.math ? 'inline-block' : 'none';
+
+            const englishBtn = document.querySelector('button[onclick*="english.html"]');
+            if (englishBtn) englishBtn.style.display = modules.english ? 'inline-block' : 'none';
+
+            const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+            if (aptitudeBtn) aptitudeBtn.style.display = modules.aptitude ? 'inline-block' : 'none';
+
+            const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+            if (storiesBtn) storiesBtn.style.display = modules.stories ? 'inline-block' : 'none';
+
+            const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+            if (eqBtn) eqBtn.style.display = modules['emotional-quotient'] ? 'inline-block' : 'none';
+
+            const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
+            if (drawingBtn) drawingBtn.style.display = modules.drawing ? 'inline-block' : 'none';
+
+            const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
+            if (germanKidsBtn) germanKidsBtn.style.display = modules['german-kids'] ? 'inline-block' : 'none';
+
+            // German B1 is admin-only - only show for admin users
+            const germanBtn = document.querySelector('button[onclick*="german.html"]');
+            if (germanBtn) {
+                if (user && user.role === 'admin') {
+                    germanBtn.style.display = 'inline-block';
+                } else {
+                    germanBtn.style.display = 'none';
+                }
+            }
+        }
     </script>
 
     <div class="container">
