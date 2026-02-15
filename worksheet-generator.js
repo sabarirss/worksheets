@@ -1399,7 +1399,7 @@ function renderWorksheet() {
             <div class="page-navigation" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
                 <button onclick="navigateAbsolutePage(-10)" ${currentAbsolutePage <= 10 ? 'disabled' : ''} title="Go back 10 pages">⏪ -10</button>
                 <button onclick="navigateAbsolutePage(-1)" ${currentAbsolutePage <= 1 ? 'disabled' : ''} title="Previous page">← Prev</button>
-                <span id="page-counter" class="page-counter" style="padding: 10px 20px; background: #f0f4ff; border-radius: 8px; font-weight: bold; min-width: 120px; text-align: center;">
+                <span id="page-counter" class="page-counter">
                     Page ${currentAbsolutePage} of 150
                 </span>
                 <button onclick="navigateAbsolutePage(1)" ${currentAbsolutePage >= 150 ? 'disabled' : ''} title="Next page">Next →</button>
