@@ -31,24 +31,20 @@ async function initializeInputMode() {
         return;
     }
 
-    // Get child's version
+    // Get child's version and input mode from child object (loaded from Firestore)
     window.childVersion = child.version || 'demo';
     console.log('Child version:', window.childVersion);
 
-    // Load saved preference
-    const saved = localStorage.getItem(`inputMode_${child.id}`);
+    // Use input mode from child object (which comes from Firestore)
+    const saved = child.inputMode || 'keyboard';
+    console.log('Saved input mode:', saved);
 
-    // Default to keyboard
-    if (!saved) {
+    // Only allow pencil mode if child has Full version
+    if (saved === 'pencil' && window.childVersion !== 'full') {
+        console.log('Pencil mode requested but child does not have Full version, defaulting to keyboard');
         window.inputMode = 'keyboard';
     } else {
-        // Only allow pencil mode if child has Full version
-        if (saved === 'pencil' && window.childVersion !== 'full') {
-            console.log('Pencil mode requested but child does not have Full version, defaulting to keyboard');
-            window.inputMode = 'keyboard';
-        } else {
-            window.inputMode = saved;
-        }
+        window.inputMode = saved;
     }
 
     console.log('Input mode initialized:', window.inputMode);
@@ -151,7 +147,7 @@ async function setInputMode(mode) {
         }
     }
 
-    // Non-admin: save per child
+    // Non-admin: save per child to Firestore
     const child = getSelectedChild();
     if (!child) {
         console.error('No child selected');
@@ -165,15 +161,24 @@ async function setInputMode(mode) {
         return false;
     }
 
-    // Save preference per child
-    localStorage.setItem(`inputMode_${child.id}`, mode);
+    // Save preference per child to Firestore
+    try {
+        await firebase.firestore().collection('children').doc(child.id).update({
+            inputMode: mode,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    window.inputMode = mode;
-    window.childVersion = childVersion;
-    console.log('Input mode changed to:', mode, 'for child:', child.name);
+        window.inputMode = mode;
+        window.childVersion = childVersion;
+        console.log('Input mode changed to:', mode, 'for child:', child.name);
 
-    updateInputModeUI();
-    return true;
+        updateInputModeUI();
+        return true;
+    } catch (error) {
+        console.error('Error saving input mode:', error);
+        alert('Failed to save input mode preference');
+        return false;
+    }
 }
 
 /**
@@ -275,7 +280,7 @@ function createInputModeToggle() {
 /**
  * Set child version (called when child is selected)
  */
-function setUserVersion(version) {
+async function setUserVersion(version) {
     window.childVersion = version || 'demo';
     console.log('Child version set to:', window.childVersion);
 
@@ -285,7 +290,15 @@ function setUserVersion(version) {
         window.inputMode = 'keyboard';
         const child = getSelectedChild();
         if (child) {
-            localStorage.setItem(`inputMode_${child.id}`, 'keyboard');
+            try {
+                await firebase.firestore().collection('children').doc(child.id).update({
+                    inputMode: 'keyboard',
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('Input mode reset to keyboard in Firestore');
+            } catch (error) {
+                console.error('Error resetting input mode:', error);
+            }
         }
     }
 

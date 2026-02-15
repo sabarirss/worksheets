@@ -9,14 +9,22 @@ let currentUser = null;
 function initializeParentMode(userData) {
     currentUser = userData;
 
+    const parentModeBtn = document.getElementById('parent-mode-btn');
+
+    // Element might not exist on all pages
+    if (!parentModeBtn) {
+        console.log('Parent mode button not found on this page');
+        return;
+    }
+
     // Don't show parent mode for admin users
     if (userData.role === 'admin') {
-        document.getElementById('parent-mode-btn').style.display = 'none';
+        parentModeBtn.style.display = 'none';
         return;
     }
 
     // Show parent mode button
-    document.getElementById('parent-mode-btn').style.display = 'block';
+    parentModeBtn.style.display = 'block';
 
     // Check if already in parent mode (session storage)
     const parentModeSession = sessionStorage.getItem('parentMode');
