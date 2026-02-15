@@ -2498,15 +2498,22 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
         </div>
     `;
 
-    // Hide navigation and show worksheet container
+    // Hide navigation and show worksheet in container
     document.getElementById('age-groups').style.display = 'none';
-    document.getElementById('difficulties').style.display = 'none';
+    document.getElementById('type-selection').style.display = 'none';
+    document.getElementById('writing-difficulties').style.display = 'none';
 
-    let worksheetContainer = document.getElementById('worksheet-content');
+    // Get or create worksheet container
+    let worksheetContainer = document.getElementById('english-worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
-        worksheetContainer.id = 'worksheet-content';
-        document.body.appendChild(worksheetContainer);
+        worksheetContainer.id = 'english-worksheet-content';
+        const container = document.querySelector('.container');
+        if (container) {
+            container.appendChild(worksheetContainer);
+        } else {
+            document.body.appendChild(worksheetContainer);
+        }
     }
 
     worksheetContainer.innerHTML = html;
@@ -2516,6 +2523,9 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     setTimeout(() => {
         initializeAllWritingCanvases();
     }, 100);
+
+    elapsedSeconds = 0;
+    updateTimerDisplay();
 }
 
 // Initialize writing canvases with ruled lines
