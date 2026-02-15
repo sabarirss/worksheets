@@ -444,7 +444,17 @@
     <div class="modal" id="password-change-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
             <h2 style="margin-top: 0; color: #667eea;">🔐 Change Password</h2>
-            <p style="color: #666; margin-bottom: 20px;">Enter a new password for the account.</p>
+            <p style="color: #666; margin-bottom: 20px;">Enter your current password and choose a new one.</p>
+
+            <div style="margin: 20px 0;">
+                <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">Current Password:</label>
+                <input
+                    type="password"
+                    id="modal-current-password"
+                    placeholder="Enter your current password"
+                    style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;"
+                >
+            </div>
 
             <div style="margin: 20px 0;">
                 <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">New Password:</label>
@@ -1007,12 +1017,13 @@
         // Password change modal functions
         function openPasswordChangeModal() {
             document.getElementById('password-change-modal').style.display = 'flex';
+            document.getElementById('modal-current-password').value = '';
             document.getElementById('modal-new-password').value = '';
             document.getElementById('modal-confirm-password').value = '';
             document.getElementById('password-change-error').style.display = 'none';
 
             setTimeout(() => {
-                document.getElementById('modal-new-password').focus();
+                document.getElementById('modal-current-password').focus();
             }, 100);
         }
 
@@ -1021,11 +1032,18 @@
         }
 
         async function saveNewPassword() {
+            const currentPassword = document.getElementById('modal-current-password').value.trim();
             const newPassword = document.getElementById('modal-new-password').value.trim();
             const confirmPassword = document.getElementById('modal-confirm-password').value.trim();
             const errorDiv = document.getElementById('password-change-error');
 
             // Validation
+            if (!currentPassword) {
+                errorDiv.textContent = 'Please enter your current password';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             if (!newPassword) {
                 errorDiv.textContent = 'Please enter a new password';
                 errorDiv.style.display = 'block';
@@ -1050,6 +1068,12 @@
                 return;
             }
 
+            if (currentPassword === newPassword) {
+                errorDiv.textContent = 'New password must be different from current password';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             try {
                 const user = firebase.auth().currentUser;
                 if (!user) {
@@ -1058,7 +1082,15 @@
                     return;
                 }
 
-                // Update password (no need for re-authentication since parent verified)
+                // Re-authenticate user with current password (required by Firebase)
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    user.email,
+                    currentPassword
+                );
+
+                await user.reauthenticateWithCredential(credential);
+
+                // Now update password
                 await user.updatePassword(newPassword);
 
                 closePasswordChangeModal();
@@ -1077,6 +1109,8 @@
 
                 if (error.code === 'auth/weak-password') {
                     errorMessage = 'Password is too weak. Please choose a stronger password';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Current password is incorrect';
                 } else if (error.code === 'auth/requires-recent-login') {
                     errorMessage = 'Session expired. Please log out and log back in';
                 } else {
