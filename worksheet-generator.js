@@ -1188,10 +1188,144 @@ function handleEnter(event, index) {
 }
 
 // Check answers
-function checkAnswers() {
+async function checkAnswers() {
     stopTimer();
 
-    let total = currentWorksheet.problems.length;
+    const total = currentWorksheet.problems.length;
+    let correct = 0;
+    let checked = 0;
+
+    // Show loading indicator
+    const resultsDiv = document.getElementById('results-summary');
+    resultsDiv.innerHTML = `
+        <h3>🤖 Checking Answers with AI...</h3>
+        <p>Recognizing your handwriting, please wait...</p>
+    `;
+    resultsDiv.style.display = 'block';
+
+    // Ensure handwriting model is loaded
+    try {
+        if (typeof loadHandwritingModel !== 'undefined') {
+            await loadHandwritingModel();
+        } else {
+            console.warn('Handwriting recognition not available - showing answers only');
+            checkAnswersManual();
+            return;
+        }
+    } catch (error) {
+        console.error('Failed to load handwriting model:', error);
+        checkAnswersManual();
+        return;
+    }
+
+    // Check each answer
+    for (let index = 0; index < currentWorksheet.problems.length; index++) {
+        const problem = currentWorksheet.problems[index];
+        const canvas = document.getElementById(`answer-${index}`);
+        const feedback = document.getElementById(`feedback-${index}`);
+        const correctAnswer = problem.answer;
+
+        if (!canvas || !feedback) continue;
+
+        try {
+            // Recognize handwritten digit
+            const result = await recognizeDigit(canvas);
+
+            if (result.isEmpty) {
+                // Canvas is empty - show as unanswered
+                feedback.textContent = `? (empty)`;
+                feedback.style.color = '#999';
+                feedback.style.fontSize = '1.2em';
+                feedback.style.fontWeight = 'bold';
+                feedback.style.display = 'inline';
+
+                // Add empty indicator to canvas
+                canvas.style.border = '2px dashed #999';
+            } else if (result.error) {
+                // Error recognizing
+                feedback.textContent = `✓ ${correctAnswer} (recognition failed)`;
+                feedback.style.color = '#ff9800';
+                feedback.style.fontSize = '1.2em';
+                feedback.style.fontWeight = 'bold';
+                feedback.style.display = 'inline';
+            } else {
+                // Successfully recognized
+                checked++;
+                const recognizedDigit = result.digit;
+                const isCorrect = recognizedDigit === correctAnswer;
+
+                if (isCorrect) {
+                    correct++;
+                    feedback.textContent = `✓ Correct! (${recognizedDigit})`;
+                    feedback.style.color = '#4caf50';
+                    canvas.style.border = '3px solid #4caf50';
+                    canvas.style.backgroundColor = '#e8f5e9';
+                } else {
+                    feedback.textContent = `✗ Wrong (saw ${recognizedDigit}, answer is ${correctAnswer})`;
+                    feedback.style.color = '#f44336';
+                    canvas.style.border = '3px solid #f44336';
+                    canvas.style.backgroundColor = '#ffebee';
+                }
+
+                feedback.style.fontSize = '1.2em';
+                feedback.style.fontWeight = 'bold';
+                feedback.style.display = 'inline';
+
+                // Log confidence for debugging
+                console.log(`Problem ${index + 1}: Recognized ${recognizedDigit}, Correct ${correctAnswer}, Confidence ${(result.confidence * 100).toFixed(1)}%`);
+            }
+        } catch (error) {
+            console.error(`Error checking answer ${index}:`, error);
+            feedback.textContent = `✓ ${correctAnswer} (error)`;
+            feedback.style.color = '#ff9800';
+            feedback.style.fontSize = '1.2em';
+            feedback.style.fontWeight = 'bold';
+            feedback.style.display = 'inline';
+        }
+    }
+
+    // Show results
+    const percentage = checked > 0 ? Math.round((correct / checked) * 100) : 0;
+    const timeText = document.getElementById('elapsed-time').textContent;
+
+    let resultMessage = '';
+    if (checked === 0) {
+        resultMessage = `<p style="font-size: 1.2em; color: #999;">No answers to check. Please write your answers on the canvas.</p>`;
+    } else if (percentage === 100) {
+        resultMessage = `<p style="font-size: 1.4em; color: #4caf50;">🎉 Perfect Score! All ${correct} correct!</p>`;
+    } else if (percentage >= 80) {
+        resultMessage = `<p style="font-size: 1.2em; color: #4caf50;">Great job! ${correct} out of ${checked} correct (${percentage}%)</p>`;
+    } else if (percentage >= 60) {
+        resultMessage = `<p style="font-size: 1.2em; color: #ff9800;">Good effort! ${correct} out of ${checked} correct (${percentage}%)</p>`;
+    } else {
+        resultMessage = `<p style="font-size: 1.2em; color: #f44336;">Keep practicing! ${correct} out of ${checked} correct (${percentage}%)</p>`;
+    }
+
+    resultsDiv.innerHTML = `
+        <h3>✅ Results</h3>
+        ${resultMessage}
+        <p style="font-size: 0.9em; color: #666;">Time: ${timeText}</p>
+        <p style="font-size: 0.8em; color: #999; margin-top: 10px;">
+            ℹ️ Handwriting recognized by AI. If results seem incorrect, try writing more clearly.
+        </p>
+    `;
+    resultsDiv.style.display = 'block';
+
+    // Show and check toggle switch
+    answersVisible = true;
+    const toggleContainer = document.getElementById('answer-toggle-container');
+    const toggleInput = document.getElementById('answer-toggle-input');
+    if (toggleContainer && toggleInput) {
+        toggleContainer.style.display = 'flex';
+        toggleInput.checked = true;
+    }
+}
+
+// Fallback function if handwriting recognition is not available
+function checkAnswersManual() {
+    stopTimer();
+
+    const total = currentWorksheet.problems.length;
 
     currentWorksheet.problems.forEach((problem, index) => {
         const canvas = document.getElementById(`answer-${index}`);
