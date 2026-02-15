@@ -1,10 +1,32 @@
 // Math Worksheet Generator
 // Note: getSelectedChild() is provided by profile-selector.js
+// Note: level-mapper.js provides level conversion functions
 
 // State variables for navigation
-let selectedAgeGroup = null;
+let selectedAgeGroup = null;  // Internal: still used for age-based content (kept for assessment)
+let selectedLevel = null;     // New: level-based selection (Level 1-12)
 let selectedOperation = null;
 let selectedDifficulty = null;
+
+// Level mapping helper (if level-mapper.js not loaded)
+if (typeof ageAndDifficultyToLevel === 'undefined') {
+    window.ageAndDifficultyToLevel = function(age, diff) {
+        const map = {'4-5':{easy:1,medium:2,hard:2},'6':{easy:3,medium:4,hard:4},'7':{easy:5,medium:6,hard:6},'8':{easy:7,medium:8,hard:8},'9+':{easy:9,medium:10,hard:10},'10+':{easy:11,medium:12,hard:12}};
+        return map[age]?.[diff] || 1;
+    };
+    window.levelToAgeGroup = function(level) {
+        if (level <= 2) return '4-5';
+        if (level <= 4) return '6';
+        if (level <= 6) return '7';
+        if (level <= 8) return '8';
+        if (level <= 10) return '9+';
+        return '10+';
+    };
+    window.levelToDifficulty = function(level) {
+        if (level === 1) return 'easy';
+        return level % 2 === 1 ? 'easy' : 'medium';
+    };
+}
 
 // Navigation functions
 function showSubjects() {
@@ -71,16 +93,18 @@ function showDifficulties(operation) {
 function updateDifficultyDescriptions() {
     if (!selectedAgeGroup || !selectedOperation) return;
 
-    const config = contentConfigs[selectedOperation]?.[selectedAgeGroup];
-    if (!config) return;
-
     const easyDesc = document.getElementById('easy-desc');
     const mediumDesc = document.getElementById('medium-desc');
     const hardDesc = document.getElementById('hard-desc');
 
-    if (easyDesc && config.easy) easyDesc.textContent = config.easy.description;
-    if (mediumDesc && config.medium) mediumDesc.textContent = config.medium.description;
-    if (hardDesc && config.hard) hardDesc.textContent = config.hard.description;
+    // Get configs using age+difficulty (internally maps to levels)
+    const easyConfig = getConfigByAge(selectedOperation, selectedAgeGroup, 'easy');
+    const mediumConfig = getConfigByAge(selectedOperation, selectedAgeGroup, 'medium');
+    const hardConfig = getConfigByAge(selectedOperation, selectedAgeGroup, 'hard');
+
+    if (easyDesc && easyConfig) easyDesc.textContent = easyConfig.description;
+    if (mediumDesc && mediumConfig) mediumDesc.textContent = mediumConfig.description;
+    if (hardDesc && hardConfig) hardDesc.textContent = hardConfig.description;
 }
 
 function loadWorksheetNew(difficulty) {
@@ -152,7 +176,9 @@ const DIFFICULTY_LABELS = {
 };
 
 // Content Configurations (age-based with difficulty levels)
-const contentConfigs = {
+// Age-based content configs (internal - kept for backward compatibility and assessment)
+// This structure is used internally but exposed as level-based to users
+const ageBasedContentConfigs = {
     addition: {
         '4-5': {
             easy: {
@@ -643,6 +669,55 @@ const contentConfigs = {
     }
 };
 
+// Convert age-based configs to level-based structure (Level 1-12)
+// This provides the external-facing level-based interface while keeping age data internal
+function buildLevelBasedConfigs() {
+    const levelConfigs = {};
+
+    // For each operation (addition, subtraction, multiplication, division)
+    for (const operation in ageBasedContentConfigs) {
+        levelConfigs[operation] = {};
+        const ageConfigs = ageBasedContentConfigs[operation];
+
+        // Convert each age+difficulty combination to a level
+        for (const ageGroup in ageConfigs) {
+            for (const difficulty in ageConfigs[ageGroup]) {
+                const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+                const config = ageConfigs[ageGroup][difficulty];
+
+                // Create level-based config with age metadata
+                levelConfigs[operation][`level${level}`] = {
+                    level: level,
+                    name: `Level ${level} - ${operation.charAt(0).toUpperCase() + operation.slice(1)}`,
+                    description: config.description,
+                    problemCount: config.problemCount,
+                    generator: config.generator,
+                    // Keep age data as metadata (for future assessment system)
+                    ageEquivalent: ageGroup,
+                    difficultyEquivalent: difficulty,
+                    originalName: config.name
+                };
+            }
+        }
+    }
+
+    return levelConfigs;
+}
+
+// Build level-based configs from age-based structure
+const contentConfigs = buildLevelBasedConfigs();
+
+// Helper: Get config by level
+function getConfigByLevel(operation, level) {
+    return contentConfigs[operation]?.[`level${level}`];
+}
+
+// Helper: Get config by age+difficulty (backward compatibility)
+function getConfigByAge(operation, ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getConfigByLevel(operation, level);
+}
+
 // Generate simple addition problems
 function generateSimpleAddition(min, max, sumLimit) {
     // Use seeded random if available, otherwise fall back to Math.random
@@ -855,7 +930,9 @@ function generateFractionDivision() {
 function loadWorksheet(operation, ageGroup, difficulty, page = 1) {
     currentOperation = operation;
     currentPage = page;
-    const config = contentConfigs[operation]?.[ageGroup]?.[difficulty];
+
+    // Get config using age+difficulty (maps to level internally)
+    const config = getConfigByAge(operation, ageGroup, difficulty);
     if (!config) {
         console.error(`No config found for: ${operation}, ${ageGroup}, ${difficulty}`);
         return;
