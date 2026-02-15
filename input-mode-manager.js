@@ -10,8 +10,20 @@ window.childVersion = 'demo'; // Will be updated when child is selected
 
 /**
  * Initialize input mode from localStorage
+ * For admins: uses admin's own input mode from their profile
+ * For parents: uses selected child's input mode
  */
-function initializeInputMode() {
+async function initializeInputMode() {
+    // Check if user is admin
+    const isAdmin = await checkIfAdmin();
+
+    if (isAdmin) {
+        console.log('Admin user detected, loading admin input mode');
+        await initializeAdminInputMode();
+        return;
+    }
+
+    // For non-admin users, use child's preference
     const child = getSelectedChild();
     if (!child) {
         console.log('No child selected, using default keyboard mode');
@@ -44,16 +56,102 @@ function initializeInputMode() {
 }
 
 /**
- * Set input mode (keyboard or pencil)
- * Only allows pencil for children with Full version
+ * Initialize input mode for admin users
+ * Admins don't have children, so we use their own profile settings
  */
-function setInputMode(mode) {
+async function initializeAdminInputMode() {
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            console.log('No user authenticated');
+            window.inputMode = 'keyboard';
+            return;
+        }
+
+        // Get admin's input mode from Firestore
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+            console.log('Admin user document not found');
+            window.inputMode = 'keyboard';
+            return;
+        }
+
+        const userData = userDoc.data();
+        const savedMode = userData.inputMode || 'keyboard';
+
+        // Admins always have full access (no version restriction)
+        window.inputMode = savedMode;
+        window.childVersion = 'full'; // Admins always have full access
+
+        console.log('Admin input mode initialized:', window.inputMode);
+        updateInputModeUI();
+    } catch (error) {
+        console.error('Error initializing admin input mode:', error);
+        window.inputMode = 'keyboard';
+    }
+}
+
+/**
+ * Check if current user is admin
+ */
+async function checkIfAdmin() {
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) return false;
+
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        if (!userDoc.exists) return false;
+
+        const userData = userDoc.data();
+        return userData.role === 'admin';
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
+/**
+ * Set input mode (keyboard or pencil)
+ * For admins: saves to their own profile
+ * For parents: saves per child, only allows pencil for children with Full version
+ */
+async function setInputMode(mode) {
     // Validate mode
     if (mode !== 'keyboard' && mode !== 'pencil') {
         console.error('Invalid input mode:', mode);
         return false;
     }
 
+    // Check if user is admin
+    const isAdmin = await checkIfAdmin();
+
+    if (isAdmin) {
+        // Admin: save to their own profile
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                console.error('No user authenticated');
+                return false;
+            }
+
+            await firebase.firestore().collection('users').doc(user.uid).update({
+                inputMode: mode,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            window.inputMode = mode;
+            window.childVersion = 'full'; // Admins always have full access
+            console.log('Admin input mode changed to:', mode);
+
+            updateInputModeUI();
+            return true;
+        } catch (error) {
+            console.error('Error saving admin input mode:', error);
+            return false;
+        }
+    }
+
+    // Non-admin: save per child
     const child = getSelectedChild();
     if (!child) {
         console.error('No child selected');

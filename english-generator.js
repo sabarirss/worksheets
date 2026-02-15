@@ -3154,9 +3154,14 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     }
 
     // Initialize writing canvases
-    setTimeout(() => {
-        initializeAllWritingCanvases();
-    }, 100);
+    // Use requestAnimationFrame + setTimeout to ensure DOM is ready
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            console.log('Initializing writing canvases...');
+            initializeAllWritingCanvases();
+            console.log('Writing canvases initialized:', writingCanvases.length);
+        }, 200);
+    });
 
     elapsedSeconds = 0;
     updateTimerDisplay();
@@ -3625,9 +3630,14 @@ function renderWorksheet() {
     }
 
     // Initialize writing canvases
-    setTimeout(() => {
-        initializeAllWritingCanvases();
-    }, 100);
+    // Use requestAnimationFrame + setTimeout to ensure DOM is ready
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            console.log('Initializing writing canvases...');
+            initializeAllWritingCanvases();
+            console.log('Writing canvases initialized:', writingCanvases.length);
+        }, 200);
+    });
 
     elapsedSeconds = 0;
     updateTimerDisplay();
