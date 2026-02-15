@@ -9,7 +9,7 @@ service cloud.firestore {
 
     // Helper function to check if user owns this user document
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid.substring(0, 20) == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
     // Helper function to check if user is the parent of the child
@@ -32,20 +32,20 @@ service cloud.firestore {
         // Self-registration during signup
         isOwner(userId) ||
         // Admin creating users
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin')
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
 
       // Only admins can delete users
       allow delete: if isAuthenticated() &&
-                       exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
-                       get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Worksheets collection - users can only access their own
     match /worksheets/{worksheetId} {
       allow read, write: if isAuthenticated() &&
-                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.username;
+                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username;
       allow create: if isAuthenticated();
     }
 
@@ -65,8 +65,8 @@ service cloud.firestore {
 
       // Allow admins to read all children
       allow read: if isAuthenticated() &&
-                    exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
-                    get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
+                    exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Child sessions collection - for single-device enforcement

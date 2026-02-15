@@ -368,10 +368,10 @@
 
                 console.log('Google sign-in successful:', user.email);
 
-                // Check if user document exists
+                // Check if user document exists (using FULL UID)
                 const userDoc = await firebase.firestore()
                     .collection('users')
-                    .doc(user.uid.substring(0, 20))
+                    .doc(user.uid)
                     .get();
 
                 if (!userDoc.exists) {
@@ -379,16 +379,12 @@
                     console.log('Creating new user document for:', user.email);
                     console.log('Full UID:', user.uid);
                     console.log('UID length:', user.uid.length);
-                    const docId = user.uid.substring(0, 20);
-                    console.log('Document ID (first 20 chars):', docId);
-                    console.log('User authenticated:', user.uid ? 'Yes' : 'No');
-                    console.log('Auth token:', await user.getIdToken().then(t => t.substring(0, 50) + '...'));
 
                     const displayName = user.displayName || user.email.split('@')[0];
                     const username = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
 
-                    console.log('Attempting to create document at: users/' + docId);
-                    await firebase.firestore().collection('users').doc(docId).set({
+                    console.log('Attempting to create document at: users/' + user.uid);
+                    await firebase.firestore().collection('users').doc(user.uid).set({
                         uid: user.uid,
                         username: username,
                         email: user.email,
