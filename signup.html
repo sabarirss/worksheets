@@ -439,12 +439,18 @@
                 if (!userDoc.exists) {
                     // New user - create user document
                     console.log('Creating new user document for:', user.email);
+                    console.log('Full UID:', user.uid);
+                    console.log('UID length:', user.uid.length);
+                    const docId = user.uid.substring(0, 20);
+                    console.log('Document ID (first 20 chars):', docId);
+                    console.log('User authenticated:', user.uid ? 'Yes' : 'No');
 
                     // Extract display name or use email username
                     const displayName = user.displayName || user.email.split('@')[0];
                     const username = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
 
-                    await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).set({
+                    console.log('Attempting to create document at: users/' + docId);
+                    await firebase.firestore().collection('users').doc(docId).set({
                         uid: user.uid,
                         username: username,
                         email: user.email,
