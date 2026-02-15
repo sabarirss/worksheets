@@ -43,7 +43,8 @@ function getDemoLimit(defaultCount) {
 // Restructured German Kids Stories - Age-based organization
 // Total: 30 stories (5 ages × 3 difficulties × 2 stories minimum)
 
-const germanStories = {
+// Age-based German stories (INTERNAL - kept for future assessment system)
+const ageBasedGermanStories = {
     '6': {
         easy: [
             {
@@ -475,6 +476,39 @@ const germanStories = {
     }
 };
 
+// Convert age-based German stories to level-based structure
+function buildLevelBasedGermanStories() {
+    const levelStories = {};
+
+    for (const ageGroup in ageBasedGermanStories) {
+        for (const difficulty in ageBasedGermanStories[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            const stories = ageBasedGermanStories[ageGroup][difficulty];
+            levelStories[key] = stories.map(story => ({
+                ...story,
+                level: level,
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty
+            }));
+        }
+    }
+    return levelStories;
+}
+
+const germanStories = buildLevelBasedGermanStories();
+
+// Helper functions for German story access
+function getGermanStoriesByLevel(level) {
+    return germanStories[`level${level}`] || [];
+}
+
+function getGermanStoriesByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getGermanStoriesByLevel(level);
+}
+
 /**
  * Load story list for selected difficulty - UPDATED to use age-based array structure
  */
@@ -502,8 +536,8 @@ function loadStoryList(difficulty) {
     const storyList = document.getElementById('story-list');
     storyList.innerHTML = '';
 
-    // FIXED: Now uses BOTH currentAge and difficulty with array structure
-    const stories = germanStories[currentAge][difficulty];
+    // Get stories (maps to level internally)
+    const stories = getGermanStoriesByAge(currentAge, difficulty);
 
     // Limit to 2 stories per age-difficulty in demo mode
     const limit = getDemoLimit(stories.length);
@@ -546,8 +580,9 @@ function loadStory(storyIndex) {
 
     storySelection.style.display = 'none';
 
-    // FIXED: Now uses age-based array structure with index
-    const story = germanStories[currentAge][currentDifficulty][storyIndex];
+    // Get story from array (maps to level internally)
+    const stories = getGermanStoriesByAge(currentAge, currentDifficulty);
+    const story = stories[storyIndex];
 
     // Build vocabulary section
     let vocabularyHTML = '';
@@ -637,7 +672,9 @@ function loadStory(storyIndex) {
  * Select an answer
  */
 function selectAnswer(questionIndex, optionIndex) {
-    const story = germanStories[currentAge][currentDifficulty][currentStory];
+    // Get story (maps to level internally)
+    const stories = getGermanStoriesByAge(currentAge, currentDifficulty);
+    const story = stories[currentStory];
     const question = story.questions[questionIndex];
 
     // Remove previous selection
@@ -662,7 +699,9 @@ function selectAnswer(questionIndex, optionIndex) {
  * Check all answers
  */
 function checkAllAnswers() {
-    const story = germanStories[currentAge][currentDifficulty][currentStory];
+    // Get story (maps to level internally)
+    const stories = getGermanStoriesByAge(currentAge, currentDifficulty);
+    const story = stories[currentStory];
     let score = 0;
     let totalQuestions = story.questions.length;
 
