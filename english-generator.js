@@ -76,7 +76,8 @@ function showDifficulties(ageGroup) {
 function updateWritingDifficultyDescriptions() {
     if (!selectedAgeGroup) return;
 
-    const config = contentConfigs[selectedAgeGroup];
+    // Get configs using age group (internally maps to levels)
+    const config = getLevelConfigsByAge(selectedAgeGroup);
     if (!config) return;
 
     const easyDesc = document.getElementById('writing-easy-desc');
@@ -135,7 +136,8 @@ function getDemoLimit(defaultCount) {
 
 // Story Database - Original educational stories
 // Organized by age group and difficulty level
-const storyDatabase = {
+// Age-based story database (internal structure - kept for future assessment system)
+const ageBasedStoryDatabase = {
     '4-5': {
         easy: [
         {
@@ -1395,11 +1397,49 @@ const storyDatabase = {
     }
 };
 
+// Convert age-based story database to level-based structure
+function buildLevelBasedStoryDatabase() {
+    const levelStories = {};
+
+    for (const ageGroup in ageBasedStoryDatabase) {
+        for (const difficulty in ageBasedStoryDatabase[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+
+            if (!levelStories[`level${level}`]) {
+                levelStories[`level${level}`] = [];
+            }
+
+            // Add stories for this level with metadata
+            const stories = ageBasedStoryDatabase[ageGroup][difficulty];
+            levelStories[`level${level}`] = stories.map(story => ({
+                ...story,
+                level: level,
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty
+            }));
+        }
+    }
+    return levelStories;
+}
+
+const storyDatabase = buildLevelBasedStoryDatabase();
+
+// Helper functions for story database access
+function getStoriesByLevel(level) {
+    return storyDatabase[`level${level}`] || [];
+}
+
+function getStoriesByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getStoriesByLevel(level);
+}
+
 // Load story list for selected age group and difficulty
 function loadStoryList() {
     if (!selectedAgeGroup || !selectedDifficulty) return;
 
-    const stories = storyDatabase[selectedAgeGroup]?.[selectedDifficulty] || [];
+    // Get stories using age+difficulty (maps to level internally)
+    const stories = getStoriesByAge(selectedAgeGroup, selectedDifficulty);
 
     // Limit to 2 stories per age-difficulty in demo mode
     const limit = getDemoLimit(stories.length);
@@ -1442,7 +1482,8 @@ function loadStoryList() {
 function loadStory(storyId) {
     if (!selectedAgeGroup || !selectedDifficulty) return;
 
-    const stories = storyDatabase[selectedAgeGroup]?.[selectedDifficulty] || [];
+    // Get stories using age+difficulty (maps to level internally)
+    const stories = getStoriesByAge(selectedAgeGroup, selectedDifficulty);
     const story = stories.find(s => s.id === storyId);
     if (!story) return;
 
@@ -2035,7 +2076,8 @@ const writingActivities = {
 };
 
 // Content Configurations (age-based with difficulty levels)
-const contentConfigs = {
+// Age-based content configuration (internal structure - kept for future assessment system)
+const ageBasedContentConfigs = {
     '4-5': {
         easy: {
             name: 'Ages 4-5 - Easy English',
@@ -2207,6 +2249,67 @@ const contentConfigs = {
         }
     }
 };
+
+// Convert age-based content configs to level-based structure
+function buildLevelBasedConfigs() {
+    const levelConfigs = {};
+
+    for (const ageGroup in ageBasedContentConfigs) {
+        for (const difficulty in ageBasedContentConfigs[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+
+            if (!levelConfigs[`level${level}`]) {
+                levelConfigs[`level${level}`] = {};
+            }
+
+            const config = ageBasedContentConfigs[ageGroup][difficulty];
+
+            // Map difficulty name to property name (easy/medium/hard/writing)
+            levelConfigs[`level${level}`][difficulty] = {
+                ...config,
+                level: level,
+                name: config.type === 'writing'
+                    ? `Level ${level} - Writing Practice`
+                    : `Level ${level} - English`,
+                // Keep age data as metadata
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty,
+                originalName: config.name
+            };
+        }
+    }
+    return levelConfigs;
+}
+
+const contentConfigs = buildLevelBasedConfigs();
+
+// Helper functions for content config access
+function getConfigByLevel(level, difficulty) {
+    return contentConfigs[`level${level}`]?.[difficulty];
+}
+
+function getConfigByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getConfigByLevel(level, difficulty);
+}
+
+// Helper to get all configs for a level (for updateWritingDifficultyDescriptions)
+function getLevelConfigs(level) {
+    return contentConfigs[`level${level}`];
+}
+
+function getLevelConfigsByAge(ageGroup) {
+    // For a given age group, return configs organized by difficulty
+    // This is used when updating difficulty descriptions
+    const result = {};
+    for (const difficulty of ['easy', 'medium', 'hard', 'writing']) {
+        const config = getConfigByAge(ageGroup, difficulty);
+        if (config) {
+            result[difficulty] = config;
+        }
+    }
+    return result;
+}
 
 // Problem generators
 function generatePictureWordProblems(wordList, count) {
@@ -2387,7 +2490,8 @@ function generateAdvancedGrammarProblems(count) {
 
 // Load worksheet for specific age group and difficulty
 function loadWorksheet(ageGroup, difficulty, page = 1) {
-    const config = contentConfigs[ageGroup]?.[difficulty];
+    // Get config using age+difficulty (maps to level internally)
+    const config = getConfigByAge(ageGroup, difficulty);
     if (!config) {
         console.error(`No config found for: ${ageGroup}, ${difficulty}`);
         return;
@@ -2449,10 +2553,11 @@ function navigateWritingPage(direction) {
 
 // Render writing practice worksheet with pages
 function renderWritingWorksheet(ageGroup, difficulty, page) {
-    const config = contentConfigs[ageGroup]?.[difficulty];
+    // Get config using age+difficulty (maps to level internally)
+    const config = getConfigByAge(ageGroup, difficulty);
     if (!config) {
         alert(`Error: No config found for ${ageGroup} - ${difficulty}`);
-        console.error('renderWritingWorksheet: config not found', { ageGroup, difficulty, contentConfigs });
+        console.error('renderWritingWorksheet: config not found', { ageGroup, difficulty });
         return;
     }
 
