@@ -48,7 +48,7 @@ async function initializeInputMode() {
     }
 
     console.log('Input mode initialized:', window.inputMode);
-    updateInputModeUI();
+    // updateInputModeUI(); // Removed - no header toggle
 }
 
 /**
@@ -80,7 +80,7 @@ async function initializeAdminInputMode() {
         window.childVersion = 'full'; // Admins always have full access
 
         console.log('Admin input mode initialized:', window.inputMode);
-        updateInputModeUI();
+        // updateInputModeUI(); // Removed - no header toggle
     } catch (error) {
         console.error('Error initializing admin input mode:', error);
         window.inputMode = 'keyboard';
@@ -139,7 +139,7 @@ async function setInputMode(mode) {
             window.childVersion = 'full'; // Admins always have full access
             console.log('Admin input mode changed to:', mode);
 
-            updateInputModeUI();
+            // updateInputModeUI(); // Removed - no header toggle
             return true;
         } catch (error) {
             console.error('Error saving admin input mode:', error);
@@ -182,7 +182,7 @@ async function setInputMode(mode) {
         window.childVersion = childVersion;
         console.log('Input mode changed to:', mode, 'for child:', child.name);
 
-        updateInputModeUI();
+        // updateInputModeUI(); // Removed - no header toggle
         return true;
     } catch (error) {
         console.error('Error saving input mode:', error);
@@ -217,75 +217,21 @@ function isPencilModeAvailable() {
 }
 
 /**
- * Update UI to reflect current input mode
+ * Update UI to reflect current input mode - REMOVED
+ * Header toggle removed, UI managed in settings page only
  */
-function updateInputModeUI() {
-    const toggle = document.getElementById('input-mode-toggle');
-    if (!toggle) return;
-
-    const keyboardBtn = toggle.querySelector('.keyboard-btn');
-    const pencilBtn = toggle.querySelector('.pencil-btn');
-
-    if (!keyboardBtn || !pencilBtn) return;
-
-    // Update active state
-    if (window.inputMode === 'keyboard') {
-        keyboardBtn.classList.add('active');
-        pencilBtn.classList.remove('active');
-    } else {
-        keyboardBtn.classList.remove('active');
-        pencilBtn.classList.add('active');
-    }
-
-    // Disable pencil button for non-Full users
-    if (!isPencilModeAvailable()) {
-        pencilBtn.style.opacity = '0.5';
-        pencilBtn.style.cursor = 'not-allowed';
-        pencilBtn.title = 'Full Version Only';
-    } else {
-        pencilBtn.style.opacity = '1';
-        pencilBtn.style.cursor = 'pointer';
-        pencilBtn.title = 'Use iPad/Tablet Pencil';
-    }
-}
+// function updateInputModeUI() {
+//     // REMOVED - No longer needed as header toggle is removed
+// }
 
 /**
- * Create input mode toggle UI
- * Call this after user data is loaded
- * Creates in .user-actions div before version badge
+ * Create input mode toggle UI - REMOVED
+ * Input mode is now managed only in Child Profile Settings page
  */
-function createInputModeToggle() {
-    // Remove existing toggle if present
-    const existingToggle = document.getElementById('input-mode-toggle');
-    if (existingToggle) {
-        existingToggle.remove();
-    }
-
-    // Find user-actions container
-    const userActions = document.querySelector('.user-actions');
-    if (!userActions) {
-        console.warn('User actions container not found');
-        return;
-    }
-
-    // Create toggle element
-    const toggleDiv = document.createElement('div');
-    toggleDiv.id = 'input-mode-toggle';
-    toggleDiv.className = 'input-mode-toggle';
-    toggleDiv.innerHTML = `
-        <button class="mode-btn keyboard-btn active" onclick="setInputMode('keyboard')" title="Use Keyboard">
-            ⌨️ Keyboard
-        </button>
-        <button class="mode-btn pencil-btn" onclick="setInputMode('pencil')" title="Use iPad/Tablet Pencil">
-            ✏️ Pencil
-        </button>
-    `;
-
-    // Insert before version badge (first child of user-actions)
-    userActions.insertBefore(toggleDiv, userActions.firstChild);
-
-    updateInputModeUI();
-}
+// function createInputModeToggle() {
+//     // REMOVED - Input mode toggle removed from header
+//     // Use Child Profile Settings page instead
+// }
 
 /**
  * Set child version (called when child is selected)
@@ -312,7 +258,7 @@ async function setUserVersion(version) {
         }
     }
 
-    updateInputModeUI();
+    // updateInputModeUI(); // Removed - no header toggle
 }
 
 // Initialize on page load
