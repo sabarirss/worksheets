@@ -303,7 +303,7 @@
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <input type="text" id="version" disabled style="flex: 1;">
                     <button id="request-upgrade-btn" class="btn" style="background: #4caf50; color: white; display: none; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;" onclick="requestVersionUpgrade()">
-                        📤 Request Full Version
+                        🛒 Buy Full Version
                     </button>
                     <span id="upgrade-requested-badge" style="display: none; background: #ff9800; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">
                         ⏳ Upgrade Requested
@@ -492,16 +492,8 @@
 
             <!-- Package Management -->
             <div id="package-management-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; display: none;">
-                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages (Parent Control)</h3>
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
-                    <p style="margin: 0; color: #1565c0; font-size: 0.95em; line-height: 1.6;">
-                        <strong>🔐 Two-Tier Permission System:</strong><br>
-                        1. <strong>Admin assigns</strong> modules (what's available)<br>
-                        2. <strong>You enable</strong> modules (what's active)<br>
-                        3. <strong>Child sees</strong> modules that are both assigned AND enabled
-                    </p>
-                </div>
-                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable assigned modules for <strong id="selected-child-name"></strong>:</p>
+                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages</h3>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for <strong id="selected-child-name"></strong>:</p>
                 <div style="display: grid; gap: 10px;">
                     <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-math" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
@@ -912,23 +904,64 @@
             const checkbox = document.getElementById(checkboxId);
             const label = checkbox.parentElement;
 
+            // Remove any existing buy button
+            const existingBtn = label.querySelector('.buy-btn');
+            if (existingBtn) {
+                existingBtn.remove();
+            }
+
             if (!isAssigned) {
-                // Module NOT assigned by admin - disable checkbox and show message
+                // Module NOT assigned by admin - disable checkbox and show "Buy" button
                 checkbox.checked = false;
                 checkbox.disabled = true;
-                label.style.opacity = '0.5';
-                label.style.cursor = 'not-allowed';
+                label.style.opacity = '1';
+                label.style.cursor = 'default';
+                label.style.justifyContent = 'space-between';
 
-                // Update label to show "Not assigned by admin"
-                label.querySelector('span').textContent = moduleName + ' (Not assigned by admin)';
+                // Update label to show module name (without extra text)
+                label.querySelector('span').textContent = moduleName;
                 label.style.background = '#f5f5f5';
                 label.style.borderColor = '#ddd';
+
+                // Add "Buy" button
+                const buyBtn = document.createElement('button');
+                buyBtn.className = 'buy-btn';
+                buyBtn.textContent = '🛒 Buy';
+                buyBtn.style.cssText = `
+                    padding: 8px 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 0.9em;
+                    font-weight: bold;
+                    transition: all 0.3s;
+                    margin-left: auto;
+                `;
+                buyBtn.onmouseover = function() {
+                    this.style.opacity = '0.9';
+                    this.style.transform = 'scale(1.05)';
+                };
+                buyBtn.onmouseout = function() {
+                    this.style.opacity = '1';
+                    this.style.transform = 'scale(1)';
+                };
+                buyBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Non-functional for now
+                    alert('Purchase functionality coming soon!');
+                };
+
+                label.appendChild(buyBtn);
             } else {
                 // Module IS assigned - enable checkbox and set current enabled state
                 checkbox.checked = isEnabled || false;
                 checkbox.disabled = false;
                 label.style.opacity = '1';
                 label.style.cursor = 'pointer';
+                label.style.justifyContent = 'flex-start';
                 label.querySelector('span').textContent = moduleName;
                 label.style.background = 'white';
                 label.style.borderColor = '#e0e0e0';

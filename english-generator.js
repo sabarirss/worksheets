@@ -2775,9 +2775,14 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     `;
 
     // Hide navigation and show worksheet in container
-    document.getElementById('age-groups').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('writing-difficulties').style.display = 'none';
+    const ageGroups = document.getElementById('age-groups');
+    if (ageGroups) ageGroups.style.display = 'none';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
+
+    const writingDifficulties = document.getElementById('writing-difficulties');
+    if (writingDifficulties) writingDifficulties.style.display = 'none';
 
     // Get or create worksheet container
     let worksheetContainer = document.getElementById('english-worksheet-content');
@@ -3241,9 +3246,14 @@ function renderWorksheet() {
     `;
 
     // Hide navigation and show worksheet in container
-    document.getElementById('age-groups').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('writing-difficulties').style.display = 'none';
+    const ageGroups = document.getElementById('age-groups');
+    if (ageGroups) ageGroups.style.display = 'none';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
+
+    const writingDifficulties = document.getElementById('writing-difficulties');
+    if (writingDifficulties) writingDifficulties.style.display = 'none';
 
     // Get or create worksheet container
     let worksheetContainer = document.getElementById('english-worksheet-content');
