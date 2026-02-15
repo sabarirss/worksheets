@@ -7,6 +7,16 @@ let selectedDifficulty = null;
 let selectedType = null; // 'writing' or 'reading'
 let currentStory = null;
 
+// Helper function to convert age to age group
+function getAgeGroup(age) {
+    if (age <= 5) return '4-5';
+    if (age === 6) return '6';
+    if (age === 7) return '7';
+    if (age === 8) return '8';
+    if (age === 9) return '9+';
+    return '10+';
+}
+
 // Navigation functions
 function selectAgeGroup(ageGroup) {
     selectedAgeGroup = ageGroup;
@@ -22,6 +32,19 @@ function backToAgeGroups() {
 }
 
 function selectType(type) {
+    // Auto-detect age from selected child if not already set
+    if (!selectedAgeGroup) {
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+            console.log('Auto-detected age group from child:', selectedAgeGroup);
+        } else {
+            // Default to age 6 if no child selected
+            selectedAgeGroup = '6';
+            console.warn('No child selected, defaulting to age 6');
+        }
+    }
+
     selectedType = type;
     document.getElementById('type-selection').style.display = 'none';
 
@@ -50,6 +73,19 @@ function backToTypeSelection() {
 }
 
 function selectReadingDifficulty(difficulty) {
+    // Auto-detect age from selected child if not already set
+    if (!selectedAgeGroup) {
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+            console.log('Auto-detected age group from child:', selectedAgeGroup);
+        } else {
+            // Default to age 6 if no child selected
+            selectedAgeGroup = '6';
+            console.warn('No child selected, defaulting to age 6');
+        }
+    }
+
     selectedDifficulty = difficulty;
     loadStoryList();
 }
@@ -90,6 +126,19 @@ function updateWritingDifficultyDescriptions() {
 }
 
 function loadWorksheetNew(difficulty) {
+    // Auto-detect age from selected child if not already set
+    if (!selectedAgeGroup) {
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+            console.log('Auto-detected age group from child:', selectedAgeGroup);
+        } else {
+            // Default to age 6 if no child selected
+            selectedAgeGroup = '6';
+            console.warn('No child selected, defaulting to age 6');
+        }
+    }
+
     selectedDifficulty = difficulty;
     if (selectedAgeGroup && selectedDifficulty) {
         loadWorksheet(selectedAgeGroup, selectedDifficulty);
