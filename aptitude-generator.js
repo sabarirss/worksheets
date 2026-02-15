@@ -163,11 +163,12 @@ function generatePatternPuzzles(count, difficulty, age) {
 
     // Load age-based patterns from aptitude-age-content.js
     let patterns = [];
-    if (typeof ageBasedPatterns !== 'undefined' &&
-        ageBasedPatterns[ageGroup] &&
-        ageBasedPatterns[ageGroup][difficulty]) {
-        patterns = ageBasedPatterns[ageGroup][difficulty];
-    } else {
+    // Get patterns using age+difficulty (maps to level internally)
+    if (typeof getPatternsByAge !== 'undefined') {
+        patterns = getPatternsByAge(ageGroup, difficulty);
+    }
+
+    if (patterns.length === 0) {
         // Fallback to hardcoded patterns if age-based content not available
         if (difficulty === 'easy') {
             patterns = [
@@ -224,11 +225,13 @@ function generateCountingPuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    // Load age-based counting configuration from aptitude-age-content.js
+    // Load counting configuration (maps age to level internally)
     let config;
-    if (typeof ageBasedCounting !== 'undefined' && ageBasedCounting[ageGroup]) {
-        config = ageBasedCounting[ageGroup];
-    } else {
+    if (typeof getCountingByAge !== 'undefined') {
+        config = getCountingByAge(ageGroup);
+    }
+
+    if (!config) {
         // Fallback configuration
         config = {
             range: { min: 3, max: 20 },

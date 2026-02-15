@@ -4,6 +4,7 @@
 /**
  * Age-based pattern puzzles with progressive difficulty
  * Each age group has easy, medium, hard - appropriate for that age
+ * INTERNAL: Kept for future assessment system - use levelBasedPatterns for access
  */
 
 const ageBasedPatterns = {
@@ -126,7 +127,46 @@ const ageBasedPatterns = {
     }
 };
 
+// Convert age-based patterns to level-based structure
+function buildLevelBasedPatterns() {
+    const levelPatterns = {};
+
+    for (const ageGroup in ageBasedPatterns) {
+        for (const difficulty in ageBasedPatterns[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            if (!levelPatterns[key]) {
+                levelPatterns[key] = [];
+            }
+
+            // Add patterns for this level with metadata
+            const patterns = ageBasedPatterns[ageGroup][difficulty];
+            levelPatterns[key] = patterns.map(pattern => ({
+                ...pattern,
+                level: level,
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty
+            }));
+        }
+    }
+    return levelPatterns;
+}
+
+const levelBasedPatterns = buildLevelBasedPatterns();
+
+// Helper functions for pattern access
+function getPatternsByLevel(level) {
+    return levelBasedPatterns[`level${level}`] || [];
+}
+
+function getPatternsByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getPatternsByLevel(level);
+}
+
 // Age-based counting puzzles with appropriate number ranges
+// INTERNAL: Kept for future assessment system - use levelBasedCounting for access
 const ageBasedCounting = {
     '4-5': {
         range: { min: 1, max: 10 },
@@ -154,4 +194,52 @@ const ageBasedCounting = {
     }
 };
 
-console.log('Age-based aptitude content loaded');
+// Convert age-based counting to level-based structure
+function buildLevelBasedCounting() {
+    const levelCounting = {};
+
+    for (const ageGroup in ageBasedCounting) {
+        // For counting, we map each age to 3 levels (easy, medium, hard)
+        // Easy and Medium use the same config, Hard uses more complex ranges
+        const baseConfig = ageBasedCounting[ageGroup];
+
+        const easyLevel = ageAndDifficultyToLevel(ageGroup, 'easy');
+        const mediumLevel = ageAndDifficultyToLevel(ageGroup, 'medium');
+        const hardLevel = ageAndDifficultyToLevel(ageGroup, 'hard');
+
+        levelCounting[`level${easyLevel}`] = {
+            ...baseConfig,
+            level: easyLevel,
+            ageEquivalent: ageGroup,
+            difficultyEquivalent: 'easy'
+        };
+
+        levelCounting[`level${mediumLevel}`] = {
+            ...baseConfig,
+            level: mediumLevel,
+            ageEquivalent: ageGroup,
+            difficultyEquivalent: 'medium'
+        };
+
+        levelCounting[`level${hardLevel}`] = {
+            ...baseConfig,
+            level: hardLevel,
+            ageEquivalent: ageGroup,
+            difficultyEquivalent: 'hard'
+        };
+    }
+    return levelCounting;
+}
+
+const levelBasedCounting = buildLevelBasedCounting();
+
+// Helper functions for counting config access
+function getCountingByLevel(level) {
+    return levelBasedCounting[`level${level}`];
+}
+
+function getCountingByAge(ageGroup) {
+    return ageBasedCounting[ageGroup];
+}
+
+console.log('Level-based aptitude content loaded - 12 levels available');
