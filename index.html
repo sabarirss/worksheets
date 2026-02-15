@@ -750,31 +750,42 @@
 
         function initializeUserInterface(user) {
             console.log('Initializing UI for user:', user.username);
-            console.log('User modules:', user.modules);
-            console.log('Enabled modules:', user.enabledModules);
 
             // Display user name
             document.getElementById('user-name-display').textContent = user.fullName;
 
-            // Display version badge
-            const version = user.version || 'demo';
+            // Show admin button if user is admin
+            if (user.role === 'admin') {
+                document.getElementById('admin-btn').style.display = 'block';
+
+                // Admin users see all modules without needing child selection
+                showAllModulesForAdmin(user);
+
+                // Hide profile selector for admin
+                const profileSelectorContainer = document.getElementById('profile-selector-container');
+                if (profileSelectorContainer) {
+                    profileSelectorContainer.style.display = 'none';
+                }
+            }
+
+            // Initialize parent mode
+            initializeParentMode(user);
+
+            // For non-admin users, module visibility will be updated when child is selected
+            // See updateModuleVisibility() function called from profile-selector.js
+        }
+
+        // Show all modules for admin users
+        function showAllModulesForAdmin(user) {
+            console.log('Showing all modules for admin user');
+
+            // Set version badge for admin
             const versionBadge = document.getElementById('version-badge');
 
-            // Initialize input mode manager with user version
-            if (typeof setUserVersion === 'function') {
-                setUserVersion(version);
-            }
-
-            // Create input mode toggle UI
-            if (typeof createInputModeToggle === 'function') {
-                createInputModeToggle();
-            }
-
-            // Check for admin demo preview mode
-            const isAdminDemoPreview = user.role === 'admin' && localStorage.getItem('adminDemoPreview') === 'true';
+            // Check if admin is in demo preview mode
+            const isAdminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
 
             if (isAdminDemoPreview) {
-                // Admin in demo preview mode
                 versionBadge.textContent = '🔍 DEMO PREVIEW MODE (Click to disable)';
                 versionBadge.style.display = 'block';
                 versionBadge.style.background = 'rgba(255, 193, 7, 0.95)';
@@ -784,80 +795,39 @@
                 versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 193, 7, 1)'; };
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
                 versionBadge.onclick = function() { window.location.href = 'settings.html'; };
-            } else if (version === 'demo') {
-                versionBadge.textContent = '📦 Demo Version (2 pages per activity)';
+            } else {
+                versionBadge.textContent = '👑 Admin - Full Access';
                 versionBadge.style.display = 'block';
-                versionBadge.style.background = 'rgba(255, 152, 0, 0.9)';
+                versionBadge.style.background = 'rgba(156, 39, 176, 0.9)';
                 versionBadge.style.border = 'none';
-                versionBadge.style.animation = 'none';
-                versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 152, 0, 1)'; };
-                versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 152, 0, 0.9)'; };
-            } else if (version === 'full') {
-                versionBadge.textContent = '⭐ Full Version';
-                versionBadge.style.display = 'block';
-                versionBadge.style.background = 'rgba(76, 175, 80, 0.9)';
-                versionBadge.style.border = 'none';
-                versionBadge.style.animation = 'none';
                 versionBadge.style.cursor = 'default';
                 versionBadge.onclick = null;
             }
 
-            // Show admin button if user is admin
-            if (user.role === 'admin') {
-                document.getElementById('admin-btn').style.display = 'block';
-            }
+            // Show all modules for admin
+            const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
+            if (mathBtn) mathBtn.style.display = 'inline-block';
 
-            // Initialize parent mode
-            initializeParentMode(user);
+            const englishBtn = document.querySelector('button[onclick*="english.html"]');
+            if (englishBtn) englishBtn.style.display = 'inline-block';
 
-            // Show only enabled modules (what parent has enabled for child)
-            // enabledModules should always exist now thanks to ensureEnabledModules()
-            const modules = user.enabledModules || {};
-            console.log('Enabled modules to display:', modules);
+            const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+            if (aptitudeBtn) aptitudeBtn.style.display = 'inline-block';
 
-            if (!modules.math) {
-                const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
-                if (mathBtn) mathBtn.style.display = 'none';
-            }
+            const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+            if (storiesBtn) storiesBtn.style.display = 'inline-block';
 
-            if (!modules.english) {
-                const englishBtn = document.querySelector('button[onclick*="english.html"]');
-                if (englishBtn) englishBtn.style.display = 'none';
-            }
+            const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+            if (eqBtn) eqBtn.style.display = 'inline-block';
 
-            if (!modules.aptitude) {
-                const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
-                if (aptitudeBtn) aptitudeBtn.style.display = 'none';
-            }
+            const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
+            if (drawingBtn) drawingBtn.style.display = 'inline-block';
 
-            if (!modules.stories) {
-                const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
-                if (storiesBtn) storiesBtn.style.display = 'none';
-            }
+            const germanBtn = document.querySelector('button[onclick*="german.html"]');
+            if (germanBtn) germanBtn.style.display = 'inline-block';
 
-            if (!modules['emotional-quotient']) {
-                const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
-                if (eqBtn) eqBtn.style.display = 'none';
-            }
-
-            if (!modules.german) {
-                const germanBtn = document.querySelector('button[onclick*="german.html"]');
-                if (germanBtn) germanBtn.style.display = 'none';
-            }
-
-            if (!modules.drawing) {
-                const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
-                if (drawingBtn) drawingBtn.style.display = 'none';
-            }
-
-            if (!modules['german-kids']) {
-                const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
-                if (germanKidsBtn) germanKidsBtn.style.display = 'none';
-            }
-
-            // TODO: Fix completion badges to show page progress instead of marking entire level complete
-            // Disabled for now as it's misleading (shows complete after saving just 1 page)
-            // setTimeout(() => addCompletionBadges(), 100);
+            const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
+            if (germanKidsBtn) germanKidsBtn.style.display = 'inline-block';
         }
 
         // Update module visibility and version based on selected child

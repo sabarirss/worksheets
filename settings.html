@@ -363,8 +363,8 @@
             </div>
         </div>
 
-        <!-- Parental Control Section -->
-        <div class="settings-section">
+        <!-- Parental Control Section (Hidden for Admin) -->
+        <div class="settings-section" id="parental-control-section">
             <h2>👨‍👩‍👧 Parental Control</h2>
 
             <div class="parent-control-box">
@@ -692,6 +692,14 @@
 
                 // Display enabled modules (what parent has enabled for child)
                 displayModules(userData.enabledModules || {});
+
+                // Hide Parental Control section for admin users
+                if (userData.role === 'admin') {
+                    const parentalControlSection = document.getElementById('parental-control-section');
+                    if (parentalControlSection) {
+                        parentalControlSection.style.display = 'none';
+                    }
+                }
             } catch (error) {
                 console.error('Error loading user profile:', error);
                 showError('Failed to load user data: ' + error.message);
