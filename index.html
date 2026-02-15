@@ -219,6 +219,25 @@
                         console.log('Admin user - skipping child profile check');
                     }
 
+                    // Auto-detect child's age for Math module
+                    let childAge;
+                    if (userData.role === 'admin') {
+                        childAge = '10'; // Admin gets full access
+                        console.log('Admin user - using default age:', childAge);
+                    } else {
+                        const child = getSelectedChild();
+                        if (child && child.age) {
+                            childAge = child.age.toString();
+                            console.log('Auto-detected child age for Math:', childAge);
+                        } else {
+                            childAge = '6'; // Default fallback
+                            console.log('No child selected - using default age:', childAge);
+                        }
+                    }
+
+                    // Store globally for Math module
+                    window.detectedChildAge = childAge;
+
                     // Initialize UI with user data
                     initializeUserInterface(userData);
                 } else {
@@ -480,45 +499,11 @@
             </div>
         </div>
 
-        <!-- Age Group Selection -->
-        <div class="level-selection" id="math-age-groups" style="display: none;">
-            <h2>Select Age Group</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showSubjects()">← Back to Subjects</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="showMathOperations('4-5')" class="level-btn">
-                    <span class="level-name">👶 Ages 4-5</span>
-                    <span class="level-desc">Pre-kindergarten level</span>
-                </button>
-                <button onclick="showMathOperations('6')" class="level-btn">
-                    <span class="level-name">🧒 Age 6</span>
-                    <span class="level-desc">Kindergarten/1st grade</span>
-                </button>
-                <button onclick="showMathOperations('7')" class="level-btn">
-                    <span class="level-name">👦 Age 7</span>
-                    <span class="level-desc">1st/2nd grade</span>
-                </button>
-                <button onclick="showMathOperations('8')" class="level-btn">
-                    <span class="level-name">👧 Age 8</span>
-                    <span class="level-desc">2nd/3rd grade</span>
-                </button>
-                <button onclick="showMathOperations('9+')" class="level-btn">
-                    <span class="level-name">🧑 Ages 9+</span>
-                    <span class="level-desc">3rd/4th grade and above</span>
-                </button>
-                <button onclick="showMathOperations('10+')" class="level-btn">
-                    <span class="level-name">👨 Ages 10+</span>
-                    <span class="level-desc">Advanced (5th grade+)</span>
-                </button>
-            </div>
-        </div>
-
         <!-- Operation Selection -->
         <div class="level-selection" id="math-operations" style="display: none;">
             <h2>Select Math Operation</h2>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathAgeGroups()">← Back to Age Groups</button>
+                <button onclick="showSubjects()">← Back to Subjects</button>
             </div>
             <div class="level-grid">
                 <button onclick="showDifficulties('addition')" class="level-btn">

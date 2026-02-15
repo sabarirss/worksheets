@@ -15,19 +15,46 @@ function showSubjects() {
 }
 
 function showMathLevels() {
-    showMathAgeGroups();
+    // Auto-detect age from selected child profile
+    let childAge = window.detectedChildAge || '6'; // Use globally stored age or default to 6
+
+    // Map age to age group format
+    const ageMap = {
+        '4': '4-5',
+        '5': '4-5',
+        '6': '6',
+        '7': '7',
+        '8': '8',
+        '9': '9+',
+        '10': '10+',
+        '11': '10+',
+        '12': '10+',
+        '13': '10+'
+    };
+
+    selectedAgeGroup = ageMap[childAge] || '6';
+    console.log('Math module using auto-detected age:', childAge, '-> age group:', selectedAgeGroup);
+
+    // Skip age selection, go directly to operations
+    document.querySelector('.subject-selection').style.display = 'none';
+    document.getElementById('math-operations').style.display = 'block';
+    document.getElementById('math-difficulties').style.display = 'none';
+
+    // Apply age-based filtering to difficulty buttons when they're shown later
+    setTimeout(function() {
+        if (typeof filterLevelButtons === 'function') {
+            filterLevelButtons();
+        }
+    }, 100);
 }
 
 function showMathAgeGroups() {
-    document.querySelector('.subject-selection').style.display = 'none';
-    document.getElementById('math-age-groups').style.display = 'block';
-    document.getElementById('math-operations').style.display = 'none';
-    document.getElementById('math-difficulties').style.display = 'none';
+    // This function is no longer used but kept for backward compatibility
+    showMathLevels();
 }
 
 function showMathOperations(ageGroup) {
     selectedAgeGroup = ageGroup;
-    document.getElementById('math-age-groups').style.display = 'none';
     document.getElementById('math-operations').style.display = 'block';
     document.getElementById('math-difficulties').style.display = 'none';
 }
