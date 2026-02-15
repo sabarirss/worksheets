@@ -105,10 +105,11 @@ function showMathOperationsBack() {
     if (difficulties) difficulties.style.display = 'none';
 }
 
-function showDifficulties(operation) {
+// New function to directly load worksheet from operation selection (skipping difficulty)
+function loadOperationWorksheet(operation) {
     selectedOperation = operation;
 
-    console.log('showDifficulties called:', {
+    console.log('loadOperationWorksheet called:', {
         operation,
         selectedAgeGroup
     });
@@ -162,6 +163,11 @@ function showDifficulties(operation) {
         // Load worksheet at starting page
         loadWorksheetByPage(operation, startPage);
     }
+}
+
+// Keep old function for backward compatibility but redirect to new function
+function showDifficulties(operation) {
+    loadOperationWorksheet(operation);
 }
 
 /**
@@ -333,14 +339,14 @@ function loadWorksheetNew(difficulty) {
 }
 
 function backToWorksheetSelection() {
-    // Hide worksheet content and show difficulty selection
+    // Hide worksheet content and show operations selection
     const worksheetContent = document.getElementById('worksheet-content');
     if (worksheetContent) {
         worksheetContent.style.display = 'none';
     }
 
-    const difficulties = document.getElementById('math-difficulties');
-    if (difficulties) difficulties.style.display = 'block';
+    const operations = document.getElementById('math-operations');
+    if (operations) operations.style.display = 'block';
 }
 
 let currentWorksheet = null;
@@ -1276,7 +1282,7 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
+                <button onclick="backToWorksheetSelection()">← Back to Operations</button>
             </div>
 
             <div class="controls">

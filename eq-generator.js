@@ -38,13 +38,13 @@ function selectAge(age) {
 }
 
 function backToAges() {
-    document.getElementById('difficulty-selection').style.display = 'none';
-    document.getElementById('age-selection').style.display = 'block';
+    document.getElementById('worksheet-area').innerHTML = '';
+    window.location.href = 'index.html';
 }
 
 function backToWorksheetSelection() {
-    document.getElementById('worksheet-area').innerHTML = '';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    // Go back to subjects instead of difficulty selection
+    window.location.href = 'index.html';
 }
 
 // Activity Generators
@@ -563,7 +563,7 @@ function renderWorksheet() {
     const html = `
         <div class="worksheet-container">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
+                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Subjects</button>
             </div>
 
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">

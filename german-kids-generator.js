@@ -509,6 +509,70 @@ function getGermanStoriesByAge(ageGroup, difficulty) {
     return getGermanStoriesByLevel(level);
 }
 
+// Load all stories from all difficulty levels (skip difficulty selection)
+function loadAllStories() {
+    userAnswers = [];
+    currentScore = 0;
+
+    const storySelection = document.getElementById('story-selection');
+    const storyArea = document.getElementById('story-area');
+
+    storySelection.style.display = 'block';
+    storyArea.innerHTML = '';
+
+    document.getElementById('story-list-title').textContent = 'Choose a Story';
+
+    const storyList = document.getElementById('story-list');
+    storyList.innerHTML = '';
+
+    // Combine all stories from all difficulty levels
+    const allStories = [];
+
+    ['easy', 'medium', 'hard'].forEach(difficulty => {
+        const stories = getGermanStoriesByAge(currentAge, difficulty);
+        stories.forEach((story, index) => {
+            allStories.push({
+                difficulty: difficulty,
+                storyIndex: index,
+                story: story
+            });
+        });
+    });
+
+    // Limit to 2 stories in demo mode
+    const limit = getDemoLimit(allStories.length);
+    const limitedStories = allStories.slice(0, limit);
+
+    if (limitedStories.length === 0) {
+        storyList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p style="font-size: 1.2em;">Noch keine Geschichten verfügbar.</p>
+                <p>(No stories available yet.)</p>
+            </div>
+        `;
+        return;
+    }
+
+    limitedStories.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'story-card';
+        card.onclick = () => {
+            currentDifficulty = item.difficulty;
+            loadStory(item.storyIndex);
+        };
+
+        const difficultyIcon = item.difficulty === 'easy' ? '⭐' : item.difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐';
+
+        card.innerHTML = `
+            <div class="story-icon">${item.story.icon}</div>
+            <div class="story-name">${item.story.name}</div>
+            <div style="font-size: 0.9em; color: #666; margin-top: 5px;">${difficultyIcon}</div>
+        `;
+
+        storyList.appendChild(card);
+    });
+}
+
 /**
  * Load story list for selected difficulty - UPDATED to use age-based array structure
  */
@@ -517,11 +581,9 @@ function loadStoryList(difficulty) {
     userAnswers = [];
     currentScore = 0;
 
-    const difficultySelection = document.getElementById('difficulty-selection');
     const storySelection = document.getElementById('story-selection');
     const storyArea = document.getElementById('story-area');
 
-    difficultySelection.style.display = 'none';
     storySelection.style.display = 'block';
     storyArea.innerHTML = '';
 
@@ -792,9 +854,14 @@ function backToStoryList() {
  * Back to difficulty selection
  */
 function backToDifficulty() {
-    const difficultySelection = document.getElementById('difficulty-selection');
-    const storySelection = document.getElementById('story-selection');
+    // Renamed function - now goes back to story list
+    backToStoryList();
+}
 
-    storySelection.style.display = 'none';
-    difficultySelection.style.display = 'block';
+function backToStoryList() {
+    const storySelection = document.getElementById('story-selection');
+    const storyArea = document.getElementById('story-area');
+
+    storySelection.style.display = 'block';
+    storyArea.innerHTML = '';
 }

@@ -10,7 +10,11 @@
       "Bash(echo:*)",
       "Bash(done)",
       "Bash(for file in aptitude.html drawing.html emotional-quotient.html english.html german-kids.html german.html learn-english-stories.html stories.html)",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Bash(__NEW_LINE_b25756ed5026a697__ echo -e \"\\\\n=== Drawing Module ===\")",
+      "Bash(__NEW_LINE_b25756ed5026a697__ echo -e \"\\\\n=== German Kids Module ===\")",
+      "Bash(__NEW_LINE_b25756ed5026a697__ echo -e \"\\\\n=== Emotional Quotient Module ===\")",
+      "Bash(__NEW_LINE_b25756ed5026a697__ echo -e \"\\\\n=== Learn English Stories Module ===\")"
     ]
   }
 }

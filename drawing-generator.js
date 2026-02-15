@@ -1409,15 +1409,67 @@ const visualGuides = {
 /**
  * Load tutorial list for selected difficulty (age-based)
  */
+// Load all tutorials from all difficulty levels (skip difficulty selection)
+function loadAllTutorials() {
+    currentStep = 0;
+
+    const tutorialSelection = document.getElementById('tutorial-selection');
+    const worksheetArea = document.getElementById('worksheet-area');
+
+    tutorialSelection.style.display = 'block';
+    worksheetArea.innerHTML = '';
+
+    document.getElementById('tutorial-list-title').textContent = 'Choose a Tutorial';
+
+    const tutorialList = document.getElementById('tutorial-list');
+    tutorialList.innerHTML = '';
+
+    // Combine all tutorials from all difficulty levels
+    const allTutorials = [];
+
+    ['easy', 'medium', 'hard'].forEach(difficulty => {
+        const tutorials = getTutorialsByAge(currentAge, difficulty);
+        Object.entries(tutorials).forEach(([key, tutorial]) => {
+            allTutorials.push({
+                key: `${difficulty}-${key}`,
+                difficulty: difficulty,
+                tutorialKey: key,
+                tutorial: tutorial
+            });
+        });
+    });
+
+    // Limit to 2 tutorials in demo mode
+    const limit = getDemoLimit(allTutorials.length);
+    const limitedTutorials = allTutorials.slice(0, limit);
+
+    for (const item of limitedTutorials) {
+        const card = document.createElement('div');
+        card.className = 'tutorial-card';
+        card.onclick = () => {
+            currentDifficulty = item.difficulty;
+            loadDrawingTutorial(item.tutorialKey);
+        };
+
+        const difficultyIcon = item.difficulty === 'easy' ? '⭐' : item.difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐';
+
+        card.innerHTML = `
+            <div class="tutorial-icon">${item.tutorial.icon}</div>
+            <div class="tutorial-name">${item.tutorial.name}</div>
+            <div style="font-size: 0.9em; color: #666; margin-top: 5px;">${difficultyIcon}</div>
+        `;
+
+        tutorialList.appendChild(card);
+    }
+}
+
 function loadTutorialList(difficulty) {
     currentDifficulty = difficulty;
     currentStep = 0;
 
-    const difficultySelection = document.getElementById('difficulty-selection');
     const tutorialSelection = document.getElementById('tutorial-selection');
     const worksheetArea = document.getElementById('worksheet-area');
 
-    difficultySelection.style.display = 'none';
     tutorialSelection.style.display = 'block';
     worksheetArea.innerHTML = '';
 
@@ -2092,9 +2144,14 @@ function backToTutorialList() {
  * Back to difficulty selection
  */
 function backToDifficulty() {
-    const difficultySelection = document.getElementById('difficulty-selection');
-    const tutorialSelection = document.getElementById('tutorial-selection');
+    // Renamed function - now goes back to tutorial list
+    backToTutorialList();
+}
 
-    tutorialSelection.style.display = 'none';
-    difficultySelection.style.display = 'block';
+function backToTutorialList() {
+    const tutorialSelection = document.getElementById('tutorial-selection');
+    const worksheetArea = document.getElementById('worksheet-area');
+
+    tutorialSelection.style.display = 'block';
+    worksheetArea.innerHTML = '';
 }

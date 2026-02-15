@@ -1074,53 +1074,28 @@
                 <button onclick="showSubjects()">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="showDifficulties('addition')" class="level-btn">
+                <button onclick="loadOperationWorksheet('addition')" class="level-btn">
                     <span class="level-name">➕ Addition</span>
                     <span class="level-desc">Basic addition skills</span>
                 </button>
-                <button onclick="showDifficulties('subtraction')" class="level-btn">
+                <button onclick="loadOperationWorksheet('subtraction')" class="level-btn">
                     <span class="level-name">➖ Subtraction</span>
                     <span class="level-desc">Basic subtraction skills</span>
                 </button>
-                <button onclick="showDifficulties('multiplication')" class="level-btn">
+                <button onclick="loadOperationWorksheet('multiplication')" class="level-btn">
                     <span class="level-name">✖️ Multiplication</span>
                     <span class="level-desc">Times tables and more</span>
                 </button>
-                <button onclick="showDifficulties('division')" class="level-btn">
+                <button onclick="loadOperationWorksheet('division')" class="level-btn">
                     <span class="level-name">➗ Division</span>
                     <span class="level-desc">Division skills</span>
                 </button>
             </div>
         </div>
 
-        <!-- Difficulty Selection -->
-        <div class="level-selection" id="math-difficulties" style="display: none;">
-            <h2>Select Difficulty Level</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showMathOperationsBack()">← Back to Operations</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="loadWorksheetNew('easy')" class="level-btn">
-                    <span class="level-name">⭐ Easy</span>
-                    <span class="level-desc" id="easy-desc">Beginner level</span>
-                </button>
-                <button onclick="loadWorksheetNew('medium')" class="level-btn">
-                    <span class="level-name">⭐⭐ Medium</span>
-                    <span class="level-desc" id="medium-desc">Intermediate level</span>
-                </button>
-                <button onclick="loadWorksheetNew('hard')" class="level-btn">
-                    <span class="level-name">⭐⭐⭐ Hard</span>
-                    <span class="level-desc" id="hard-desc">Advanced level</span>
-                </button>
-            </div>
-        </div>
 
         <!-- Assessment Container -->
         <div id="assessment-container" style="display: none;"></div>
-
-        <footer>
-            <p>Practice with focus. Build mastery through repetition.</p>
-        </footer>
     </div>
 
     <!-- TensorFlow.js for Handwriting Recognition -->

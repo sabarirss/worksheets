@@ -337,30 +337,9 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <div class="drawing-selection" id="difficulty-selection">
-            <h2>Select Difficulty Level</h2>
-            <div class="difficulty-grid">
-                <button onclick="loadTutorialList('easy')" class="difficulty-btn">
-                    ⭐ EASY<br>
-                    <span style="font-size: 0.8em;">Simple Shapes</span>
-                </button>
-                <button onclick="loadTutorialList('medium')" class="difficulty-btn">
-                    ⭐⭐ MEDIUM<br>
-                    <span style="font-size: 0.8em;">Basic Drawings</span>
-                </button>
-                <button onclick="loadTutorialList('hard')" class="difficulty-btn">
-                    ⭐⭐⭐ HARD<br>
-                    <span style="font-size: 0.8em;">Detailed Art</span>
-                </button>
-            </div>
-            <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
-        <div id="tutorial-selection" style="display: none;">
+        <div id="tutorial-selection">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToDifficulty()">← Back to Difficulty Levels</button>
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
             <h2 id="tutorial-list-title">Choose a Tutorial</h2>
             <div class="tutorial-list" id="tutorial-list"></div>
@@ -376,5 +355,13 @@
     <script src="storage-manager.js"></script>
     <script src="handwriting-input.js"></script>
     <script src="drawing-generator.js"></script>
+    <script>
+        // Load all tutorials on page load (skip difficulty selection)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadAllTutorials === 'function') {
+                loadAllTutorials();
+            }
+        });
+    </script>
 </body>
 </html>

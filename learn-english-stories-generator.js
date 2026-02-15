@@ -45,8 +45,8 @@ function selectDifficulty(difficulty) {
 }
 
 function backToDifficulties() {
-    document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    // Renamed function - now goes back to story list
+    backToStoryList();
 }
 
 function backToStoryList() {
@@ -1350,6 +1350,60 @@ function getLearnEnglishStoriesByAge(ageGroup, difficulty) {
     return getLearnEnglishStoriesByLevel(level);
 }
 
+// Load all stories from all difficulty levels (skip difficulty selection)
+function loadAllStories() {
+    document.getElementById('story-selection').style.display = 'block';
+
+    // Combine all stories from all difficulty levels
+    const allStories = [];
+
+    ['easy', 'medium', 'hard'].forEach(difficulty => {
+        const stories = getLearnEnglishStoriesByAge(currentAge, difficulty);
+        stories.forEach(story => {
+            allStories.push({
+                ...story,
+                difficulty: difficulty
+            });
+        });
+    });
+
+    // Limit to 2 stories in demo mode
+    const limit = getDemoLimit(allStories.length);
+    const limitedStories = allStories.slice(0, limit);
+
+    const title = `Choose a Story (${limitedStories.length})`;
+    document.getElementById('story-list-title').textContent = title;
+
+    const listContainer = document.getElementById('story-list');
+
+    if (limitedStories.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                <p style="font-size: 1.2em; color: #666;">No stories available yet.</p>
+                <p style="color: #999;">More stories coming soon!</p>
+            </div>
+        `;
+        return;
+    }
+
+    const difficultyStars = {
+        easy: '⭐',
+        medium: '⭐⭐',
+        hard: '⭐⭐⭐'
+    };
+
+    listContainer.innerHTML = limitedStories.map(story => `
+        <div class="story-card" onclick="currentDifficulty='${story.difficulty}'; loadStory(${story.id})">
+            <div class="story-icon">${story.icon}</div>
+            <div class="story-title">${story.title}</div>
+            <div class="story-meta">
+                Level: ${story.level} ${difficultyStars[story.difficulty]}<br>
+                Words: ${story.wordCount}
+            </div>
+        </div>
+    `).join('');
+}
+
 // Load story list for selected age group and difficulty
 function loadStoryList() {
     if (!currentAge || !currentDifficulty) return;
@@ -1361,7 +1415,6 @@ function loadStoryList() {
     const limit = getDemoLimit(stories.length);
     const limitedStories = stories.slice(0, limit);
 
-    document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-selection').style.display = 'block';
 
     const difficultyStars = {

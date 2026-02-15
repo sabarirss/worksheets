@@ -249,27 +249,6 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <!-- Difficulty Selection (Age is auto-detected from profile) -->
-        <div class="eq-selection" id="difficulty-selection">
-            <h2>Select Difficulty Level</h2>
-            <div class="difficulty-grid">
-                <button onclick="loadActivities('easy')" class="difficulty-btn">
-                    ⭐ EASY<br>
-                    <span style="font-size: 0.8em;">Basic Emotions</span>
-                </button>
-                <button onclick="loadActivities('medium')" class="difficulty-btn">
-                    ⭐⭐ MEDIUM<br>
-                    <span style="font-size: 0.8em;">Understanding Feelings</span>
-                </button>
-                <button onclick="loadActivities('hard')" class="difficulty-btn">
-                    ⭐⭐⭐ HARD<br>
-                    <span style="font-size: 0.8em;">Complex Situations</span>
-                </button>
-            </div>
-            <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
 
         <div id="worksheet-area"></div>
 
@@ -281,5 +260,13 @@
     <script src="age-content-mapper.js"></script>
     <script src="eq-age-content.js"></script>
     <script src="eq-generator.js"></script>
+    <script>
+        // Load activity directly on page load (skip difficulty selection)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadActivities === 'function') {
+                loadActivities('easy', 1);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -359,32 +359,10 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <!-- Difficulty Selection -->
-        <div class="age-selection" id="difficulty-selection">
-            <h2>Choose Difficulty Level</h2>
-            <div class="age-grid">
-                <button onclick="selectDifficulty('easy')" class="age-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
-                    ⭐ Easy<br>
-                    <span style="font-size: 0.8em;">Simple stories with basic vocabulary</span>
-                </button>
-                <button onclick="selectDifficulty('medium')" class="age-btn" style="background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%);">
-                    ⭐⭐ Medium<br>
-                    <span style="font-size: 0.8em;">Longer stories with more complex words</span>
-                </button>
-                <button onclick="selectDifficulty('hard')" class="age-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                    ⭐⭐⭐ Hard<br>
-                    <span style="font-size: 0.8em;">Advanced stories with challenging concepts</span>
-                </button>
-            </div>
-            <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
         <!-- Story List -->
-        <div id="story-selection" style="display: none;">
+        <div id="story-selection">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToDifficulties()">← Back to Difficulty Levels</button>
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
             <h2 id="story-list-title">Choose a Story</h2>
             <div class="story-list" id="story-list"></div>
@@ -399,5 +377,13 @@
     </div>
 
     <script src="learn-english-stories-generator.js"></script>
+    <script>
+        // Load all stories on page load (skip difficulty selection)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadAllStories === 'function') {
+                loadAllStories();
+            }
+        });
+    </script>
 </body>
 </html>

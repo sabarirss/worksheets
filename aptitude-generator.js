@@ -61,23 +61,26 @@ function selectType(type) {
         sequences: '➡️ Sequences', matching: '🔗 Matching', oddone: '👀 Odd One Out',
         comparison: '📏 Comparison', logic: '🤔 Logic Puzzles'
     };
-    document.getElementById('challenge-name').textContent = names[type];
     document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    // Skip difficulty selection and load puzzles directly at page 1
+    loadPuzzles('easy', 1);
 }
 
 function backToTypes() {
-    document.getElementById('difficulty-selection').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'block';
-}
-
-function backToWorksheetSelection() {
-    // Hide worksheet content and show difficulty selection
     const worksheetContent = document.getElementById('worksheet-content');
     if (worksheetContent) {
         worksheetContent.style.display = 'none';
     }
-    document.getElementById('difficulty-selection').style.display = 'block';
+    document.getElementById('type-selection').style.display = 'block';
+}
+
+function backToWorksheetSelection() {
+    // Hide worksheet content and show type selection
+    const worksheetContent = document.getElementById('worksheet-content');
+    if (worksheetContent) {
+        worksheetContent.style.display = 'none';
+    }
+    document.getElementById('type-selection').style.display = 'block';
 }
 
 // Complex Maze Generation
@@ -817,7 +820,7 @@ function renderWorksheet() {
     const html = `
         <div class="worksheet-container">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
+                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Challenges</button>
             </div>
 
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">

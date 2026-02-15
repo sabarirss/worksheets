@@ -92,7 +92,7 @@ function selectReadingDifficulty(difficulty) {
 
 function backToReadingDifficulties() {
     document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('reading-difficulties').style.display = 'block';
+    document.getElementById('type-selection').style.display = 'block';
 }
 
 function backToStoryListFromReader() {
@@ -146,12 +146,12 @@ function loadWorksheetNew(difficulty) {
 }
 
 function backToWorksheetSelection() {
-    // Hide worksheet content and show writing difficulties
+    // Hide worksheet content and show type selection
     const worksheetContainer = document.getElementById('english-worksheet-content');
     if (worksheetContainer) {
         worksheetContainer.style.display = 'none';
     }
-    document.getElementById('writing-difficulties').style.display = 'block';
+    document.getElementById('type-selection').style.display = 'block';
 }
 
 let currentWorksheet = null;
@@ -2676,7 +2676,7 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
             </div>
 
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
+                <button onclick="backToWorksheetSelection()">← Back to Type Selection</button>
             </div>
 
             <div class="controls">
@@ -3111,7 +3111,7 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation" style="margin-bottom: 20px;">
-                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">← Back to Difficulty</button>
+                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">← Back to Type Selection</button>
             </div>
 
             <div class="controls">

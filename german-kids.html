@@ -372,30 +372,9 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <div class="german-kids-selection" id="difficulty-selection">
-            <h2>Select Difficulty Level</h2>
-            <div class="difficulty-grid">
-                <button onclick="loadStoryList('easy')" class="difficulty-btn">
-                    ⭐ EASY<br>
-                    <span style="font-size: 0.8em;">Sehr Einfach</span>
-                </button>
-                <button onclick="loadStoryList('medium')" class="difficulty-btn">
-                    ⭐⭐ MEDIUM<br>
-                    <span style="font-size: 0.8em;">Mittel</span>
-                </button>
-                <button onclick="loadStoryList('hard')" class="difficulty-btn">
-                    ⭐⭐⭐ HARD<br>
-                    <span style="font-size: 0.8em;">Schwer</span>
-                </button>
-            </div>
-            <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
-        <div id="story-selection" style="display: none;">
+        <div id="story-selection">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToDifficulty()">← Back to Difficulty Levels</button>
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
             <h2 id="story-list-title">Choose a Story</h2>
             <div class="story-list" id="story-list"></div>
@@ -410,5 +389,13 @@
 
     <script src="storage-manager.js"></script>
     <script src="german-kids-generator.js"></script>
+    <script>
+        // Load all stories on page load (skip difficulty selection)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadAllStories === 'function') {
+                loadAllStories();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -325,20 +325,12 @@ function backToAges() {
 
 function selectCategory(category) {
     currentCategory = category;
+    currentDifficulty = 'easy'; // Default to easy when skipping difficulty selection
 
     document.getElementById('category-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
 
-    const categoryNames = {
-        animals: '🦁 Animal Stories',
-        nature: '🌳 Nature Tales',
-        family: '👨‍👩‍👧‍👦 Family & Friends',
-        adventures: '🚀 Adventures',
-        learning: '📚 Learning & School',
-        bedtime: '🌙 Bedtime Stories'
-    };
-
-    document.getElementById('category-subtitle').textContent = categoryNames[category];
+    // Skip difficulty selection and show stories directly
+    showStories('easy');
 }
 
 function showStories(difficulty) {
@@ -353,7 +345,6 @@ function showStories(difficulty) {
     const limit = getDemoLimit(currentList.length);
     const limitedList = currentList.slice(0, limit);
 
-    document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-list').style.display = 'block';
 
     const categoryNames = {
@@ -395,12 +386,12 @@ function showStories(difficulty) {
 }
 
 function backToDifficulty() {
-    document.getElementById('story-list').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    // Renamed function - now goes back to categories
+    backToCategories();
 }
 
 function backToCategories() {
-    document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('story-list').style.display = 'none';
     document.getElementById('category-selection').style.display = 'block';
 }
 
