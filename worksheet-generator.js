@@ -134,9 +134,27 @@ function loadOperationWorksheet(operation) {
 
     // Admin users can bypass child selection and assessment
     if (isAdmin) {
-        console.log('Admin user - skipping child check and assessment');
-        // Load worksheet at page 1 for admin
-        loadWorksheetByPage(operation, 1);
+        console.log('Admin user - checking level selection');
+
+        // Check if admin has selected a specific level for Math
+        const adminLevel = typeof getAdminLevelForModule === 'function' ? getAdminLevelForModule('math') : null;
+        console.log('Admin selected level for Math:', adminLevel);
+
+        if (adminLevel) {
+            // Admin selected a specific level - load that level's content
+            const startPage = Math.max(1, Math.floor((parseInt(adminLevel) - 1) * 12.5) + 1);
+            console.log(`Admin viewing Level ${adminLevel}, starting at page ${startPage}`);
+
+            // Set a flag so worksheet UI knows to show level indicator
+            window.adminViewingLevel = adminLevel;
+
+            loadWorksheetByPage(operation, startPage);
+        } else {
+            // No level selected - show all content (default behavior)
+            console.log('Admin viewing all levels');
+            window.adminViewingLevel = null;
+            loadWorksheetByPage(operation, 1);
+        }
         return;
     }
 
@@ -1400,10 +1418,12 @@ function renderWorksheet() {
     const ageGroups = document.getElementById('math-age-groups');
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
+    const subjectSelection = document.querySelector('.subject-selection');
 
     if (ageGroups) ageGroups.style.display = 'none';
     if (operations) operations.style.display = 'none';
     if (difficulties) difficulties.style.display = 'none';
+    if (subjectSelection) subjectSelection.style.display = 'none';
 
     // Get or create worksheet container
     let worksheetContainer = document.getElementById('worksheet-content');
@@ -1415,6 +1435,14 @@ function renderWorksheet() {
 
     worksheetContainer.innerHTML = html;
     worksheetContainer.style.display = 'block';
+
+    // Show admin level indicator if admin has selected a specific level
+    if (typeof showAdminLevelIndicator === 'function') {
+        const worksheetInnerContainer = worksheetContainer.querySelector('.worksheet-container');
+        if (worksheetInnerContainer) {
+            showAdminLevelIndicator('math', worksheetInnerContainer);
+        }
+    }
 
     // Initialize handwriting inputs
     setTimeout(() => {

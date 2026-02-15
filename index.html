@@ -738,7 +738,7 @@
 
             try {
                 // Update Firestore
-                await firebase.firestore().collection('users').doc(uid.substring(0, 20)).update({
+                await firebase.firestore().collection('users').doc(uid).update({
                     enabledModules: enabledModules
                 });
 
@@ -754,12 +754,23 @@
         function initializeUserInterface(user) {
             console.log('Initializing UI for user:', user.username);
 
-            // Display user name
-            document.getElementById('user-name-display').textContent = user.fullName;
+            // Display user name (if element exists)
+            const userNameDisplay = document.getElementById('user-name-display');
+            if (userNameDisplay) {
+                userNameDisplay.textContent = user.fullName;
+            }
 
             // Show admin button if user is admin
+            console.log('User role:', user.role);
             if (user.role === 'admin') {
-                document.getElementById('admin-btn').style.display = 'block';
+                console.log('Admin user detected - showing admin button');
+                const adminBtn = document.getElementById('admin-btn');
+                if (adminBtn) {
+                    adminBtn.style.display = 'inline-block';
+                    console.log('Admin button display set to inline-block');
+                } else {
+                    console.error('Admin button element not found!');
+                }
 
                 // Admin users see all modules without needing child selection
                 showAllModulesForAdmin(user);
@@ -848,9 +859,16 @@
                 return;
             }
 
-            // Get child's enabled modules (default to only math for existing children without this field)
-            const modules = child.enabledModules || { math: true };
-            console.log('Child enabled modules:', modules);
+            // TWO-TIER PERMISSION SYSTEM
+            // Admin assigns modules → assignedModules (what's available to parent)
+            // Parent enables modules → enabledModules (what's active for child)
+            // Child sees module ONLY if: assignedModules[x] AND enabledModules[x]
+
+            const assignedModules = child.assignedModules || child.modules || { math: true };
+            const enabledModules = child.enabledModules || { math: true };
+
+            console.log('Assigned modules (admin):', assignedModules);
+            console.log('Enabled modules (parent):', enabledModules);
 
             // Update version badge based on child's version
             const version = child.version || 'demo';
@@ -894,27 +912,28 @@
                 versionBadge.onclick = null;
             }
 
-            // Update each module's visibility based on child's permissions
+            // Update each module's visibility based on TWO-TIER LOGIC
+            // Module shows ONLY if BOTH assigned by admin AND enabled by parent
             const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
-            if (mathBtn) mathBtn.style.display = modules.math ? 'inline-block' : 'none';
+            if (mathBtn) mathBtn.style.display = (assignedModules.math && enabledModules.math) ? 'inline-block' : 'none';
 
             const englishBtn = document.querySelector('button[onclick*="english.html"]');
-            if (englishBtn) englishBtn.style.display = modules.english ? 'inline-block' : 'none';
+            if (englishBtn) englishBtn.style.display = (assignedModules.english && enabledModules.english) ? 'inline-block' : 'none';
 
             const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
-            if (aptitudeBtn) aptitudeBtn.style.display = modules.aptitude ? 'inline-block' : 'none';
+            if (aptitudeBtn) aptitudeBtn.style.display = (assignedModules.aptitude && enabledModules.aptitude) ? 'inline-block' : 'none';
 
             const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
-            if (storiesBtn) storiesBtn.style.display = modules.stories ? 'inline-block' : 'none';
+            if (storiesBtn) storiesBtn.style.display = (assignedModules.stories && enabledModules.stories) ? 'inline-block' : 'none';
 
             const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
-            if (eqBtn) eqBtn.style.display = modules['emotional-quotient'] ? 'inline-block' : 'none';
+            if (eqBtn) eqBtn.style.display = (assignedModules['emotional-quotient'] && enabledModules['emotional-quotient']) ? 'inline-block' : 'none';
 
             const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
-            if (drawingBtn) drawingBtn.style.display = modules.drawing ? 'inline-block' : 'none';
+            if (drawingBtn) drawingBtn.style.display = (assignedModules.drawing && enabledModules.drawing) ? 'inline-block' : 'none';
 
             const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
-            if (germanKidsBtn) germanKidsBtn.style.display = modules['german-kids'] ? 'inline-block' : 'none';
+            if (germanKidsBtn) germanKidsBtn.style.display = (assignedModules['german-kids'] && enabledModules['german-kids']) ? 'inline-block' : 'none';
 
             // German B1 is admin-only - only show for admin users
             const germanBtn = document.querySelector('button[onclick*="german.html"]');
@@ -925,6 +944,8 @@
                     germanBtn.style.display = 'none';
                 }
             }
+
+            console.log('Module visibility updated with two-tier logic (assigned AND enabled)');
         }
     </script>
 
@@ -1102,6 +1123,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
 
     <script src="level-mapper.js"></script>
+    <script src="admin-level-manager.js"></script>
     <script src="storage-manager.js"></script>
     <script src="handwriting-input.js"></script>
     <script src="handwriting-recognition.js"></script>

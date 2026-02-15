@@ -334,6 +334,18 @@ function selectCategory(category) {
 }
 
 function showStories(difficulty) {
+    // Check for admin level override
+    if (window.currentUserRole === 'admin') {
+        const adminLevel = getAdminLevelForModule('stories');
+        if (adminLevel) {
+            const levelDetails = getLevelDetails(adminLevel);
+            if (levelDetails) {
+                currentAge = levelDetails.ageGroup;
+                difficulty = levelDetails.difficulty;
+            }
+        }
+    }
+
     currentDifficulty = difficulty;
 
     // Get unique stories for the selected category and difficulty
@@ -383,6 +395,11 @@ function showStories(difficulty) {
         `;
         container.appendChild(card);
     });
+
+    // Add admin level indicator
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('stories', container);
+    }
 }
 
 function backToDifficulty() {

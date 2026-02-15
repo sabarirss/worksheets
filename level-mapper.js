@@ -24,32 +24,38 @@ function ageAndDifficultyToLevel(ageGroup, difficulty) {
         '4-5': {
             'easy': 1,
             'medium': 2,
-            'hard': 2
+            'hard': 2,
+            'writing': 1  // Writing practice maps to easy level
         },
         '6': {
             'easy': 3,
             'medium': 4,
-            'hard': 4
+            'hard': 4,
+            'writing': 3  // Writing practice maps to easy level
         },
         '7': {
             'easy': 5,
             'medium': 6,
-            'hard': 6
+            'hard': 6,
+            'writing': 5  // Writing practice maps to easy level
         },
         '8': {
             'easy': 7,
             'medium': 8,
-            'hard': 8
+            'hard': 8,
+            'writing': 7  // Writing practice maps to easy level
         },
         '9+': {
             'easy': 9,
             'medium': 10,
-            'hard': 10
+            'hard': 10,
+            'writing': 9  // Writing practice maps to easy level
         },
         '10+': {
             'easy': 11,
             'medium': 12,
-            'hard': 12
+            'hard': 12,
+            'writing': 11  // Writing practice maps to easy level
         }
     };
 

@@ -440,6 +440,206 @@
             </div>
         </div>
 
+        <!-- Admin Level Selection Section -->
+        <div class="admin-level-selection" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
+                📊 Admin Content Level Selection
+            </h2>
+            <p style="color: #666; margin-bottom: 25px;">
+                Select which level (1-12) you want to view for each module. When you access a module, you'll see only content from the selected level.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <!-- Math -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">🔢</span> Math
+                    </h3>
+                    <select id="admin-level-math" class="level-select" onchange="saveAdminLevelSelection('math', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="math-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- English -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">📝</span> English
+                    </h3>
+                    <select id="admin-level-english" class="level-select" onchange="saveAdminLevelSelection('english', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="english-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- Aptitude -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">🧩</span> Aptitude
+                    </h3>
+                    <select id="admin-level-aptitude" class="level-select" onchange="saveAdminLevelSelection('aptitude', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="aptitude-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- Stories -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">📖</span> Stories
+                    </h3>
+                    <select id="admin-level-stories" class="level-select" onchange="saveAdminLevelSelection('stories', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="stories-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- Drawing -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">🎨</span> Drawing
+                    </h3>
+                    <select id="admin-level-drawing" class="level-select" onchange="saveAdminLevelSelection('drawing', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="drawing-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- Emotional Quotient -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">😊</span> EQ
+                    </h3>
+                    <select id="admin-level-emotional-quotient" class="level-select" onchange="saveAdminLevelSelection('emotional-quotient', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="eq-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- German Kids -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">🇩🇪</span> German Kids
+                    </h3>
+                    <select id="admin-level-german-kids" class="level-select" onchange="saveAdminLevelSelection('german-kids', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="german-kids-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+
+                <!-- Learn English Stories -->
+                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5em;">🌍</span> Learn English Stories
+                    </h3>
+                    <select id="admin-level-learn-english-stories" class="level-select" onchange="saveAdminLevelSelection('learn-english-stories', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
+                        <option value="">All Levels</option>
+                        <option value="1">Level 1 - Basic Foundations</option>
+                        <option value="2">Level 2 - Pre-K Advanced</option>
+                        <option value="3">Level 3 - Kindergarten Basics</option>
+                        <option value="4">Level 4 - Kindergarten Advanced</option>
+                        <option value="5">Level 5 - 1st Grade Basics</option>
+                        <option value="6">Level 6 - 1st Grade Advanced</option>
+                        <option value="7">Level 7 - 2nd Grade Basics</option>
+                        <option value="8">Level 8 - 2nd Grade Advanced</option>
+                        <option value="9">Level 9 - 3rd Grade Basics</option>
+                        <option value="10">Level 10 - 4th Grade Advanced</option>
+                        <option value="11">Level 11 - Advanced Basics</option>
+                        <option value="12">Level 12 - Pre-Teen Advanced</option>
+                    </select>
+                    <div id="learn-english-stories-level-info" style="margin-top: 10px; padding: 10px; background: #f0f4ff; border-radius: 5px; font-size: 0.9em; color: #666; display: none;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+                <strong>💡 How it works:</strong> Select a level for any module and only that level's content will be shown when you access that module from the home page. Select "All Levels" to see all content.
+            </div>
+        </div>
+
         <div class="stats-grid" id="stats-grid">
             <!-- Stats will be populated here -->
         </div>
@@ -481,20 +681,64 @@
                 return;
             }
 
-            // Check if user is admin
-            const userDoc = await firebase.firestore().collection('users')
-                .where('email', '==', user.email.toLowerCase())
-                .limit(1)
-                .get();
+            console.log('Auth user:', user.uid, user.email);
 
-            if (userDoc.empty || userDoc.docs[0].data().role !== 'admin') {
-                alert('Access denied. Admin privileges required.');
+            // Check if user is admin - IMPORTANT: Query by UID to match security rules
+            try {
+                // First, try to get the user document by UID (this is what security rules check)
+                const userDocByUid = await firebase.firestore().collection('users').doc(user.uid).get();
+
+                console.log('User doc by UID exists:', userDocByUid.exists);
+                if (userDocByUid.exists) {
+                    console.log('User doc data:', userDocByUid.data());
+                    const userData = userDocByUid.data();
+
+                    if (userData.role === 'admin') {
+                        console.log('✓ Admin verified via UID match');
+                        loadParentsAndChildren();
+                        return;
+                    }
+                }
+
+                // Fallback: Try email lookup (for old admin accounts)
+                console.log('Trying email lookup...');
+                const userDocByEmail = await firebase.firestore().collection('users')
+                    .where('email', '==', user.email.toLowerCase())
+                    .limit(1)
+                    .get();
+
+                if (userDocByEmail.empty) {
+                    console.error('No user document found for:', user.email);
+                    alert('Access denied. User profile not found.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const userData = userDocByEmail.docs[0].data();
+                console.log('User data from email lookup:', userData);
+
+                if (userData.role !== 'admin') {
+                    console.error('User is not admin. Role:', userData.role);
+                    alert('Access denied. Admin privileges required.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Admin found by email but doc ID doesn't match UID
+                console.warn('⚠️ Admin user document ID mismatch!');
+                console.warn('Auth UID:', user.uid);
+                console.warn('Doc ID:', userDocByEmail.docs[0].id);
+                console.warn('This will cause Firestore security rule failures!');
+
+                alert('Admin account detected but document structure needs fixing. Please contact support.');
+                // Still try to load data, but it will likely fail
+                loadParentsAndChildren();
+
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                alert('Error verifying admin access: ' + error.message);
                 window.location.href = 'index.html';
-                return;
             }
-
-            // Load data
-            loadParentsAndChildren();
         });
 
         // Load parents and children on page load
@@ -504,8 +748,12 @@
 
         async function loadParentsAndChildren() {
             try {
+                console.log('Loading parents and children...');
+
                 // Load all users except admin (parents/students with children)
+                console.log('Fetching users collection...');
                 const allUsersSnapshot = await firebase.firestore().collection('users').get();
+                console.log('✓ Users loaded:', allUsersSnapshot.size, 'documents');
 
                 parentsData = allUsersSnapshot.docs
                     .map(doc => ({
@@ -515,12 +763,19 @@
                     }))
                     .filter(user => user.role !== 'admin'); // Exclude admin from parent list
 
+                console.log('Parent accounts (non-admin):', parentsData.length);
+
                 // Load all children
+                console.log('Fetching children collection...');
                 const childrenSnapshot = await firebase.firestore().collection('children').get();
+                console.log('✓ Children loaded:', childrenSnapshot.size, 'documents');
+
                 childrenData = childrenSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                console.log('Total children:', childrenData.length);
 
                 // Update stats
                 await updateStats();
@@ -528,8 +783,18 @@
                 // Render parents list
                 renderParents();
             } catch (error) {
-                console.error('Error loading data:', error);
-                alert('Error loading data. Check console for details.');
+                console.error('❌ Error loading data:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+
+                if (error.code === 'permission-denied') {
+                    alert('Permission denied. This likely means:\n\n' +
+                          '1. Firestore security rules need to be deployed\n' +
+                          '2. Admin user document structure is incorrect\n\n' +
+                          'Check the browser console for details.');
+                } else {
+                    alert('Error loading data: ' + error.message + '\n\nCheck console for details.');
+                }
             }
         }
 
@@ -579,8 +844,23 @@
             emptyState.style.display = 'none';
 
             parentsList.innerHTML = parentsData.map(parent => {
-                const parentChildren = childrenData.filter(child => child.parent_uid === parent.uid);
+                // Match children by either full UID or truncated UID (first 20 chars)
+                const parentUid = parent.uid;
+                const parentUidTruncated = parentUid ? parentUid.substring(0, 20) : null;
+
+                const parentChildren = childrenData.filter(child => {
+                    const matches = child.parent_uid === parentUid ||
+                                   child.parent_uid === parentUidTruncated ||
+                                   child.parent_uid === parent.id; // Also try document ID
+
+                    if (matches) {
+                        console.log(`Child ${child.name} matched to parent ${parent.fullName || parent.username}`);
+                    }
+                    return matches;
+                });
+
                 const childCount = parentChildren.length;
+                console.log(`Parent ${parent.fullName || parent.username} (UID: ${parentUid}): ${childCount} children`);
 
                 return `
                     <div class="parent-row" id="parent-${parent.uid}">
@@ -613,10 +893,22 @@
                 return '<div class="no-children">No children profiles yet. Parents can add children from their account.</div>';
             }
 
+            console.log('Rendering children:', children.length);
+
             return children.map(child => {
+                console.log('Child data:', child);
                 const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
                 const age = child.age || calculateAge(child.date_of_birth);
-                const modules = child.modules || {};
+                // Admin manages ASSIGNED modules (what's available to parent)
+                const assignedModules = child.assignedModules || child.modules || { math: true };
+                const enabledModules = child.enabledModules || { math: true };
+
+                // Count assigned and enabled modules
+                const assignedCount = Object.values(assignedModules).filter(Boolean).length;
+                const enabledCount = Object.values(enabledModules).filter(Boolean).length;
+
+                const currentInputMode = child.inputMode || 'keyboard';
+                const currentVersion = child.version || 'demo';
 
                 return `
                     <div class="child-card">
@@ -626,15 +918,52 @@
                                 <div class="child-name">${child.name}</div>
                                 <div class="child-info-line">Age: ${age} years old | Grade: ${child.grade || 'Not set'}</div>
                                 <div class="child-info-line">Born: ${formatDate(child.date_of_birth)}</div>
+                                <div class="child-info-line" style="color: #667eea; font-weight: bold; margin-top: 8px;">
+                                    ✓ Assigned: ${assignedCount} | Enabled by Parent: ${enabledCount}
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Input Mode Selection -->
+                        <div class="modules-section" style="margin-bottom: 20px;">
+                            <div class="modules-title">✍️ Input Mode</div>
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 15px; padding: 10px; background: #fff9e6; border-radius: 8px;">
+                                ℹ️ Select how this child will input answers in worksheets
+                            </div>
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; padding: 12px 20px; border: 2px solid ${currentInputMode === 'keyboard' ? '#667eea' : '#ddd'}; border-radius: 8px; cursor: pointer; background: ${currentInputMode === 'keyboard' ? '#f0f4ff' : 'white'}; flex: 1;">
+                                    <input type="radio"
+                                           name="inputMode-${child.id}"
+                                           value="keyboard"
+                                           ${currentInputMode === 'keyboard' ? 'checked' : ''}
+                                           onchange="updateChildInputMode('${child.id}', 'keyboard')"
+                                           style="margin-right: 10px;">
+                                    <span style="font-size: 1.2em;">⌨️ Keyboard</span>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 12px 20px; border: 2px solid ${currentInputMode === 'pencil' ? '#667eea' : '#ddd'}; border-radius: 8px; cursor: pointer; background: ${currentInputMode === 'pencil' ? '#f0f4ff' : 'white'}; flex: 1; ${currentVersion === 'demo' ? 'opacity: 0.5;' : ''}">
+                                    <input type="radio"
+                                           name="inputMode-${child.id}"
+                                           value="pencil"
+                                           ${currentInputMode === 'pencil' ? 'checked' : ''}
+                                           ${currentVersion === 'demo' ? 'disabled' : ''}
+                                           onchange="updateChildInputMode('${child.id}', 'pencil')"
+                                           style="margin-right: 10px;">
+                                    <span style="font-size: 1.2em;">✏️ Stylus</span>
+                                    ${currentVersion === 'demo' ? '<span style="font-size: 0.8em; color: #ff9800; margin-left: 8px;">(Full Version)</span>' : ''}
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="modules-section">
-                            <div class="modules-title">Assigned Modules / Packages</div>
+                            <div class="modules-title">📦 Assign Modules (Admin Control)</div>
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 15px; padding: 10px; background: #f0f4ff; border-radius: 8px;">
+                                ℹ️ <strong>Admin assigns modules</strong> that become available to parents. Parents can then enable/disable assigned modules for their child.
+                            </div>
                             <div class="modules-grid">
-                                ${renderModuleCheckboxes(child.id, modules)}
+                                ${renderModuleCheckboxes(child.id, assignedModules)}
                             </div>
                             <button class="save-modules-btn" onclick="saveChildModules('${child.id}')">
-                                Save Module Changes
+                                💾 Save Assigned Modules
                             </button>
                         </div>
                     </div>
@@ -642,7 +971,7 @@
             }).join('');
         }
 
-        function renderModuleCheckboxes(childId, modules) {
+        function renderModuleCheckboxes(childId, assignedModules) {
             const availableModules = [
                 { id: 'math', name: '📐 Mathematics', key: 'math' },
                 { id: 'english', name: '📚 English', key: 'english' },
@@ -656,43 +985,95 @@
             ];
 
             return availableModules.map(module => {
-                const checked = modules[module.key] ? 'checked' : '';
+                const isAssigned = assignedModules[module.key] || false;
+                const checked = isAssigned ? 'checked' : '';
+                const icon = isAssigned ? '✓' : '○';
+                const statusColor = isAssigned ? '#4caf50' : '#999';
+
                 return `
-                    <div class="module-checkbox">
+                    <div class="module-checkbox" style="border-left: 4px solid ${statusColor};">
                         <input type="checkbox"
                                id="module-${childId}-${module.id}"
                                data-child="${childId}"
                                data-module="${module.key}"
                                ${checked}>
-                        <label for="module-${childId}-${module.id}">${module.name}</label>
+                        <label for="module-${childId}-${module.id}">
+                            <span style="color: ${statusColor}; margin-right: 5px;">${icon}</span>${module.name}
+                        </label>
                     </div>
                 `;
             }).join('');
+        }
+
+        async function updateChildInputMode(childId, mode) {
+            try {
+                console.log(`Updating input mode for child ${childId} to: ${mode}`);
+
+                // Check if switching to pencil mode
+                if (mode === 'pencil') {
+                    // Get child data to check version
+                    const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+                    if (childDoc.exists) {
+                        const childData = childDoc.data();
+                        const version = childData.version || 'demo';
+
+                        if (version === 'demo') {
+                            alert('⚠️ Stylus mode is only available in Full Version.\n\nPlease upgrade to Full Version first.');
+                            // Reload to reset the radio button
+                            await loadParentsAndChildren();
+                            return;
+                        }
+                    }
+                }
+
+                // Update child document in Firestore
+                await firebase.firestore().collection('children').doc(childId).update({
+                    inputMode: mode,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                console.log(`✓ Input mode updated to: ${mode}`);
+
+                // Show success message
+                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
+                alert(`✓ Input mode changed to: ${modeIcon} ${modeName}`);
+
+                // Reload data to reflect changes
+                await loadParentsAndChildren();
+            } catch (error) {
+                console.error('Error updating input mode:', error);
+                alert('Error updating input mode: ' + error.message);
+            }
         }
 
         async function saveChildModules(childId) {
             try {
                 // Gather all module checkboxes for this child
                 const checkboxes = document.querySelectorAll(`input[data-child="${childId}"]`);
-                const modules = {};
+                const assignedModules = {};
 
                 checkboxes.forEach(checkbox => {
                     const moduleKey = checkbox.getAttribute('data-module');
-                    modules[moduleKey] = checkbox.checked;
+                    assignedModules[moduleKey] = checkbox.checked;
                 });
 
+                console.log('Saving assigned modules for child:', childId, assignedModules);
+
                 // Update child document in Firestore
+                // Admin saves to assignedModules (what's available to parent)
                 await firebase.firestore().collection('children').doc(childId).update({
-                    modules: modules,
+                    assignedModules: assignedModules,
+                    modules: assignedModules,  // Keep for backward compatibility
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert('Modules updated successfully!');
+                alert('✓ Assigned modules updated successfully!\n\nParents can now enable/disable these modules for their child.');
 
                 // Reload data
                 await loadParentsAndChildren();
             } catch (error) {
-                console.error('Error saving modules:', error);
+                console.error('Error saving assigned modules:', error);
                 alert('Error saving modules: ' + error.message);
             }
         }
@@ -763,6 +1144,82 @@ Would you like to view their children profiles?
                 return 'N/A';
             }
         }
+
+        // ===== Admin Level Selection Functions =====
+
+        // Save admin's level selection for a module
+        function saveAdminLevelSelection(module, level) {
+            const selections = getAdminLevelSelections();
+            selections[module] = level || null;
+            localStorage.setItem('admin_level_selections', JSON.stringify(selections));
+
+            console.log(`Admin level for ${module} set to:`, level || 'All Levels');
+
+            // Show visual feedback
+            const card = document.querySelector(`#admin-level-${module}`).closest('.level-select-card');
+            if (card) {
+                card.style.borderColor = level ? '#667eea' : '#e0e0e0';
+                card.style.background = level ? '#f0f4ff' : 'white';
+            }
+
+            // Show level info
+            const infoDiv = document.getElementById(`${module}-level-info`);
+            if (infoDiv) {
+                if (level) {
+                    const levelNames = {
+                        '1': 'Ages 4-5 Easy',
+                        '2': 'Ages 4-5 Medium/Hard',
+                        '3': 'Age 6 Easy',
+                        '4': 'Age 6 Medium/Hard',
+                        '5': 'Age 7 Easy',
+                        '6': 'Age 7 Medium/Hard',
+                        '7': 'Age 8 Easy',
+                        '8': 'Age 8 Medium/Hard',
+                        '9': 'Ages 9+ Easy',
+                        '10': 'Ages 9+ Medium/Hard',
+                        '11': 'Ages 10+ Easy/Medium',
+                        '12': 'Ages 10+ Hard'
+                    };
+                    infoDiv.textContent = `✓ Viewing ${levelNames[level]} content only`;
+                    infoDiv.style.display = 'block';
+                } else {
+                    infoDiv.style.display = 'none';
+                }
+            }
+        }
+
+        // Get all admin level selections
+        function getAdminLevelSelections() {
+            const stored = localStorage.getItem('admin_level_selections');
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        // Get admin's level selection for a specific module
+        function getAdminLevelForModule(module) {
+            const selections = getAdminLevelSelections();
+            return selections[module] || null; // null means "All Levels"
+        }
+
+        // Load saved level selections on page load
+        function loadSavedLevelSelections() {
+            const selections = getAdminLevelSelections();
+            console.log('Loading saved admin level selections:', selections);
+
+            for (const module in selections) {
+                const level = selections[module];
+                const select = document.getElementById(`admin-level-${module}`);
+                if (select && level) {
+                    select.value = level;
+                    // Trigger visual feedback
+                    saveAdminLevelSelection(module, level);
+                }
+            }
+        }
+
+        // Call on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadSavedLevelSelections, 500);
+        });
     </script>
 </body>
 </html>

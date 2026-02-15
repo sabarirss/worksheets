@@ -1352,6 +1352,17 @@ function getLearnEnglishStoriesByAge(ageGroup, difficulty) {
 
 // Load all stories from all difficulty levels (skip difficulty selection)
 function loadAllStories() {
+    // Check for admin level override
+    if (window.currentUserRole === 'admin') {
+        const adminLevel = getAdminLevelForModule('learn-english-stories');
+        if (adminLevel) {
+            const levelDetails = getLevelDetails(adminLevel);
+            if (levelDetails) {
+                currentAge = levelDetails.ageGroup;
+            }
+        }
+    }
+
     document.getElementById('story-selection').style.display = 'block';
 
     // Combine all stories from all difficulty levels
@@ -1402,6 +1413,11 @@ function loadAllStories() {
             </div>
         </div>
     `).join('');
+
+    // Add admin level indicator
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('learn-english-stories', listContainer);
+    }
 }
 
 // Load story list for selected age group and difficulty

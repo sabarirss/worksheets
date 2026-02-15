@@ -364,19 +364,6 @@
                 <button class="btn btn-primary" onclick="openParentalControl()" style="width: 100%; font-size: 1.1em; padding: 15px;">
                     🔐 Manage Child Packages
                 </button>
-
-                <div class="age-guidelines" style="margin-top: 20px;">
-                    <h4>Age-Appropriate Content:</h4>
-                    <ul>
-                        <li><strong>Ages 4-5:</strong> Basic counting, simple words, pattern recognition</li>
-                        <li><strong>Age 6:</strong> Addition/subtraction to 20, sight words, simple stories</li>
-                        <li><strong>Age 7:</strong> Two-digit math, sentences, synonyms, logic puzzles</li>
-                        <li><strong>Age 8:</strong> Multiplication/division, grammar, reading comprehension, cursive writing</li>
-                        <li><strong>Age 9+:</strong> Advanced math operations, advanced reading, complex reasoning</li>
-                        <li><strong>Age 10+:</strong> Pre-algebra, essay writing, advanced problem-solving, German B1 (adult level)</li>
-                    </ul>
-                    <p style="font-size: 0.85em; color: #888; margin: 10px 0 0 0;">Note: Content difficulty automatically adjusts based on child's age</p>
-                </div>
             </div>
         </div>
 
@@ -505,8 +492,16 @@
 
             <!-- Package Management -->
             <div id="package-management-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; display: none;">
-                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages</h3>
-                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for <strong id="selected-child-name"></strong>:</p>
+                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages (Parent Control)</h3>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
+                    <p style="margin: 0; color: #1565c0; font-size: 0.95em; line-height: 1.6;">
+                        <strong>🔐 Two-Tier Permission System:</strong><br>
+                        1. <strong>Admin assigns</strong> modules (what's available)<br>
+                        2. <strong>You enable</strong> modules (what's active)<br>
+                        3. <strong>Child sees</strong> modules that are both assigned AND enabled
+                    </p>
+                </div>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable assigned modules for <strong id="selected-child-name"></strong>:</p>
                 <div style="display: grid; gap: 10px;">
                     <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-math" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
@@ -605,7 +600,7 @@
                     };
 
                     try {
-                        await firebase.firestore().collection('users').doc(firebaseUser.uid.substring(0, 20)).update({
+                        await firebase.firestore().collection('users').doc(firebaseUser.uid).update({
                             enabledModules: enabledModules
                         });
                         userData.enabledModules = enabledModules;
@@ -716,7 +711,7 @@
             }
 
             try {
-                const userDoc = firebase.firestore().collection('users').doc(currentUser.uid.substring(0, 20));
+                const userDoc = firebase.firestore().collection('users').doc(currentUser.uid);
                 await userDoc.update({
                     fullName: fullName
                 });
@@ -831,7 +826,6 @@
                     const snapshot = await firebase.firestore()
                         .collection('children')
                         .where('parent_uid', '==', currentUser.uid)
-                        .orderBy('created_at', 'desc')
                         .get();
 
                     if (snapshot.empty) {
@@ -839,10 +833,20 @@
                         return;
                     }
 
+                    // Sort children by created_at in JavaScript
+                    const children = [];
                     snapshot.forEach(doc => {
-                        const child = doc.data();
+                        children.push({ id: doc.id, ...doc.data() });
+                    });
+                    children.sort((a, b) => {
+                        const aTime = a.created_at ? a.created_at.toMillis() : 0;
+                        const bTime = b.created_at ? b.created_at.toMillis() : 0;
+                        return bTime - aTime; // descending order
+                    });
+
+                    children.forEach(child => {
                         const option = document.createElement('option');
-                        option.value = doc.id;
+                        option.value = child.id;
                         option.textContent = child.name;
                         childSelect.appendChild(option);
                     });
@@ -882,19 +886,52 @@
                 document.getElementById('package-management-section').style.display = 'block';
                 document.getElementById('save-packages-btn').disabled = false;
 
-                // Load child's enabled modules
-                const modules = child.enabledModules || { math: true };
+                // Get ASSIGNED modules (what admin made available)
+                const assignedModules = child.assignedModules || child.modules || { math: true };
 
-                document.getElementById('panel-toggle-math').checked = modules.math || false;
-                document.getElementById('panel-toggle-english').checked = modules.english || false;
-                document.getElementById('panel-toggle-aptitude').checked = modules.aptitude || false;
-                document.getElementById('panel-toggle-stories').checked = modules.stories || false;
-                document.getElementById('panel-toggle-emotional-quotient').checked = modules['emotional-quotient'] || false;
-                document.getElementById('panel-toggle-drawing').checked = modules.drawing || false;
-                document.getElementById('panel-toggle-german-kids').checked = modules['german-kids'] || false;
+                // Get ENABLED modules (what parent has enabled)
+                const enabledModules = child.enabledModules || { math: true };
+
+                // Configure each module checkbox based on assigned status
+                configureModuleCheckbox('panel-toggle-math', assignedModules.math, enabledModules.math, '📐 Mathematics');
+                configureModuleCheckbox('panel-toggle-english', assignedModules.english, enabledModules.english, '📚 English');
+                configureModuleCheckbox('panel-toggle-aptitude', assignedModules.aptitude, enabledModules.aptitude, '🧩 Aptitude');
+                configureModuleCheckbox('panel-toggle-stories', assignedModules.stories, enabledModules.stories, '📖 Stories');
+                configureModuleCheckbox('panel-toggle-emotional-quotient', assignedModules['emotional-quotient'], enabledModules['emotional-quotient'], '❤️ Emotional Quotient');
+                configureModuleCheckbox('panel-toggle-drawing', assignedModules.drawing, enabledModules.drawing, '🎨 Drawing');
+                configureModuleCheckbox('panel-toggle-german-kids', assignedModules['german-kids'], enabledModules['german-kids'], '🇩🇪 German Kids');
+
             } catch (error) {
                 console.error('Error loading child packages:', error);
                 alert('Error loading child data: ' + error.message);
+            }
+        }
+
+        // Configure a module checkbox based on whether it's assigned and enabled
+        function configureModuleCheckbox(checkboxId, isAssigned, isEnabled, moduleName) {
+            const checkbox = document.getElementById(checkboxId);
+            const label = checkbox.parentElement;
+
+            if (!isAssigned) {
+                // Module NOT assigned by admin - disable checkbox and show message
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                label.style.opacity = '0.5';
+                label.style.cursor = 'not-allowed';
+
+                // Update label to show "Not assigned by admin"
+                label.querySelector('span').textContent = moduleName + ' (Not assigned by admin)';
+                label.style.background = '#f5f5f5';
+                label.style.borderColor = '#ddd';
+            } else {
+                // Module IS assigned - enable checkbox and set current enabled state
+                checkbox.checked = isEnabled || false;
+                checkbox.disabled = false;
+                label.style.opacity = '1';
+                label.style.cursor = 'pointer';
+                label.querySelector('span').textContent = moduleName;
+                label.style.background = 'white';
+                label.style.borderColor = '#e0e0e0';
             }
         }
 
@@ -913,26 +950,29 @@
             const errorDiv = document.getElementById('panel-error');
 
             try {
-                // Collect enabled modules
+                // Collect enabled modules (only from non-disabled checkboxes)
                 const enabledModules = {
-                    math: document.getElementById('panel-toggle-math').checked,
-                    english: document.getElementById('panel-toggle-english').checked,
-                    aptitude: document.getElementById('panel-toggle-aptitude').checked,
-                    stories: document.getElementById('panel-toggle-stories').checked,
-                    'emotional-quotient': document.getElementById('panel-toggle-emotional-quotient').checked,
-                    drawing: document.getElementById('panel-toggle-drawing').checked,
+                    math: document.getElementById('panel-toggle-math').disabled ? false : document.getElementById('panel-toggle-math').checked,
+                    english: document.getElementById('panel-toggle-english').disabled ? false : document.getElementById('panel-toggle-english').checked,
+                    aptitude: document.getElementById('panel-toggle-aptitude').disabled ? false : document.getElementById('panel-toggle-aptitude').checked,
+                    stories: document.getElementById('panel-toggle-stories').disabled ? false : document.getElementById('panel-toggle-stories').checked,
+                    'emotional-quotient': document.getElementById('panel-toggle-emotional-quotient').disabled ? false : document.getElementById('panel-toggle-emotional-quotient').checked,
+                    drawing: document.getElementById('panel-toggle-drawing').disabled ? false : document.getElementById('panel-toggle-drawing').checked,
                     german: false, // German B1 is admin-only
-                    'german-kids': document.getElementById('panel-toggle-german-kids').checked
+                    'german-kids': document.getElementById('panel-toggle-german-kids').disabled ? false : document.getElementById('panel-toggle-german-kids').checked
                 };
 
-                // Save to child's document
+                console.log('Saving enabled modules (parent control):', enabledModules);
+
+                // Save ONLY enabledModules (parent control)
+                // Do NOT modify assignedModules (that's admin-only)
                 await firebase.firestore().collection('children').doc(childId).update({
                     enabledModules: enabledModules,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 closeParentalControlPanel();
-                showSuccess('Package settings updated successfully! Changes will apply on next page load.');
+                showSuccess('✓ Package settings updated successfully!\n\nModules will appear based on both admin assignment and your enabled settings.');
 
                 // Reload after 2 seconds if this is the currently selected child
                 const selectedChild = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
@@ -986,7 +1026,8 @@
             }
 
             try {
-                const uid = currentUser.uid.substring(0, 20);
+                // Use full UID (not truncated) to match security rules
+                const uid = currentUser.uid;
                 await firebase.firestore().collection('users').doc(uid).update({
                     versionUpgradeRequested: true,
                     upgradeRequestedAt: firebase.firestore.FieldValue.serverTimestamp()

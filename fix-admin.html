@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Admin User Structure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+        .success {
+            background: #efe;
+            color: #3c3;
+            border-left: 4px solid #3c3;
+        }
+        .warning {
+            background: #ffc;
+            color: #c93;
+            border-left: 4px solid #c93;
+        }
+        .info {
+            background: #eef;
+            color: #36c;
+            border-left: 4px solid #36c;
+        }
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .details {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Admin User Structure</h1>
+        <p>This tool will check and fix the admin user document structure to ensure Firestore security rules work correctly.</p>
+
+        <div id="status"></div>
+        <div id="details"></div>
+        <div id="actions"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        firebase.auth().onAuthStateChanged(async function(user) {
+            if (!user) {
+                showStatus('error', 'Not logged in. Please <a href="login.html">login as admin</a> first.');
+                return;
+            }
+
+            currentUser = user;
+            await checkAdminStructure();
+        });
+
+        async function checkAdminStructure() {
+            const statusDiv = document.getElementById('status');
+            const detailsDiv = document.getElementById('details');
+            const actionsDiv = document.getElementById('actions');
+
+            try {
+                showStatus('info', 'Checking admin user structure...');
+
+                // Get auth user info
+                const authUid = currentUser.uid;
+                const authEmail = currentUser.email;
+
+                detailsDiv.innerHTML = `
+                    <div class="details">
+                        <strong>Auth User Info:</strong><br>
+                        UID: ${authUid}<br>
+                        Email: ${authEmail}
+                    </div>
+                `;
+
+                // Check if document exists at auth UID
+                const docByUid = await firebase.firestore().collection('users').doc(authUid).get();
+
+                if (docByUid.exists) {
+                    const data = docByUid.data();
+                    detailsDiv.innerHTML += `
+                        <div class="details">
+                            <strong>✓ Document found at correct location (UID):</strong><br>
+                            Role: ${data.role}<br>
+                            Email: ${data.email}<br>
+                            Username: ${data.username}
+                        </div>
+                    `;
+
+                    if (data.role === 'admin') {
+                        showStatus('success', '✓ Admin user structure is correct! Security rules should work.');
+                        actionsDiv.innerHTML = '<button onclick="window.location.href=\'admin.html\'">Go to Admin Panel</button>';
+                    } else {
+                        showStatus('error', 'User is not an admin. Role: ' + data.role);
+                    }
+                    return;
+                }
+
+                // Document not found at UID location - check by email
+                showStatus('warning', 'Document not found at UID location. Checking by email...');
+
+                const queryByEmail = await firebase.firestore().collection('users')
+                    .where('email', '==', authEmail.toLowerCase())
+                    .limit(1)
+                    .get();
+
+                if (queryByEmail.empty) {
+                    showStatus('error', 'No user document found! Please create an admin account.');
+                    return;
+                }
+
+                const oldDoc = queryByEmail.docs[0];
+                const oldDocId = oldDoc.id;
+                const oldData = oldDoc.data();
+
+                detailsDiv.innerHTML += `
+                    <div class="details">
+                        <strong>⚠️ Document found at wrong location:</strong><br>
+                        Current Doc ID: ${oldDocId}<br>
+                        Should be: ${authUid}<br>
+                        Role: ${oldData.role}<br>
+                        Email: ${oldData.email}
+                    </div>
+                `;
+
+                if (oldData.role !== 'admin') {
+                    showStatus('error', 'User is not an admin. Cannot fix non-admin user.');
+                    return;
+                }
+
+                showStatus('warning', 'Admin document structure needs fixing!');
+                actionsDiv.innerHTML = `
+                    <button onclick="fixAdminStructure('${oldDocId}', '${authUid}')">
+                        🔧 Fix Admin Structure
+                    </button>
+                    <p style="color: #666; font-size: 0.9em;">
+                        This will copy the admin document to the correct location (${authUid}) and delete the old one.
+                    </p>
+                `;
+
+            } catch (error) {
+                showStatus('error', 'Error checking structure: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        async function fixAdminStructure(oldDocId, newDocId) {
+            const actionsDiv = document.getElementById('actions');
+            actionsDiv.innerHTML = '<p>Fixing structure...</p>';
+
+            try {
+                // Get old document
+                const oldDoc = await firebase.firestore().collection('users').doc(oldDocId).get();
+                const oldData = oldDoc.data();
+
+                // Update UID in data to match new doc ID
+                oldData.uid = newDocId;
+
+                // Create new document at correct location
+                await firebase.firestore().collection('users').doc(newDocId).set(oldData);
+
+                showStatus('success', '✓ New admin document created at correct location!');
+
+                // Try to delete old document (might fail if we don't have permission)
+                try {
+                    await firebase.firestore().collection('users').doc(oldDocId).delete();
+                    showStatus('success', '✓ Old document deleted. Structure fixed!');
+                } catch (deleteError) {
+                    showStatus('warning', '✓ New document created, but couldn\'t delete old one. You may need to delete it manually in Firebase Console.');
+                }
+
+                actionsDiv.innerHTML = `
+                    <button onclick="window.location.href='admin.html'">Go to Admin Panel</button>
+                    <button onclick="window.location.reload()">Check Again</button>
+                `;
+
+            } catch (error) {
+                showStatus('error', 'Error fixing structure: ' + error.message);
+                console.error(error);
+                actionsDiv.innerHTML = '<button onclick="window.location.reload()">Try Again</button>';
+            }
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + type;
+            statusDiv.innerHTML = message;
+        }
+    </script>
+</body>
+</html>

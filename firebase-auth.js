@@ -29,7 +29,7 @@ async function initializeAuth() {
             );
 
             // Create admin user document in Firestore with UID as document ID
-            const docId = adminCredential.user.uid.substring(0, 20);
+            const docId = adminCredential.user.uid;
             await firebase.firestore().collection('users').doc(docId).set({
                 uid: adminCredential.user.uid,
                 username: 'admin',
@@ -83,7 +83,7 @@ firebase.auth().onAuthStateChanged(async (firebaseUser) => {
     if (firebaseUser) {
         // User is signed in, load their profile from Firestore
         try {
-            const userDoc = await firebase.firestore().collection('users').doc(firebaseUser.uid.substring(0, 20)).get();
+            const userDoc = await firebase.firestore().collection('users').doc(firebaseUser.uid).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
 
@@ -338,7 +338,7 @@ async function createUser(userData) {
 
         console.log('Creating user with modules:', newUser.modules);
 
-        await firebase.firestore().collection('users').doc(userCredential.user.uid.substring(0, 20)).set(newUser);
+        await firebase.firestore().collection('users').doc(userCredential.user.uid).set(newUser);
 
         // Sign out from secondary app and delete it
         await secondaryApp.auth().signOut();

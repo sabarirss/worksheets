@@ -201,7 +201,7 @@ async function updateChildAge(newAge) {
     }
 
     try {
-        const userDoc = firebase.firestore().collection('users').doc(user.uid.substring(0, 20));
+        const userDoc = firebase.firestore().collection('users').doc(user.uid);
         await userDoc.update({
             age: parseInt(newAge)
         });
@@ -231,7 +231,7 @@ async function hasParentPin() {
     if (!user) return false;
 
     try {
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).get();
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
         return userDoc.exists && userDoc.data().parentPin;
     } catch (error) {
         console.error('Error checking parent PIN:', error);
@@ -245,7 +245,7 @@ async function verifyParentPin(inputPin) {
     if (!user) return false;
 
     try {
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid.substring(0, 20)).get();
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
         if (!userDoc.exists) return false;
 
         const storedPin = userDoc.data().parentPin;
@@ -599,7 +599,7 @@ async function saveParentPin() {
     }
 
     try {
-        const userDoc = firebase.firestore().collection('users').doc(user.uid.substring(0, 20));
+        const userDoc = firebase.firestore().collection('users').doc(user.uid);
         await userDoc.update({
             parentPin: pin
         });

@@ -1411,6 +1411,17 @@ const visualGuides = {
  */
 // Load all tutorials from all difficulty levels (skip difficulty selection)
 function loadAllTutorials() {
+    // Check for admin level override
+    if (window.currentUserRole === 'admin') {
+        const adminLevel = getAdminLevelForModule('drawing');
+        if (adminLevel) {
+            const levelDetails = getLevelDetails(adminLevel);
+            if (levelDetails) {
+                currentAge = levelDetails.ageGroup;
+            }
+        }
+    }
+
     currentStep = 0;
 
     const tutorialSelection = document.getElementById('tutorial-selection');
@@ -1460,6 +1471,11 @@ function loadAllTutorials() {
         `;
 
         tutorialList.appendChild(card);
+    }
+
+    // Add admin level indicator
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('drawing', tutorialList);
     }
 }
 

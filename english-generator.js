@@ -90,6 +90,49 @@ function selectReadingDifficulty(difficulty) {
     loadStoryList();
 }
 
+// Load all stories (combined, without difficulty filtering)
+function loadAllStories() {
+    // Auto-detect age from selected child if not already set
+    if (!selectedAgeGroup) {
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+            console.log('Auto-detected age group from child:', selectedAgeGroup);
+        } else {
+            // Default to age 6 if no child selected
+            selectedAgeGroup = '6';
+            console.warn('No child selected, defaulting to age 6');
+        }
+    }
+
+    // Load all stories from all difficulties
+    document.getElementById('type-selection').style.display = 'none';
+    document.getElementById('story-selection').style.display = 'block';
+
+    const storyListContainer = document.getElementById('story-list');
+    storyListContainer.innerHTML = '';
+
+    // Load stories from all difficulties and combine them
+    ['easy', 'medium', 'hard'].forEach(difficulty => {
+        const stories = getStoriesByAgeDifficulty(selectedAgeGroup, difficulty);
+        stories.forEach(story => {
+            const storyCard = document.createElement('div');
+            storyCard.className = 'story-card';
+            storyCard.onclick = () => loadStoryReader(story, difficulty);
+
+            // Add difficulty badge
+            const difficultyBadge = difficulty === 'easy' ? '⭐' : difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐';
+
+            storyCard.innerHTML = `
+                <div class="story-icon">${story.emoji}</div>
+                <h3 class="story-title">${story.title}</h3>
+                <div class="story-meta">${difficultyBadge}</div>
+            `;
+            storyListContainer.appendChild(storyCard);
+        });
+    });
+}
+
 function backToReadingDifficulties() {
     document.getElementById('story-selection').style.display = 'none';
     document.getElementById('type-selection').style.display = 'block';
@@ -110,7 +153,15 @@ function showDifficulties(ageGroup) {
 }
 
 function updateWritingDifficultyDescriptions() {
-    if (!selectedAgeGroup) return;
+    // Auto-detect age from selected child to update descriptions on page load
+    if (!selectedAgeGroup) {
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+        } else {
+            selectedAgeGroup = '6';
+        }
+    }
 
     // Get configs using age group (internally maps to levels)
     const config = getLevelConfigsByAge(selectedAgeGroup);
@@ -123,9 +174,36 @@ function updateWritingDifficultyDescriptions() {
     if (easyDesc && config.easy) easyDesc.textContent = config.easy.description;
     if (mediumDesc && config.medium) mediumDesc.textContent = config.medium.description;
     if (hardDesc && config.hard) hardDesc.textContent = config.hard.description;
+
+    // Hide writing practice button for ages 9+ and 10+ (handwriting not age-appropriate)
+    const writingBtn = document.getElementById('writing-practice-btn');
+    if (writingBtn) {
+        if (selectedAgeGroup === '9+' || selectedAgeGroup === '10+') {
+            writingBtn.style.display = 'none';
+        } else {
+            writingBtn.style.display = 'flex';
+        }
+    }
 }
 
 function loadWorksheetNew(difficulty) {
+    // Check if user is admin with level selection
+    const isAdmin = window.currentUserRole === 'admin';
+
+    if (isAdmin && typeof getAdminLevelForModule === 'function') {
+        const adminLevel = getAdminLevelForModule('english');
+        if (adminLevel) {
+            // Admin has selected a specific level - use that level's age/difficulty
+            const levelDetails = getLevelDetails(adminLevel);
+            selectedAgeGroup = levelDetails.ageGroup;
+            // For 'writing' difficulty, keep it as 'writing', otherwise use the selected difficulty
+            selectedDifficulty = difficulty === 'writing' ? 'writing' : levelDetails.difficulty;
+            console.log(`Admin viewing English Level ${adminLevel}: ${selectedAgeGroup} ${selectedDifficulty}`);
+            loadWorksheet(selectedAgeGroup, selectedDifficulty);
+            return;
+        }
+    }
+
     // Auto-detect age from selected child if not already set
     if (!selectedAgeGroup) {
         const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
@@ -2717,6 +2795,11 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     worksheetContainer.innerHTML = html;
     worksheetContainer.style.display = 'block';
 
+    // Show admin level indicator if admin has selected a specific level
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('english', worksheetContainer);
+    }
+
     // Initialize writing canvases
     setTimeout(() => {
         initializeAllWritingCanvases();
@@ -3177,6 +3260,11 @@ function renderWorksheet() {
 
     worksheetContainer.innerHTML = html;
     worksheetContainer.style.display = 'block';
+
+    // Show admin level indicator if admin has selected a specific level
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('english', worksheetContainer);
+    }
 
     // Initialize writing canvases
     setTimeout(() => {

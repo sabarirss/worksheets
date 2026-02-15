@@ -337,7 +337,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Enabled Modules</label>
+                    <label>Enabled Modules (Parent Control)</label>
+                    <div style="margin-bottom: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; font-size: 0.9em; color: #1565c0;">
+                        ℹ️ <strong>Two-Tier System:</strong> Admin assigns available modules → Parents enable modules for their child → Child sees modules that are both assigned AND enabled.
+                    </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="module-math" checked>
@@ -487,9 +490,19 @@
             const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
             const age = calculateAge(child.date_of_birth);
 
-            // Count enabled modules
-            const modules = child.enabledModules || { math: true };
-            const enabledCount = Object.values(modules).filter(Boolean).length;
+            // Count enabled modules (both assigned AND enabled)
+            const assignedModules = child.assignedModules || child.modules || { math: true };
+            const enabledModules = child.enabledModules || { math: true };
+
+            // Count modules that are both assigned and enabled (visible to child)
+            let visibleCount = 0;
+            for (const key in assignedModules) {
+                if (assignedModules[key] && enabledModules[key]) {
+                    visibleCount++;
+                }
+            }
+
+            const enabledCount = visibleCount;
 
             // Get version
             const version = child.version || 'demo';
@@ -555,26 +568,23 @@
                 // Set version (default to demo if not set)
                 document.getElementById('child-version').value = child.version || 'demo';
 
-                // Set enabled modules (default all to false except math if not set)
-                const modules = child.enabledModules || {
-                    math: true,
-                    english: false,
-                    aptitude: false,
-                    stories: false,
-                    'emotional-quotient': false,
-                    drawing: false,
-                    german: false,
-                    'german-kids': false
-                };
+                // Get assigned and enabled modules
+                const assignedModules = child.assignedModules || child.modules || { math: true };
+                const enabledModules = child.enabledModules || { math: true };
 
-                document.getElementById('module-math').checked = modules.math;
-                document.getElementById('module-english').checked = modules.english;
-                document.getElementById('module-aptitude').checked = modules.aptitude;
-                document.getElementById('module-stories').checked = modules.stories;
-                document.getElementById('module-eq').checked = modules['emotional-quotient'];
-                document.getElementById('module-drawing').checked = modules.drawing;
+                // When editing, show what parent has enabled
+                // But we should also show which are assigned (in a future enhancement, could disable non-assigned)
+                document.getElementById('module-math').checked = enabledModules.math || false;
+                document.getElementById('module-english').checked = enabledModules.english || false;
+                document.getElementById('module-aptitude').checked = enabledModules.aptitude || false;
+                document.getElementById('module-stories').checked = enabledModules.stories || false;
+                document.getElementById('module-eq').checked = enabledModules['emotional-quotient'] || false;
+                document.getElementById('module-drawing').checked = enabledModules.drawing || false;
+                document.getElementById('module-german-kids').checked = enabledModules['german-kids'] || false;
+
                 // German B1 is admin-only, no checkbox to set
-                document.getElementById('module-german-kids').checked = modules['german-kids'];
+
+                console.log('Loaded child for editing - Assigned:', assignedModules, 'Enabled:', enabledModules);
 
                 document.getElementById('child-modal').style.display = 'flex';
             } catch (error) {
@@ -622,8 +632,13 @@
                 return;
             }
 
-            // Collect enabled modules
-            const enabledModules = {
+            // TWO-TIER PERMISSION SYSTEM
+            // When creating a child, initialize BOTH fields:
+            // - assignedModules: What admin assigns (default: math only)
+            // - enabledModules: What parent enables (default: same as checkboxes)
+
+            // Collect what parent selected (will be enabledModules)
+            const selectedModules = {
                 math: document.getElementById('module-math').checked,
                 english: document.getElementById('module-english').checked,
                 aptitude: document.getElementById('module-aptitude').checked,
@@ -634,6 +649,22 @@
                 'german-kids': document.getElementById('module-german-kids').checked
             };
 
+            // Initialize assignedModules (admin control) - default to math only
+            // Admin can change this later from admin panel
+            const assignedModules = {
+                math: true,  // Math always assigned by default
+                english: false,
+                aptitude: false,
+                stories: false,
+                'emotional-quotient': false,
+                drawing: false,
+                german: false,
+                'german-kids': false
+            };
+
+            // Initialize enabledModules (parent control) based on what parent selected
+            const enabledModules = { ...selectedModules };
+
             const childData = {
                 name: name,
                 gender: gender,
@@ -642,18 +673,31 @@
                 grade: grade,
                 parent_uid: parentUid,
                 version: version,
-                enabledModules: enabledModules
+                assignedModules: assignedModules,  // What admin makes available
+                enabledModules: enabledModules,    // What parent enables
+                modules: assignedModules           // Backward compatibility
             };
 
             try {
                 if (currentEditChildId) {
                     // Update existing child
-                    await firebase.firestore().collection('children').doc(currentEditChildId).update({
-                        ...childData,
+                    // When editing from parent side, preserve assignedModules (admin control)
+                    // Only update enabledModules and basic info
+                    const updateData = {
+                        name: name,
+                        gender: gender,
+                        date_of_birth: dateOfBirth,
+                        age: calculateAge(dateOfBirth),
+                        grade: grade,
+                        version: version,
+                        enabledModules: enabledModules,  // Update what parent enables
+                        // Do NOT update assignedModules - that's admin-only
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    };
+
+                    await firebase.firestore().collection('children').doc(currentEditChildId).update(updateData);
                 } else {
-                    // Create new child
+                    // Create new child - initialize both fields
                     await firebase.firestore().collection('children').add({
                         ...childData,
                         created_at: firebase.firestore.FieldValue.serverTimestamp()

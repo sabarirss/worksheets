@@ -246,13 +246,17 @@
             const loginForm = document.getElementById('login-form');
             const loading = document.getElementById('loading');
             const signupLink = document.getElementById('signup-link');
+            const divider = document.querySelector('.divider');
+            const googleBtn = document.querySelector('.google-signin-btn');
 
             // Hide error
             errorMsg.style.display = 'none';
 
-            // Show loading, hide form and signup link
+            // Show loading, hide form, signup link, divider, and Google button
             loginForm.style.display = 'none';
             signupLink.style.display = 'none';
+            if (divider) divider.style.display = 'none';
+            if (googleBtn) googleBtn.style.display = 'none';
             loading.style.display = 'block';
 
             try {
@@ -280,6 +284,8 @@
                         errorMsg.style.display = 'block';
                         loginForm.style.display = 'block';
                         signupLink.style.display = 'block';
+                        if (divider) divider.style.display = 'flex';
+                        if (googleBtn) googleBtn.style.display = 'flex';
                         loading.style.display = 'none';
                         return;
                     }
@@ -303,6 +309,8 @@
                     errorMsg.style.display = 'block';
                     loginForm.style.display = 'block';
                     signupLink.style.display = 'block';
+                    if (divider) divider.style.display = 'flex';
+                    if (googleBtn) googleBtn.style.display = 'flex';
                     loading.style.display = 'none';
 
                     // Also show alert for visibility
@@ -321,6 +329,8 @@
                 errorMsg.style.display = 'block';
                 loginForm.style.display = 'block';
                 signupLink.style.display = 'block';
+                if (divider) divider.style.display = 'flex';
+                if (googleBtn) googleBtn.style.display = 'flex';
                 loading.style.display = 'none';
 
                 // Show alert for visibility
@@ -355,10 +365,14 @@
             const loading = document.getElementById('loading');
             const loginForm = document.getElementById('login-form');
             const signupLink = document.getElementById('signup-link');
+            const divider = document.querySelector('.divider');
+            const googleBtn = document.querySelector('.google-signin-btn');
 
             errorMsg.style.display = 'none';
             loginForm.style.display = 'none';
             signupLink.style.display = 'none';
+            if (divider) divider.style.display = 'none';
+            if (googleBtn) googleBtn.style.display = 'none';
             loading.style.display = 'block';
 
             try {
@@ -437,6 +451,8 @@
                 errorMsg.style.display = 'block';
                 loginForm.style.display = 'block';
                 signupLink.style.display = 'block';
+                if (divider) divider.style.display = 'flex';
+                if (googleBtn) googleBtn.style.display = 'flex';
                 loading.style.display = 'none';
             }
         }

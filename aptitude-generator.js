@@ -567,6 +567,18 @@ function generateLogicPuzzles(count, difficulty, age) {
 
 // Load Puzzles
 function loadPuzzles(difficulty, page = 1) {
+    // Check for admin level override
+    if (window.currentUserRole === 'admin') {
+        const adminLevel = getAdminLevelForModule('aptitude');
+        if (adminLevel) {
+            const levelDetails = getLevelDetails(adminLevel);
+            if (levelDetails) {
+                currentAge = levelDetails.ageGroup;
+                difficulty = levelDetails.difficulty;
+            }
+        }
+    }
+
     currentDifficulty = difficulty;
     currentPage = page;
 
@@ -905,6 +917,11 @@ function renderWorksheet() {
 
     worksheetContainer.innerHTML = html;
     worksheetContainer.style.display = 'block';
+
+    // Add admin level indicator
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('aptitude', worksheetContainer);
+    }
 
     setTimeout(() => {
         initializeAllHandwritingInputs();

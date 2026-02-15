@@ -428,6 +428,18 @@ function shuffleArray(array) {
 
 // Load activities based on difficulty and age
 function loadActivities(difficulty, page = 1) {
+    // Check for admin level override
+    if (window.currentUserRole === 'admin') {
+        const adminLevel = getAdminLevelForModule('emotional-quotient');
+        if (adminLevel) {
+            const levelDetails = getLevelDetails(adminLevel);
+            if (levelDetails) {
+                currentAge = levelDetails.ageGroup;
+                difficulty = levelDetails.difficulty;
+            }
+        }
+    }
+
     currentDifficulty = difficulty;
     currentPage = page;
 
@@ -616,7 +628,13 @@ function renderWorksheet() {
     `;
 
     document.getElementById('eq-selection').style.display = 'none';
-    document.getElementById('worksheet-area').innerHTML = html;
+    const worksheetArea = document.getElementById('worksheet-area');
+    worksheetArea.innerHTML = html;
+
+    // Add admin level indicator
+    if (typeof showAdminLevelIndicator === 'function') {
+        showAdminLevelIndicator('emotional-quotient', worksheetArea);
+    }
 
     elapsedSeconds = 0;
     updateTimerDisplay();

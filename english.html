@@ -280,6 +280,7 @@
     <script src="firebase-auth.js"></script>
     <script src="firebase-storage.js"></script>
     <script src="age-filter.js"></script>
+    <script src="admin-level-manager.js"></script>
     <script src="child-session-manager.js"></script>
     <script src="profile-selector.js"></script>
 </head>
@@ -346,61 +347,25 @@
                 <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="selectType('writing')" class="level-btn">
-                    <span class="level-name">✍️ Writing Worksheets</span>
-                    <span class="level-desc">Vocabulary, grammar, and handwriting practice</span>
-                </button>
-                <button onclick="selectType('reading')" class="level-btn">
-                    <span class="level-name">📚 Reading Stories</span>
-                    <span class="level-desc">Interactive stories with comprehension questions</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Difficulty Selection for Writing -->
-        <div class="level-selection" id="writing-difficulties" style="display: none;">
-            <h2>Select Difficulty Level</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToTypeSelection()">← Back to Type</button>
-            </div>
-            <div class="level-grid">
                 <button onclick="loadWorksheetNew('easy')" class="level-btn">
-                    <span class="level-name">⭐ Easy</span>
-                    <span class="level-desc" id="writing-easy-desc">Beginner level</span>
+                    <span class="level-name">📝 Vocabulary Easy</span>
+                    <span class="level-desc" id="writing-easy-desc">Picture words and sight words</span>
                 </button>
                 <button onclick="loadWorksheetNew('medium')" class="level-btn">
-                    <span class="level-name">⭐⭐ Medium</span>
-                    <span class="level-desc" id="writing-medium-desc">Intermediate level</span>
+                    <span class="level-name">📝 Vocabulary Medium</span>
+                    <span class="level-desc" id="writing-medium-desc">Sentence completion and grammar</span>
                 </button>
                 <button onclick="loadWorksheetNew('hard')" class="level-btn">
-                    <span class="level-name">⭐⭐⭐ Hard</span>
-                    <span class="level-desc" id="writing-hard-desc">Advanced level</span>
+                    <span class="level-name">📝 Vocabulary Hard</span>
+                    <span class="level-desc" id="writing-hard-desc">Advanced grammar and comprehension</span>
                 </button>
                 <button onclick="loadWorksheetNew('writing')" class="level-btn" id="writing-practice-btn">
                     <span class="level-name">✍️ Writing Practice</span>
                     <span class="level-desc">Handwriting with ruled lines (50 pages)</span>
                 </button>
-            </div>
-        </div>
-
-        <!-- Difficulty Selection for Reading -->
-        <div class="level-selection" id="reading-difficulties" style="display: none;">
-            <h2>Select Difficulty Level</h2>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToTypeSelection()">← Back to Type</button>
-            </div>
-            <div class="level-grid">
-                <button onclick="selectReadingDifficulty('easy')" class="level-btn">
-                    <span class="level-name">⭐ Easy</span>
-                    <span class="level-desc">Short simple stories</span>
-                </button>
-                <button onclick="selectReadingDifficulty('medium')" class="level-btn">
-                    <span class="level-name">⭐⭐ Medium</span>
-                    <span class="level-desc">Intermediate stories</span>
-                </button>
-                <button onclick="selectReadingDifficulty('hard')" class="level-btn">
-                    <span class="level-name">⭐⭐⭐ Hard</span>
-                    <span class="level-desc">Complex stories</span>
+                <button onclick="loadAllStories()" class="level-btn">
+                    <span class="level-name">📚 Reading Stories</span>
+                    <span class="level-desc">Interactive stories with comprehension questions</span>
                 </button>
             </div>
         </div>
@@ -409,7 +374,7 @@
         <div class="level-selection" id="story-selection" style="display: none;">
             <h2>Select a Story</h2>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToReadingDifficulties()">← Back to Type Selection</button>
+                <button onclick="backToTypeSelection()">← Back to Activities</button>
             </div>
             <div id="story-list"></div>
         </div>
@@ -420,10 +385,16 @@
 
     <script src="storage-manager.js?v=2.0"></script>
     <script src="handwriting-input.js?v=2.0"></script>
+    <script src="level-mapper.js"></script>
     <script src="english-generator.js?v=2.0"></script>
     <script>
         // Add completion badges on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Update difficulty descriptions based on detected child age
+            if (typeof updateWritingDifficultyDescriptions === 'function') {
+                updateWritingDifficultyDescriptions();
+            }
+
             // Get all completed English worksheets
             const completedWorksheets = getCompletedWorksheets('english');
 
