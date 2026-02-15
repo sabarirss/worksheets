@@ -83,6 +83,24 @@ function showMathOperationsBack() {
 
 function showDifficulties(operation) {
     selectedOperation = operation;
+
+    console.log('showDifficulties called:', {
+        operation,
+        selectedAgeGroup
+    });
+
+    // Ensure age group is set
+    if (!selectedAgeGroup) {
+        console.warn('selectedAgeGroup not set, auto-detecting...');
+        let childAge = window.detectedChildAge || '6';
+        const ageMap = {
+            '4': '4-5', '5': '4-5', '6': '6', '7': '7', '8': '8',
+            '9': '9+', '10': '10+', '11': '10+', '12': '10+', '13': '10+'
+        };
+        selectedAgeGroup = ageMap[childAge] || '6';
+        console.log('Auto-set age group to:', selectedAgeGroup);
+    }
+
     document.getElementById('math-operations').style.display = 'none';
     document.getElementById('math-difficulties').style.display = 'block';
 
@@ -109,8 +127,43 @@ function updateDifficultyDescriptions() {
 
 function loadWorksheetNew(difficulty) {
     selectedDifficulty = difficulty;
+
+    // Debug logging
+    console.log('loadWorksheetNew called:', {
+        difficulty,
+        selectedAgeGroup,
+        selectedOperation,
+        selectedDifficulty
+    });
+
+    // Check if all required variables are set
+    if (!selectedAgeGroup) {
+        console.error('selectedAgeGroup is not set! Auto-detecting now...');
+        // Auto-detect if missing
+        let childAge = window.detectedChildAge || '6';
+        const ageMap = {
+            '4': '4-5', '5': '4-5', '6': '6', '7': '7', '8': '8',
+            '9': '9+', '10': '10+', '11': '10+', '12': '10+', '13': '10+'
+        };
+        selectedAgeGroup = ageMap[childAge] || '6';
+        console.log('Auto-detected age group:', selectedAgeGroup);
+    }
+
+    if (!selectedOperation) {
+        console.error('selectedOperation is not set!');
+        alert('Please select an operation first (Addition, Subtraction, etc.)');
+        return;
+    }
+
     if (selectedAgeGroup && selectedOperation && selectedDifficulty) {
+        console.log('Loading worksheet:', selectedOperation, selectedAgeGroup, selectedDifficulty);
         loadWorksheet(selectedOperation, selectedAgeGroup, selectedDifficulty, 1);
+    } else {
+        console.error('Missing required parameters:', {
+            selectedAgeGroup,
+            selectedOperation,
+            selectedDifficulty
+        });
     }
 }
 
