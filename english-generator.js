@@ -20,15 +20,25 @@ function getAgeGroup(age) {
 // Navigation functions
 function selectAgeGroup(ageGroup) {
     selectedAgeGroup = ageGroup;
-    document.getElementById('age-groups').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'block';
+    const ageGroups = document.getElementById('age-groups');
+    if (ageGroups) ageGroups.style.display = 'none';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'block';
 }
 
 function backToAgeGroups() {
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('writing-difficulties').style.display = 'none';
-    document.getElementById('reading-difficulties').style.display = 'none';
-    document.getElementById('age-groups').style.display = 'block';
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
+
+    const writingDifficulties = document.getElementById('writing-difficulties');
+    if (writingDifficulties) writingDifficulties.style.display = 'none';
+
+    const readingDifficulties = document.getElementById('reading-difficulties');
+    if (readingDifficulties) readingDifficulties.style.display = 'none';
+
+    const ageGroups = document.getElementById('age-groups');
+    if (ageGroups) ageGroups.style.display = 'block';
 }
 
 function selectType(type) {
@@ -46,30 +56,52 @@ function selectType(type) {
     }
 
     selectedType = type;
-    document.getElementById('type-selection').style.display = 'none';
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
 
     if (type === 'writing') {
         // Show writing difficulties and update descriptions
-        document.getElementById('writing-difficulties').style.display = 'block';
-        updateWritingDifficultyDescriptions();
+        const writingDifficulties = document.getElementById('writing-difficulties');
+        if (writingDifficulties) {
+            writingDifficulties.style.display = 'block';
+            updateWritingDifficultyDescriptions();
+        }
 
         // Hide writing practice button for ages 9+ and 10+
         const writingBtn = document.getElementById('writing-practice-btn');
-        if (selectedAgeGroup === '9+' || selectedAgeGroup === '10+') {
-            writingBtn.style.display = 'none';
-        } else {
-            writingBtn.style.display = 'flex';
+        if (writingBtn) {
+            if (selectedAgeGroup === '9+' || selectedAgeGroup === '10+') {
+                writingBtn.style.display = 'none';
+            } else {
+                writingBtn.style.display = 'flex';
+            }
         }
     } else if (type === 'reading') {
-        document.getElementById('reading-difficulties').style.display = 'block';
+        const readingDifficulties = document.getElementById('reading-difficulties');
+        if (readingDifficulties) readingDifficulties.style.display = 'block';
     }
 }
 
 function backToTypeSelection() {
-    document.getElementById('writing-difficulties').style.display = 'none';
-    document.getElementById('reading-difficulties').style.display = 'none';
-    document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'block';
+    const writingDifficulties = document.getElementById('writing-difficulties');
+    if (writingDifficulties) writingDifficulties.style.display = 'none';
+
+    const readingDifficulties = document.getElementById('reading-difficulties');
+    if (readingDifficulties) readingDifficulties.style.display = 'none';
+
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'none';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'block';
+
+    // Hide worksheet container if visible
+    const worksheetContainer = document.getElementById('english-worksheet-content');
+    if (worksheetContainer) worksheetContainer.style.display = 'none';
+
+    // Hide story reader if visible
+    const storyReader = document.getElementById('story-reader');
+    if (storyReader) storyReader.style.display = 'none';
 }
 
 function selectReadingDifficulty(difficulty) {
@@ -106,19 +138,31 @@ function loadAllStories() {
     }
 
     // Load all stories from all difficulties
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('story-selection').style.display = 'block';
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
+
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'block';
 
     const storyListContainer = document.getElementById('story-list');
+    if (!storyListContainer) {
+        console.error('Story list container not found');
+        return;
+    }
+
     storyListContainer.innerHTML = '';
 
     // Load stories from all difficulties and combine them
     ['easy', 'medium', 'hard'].forEach(difficulty => {
-        const stories = getStoriesByAgeDifficulty(selectedAgeGroup, difficulty);
+        const stories = getStoriesByAge(selectedAgeGroup, difficulty);
         stories.forEach(story => {
             const storyCard = document.createElement('div');
             storyCard.className = 'story-card';
-            storyCard.onclick = () => loadStoryReader(story, difficulty);
+            // Fixed: Use loadStory instead of non-existent loadStoryReader
+            storyCard.onclick = () => {
+                selectedDifficulty = difficulty;
+                loadStory(story.id);
+            };
 
             // Add difficulty badge
             const difficultyBadge = difficulty === 'easy' ? '⭐' : difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐';
@@ -134,13 +178,19 @@ function loadAllStories() {
 }
 
 function backToReadingDifficulties() {
-    document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'block';
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'none';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'block';
 }
 
 function backToStoryListFromReader() {
-    document.getElementById('story-reader').style.display = 'none';
-    document.getElementById('story-selection').style.display = 'block';
+    const storyReader = document.getElementById('story-reader');
+    if (storyReader) storyReader.style.display = 'none';
+
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'block';
 }
 
 // Legacy functions for compatibility
@@ -229,7 +279,9 @@ function backToWorksheetSelection() {
     if (worksheetContainer) {
         worksheetContainer.style.display = 'none';
     }
-    document.getElementById('type-selection').style.display = 'block';
+
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'block';
 }
 
 let currentWorksheet = null;
@@ -1572,8 +1624,11 @@ function loadStoryList() {
     const limit = getDemoLimit(stories.length);
     const limitedStories = stories.slice(0, limit);
 
-    document.getElementById('reading-difficulties').style.display = 'none';
-    document.getElementById('story-selection').style.display = 'block';
+    const readingDifficulties = document.getElementById('reading-difficulties');
+    if (readingDifficulties) readingDifficulties.style.display = 'none';
+
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'block';
 
     const difficultyStars = {
         easy: '⭐',
@@ -1582,6 +1637,10 @@ function loadStoryList() {
     };
 
     const listContainer = document.getElementById('story-list');
+    if (!listContainer) {
+        console.error('Story list container not found');
+        return;
+    }
 
     if (limitedStories.length === 0) {
         listContainer.innerHTML = `
@@ -1617,8 +1676,15 @@ function loadStory(storyId) {
     currentStory = story;
     let userAnswers = [];
 
-    document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('story-reader').style.display = 'block';
+    const storySelection = document.getElementById('story-selection');
+    if (storySelection) storySelection.style.display = 'none';
+
+    const storyReader = document.getElementById('story-reader');
+    if (!storyReader) {
+        console.error('Story reader container not found');
+        return;
+    }
+    storyReader.style.display = 'block';
 
     // Build vocabulary section
     let vocabularyHTML = '';
@@ -1654,6 +1720,10 @@ function loadStory(storyId) {
     });
 
     const readerContainer = document.getElementById('story-reader');
+    if (!readerContainer) {
+        console.error('Story reader container not found');
+        return;
+    }
     readerContainer.innerHTML = `
         <div class="navigation" style="margin-bottom: 20px;">
             <button onclick="backToStoryListFromReader()">← Back to Stories</button>
