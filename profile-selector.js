@@ -72,7 +72,16 @@ async function loadProfileSelector(parentUid) {
 
     } catch (error) {
         console.error('Error loading profile selector:', error);
-        container.innerHTML = '<div style="color: red;">Error loading profiles</div>';
+        console.error('Error details:', error.code, error.message);
+
+        // Hide container instead of showing error
+        // This allows index.html redirect to work properly
+        container.style.display = 'none';
+
+        // If it's a permission error, the user likely needs to create children
+        if (error.code === 'permission-denied') {
+            console.log('Permission denied - user may need to create children profiles');
+        }
     }
 }
 
