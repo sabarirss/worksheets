@@ -154,15 +154,25 @@ async function setInputMode(mode) {
         return false;
     }
 
-    // Check if pencil mode is allowed for this child
-    const childVersion = child.version || 'demo';
-    if (mode === 'pencil' && childVersion !== 'full') {
-        alert(`✨ Pencil Mode is a Full Version feature!\n\nUpgrade ${child.name}'s profile to Full Version to use handwriting recognition with your iPad/tablet pencil.`);
-        return false;
-    }
-
-    // Save preference per child to Firestore
+    // Fetch fresh child data from Firestore to check current version
     try {
+        const childDoc = await firebase.firestore().collection('children').doc(child.id).get();
+        if (!childDoc.exists) {
+            console.error('Child document not found in Firestore');
+            alert('Child profile not found. Please refresh the page.');
+            return false;
+        }
+
+        const childData = childDoc.data();
+        const childVersion = childData.version || 'demo';
+
+        // Check if pencil mode is allowed for this child
+        if (mode === 'pencil' && childVersion !== 'full') {
+            alert(`✨ Pencil Mode is a Full Version feature!\n\nUpgrade ${child.name}'s profile to Full Version to use handwriting recognition with your iPad/tablet pencil.`);
+            return false;
+        }
+
+        // Save preference per child to Firestore
         await firebase.firestore().collection('children').doc(child.id).update({
             inputMode: mode,
             updated_at: firebase.firestore.FieldValue.serverTimestamp()
