@@ -1581,10 +1581,6 @@ function loadStory(storyId) {
             <button onclick="backToStoryListFromReader()">← Back to Stories</button>
         </div>
 
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
-            📊 Age Group: ${selectedAgeGroup}
-        </div>
-
         <div class="story-container">
             <div class="story-title">${story.title}</div>
 
@@ -2658,9 +2654,6 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
 
     const html = `
         <div class="worksheet-container">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
-                📊 Age Group: ${ageGroup}
-            </div>
             <div class="worksheet-header">
                 <div class="worksheet-info">
                     <h2>✍️ ${config.name}</h2>
@@ -3093,9 +3086,6 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
-                📊 Age Group: ${ageGroup}
-            </div>
             <div class="worksheet-header">
                 <div class="worksheet-info">
                     <h2>${config.name}</h2>

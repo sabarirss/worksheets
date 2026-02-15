@@ -153,7 +153,7 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
             questions.push({
                 ...problem,
                 operation: operation,
-                problem: `${problem.a} ${opSymbol} ${problem.b} = ?`,
+                problem: `${problem.a} ${opSymbol} ${problem.b} =`,
                 sourceAge: youngerAge,
                 sourceDifficulty: 'easy'
             });
@@ -172,7 +172,7 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
             questions.push({
                 ...problem,
                 operation: operation,
-                problem: `${problem.a} ${opSymbol} ${problem.b} = ?`,
+                problem: `${problem.a} ${opSymbol} ${problem.b} =`,
                 sourceAge: ageGroup,
                 sourceDifficulty: 'medium'
             });
@@ -326,7 +326,7 @@ function renderAssessmentUI() {
                 <input type="number"
                        id="assessment-answer-${index}"
                        class="answer-input"
-                       placeholder="?"
+                       placeholder=""
                        inputmode="numeric">
             `;
         }
