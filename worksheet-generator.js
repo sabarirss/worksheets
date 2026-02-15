@@ -1315,7 +1315,7 @@ function renderWorksheet() {
                                    id="answer-${index}"
                                    class="keyboard-answer-input"
                                    data-answer="${problem.answer}"
-                                   placeholder="?"
+                                   placeholder=""
                                    inputmode="numeric">
                         `;
                     }
