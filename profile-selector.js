@@ -448,10 +448,8 @@ async function selectInputMode(childId, mode) {
         console.log(`Input mode set to ${mode} for child ${childId}`);
 
         // Close and reopen modal to refresh badge visibility
-        const childData = await firebase.firestore().collection('children').doc(childId).get();
-        const childName = childData.exists ? childData.data().name : 'Child';
         closeChildSettings();
-        setTimeout(() => openChildSettings(childId, childName), 100);
+        setTimeout(() => openChildSettings(childId, childData.name), 100);
 
     } catch (error) {
         console.error('Error setting input mode:', error);

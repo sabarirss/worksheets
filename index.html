@@ -825,28 +825,28 @@
 
             // Show all modules for admin
             const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
-            if (mathBtn) mathBtn.style.display = 'inline-block';
+            if (mathBtn) mathBtn.style.display = 'flex';
 
             const englishBtn = document.querySelector('button[onclick*="english.html"]');
-            if (englishBtn) englishBtn.style.display = 'inline-block';
+            if (englishBtn) englishBtn.style.display = 'flex';
 
             const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
-            if (aptitudeBtn) aptitudeBtn.style.display = 'inline-block';
+            if (aptitudeBtn) aptitudeBtn.style.display = 'flex';
 
             const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
-            if (storiesBtn) storiesBtn.style.display = 'inline-block';
+            if (storiesBtn) storiesBtn.style.display = 'flex';
 
             const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
-            if (eqBtn) eqBtn.style.display = 'inline-block';
+            if (eqBtn) eqBtn.style.display = 'flex';
 
             const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
-            if (drawingBtn) drawingBtn.style.display = 'inline-block';
+            if (drawingBtn) drawingBtn.style.display = 'flex';
 
             const germanBtn = document.querySelector('button[onclick*="german.html"]');
-            if (germanBtn) germanBtn.style.display = 'inline-block';
+            if (germanBtn) germanBtn.style.display = 'flex';
 
             const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
-            if (germanKidsBtn) germanKidsBtn.style.display = 'inline-block';
+            if (germanKidsBtn) germanKidsBtn.style.display = 'flex';
         }
 
         // Update module visibility and version based on selected child
@@ -925,31 +925,31 @@
             // Update each module's visibility based on TWO-TIER LOGIC
             // Module shows ONLY if BOTH assigned by admin AND enabled by parent
             const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
-            if (mathBtn) mathBtn.style.display = (assignedModules.math && enabledModules.math) ? 'inline-block' : 'none';
+            if (mathBtn) mathBtn.style.display = (assignedModules.math && enabledModules.math) ? 'flex' : 'none';
 
             const englishBtn = document.querySelector('button[onclick*="english.html"]');
-            if (englishBtn) englishBtn.style.display = (assignedModules.english && enabledModules.english) ? 'inline-block' : 'none';
+            if (englishBtn) englishBtn.style.display = (assignedModules.english && enabledModules.english) ? 'flex' : 'none';
 
             const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
-            if (aptitudeBtn) aptitudeBtn.style.display = (assignedModules.aptitude && enabledModules.aptitude) ? 'inline-block' : 'none';
+            if (aptitudeBtn) aptitudeBtn.style.display = (assignedModules.aptitude && enabledModules.aptitude) ? 'flex' : 'none';
 
             const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
-            if (storiesBtn) storiesBtn.style.display = (assignedModules.stories && enabledModules.stories) ? 'inline-block' : 'none';
+            if (storiesBtn) storiesBtn.style.display = (assignedModules.stories && enabledModules.stories) ? 'flex' : 'none';
 
             const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
-            if (eqBtn) eqBtn.style.display = (assignedModules['emotional-quotient'] && enabledModules['emotional-quotient']) ? 'inline-block' : 'none';
+            if (eqBtn) eqBtn.style.display = (assignedModules['emotional-quotient'] && enabledModules['emotional-quotient']) ? 'flex' : 'none';
 
             const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
-            if (drawingBtn) drawingBtn.style.display = (assignedModules.drawing && enabledModules.drawing) ? 'inline-block' : 'none';
+            if (drawingBtn) drawingBtn.style.display = (assignedModules.drawing && enabledModules.drawing) ? 'flex' : 'none';
 
             const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
-            if (germanKidsBtn) germanKidsBtn.style.display = (assignedModules['german-kids'] && enabledModules['german-kids']) ? 'inline-block' : 'none';
+            if (germanKidsBtn) germanKidsBtn.style.display = (assignedModules['german-kids'] && enabledModules['german-kids']) ? 'flex' : 'none';
 
             // German B1 is admin-only - only show for admin users
             const germanBtn = document.querySelector('button[onclick*="german.html"]');
             if (germanBtn) {
                 if (user && user.role === 'admin') {
-                    germanBtn.style.display = 'inline-block';
+                    germanBtn.style.display = 'flex';
                 } else {
                     germanBtn.style.display = 'none';
                 }
