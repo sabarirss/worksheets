@@ -237,26 +237,38 @@ function updateInputModeUI() {
 /**
  * Create input mode toggle UI
  * Call this after user data is loaded
+ * Creates in .user-actions div before version badge
  */
 function createInputModeToggle() {
-    const container = document.getElementById('input-mode-container');
-    if (!container) {
-        console.warn('Input mode container not found');
+    // Remove existing toggle if present
+    const existingToggle = document.getElementById('input-mode-toggle');
+    if (existingToggle) {
+        existingToggle.remove();
+    }
+
+    // Find user-actions container
+    const userActions = document.querySelector('.user-actions');
+    if (!userActions) {
+        console.warn('User actions container not found');
         return;
     }
 
-    const html = `
-        <div id="input-mode-toggle" class="input-mode-toggle">
-            <button class="mode-btn keyboard-btn active" onclick="setInputMode('keyboard')" title="Use Keyboard">
-                ⌨️ Keyboard
-            </button>
-            <button class="mode-btn pencil-btn" onclick="setInputMode('pencil')" title="Use iPad/Tablet Pencil">
-                ✏️ Pencil
-            </button>
-        </div>
+    // Create toggle element
+    const toggleDiv = document.createElement('div');
+    toggleDiv.id = 'input-mode-toggle';
+    toggleDiv.className = 'input-mode-toggle';
+    toggleDiv.innerHTML = `
+        <button class="mode-btn keyboard-btn active" onclick="setInputMode('keyboard')" title="Use Keyboard">
+            ⌨️ Keyboard
+        </button>
+        <button class="mode-btn pencil-btn" onclick="setInputMode('pencil')" title="Use iPad/Tablet Pencil">
+            ✏️ Pencil
+        </button>
     `;
 
-    container.innerHTML = html;
+    // Insert before version badge (first child of user-actions)
+    userActions.insertBefore(toggleDiv, userActions.firstChild);
+
     updateInputModeUI();
 }
 

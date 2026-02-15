@@ -780,6 +780,14 @@
                 if (profileSelectorContainer) {
                     profileSelectorContainer.style.display = 'none';
                 }
+
+                // Initialize input mode toggle for admin (they don't have children)
+                if (typeof createInputModeToggle === 'function') {
+                    createInputModeToggle();
+                }
+                if (typeof initializeInputMode === 'function') {
+                    initializeInputMode();
+                }
             }
 
             // Initialize parent mode
@@ -877,6 +885,14 @@
             // Initialize input mode manager with child's version
             if (typeof setUserVersion === 'function') {
                 setUserVersion(version);
+            }
+
+            // Create and initialize input mode toggle UI
+            if (typeof createInputModeToggle === 'function') {
+                createInputModeToggle();
+            }
+            if (typeof initializeInputMode === 'function') {
+                initializeInputMode();
             }
 
             // Check if admin is in demo preview mode
