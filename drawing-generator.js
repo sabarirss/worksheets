@@ -1422,6 +1422,10 @@ function loadDrawingTutorial(tutorialKey) {
             <button onclick="backToTutorialList()">← Back to Tutorial List</button>
         </div>
 
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+            📊 Age Group: ${currentAge}
+        </div>
+
         <div class="drawing-title">${tutorial.icon} ${tutorial.name}</div>
 
         <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 15px; margin: 20px 0; text-align: center;">

@@ -712,6 +712,9 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+                📊 Age Group: ${currentAge}
+            </div>
             <div class="worksheet-header">
                 <div class="worksheet-info">
                     <h2>${typeNames[type]} - ${difficultyStars[difficulty]} ${difficulty.toUpperCase()}</h2>

@@ -384,6 +384,9 @@ function readStory(index) {
     const storyText = story.story || story.text || '';
 
     document.getElementById('story-content').innerHTML = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+            📊 Age Group: ${currentAge}
+        </div>
         <div class="story-meta">Story ${index + 1} of ${currentList.length}</div>
         <h1 class="story-title">${story.title}</h1>
         <div class="story-illustration">

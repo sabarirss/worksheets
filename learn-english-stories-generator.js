@@ -1255,6 +1255,10 @@ function loadStory(storyId) {
             <button onclick="backToStoryList()">← Back to Stories</button>
         </div>
 
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+            📊 Age Group: ${currentAge}
+        </div>
+
         <div class="story-reader">
             <div class="story-header">
                 <div style="font-size: 3em; margin-bottom: 10px;">${story.icon}</div>
