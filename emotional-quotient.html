@@ -194,6 +194,31 @@
     </style>
 </head>
 <body>
+    <script>
+        // Wait for Firebase auth to initialize
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Auto-detect child's age from selected profile
+            const child = getSelectedChild();
+            if (!child || !child.age) {
+                alert('Please select a child profile first');
+                window.location.href = 'children-profiles.html';
+                return;
+            }
+
+            // Set current age automatically (defined in eq-generator.js)
+            setTimeout(function() {
+                if (typeof currentAge !== 'undefined') {
+                    currentAge = child.age.toString();
+                    console.log('Auto-detected age for EQ:', currentAge);
+                }
+            }, 100);
+        });
+    </script>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div>
@@ -203,41 +228,8 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <!-- Age Group Selection -->
-        <div class="level-selection" id="age-selection">
-            <h2>Select Age Group</h2>
-            <div class="level-grid">
-                <button onclick="selectAge('4-5')" class="level-btn">
-                    <span class="level-name">👶 Ages 4-5</span>
-                    <span class="level-desc">Pre-kindergarten level</span>
-                </button>
-                <button onclick="selectAge('6')" class="level-btn">
-                    <span class="level-name">🧒 Age 6</span>
-                    <span class="level-desc">Kindergarten/1st grade</span>
-                </button>
-                <button onclick="selectAge('7')" class="level-btn">
-                    <span class="level-name">👦 Age 7</span>
-                    <span class="level-desc">1st/2nd grade</span>
-                </button>
-                <button onclick="selectAge('8')" class="level-btn">
-                    <span class="level-name">👧 Age 8</span>
-                    <span class="level-desc">2nd/3rd grade</span>
-                </button>
-                <button onclick="selectAge('9+')" class="level-btn">
-                    <span class="level-name">🧑 Ages 9+</span>
-                    <span class="level-desc">3rd/4th grade and above</span>
-                </button>
-                <button onclick="selectAge('10+')" class="level-btn">
-                    <span class="level-name">👨 Ages 10+</span>
-                    <span class="level-desc">Advanced (5th grade+)</span>
-                </button>
-            </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
-        <div class="eq-selection" id="difficulty-selection" style="display: none;">
+        <!-- Difficulty Selection (Age is auto-detected from profile) -->
+        <div class="eq-selection" id="difficulty-selection">
             <h2>Select Difficulty Level</h2>
             <div class="difficulty-grid">
                 <button onclick="loadActivities('easy')" class="difficulty-btn">
@@ -254,7 +246,7 @@
                 </button>
             </div>
             <div class="navigation">
-                <button onclick="backToAges()">← Back to Age Groups</button>
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
         </div>
 
