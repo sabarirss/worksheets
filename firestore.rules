@@ -25,10 +25,21 @@ service cloud.firestore {
       // Allow users to update their own profile
       allow update: if isOwner(userId);
 
-      // Only admins can create/delete users (admin creates via secondary auth)
-      allow create, delete: if isAuthenticated() &&
-                               exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
-                               get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
+      // Allow create if:
+      // 1. User is creating their own account during signup (userId matches their auth.uid)
+      // 2. OR user is an admin creating another user's account
+      allow create: if isAuthenticated() && (
+        // Self-registration during signup
+        isOwner(userId) ||
+        // Admin creating users
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin')
+      );
+
+      // Only admins can delete users
+      allow delete: if isAuthenticated() &&
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
     }
 
     // Worksheets collection - users can only access their own

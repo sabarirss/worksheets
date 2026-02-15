@@ -2,7 +2,7 @@
 // Replaces text inputs with drawable canvases
 
 class HandwritingInput {
-    constructor(canvasId, width = 100, height = 60) {
+    constructor(canvasId, width = 100, height = 60, showRuledLines = false) {
         this.canvasId = canvasId;
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) return;
@@ -10,6 +10,7 @@ class HandwritingInput {
         this.canvas.width = width;
         this.canvas.height = height;
         this.ctx = this.canvas.getContext('2d');
+        this.showRuledLines = showRuledLines; // Only show for English
 
         this.isDrawing = false;
         this.lastX = 0;
@@ -25,7 +26,8 @@ class HandwritingInput {
         this.ctx.fillStyle = '#f8f9ff';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Four ruled lines for handwriting practice
+        // Four ruled lines for handwriting practice (only for English)
+        if (!this.showRuledLines) return;
         const height = this.canvas.height;
         const width = this.canvas.width;
 
@@ -171,8 +173,8 @@ class HandwritingInput {
 let handwritingInputs = [];
 
 // Initialize a handwriting input
-function initHandwritingInput(canvasId, width = 100, height = 60) {
-    const input = new HandwritingInput(canvasId, width, height);
+function initHandwritingInput(canvasId, width = 100, height = 60, showRuledLines = false) {
+    const input = new HandwritingInput(canvasId, width, height, showRuledLines);
     handwritingInputs.push(input);
     return input;
 }
@@ -184,7 +186,8 @@ function initializeAllHandwritingInputs() {
     canvases.forEach(canvas => {
         const width = parseInt(canvas.dataset.width) || 100;
         const height = parseInt(canvas.dataset.height) || 60;
-        initHandwritingInput(canvas.id, width, height);
+        const showRuledLines = canvas.dataset.showRuledLines === 'true'; // Only true for English
+        initHandwritingInput(canvas.id, width, height, showRuledLines);
     });
 }
 

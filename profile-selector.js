@@ -205,6 +205,11 @@ function selectChild(childId, childData) {
     }));
     console.log('Selected child:', childData.name, 'ID:', childId);
 
+    // Initialize input mode for this child (if input mode manager is loaded)
+    if (typeof initializeInputMode === 'function') {
+        initializeInputMode();
+    }
+
     // Create session for single-device enforcement (if session manager is loaded)
     if (typeof createChildSession === 'function') {
         createChildSession(childId);

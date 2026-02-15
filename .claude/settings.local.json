@@ -9,7 +9,8 @@
       "Bash(do)",
       "Bash(echo:*)",
       "Bash(done)",
-      "Bash(for file in aptitude.html drawing.html emotional-quotient.html english.html german-kids.html german.html learn-english-stories.html stories.html)"
+      "Bash(for file in aptitude.html drawing.html emotional-quotient.html english.html german-kids.html german.html learn-english-stories.html stories.html)",
+      "Bash(node -c:*)"
     ]
   }
 }

@@ -137,6 +137,14 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
     }
 
     // Get 5 questions from younger age (easy difficulty)
+    // Get operation symbol
+    const opSymbol = {
+        'addition': '+',
+        'subtraction': '−',
+        'multiplication': '×',
+        'division': '÷'
+    }[operation] || '+';
+
     const youngerConfig = getConfigByAge(operation, youngerAge, 'easy');
     if (youngerConfig && youngerConfig.generator) {
         // Call generator 5 times to get 5 problems
@@ -144,6 +152,8 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
             const problem = youngerConfig.generator();
             questions.push({
                 ...problem,
+                operation: operation,
+                problem: `${problem.a} ${opSymbol} ${problem.b} = ?`,
                 sourceAge: youngerAge,
                 sourceDifficulty: 'easy'
             });
@@ -161,6 +171,8 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
             const problem = currentConfig.generator();
             questions.push({
                 ...problem,
+                operation: operation,
+                problem: `${problem.a} ${opSymbol} ${problem.b} = ?`,
                 sourceAge: ageGroup,
                 sourceDifficulty: 'medium'
             });
@@ -272,12 +284,11 @@ function renderAssessmentUI() {
         return;
     }
 
-    // Hide other page elements
-    const mainContainer = document.querySelector('.container');
-    if (mainContainer) {
-        mainContainer.style.display = 'none';
-    }
+    // Set global flag to prevent auth redirects during assessment
+    window.assessmentActive = true;
+    console.log('Assessment active flag set to true');
 
+    // Don't hide main container - let assessment overlay cover it
     console.log('Rendering assessment with', assessmentQuestions.length, 'questions');
 
     let html = `
@@ -293,19 +304,40 @@ function renderAssessmentUI() {
             <div class="assessment-questions">
     `;
 
+    // Check input mode (keyboard or pencil)
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
     // Generate question UI
     assessmentQuestions.forEach((question, index) => {
+        // Create answer input based on mode
+        let answerInput;
+        if (usePencil) {
+            // Pencil mode: Canvas for handwriting
+            answerInput = `
+                <canvas id="assessment-answer-${index}"
+                        class="answer-canvas"
+                        width="120"
+                        height="80"></canvas>
+                <button class="clear-btn" onclick="clearAssessmentCanvas(${index})">Clear</button>
+            `;
+        } else {
+            // Keyboard mode: Text input
+            answerInput = `
+                <input type="number"
+                       id="assessment-answer-${index}"
+                       class="answer-input"
+                       placeholder="?"
+                       inputmode="numeric">
+            `;
+        }
+
         html += `
             <div class="assessment-question">
                 <div class="question-number">${index + 1}.</div>
                 <div class="question-content">
                     <div class="math-problem">${question.problem}</div>
                     <div class="answer-section">
-                        <canvas id="assessment-answer-${index}"
-                                class="answer-canvas"
-                                width="120"
-                                height="80"></canvas>
-                        <button class="clear-btn" onclick="clearAssessmentCanvas(${index})">Clear</button>
+                        ${answerInput}
                     </div>
                     <div class="feedback" id="assessment-feedback-${index}"></div>
                 </div>
@@ -336,15 +368,20 @@ function renderAssessmentUI() {
     container.style.position = 'relative';
     container.style.zIndex = '1000';
 
-    console.log('Assessment HTML rendered, initializing canvases...');
+    console.log('Assessment HTML rendered');
 
-    // Initialize canvases
-    setTimeout(() => {
-        assessmentQuestions.forEach((_, index) => {
-            initializeAssessmentCanvas(index);
-        });
-        console.log('All canvases initialized');
-    }, 100);
+    // Initialize canvases only if in pencil mode
+    if (usePencil) {
+        console.log('Initializing canvases for pencil mode...');
+        setTimeout(() => {
+            assessmentQuestions.forEach((_, index) => {
+                initializeAssessmentCanvas(index);
+            });
+            console.log('All canvases initialized');
+        }, 100);
+    } else {
+        console.log('Keyboard mode - using input fields');
+    }
 }
 
 /**
@@ -441,17 +478,22 @@ async function submitAssessment() {
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ Checking answers...';
 
-    // Ensure handwriting model is loaded
-    try {
-        if (typeof loadHandwritingModel !== 'undefined') {
-            await loadHandwritingModel();
+    // Check if using pencil mode
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    // Ensure handwriting model is loaded only for pencil mode
+    if (usePencil) {
+        try {
+            if (typeof loadHandwritingModel !== 'undefined') {
+                await loadHandwritingModel();
+            }
+        } catch (error) {
+            console.error('Failed to load handwriting model:', error);
+            alert('Error loading handwriting recognition. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✓ Submit Assessment';
+            return;
         }
-    } catch (error) {
-        console.error('Failed to load handwriting model:', error);
-        alert('Error loading handwriting recognition. Please try again.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = '✓ Submit Assessment';
-        return;
     }
 
     let correct = 0;
@@ -459,41 +501,73 @@ async function submitAssessment() {
 
     // Check each answer
     for (let i = 0; i < assessmentQuestions.length; i++) {
-        const canvas = document.getElementById(`assessment-answer-${i}`);
+        const answerElement = document.getElementById(`assessment-answer-${i}`);
         const feedback = document.getElementById(`assessment-feedback-${i}`);
         const correctAnswer = assessmentQuestions[i].answer;
 
         try {
-            const result = await recognizeDigit(canvas);
+            let userAnswer = null;
+            let isEmpty = false;
 
-            if (result.isEmpty) {
+            if (usePencil) {
+                // Pencil mode: Use handwriting recognition
+                const result = await recognizeDigit(answerElement);
+
+                if (result.isEmpty) {
+                    isEmpty = true;
+                } else if (result.error) {
+                    userAnswer = null;
+                } else {
+                    userAnswer = result.digit;
+                }
+            } else {
+                // Keyboard mode: Get value from input field
+                const inputValue = answerElement.value.trim();
+                if (inputValue === '') {
+                    isEmpty = true;
+                } else {
+                    userAnswer = parseInt(inputValue);
+                }
+            }
+
+            // Provide feedback
+            if (isEmpty) {
                 feedback.textContent = '⚠️ Empty';
                 feedback.style.color = '#999';
                 results.push({ question: i + 1, correct: false, isEmpty: true });
-            } else if (result.error) {
-                feedback.textContent = `Correct: ${correctAnswer}`;
+            } else if (userAnswer === null || isNaN(userAnswer)) {
+                feedback.textContent = `❓ Unclear (answer: ${correctAnswer})`;
                 feedback.style.color = '#ff9800';
                 results.push({ question: i + 1, correct: false, error: true });
             } else {
-                const isCorrect = result.digit === correctAnswer;
+                const isCorrect = userAnswer === correctAnswer;
 
                 if (isCorrect) {
                     correct++;
                     feedback.textContent = '✓ Correct!';
                     feedback.style.color = '#4caf50';
-                    canvas.style.border = '2px solid #4caf50';
+                    if (usePencil) {
+                        answerElement.style.border = '2px solid #4caf50';
+                    } else {
+                        answerElement.style.borderColor = '#4caf50';
+                        answerElement.style.borderWidth = '2px';
+                    }
                 } else {
                     feedback.textContent = `✗ Wrong (answer: ${correctAnswer})`;
                     feedback.style.color = '#f44336';
-                    canvas.style.border = '2px solid #f44336';
+                    if (usePencil) {
+                        answerElement.style.border = '2px solid #f44336';
+                    } else {
+                        answerElement.style.borderColor = '#f44336';
+                        answerElement.style.borderWidth = '2px';
+                    }
                 }
 
                 results.push({
                     question: i + 1,
                     correct: isCorrect,
-                    recognized: result.digit,
-                    expected: correctAnswer,
-                    confidence: result.confidence
+                    userAnswer: userAnswer,
+                    expected: correctAnswer
                 });
             }
 
@@ -502,7 +576,7 @@ async function submitAssessment() {
 
         } catch (error) {
             console.error(`Error checking answer ${i}:`, error);
-            feedback.textContent = `Correct: ${correctAnswer}`;
+            feedback.textContent = `❓ Error (answer: ${correctAnswer})`;
             feedback.style.color = '#ff9800';
         }
     }
@@ -577,6 +651,10 @@ function showAssessmentResults(correct, total, scorePercentage, levelResult) {
 function startLearningAtLevel(operation, level) {
     console.log('Starting learning:', { operation, level });
 
+    // Clear assessment active flag
+    window.assessmentActive = false;
+    console.log('Assessment active flag cleared');
+
     // Convert level back to age+difficulty
     const ageGroup = levelToAgeGroup(level);
     const difficulty = levelToDifficulty(level);
@@ -588,12 +666,6 @@ function startLearningAtLevel(operation, level) {
     if (container) {
         container.style.display = 'none';
         container.innerHTML = '';
-    }
-
-    // Show main container
-    const mainContainer = document.querySelector('.container');
-    if (mainContainer) {
-        mainContainer.style.display = 'block';
     }
 
     // Load worksheet at assigned level
@@ -609,17 +681,15 @@ function startLearningAtLevel(operation, level) {
  */
 function cancelAssessment() {
     if (confirm('Are you sure you want to cancel the assessment?')) {
+        // Clear assessment active flag
+        window.assessmentActive = false;
+        console.log('Assessment cancelled, flag cleared');
+
         // Hide assessment container
         const container = document.getElementById('assessment-container');
         if (container) {
             container.style.display = 'none';
             container.innerHTML = '';
-        }
-
-        // Show main container
-        const mainContainer = document.querySelector('.container');
-        if (mainContainer) {
-            mainContainer.style.display = 'block';
         }
 
         // Show operations selection

@@ -21,6 +21,7 @@
     <script src="age-filter.js"></script>
     <script src="child-session-manager.js"></script>
     <script src="profile-selector.js"></script>
+    <script src="input-mode-manager.js"></script>
     <style>
         .user-header {
             display: flex;
@@ -54,6 +55,37 @@
         }
 
         .header-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Input Mode Toggle Styles */
+        .input-mode-toggle {
+            display: flex;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .mode-btn {
+            padding: 8px 15px;
+            border: none;
+            background: transparent;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-btn.active {
             background: white;
             color: #667eea;
         }
@@ -260,6 +292,31 @@
             border-radius: 5px;
             cursor: crosshair;
             background: white;
+        }
+
+        .answer-input {
+            width: 120px;
+            height: 60px;
+            font-size: 2em;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: bold;
+            color: #333;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .answer-input::placeholder {
+            color: #ccc;
+            font-weight: normal;
         }
 
         .clear-btn {
@@ -552,6 +609,11 @@
         firebase.auth().onAuthStateChanged(async function(firebaseUser) {
             console.log('INDEX.HTML: Auth state changed, user:', firebaseUser);
             if (!firebaseUser) {
+                // Don't redirect if assessment is active
+                if (window.assessmentActive) {
+                    console.log('INDEX.HTML: Assessment active, skipping redirect');
+                    return;
+                }
                 console.log('INDEX.HTML: No user, redirecting to login');
                 window.location.href = 'login.html';
             } else {
@@ -582,6 +644,11 @@
 
                         if (childrenSnapshot.empty) {
                             // No children - redirect to create first child
+                            // Don't redirect if assessment is active
+                            if (window.assessmentActive) {
+                                console.log('No children but assessment active, skipping redirect');
+                                return;
+                            }
                             console.log('No children found - redirecting to profile creation');
                             sessionStorage.setItem('firstTimeSetup', 'true');
                             window.location.href = 'children-profiles.html';
@@ -667,6 +734,16 @@
             // Display version badge
             const version = user.version || 'demo';
             const versionBadge = document.getElementById('version-badge');
+
+            // Initialize input mode manager with user version
+            if (typeof setUserVersion === 'function') {
+                setUserVersion(version);
+            }
+
+            // Create input mode toggle UI
+            if (typeof createInputModeToggle === 'function') {
+                createInputModeToggle();
+            }
 
             // Check for admin demo preview mode
             const isAdminDemoPreview = user.role === 'admin' && localStorage.getItem('adminDemoPreview') === 'true';
@@ -772,6 +849,7 @@
             </div>
             <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
                 <div id="profile-selector-container"></div>
+                <div id="input-mode-container"></div>
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
                     👤 Admin Panel
                 </button>

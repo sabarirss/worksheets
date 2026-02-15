@@ -28,12 +28,26 @@ if (typeof ageAndDifficultyToLevel === 'undefined') {
     };
 }
 
+// Warn before leaving page with unsaved changes
+window.addEventListener('beforeunload', (event) => {
+    if (hasUnsavedChanges) {
+        event.preventDefault();
+        event.returnValue = ''; // Modern browsers require this
+        return ''; // Legacy browsers
+    }
+});
+
 // Navigation functions
 function showSubjects() {
-    document.querySelector('.subject-selection').style.display = 'block';
-    document.getElementById('math-age-groups').style.display = 'none';
-    document.getElementById('math-operations').style.display = 'none';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const subjectSelection = document.querySelector('.subject-selection');
+    const ageGroups = document.getElementById('math-age-groups');
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (subjectSelection) subjectSelection.style.display = 'block';
+    if (ageGroups) ageGroups.style.display = 'none';
+    if (operations) operations.style.display = 'none';
+    if (difficulties) difficulties.style.display = 'none';
 }
 
 function showMathLevels() {
@@ -58,9 +72,13 @@ function showMathLevels() {
     console.log('Math module using auto-detected age:', childAge, '-> age group:', selectedAgeGroup);
 
     // Skip age selection, go directly to operations
-    document.querySelector('.subject-selection').style.display = 'none';
-    document.getElementById('math-operations').style.display = 'block';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const subjectSelection = document.querySelector('.subject-selection');
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (subjectSelection) subjectSelection.style.display = 'none';
+    if (operations) operations.style.display = 'block';
+    if (difficulties) difficulties.style.display = 'none';
 
     // Age-based filtering removed - all children can access all difficulty levels
 }
@@ -72,13 +90,19 @@ function showMathAgeGroups() {
 
 function showMathOperations(ageGroup) {
     selectedAgeGroup = ageGroup;
-    document.getElementById('math-operations').style.display = 'block';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (operations) operations.style.display = 'block';
+    if (difficulties) difficulties.style.display = 'none';
 }
 
 function showMathOperationsBack() {
-    document.getElementById('math-operations').style.display = 'block';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (operations) operations.style.display = 'block';
+    if (difficulties) difficulties.style.display = 'none';
 }
 
 function showDifficulties(operation) {
@@ -115,16 +139,16 @@ function showDifficulties(operation) {
         // Show assessment gate - user must take assessment first
         showAssessmentGate(operation);
     } else {
-        // Assessment completed - show worksheets at assigned level
+        // Assessment completed - show page navigator for all 150 pages
         const assignedLevel = getAssignedLevel(child.id, operation);
         console.log(`Assessment completed - Level ${assignedLevel} assigned`);
 
-        // Convert level to age+difficulty for loading worksheets
-        const ageGroup = levelToAgeGroup(assignedLevel);
-        const difficulty = levelToDifficulty(assignedLevel);
+        // Calculate starting page based on assigned level (levels 1-12 map to pages 1-150)
+        // Level 1 = page 1, Level 6 = page 50, Level 7 = page 75, Level 12 = page 150
+        const startPage = Math.max(1, Math.floor((assignedLevel - 1) * 12.5) + 1);
 
-        // Load worksheet directly at assigned level
-        loadWorksheet(operation, ageGroup, difficulty, 1);
+        // Load worksheet at starting page
+        loadWorksheetByPage(operation, startPage);
     }
 }
 
@@ -135,8 +159,11 @@ function showAssessmentGate(operation) {
     console.log('Showing assessment gate for:', operation);
 
     // Hide all main sections
-    document.getElementById('math-operations').style.display = 'none';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (operations) operations.style.display = 'none';
+    if (difficulties) difficulties.style.display = 'none';
 
     const subjectSelection = document.querySelector('.subject-selection');
     if (subjectSelection) subjectSelection.style.display = 'none';
@@ -230,7 +257,8 @@ function backToOperations() {
     if (footer) footer.style.display = 'block';
 
     // Show operations
-    document.getElementById('math-operations').style.display = 'block';
+    const operations = document.getElementById('math-operations');
+    if (operations) operations.style.display = 'block';
 }
 
 function updateDifficultyDescriptions() {
@@ -298,7 +326,9 @@ function backToWorksheetSelection() {
     if (worksheetContent) {
         worksheetContent.style.display = 'none';
     }
-    document.getElementById('math-difficulties').style.display = 'block';
+
+    const difficulties = document.getElementById('math-difficulties');
+    if (difficulties) difficulties.style.display = 'block';
 }
 
 let currentWorksheet = null;
@@ -324,11 +354,14 @@ function getDemoLimit(defaultCount) {
     return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
 }
 let currentPage = 1;
-let totalPages = 50;
+let currentAbsolutePage = 1; // Absolute page number (1-150)
+let totalPages = 150; // Now always 150 pages (50 easy + 50 medium + 50 hard)
 let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
+let hasUnsavedChanges = false; // Track if page has been modified
+let pageSubmissions = {}; // Track submitted pages: { operation: { absolutePage: { submitted, score, timestamp } } }
 
 // Seeded random number generator for deterministic worksheets
 class SeededRandom {
@@ -1104,6 +1137,39 @@ function generateFractionDivision() {
     };
 }
 
+/**
+ * Load worksheet by absolute page number (1-150)
+ * Pages 1-50: Easy
+ * Pages 51-100: Medium
+ * Pages 101-150: Hard
+ */
+function loadWorksheetByPage(operation, absolutePage) {
+    // Ensure page is within bounds
+    absolutePage = Math.max(1, Math.min(150, absolutePage));
+
+    // Map absolute page to difficulty and relative page
+    let difficulty, relativePage;
+
+    if (absolutePage <= 50) {
+        difficulty = 'easy';
+        relativePage = absolutePage;
+    } else if (absolutePage <= 100) {
+        difficulty = 'medium';
+        relativePage = absolutePage - 50;
+    } else {
+        difficulty = 'hard';
+        relativePage = absolutePage - 100;
+    }
+
+    console.log(`Loading page ${absolutePage} -> ${difficulty} page ${relativePage}`);
+
+    // Store absolute page for navigation
+    currentAbsolutePage = absolutePage;
+
+    // Use the assigned age group from assessment
+    loadWorksheet(operation, selectedAgeGroup, difficulty, relativePage);
+}
+
 // Load worksheet for specific age group, difficulty, and page
 function loadWorksheet(operation, ageGroup, difficulty, page = 1) {
     currentOperation = operation;
@@ -1120,8 +1186,8 @@ function loadWorksheet(operation, ageGroup, difficulty, page = 1) {
     const seed = hashCode(`${operation}-${ageGroup}-${difficulty}-${page}`);
     seededRandom = new SeededRandom(seed);
 
-    // Set page limit for demo mode (2 pages) vs full mode (50 pages)
-    totalPages = isDemoMode() ? 2 : 50;
+    // Total pages is now always 150 (50 easy + 50 medium + 50 hard)
+    // Old: totalPages = isDemoMode() ? 2 : 50;
 
     // Generate full problems per page (no limit on problems, limit on pages instead)
     const problemCount = config.problemCount;
@@ -1226,12 +1292,13 @@ function renderWorksheet() {
 
             <div class="problems-grid">
                 ${problems.map((problem, index) => {
-                    return `
-                    <div class="problem">
-                        <span class="problem-number">${index + 1}.</span>
-                        <div class="problem-content problem-with-handwriting">
-                            <span class="problem-text">${problem.a} ${symbol} ${problem.b}</span>
-                            <span class="equals">=</span>
+                    // Check input mode
+                    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+                    let answerInput;
+                    if (usePencil) {
+                        // Pencil mode: Canvas
+                        answerInput = `
                             <div class="handwriting-input-wrapper">
                                 <canvas
                                     id="answer-${index}"
@@ -1243,6 +1310,26 @@ function renderWorksheet() {
                                 </canvas>
                                 <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>
                             </div>
+                        `;
+                    } else {
+                        // Keyboard mode: Input field
+                        answerInput = `
+                            <input type="number"
+                                   id="answer-${index}"
+                                   class="keyboard-answer-input"
+                                   data-answer="${problem.answer}"
+                                   placeholder="?"
+                                   inputmode="numeric">
+                        `;
+                    }
+
+                    return `
+                    <div class="problem">
+                        <span class="problem-number">${index + 1}.</span>
+                        <div class="problem-content problem-with-handwriting">
+                            <span class="problem-text">${problem.a} ${symbol} ${problem.b}</span>
+                            <span class="equals">=</span>
+                            ${answerInput}
                             <span class="answer-feedback" id="feedback-${index}"></span>
                         </div>
                     </div>
@@ -1261,10 +1348,25 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="page-navigation" style="margin: 30px 0;">
-                <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>← Previous Page</button>
-                <span class="page-counter">Page ${currentPage} of ${totalPages}</span>
-                <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>Next Page →</button>
+            <!-- Submit and Clear Buttons -->
+            <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                    ✓ Submit for Evaluation
+                </button>
+                <button onclick="clearWorksheet()" class="clear-worksheet-btn" style="padding: 15px 30px; font-size: 1em; background: #ff9800; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 152, 0, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 152, 0, 0.3)'">
+                    🗑️ Clear All
+                </button>
+                <div id="submission-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
+            </div>
+
+            <div class="page-navigation" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button onclick="navigateAbsolutePage(-10)" ${currentAbsolutePage <= 10 ? 'disabled' : ''} title="Go back 10 pages">⏪ -10</button>
+                <button onclick="navigateAbsolutePage(-1)" ${currentAbsolutePage <= 1 ? 'disabled' : ''} title="Previous page">← Prev</button>
+                <span id="page-counter" class="page-counter" style="padding: 10px 20px; background: #f0f4ff; border-radius: 8px; font-weight: bold; min-width: 120px; text-align: center;">
+                    Page ${currentAbsolutePage} of 150
+                </span>
+                <button onclick="navigateAbsolutePage(1)" ${currentAbsolutePage >= 150 ? 'disabled' : ''} title="Next page">Next →</button>
+                <button onclick="navigateAbsolutePage(10)" ${currentAbsolutePage >= 141 ? 'disabled' : ''} title="Go forward 10 pages">+10 ⏩</button>
             </div>
 
             <div class="navigation" style="margin-top: 20px;">
@@ -1280,9 +1382,13 @@ function renderWorksheet() {
     `;
 
     // Hide navigation and show worksheet in container
-    document.getElementById('math-age-groups').style.display = 'none';
-    document.getElementById('math-operations').style.display = 'none';
-    document.getElementById('math-difficulties').style.display = 'none';
+    const ageGroups = document.getElementById('math-age-groups');
+    const operations = document.getElementById('math-operations');
+    const difficulties = document.getElementById('math-difficulties');
+
+    if (ageGroups) ageGroups.style.display = 'none';
+    if (operations) operations.style.display = 'none';
+    if (difficulties) difficulties.style.display = 'none';
 
     // Get or create worksheet container
     let worksheetContainer = document.getElementById('worksheet-content');
@@ -1303,12 +1409,98 @@ function renderWorksheet() {
             loadSavedWorksheet();
             // Validate show answers toggle after loading
             validateShowAnswersToggle();
+
+            // Load submission data for current child
+            loadPageSubmissions();
+
+            // Add change tracking to all inputs
+            addChangeTracking();
+
+            // Update submission status display
+            updateSubmissionStatusDisplay();
         }, 200);
     }, 100);
+
+    // Reset unsaved changes flag
+    hasUnsavedChanges = false;
 
     // Reset timer
     elapsedSeconds = 0;
     updateTimerDisplay();
+}
+
+/**
+ * Add change tracking to all answer inputs
+ */
+function addChangeTracking() {
+    const totalProblems = currentWorksheet.problems.length;
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    for (let i = 0; i < totalProblems; i++) {
+        const answerElement = document.getElementById(`answer-${i}`);
+        if (!answerElement) continue;
+
+        if (usePencil) {
+            // For canvas, track drawing events
+            answerElement.addEventListener('pointerdown', markAsChanged);
+            answerElement.addEventListener('touchstart', markAsChanged);
+        } else {
+            // For input fields, track input events
+            answerElement.addEventListener('input', markAsChanged);
+            answerElement.addEventListener('change', markAsChanged);
+        }
+    }
+}
+
+/**
+ * Update submission status display for current page
+ */
+function updateSubmissionStatusDisplay() {
+    const operation = currentWorksheet.operation;
+    const submission = pageSubmissions[operation]?.[currentAbsolutePage];
+
+    const statusDiv = document.getElementById('submission-status');
+    const submitBtn = document.querySelector('.submit-worksheet-btn');
+    const pageCounter = document.getElementById('page-counter');
+
+    if (submission && submission.submitted) {
+        // Page has been submitted
+        if (statusDiv) {
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = submission.score >= 80 ? '#4caf50' : submission.score >= 60 ? '#ff9800' : '#f44336';
+            statusDiv.style.color = 'white';
+            statusDiv.innerHTML = `
+                ✓ Done! Score: ${submission.correctCount}/${submission.totalProblems} (${submission.score}%)
+                ${submission.score >= 80 ? '🌟' : submission.score >= 60 ? '👍' : '💪'}
+            `;
+        }
+
+        if (submitBtn) {
+            submitBtn.textContent = '✓ Resubmit';
+        }
+
+        // Add "Done" badge to page counter
+        if (pageCounter) {
+            pageCounter.innerHTML = `
+                Page ${currentAbsolutePage} of 150
+                <span style="margin-left: 10px; padding: 3px 8px; background: #4caf50; color: white; border-radius: 5px; font-size: 0.9em;">✓ Done</span>
+            `;
+        }
+    } else {
+        // Page not submitted yet
+        if (statusDiv) {
+            statusDiv.style.display = 'none';
+        }
+
+        if (submitBtn) {
+            submitBtn.textContent = '✓ Submit for Evaluation';
+        }
+
+        // Remove "Done" badge
+        if (pageCounter) {
+            pageCounter.textContent = `Page ${currentAbsolutePage} of 150`;
+        }
+    }
 }
 
 // Timer functions
@@ -1815,15 +2007,44 @@ function navigatePage(direction) {
             return;
         }
 
-        // Auto-save current page before navigating
-        try {
-            autoSavePage();
-        } catch (saveError) {
-            console.error('Error during auto-save:', saveError);
+        // Check for unsaved changes
+        if (!checkUnsavedChanges()) {
+            return; // User cancelled navigation
         }
 
         // Load new page
         loadWorksheet(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty, newPage);
+    } catch (error) {
+        console.error('Navigation error:', error);
+        alert('Navigation error: ' + error.message);
+    }
+}
+
+/**
+ * Navigate by absolute page number (1-150)
+ * @param {number} offset - Number of pages to move (-10, -1, +1, +10)
+ */
+function navigateAbsolutePage(offset) {
+    try {
+        if (!currentWorksheet) {
+            alert('Error: Worksheet not loaded properly. Please reload the page.');
+            return;
+        }
+
+        const newAbsolutePage = currentAbsolutePage + offset;
+
+        // Check bounds (1-150)
+        if (newAbsolutePage < 1 || newAbsolutePage > 150) {
+            return;
+        }
+
+        // Check for unsaved changes
+        if (!checkUnsavedChanges()) {
+            return; // User cancelled navigation
+        }
+
+        // Load new page by absolute page number
+        loadWorksheetByPage(currentWorksheet.operation, newAbsolutePage);
     } catch (error) {
         console.error('Navigation error:', error);
         alert('Navigation error: ' + error.message);
@@ -1869,3 +2090,250 @@ function generateMorePages() {
     // Reload current page to update navigation
     loadWorksheet(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty, currentPage);
 }
+
+/**
+ * Submit worksheet for evaluation
+ * Checks all answers, provides feedback, and marks page as Done
+ */
+async function submitWorksheet() {
+    if (!currentWorksheet) {
+        alert('No worksheet loaded');
+        return;
+    }
+
+    const submitBtn = document.querySelector('.submit-worksheet-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Evaluating...';
+
+    // Check if using pencil mode
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    // Load handwriting model if needed
+    if (usePencil && typeof loadHandwritingModel !== 'undefined') {
+        try {
+            await loadHandwritingModel();
+        } catch (error) {
+            console.error('Failed to load handwriting model:', error);
+            alert('Error loading handwriting recognition. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✓ Submit for Evaluation';
+            return;
+        }
+    }
+
+    let correctCount = 0;
+    const totalProblems = currentWorksheet.problems.length;
+
+    // Evaluate each answer
+    for (let i = 0; i < totalProblems; i++) {
+        const answerElement = document.getElementById(`answer-${i}`);
+        const feedbackElement = document.getElementById(`feedback-${i}`);
+        const correctAnswer = currentWorksheet.problems[i].answer;
+
+        if (!answerElement || !feedbackElement) continue;
+
+        try {
+            let userAnswer = null;
+            let isEmpty = false;
+
+            if (usePencil) {
+                // Pencil mode: handwriting recognition
+                const result = await recognizeDigit(answerElement);
+                if (result.isEmpty) {
+                    isEmpty = true;
+                } else if (!result.error) {
+                    userAnswer = result.digit;
+                }
+            } else {
+                // Keyboard mode: get input value
+                const value = answerElement.value.trim();
+                if (value === '') {
+                    isEmpty = true;
+                } else {
+                    userAnswer = parseInt(value);
+                }
+            }
+
+            // Provide feedback
+            if (isEmpty) {
+                feedbackElement.textContent = '⚠️ Empty';
+                feedbackElement.style.color = '#999';
+                answerElement.style.borderColor = '#999';
+            } else if (userAnswer === null || isNaN(userAnswer)) {
+                feedbackElement.textContent = `Answer: ${correctAnswer}`;
+                feedbackElement.style.color = '#ff9800';
+                answerElement.style.borderColor = '#ff9800';
+            } else if (userAnswer === correctAnswer) {
+                correctCount++;
+                feedbackElement.textContent = '✓ Correct!';
+                feedbackElement.style.color = '#4caf50';
+                feedbackElement.style.fontWeight = 'bold';
+                answerElement.style.borderColor = '#4caf50';
+                answerElement.style.borderWidth = '3px';
+            } else {
+                feedbackElement.textContent = `✗ Wrong (${correctAnswer})`;
+                feedbackElement.style.color = '#f44336';
+                feedbackElement.style.fontWeight = 'bold';
+                answerElement.style.borderColor = '#f44336';
+                answerElement.style.borderWidth = '3px';
+            }
+
+            feedbackElement.style.display = 'inline-block';
+            feedbackElement.style.marginLeft = '10px';
+
+        } catch (error) {
+            console.error(`Error evaluating answer ${i}:`, error);
+            feedbackElement.textContent = `Answer: ${correctAnswer}`;
+            feedbackElement.style.color = '#ff9800';
+        }
+    }
+
+    // Calculate score
+    const score = Math.round((correctCount / totalProblems) * 100);
+
+    // Mark page as submitted
+    const operation = currentWorksheet.operation;
+    if (!pageSubmissions[operation]) {
+        pageSubmissions[operation] = {};
+    }
+    pageSubmissions[operation][currentAbsolutePage] = {
+        submitted: true,
+        score: score,
+        correctCount: correctCount,
+        totalProblems: totalProblems,
+        timestamp: new Date().toISOString()
+    };
+
+    // Save submissions to localStorage
+    const child = getSelectedChild();
+    if (child) {
+        localStorage.setItem(`pageSubmissions_${child.id}`, JSON.stringify(pageSubmissions));
+    }
+
+    // Clear unsaved changes flag
+    hasUnsavedChanges = false;
+
+    // Show submission status
+    const statusDiv = document.getElementById('submission-status');
+    if (statusDiv) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = score >= 80 ? '#4caf50' : score >= 60 ? '#ff9800' : '#f44336';
+        statusDiv.style.color = 'white';
+        statusDiv.innerHTML = `
+            ✓ Submitted! Score: ${correctCount}/${totalProblems} (${score}%)
+            ${score >= 80 ? '🌟 Excellent!' : score >= 60 ? '👍 Good job!' : '💪 Keep practicing!'}
+        `;
+    }
+
+    // Re-enable submit button
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Resubmit';
+
+    console.log(`Page ${currentAbsolutePage} submitted: ${correctCount}/${totalProblems} (${score}%)`);
+}
+
+/**
+ * Clear all answers on current worksheet
+ */
+function clearWorksheet() {
+    if (!currentWorksheet) return;
+
+    if (!confirm('Clear all answers on this page?')) {
+        return;
+    }
+
+    const totalProblems = currentWorksheet.problems.length;
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    for (let i = 0; i < totalProblems; i++) {
+        const answerElement = document.getElementById(`answer-${i}`);
+        const feedbackElement = document.getElementById(`feedback-${i}`);
+
+        if (!answerElement) continue;
+
+        // Clear input based on mode
+        if (usePencil) {
+            // Clear canvas
+            if (typeof clearHandwritingInput === 'function') {
+                clearHandwritingInput(`answer-${i}`);
+            }
+        } else {
+            // Clear input field
+            answerElement.value = '';
+        }
+
+        // Clear feedback
+        if (feedbackElement) {
+            feedbackElement.textContent = '';
+            feedbackElement.style.display = 'none';
+        }
+
+        // Reset border
+        answerElement.style.borderColor = '#667eea';
+        answerElement.style.borderWidth = '2px';
+    }
+
+    // Clear submission status for this page
+    const operation = currentWorksheet.operation;
+    if (pageSubmissions[operation] && pageSubmissions[operation][currentAbsolutePage]) {
+        delete pageSubmissions[operation][currentAbsolutePage];
+
+        // Update localStorage
+        const child = getSelectedChild();
+        if (child) {
+            localStorage.setItem(`pageSubmissions_${child.id}`, JSON.stringify(pageSubmissions));
+        }
+    }
+
+    // Hide submission status
+    const statusDiv = document.getElementById('submission-status');
+    if (statusDiv) {
+        statusDiv.style.display = 'none';
+    }
+
+    // Reset submit button
+    const submitBtn = document.querySelector('.submit-worksheet-btn');
+    if (submitBtn) {
+        submitBtn.textContent = '✓ Submit for Evaluation';
+    }
+
+    // Mark as unsaved (empty)
+    hasUnsavedChanges = false;
+
+    console.log('Worksheet cleared');
+}
+
+/**
+ * Check for unsaved changes before navigation
+ */
+function checkUnsavedChanges() {
+    if (!hasUnsavedChanges) return true;
+
+    return confirm('You have unsaved changes. Leave without submitting?');
+}
+
+/**
+ * Track input changes to detect unsaved work
+ */
+function markAsChanged() {
+    hasUnsavedChanges = true;
+}
+
+/**
+ * Load submission data for current child
+ */
+function loadPageSubmissions() {
+    const child = getSelectedChild();
+    if (!child) return;
+
+    const stored = localStorage.getItem(`pageSubmissions_${child.id}`);
+    if (stored) {
+        try {
+            pageSubmissions = JSON.parse(stored);
+        } catch (error) {
+            console.error('Error loading submissions:', error);
+            pageSubmissions = {};
+        }
+    }
+}
+
