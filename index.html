@@ -199,20 +199,24 @@
                     // Ensure enabledModules exists (initialize for existing users)
                     await ensureEnabledModules(firebaseUser.uid, userData);
 
-                    // Check if user has children profiles (works for both new and existing users)
-                    // Check regardless of role to support migration from old 'student' role to new 'parent' role
-                    const childrenSnapshot = await firebase.firestore()
-                        .collection('children')
-                        .where('parent_uid', '==', firebaseUser.uid)
-                        .limit(1)
-                        .get();
+                    // Admin does not need child profiles - skip check
+                    if (userData.role !== 'admin') {
+                        // Check if user has children profiles (works for both new and existing users)
+                        const childrenSnapshot = await firebase.firestore()
+                            .collection('children')
+                            .where('parent_uid', '==', firebaseUser.uid)
+                            .limit(1)
+                            .get();
 
-                    if (childrenSnapshot.empty) {
-                        // No children - redirect to create first child
-                        console.log('No children found - redirecting to profile creation');
-                        sessionStorage.setItem('firstTimeSetup', 'true');
-                        window.location.href = 'children-profiles.html';
-                        return;
+                        if (childrenSnapshot.empty) {
+                            // No children - redirect to create first child
+                            console.log('No children found - redirecting to profile creation');
+                            sessionStorage.setItem('firstTimeSetup', 'true');
+                            window.location.href = 'children-profiles.html';
+                            return;
+                        }
+                    } else {
+                        console.log('Admin user - skipping child profile check');
                     }
 
                     // Initialize UI with user data

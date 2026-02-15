@@ -31,25 +31,45 @@
 <body>
     <script>
         // Wait for Firebase auth to initialize
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Auto-detect child's age from selected profile
-            const child = getSelectedChild();
-            if (!child || !child.age) {
-                alert('Please select a child profile first');
-                window.location.href = 'children-profiles.html';
-                return;
+            // Check if user is admin
+            const userDoc = await firebase.firestore().collection('users')
+                .where('email', '==', user.email.toLowerCase())
+                .limit(1)
+                .get();
+
+            let isAdmin = false;
+            if (!userDoc.empty) {
+                const userData = userDoc.docs[0].data();
+                isAdmin = userData.role === 'admin';
+            }
+
+            let childAge;
+            if (isAdmin) {
+                // Admin doesn't need child profile - use default age 10+ (full access)
+                childAge = '10';
+                console.log('Admin user - using default age:', childAge);
+            } else {
+                // Auto-detect child's age from selected profile
+                const child = getSelectedChild();
+                if (!child || !child.age) {
+                    alert('Please select a child profile first');
+                    window.location.href = 'children-profiles.html';
+                    return;
+                }
+                childAge = child.age.toString();
+                console.log('Auto-detected age for stories:', childAge);
             }
 
             // Set current age automatically (defined in stories-generator.js)
             setTimeout(function() {
                 if (typeof currentAge !== 'undefined') {
-                    currentAge = child.age.toString();
-                    console.log('Auto-detected age for stories:', currentAge);
+                    currentAge = childAge;
                 }
             }, 100);
         });
