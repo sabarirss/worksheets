@@ -33,8 +33,10 @@ async function loadProfileSelector(parentUid) {
             .get();
 
         if (snapshot.empty) {
-            // No children found - show "Add Child" option
-            renderEmptyState(container);
+            // No children found - hide container (redirect will happen from index.html)
+            // Don't show error on index.html since redirect is triggered separately
+            container.style.display = 'none';
+            console.log('No children profiles found - container hidden');
             return;
         }
 
