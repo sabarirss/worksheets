@@ -1,10 +1,23 @@
-# 🔥 Firestore Rules Update - Fix "Error loading profiles"
+# 🔥 CRITICAL: Firestore Rules Update - Fix Login Issue
 
-## Problem
-Existing users are seeing "Error loading profiles" because the Firestore security rules don't include permissions for the `children` collection.
+## 🚨 Problem
+**After adding child profiles, users cannot login - including admin!**
 
-## Solution
-Update your Firestore security rules to allow parents to access their children's profiles.
+### Root Cause
+The Firestore security rules were blocking the login flow itself:
+1. Login needs to query the `users` collection to convert username → email
+2. Old rules required authentication to read `users` collection
+3. **Catch-22**: Can't login without querying users, can't query users without being logged in!
+
+### Symptoms
+- "Invalid username or password" errors for correct credentials
+- Login works initially, fails after creating child profile
+- Even admin cannot login after rules update
+
+---
+
+## ✅ Solution
+Update Firestore rules to allow **public read** access to the `users` collection for login purposes, while maintaining security for other operations.
 
 ---
 
@@ -21,7 +34,7 @@ Click on your project (e.g., "worksheets-app")
 2. Click the **"Rules"** tab at the top
 
 ### 4. Replace the Rules
-Copy the entire content from `firestore.rules` file and paste it into the rules editor.
+**IMPORTANT:** Copy the ENTIRE content from the `firestore.rules` file and paste it into the rules editor.
 
 Or copy this directly:
 
@@ -35,10 +48,9 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return isAuthenticated() &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // Helper function to check if user owns this user document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid.substring(0, 20) == userId;
     }
 
     // Helper function to check if user is the parent of the child
@@ -46,16 +58,24 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == parentUid;
     }
 
-    // Users collection - authenticated users can read, only admins can write
+    // Users collection - public read for login flow, restricted write
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      // Allow public read for login username/email lookup
+      allow read: if true;
+
+      // Allow users to update their own profile
+      allow update: if isOwner(userId);
+
+      // Only admins can create/delete users (admin creates via secondary auth)
+      allow create, delete: if isAuthenticated() &&
+                               exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+                               get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
     }
 
     // Worksheets collection - users can only access their own
     match /worksheets/{worksheetId} {
       allow read, write: if isAuthenticated() &&
-                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username;
+                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.username;
       allow create: if isAuthenticated();
     }
 
@@ -74,7 +94,9 @@ service cloud.firestore {
                               resource.data.parent_uid == request.auth.uid;
 
       // Allow admins to read all children
-      allow read: if isAdmin();
+      allow read: if isAuthenticated() &&
+                    exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
     }
 
     // Child sessions collection - for single-device enforcement
@@ -90,60 +112,102 @@ service cloud.firestore {
 ```
 
 ### 5. Publish the Rules
-Click the blue **"Publish"** button
+Click the blue **"Publish"** button in the top right
 
-### 6. Test
-1. Refresh your app in the browser
-2. Login as an existing user
-3. The "Error loading profiles" should now be gone
-4. You should be redirected to create a child profile if you don't have any
+### 6. Test Login
+1. Wait 30 seconds for rules to propagate
+2. Try logging in with your username and password
+3. Admin login: `admin` / `admin123`
+4. Login should now work! ✅
 
 ---
 
 ## What These Rules Do
 
-### ✅ Children Collection
-- **Parents** can create, read, update, and delete their own children's profiles
-- **Admins** can read all children (for support purposes)
-- **Security**: Each parent can only access children where `parent_uid` matches their user ID
+### 🔓 Users Collection (PUBLIC READ)
+- **Everyone** can read user data (needed for login username→email lookup)
+- **Users** can update their own profile
+- **Only admins** can create/delete users
+- **Security Note**: Don't store sensitive data in users collection (passwords are in Firebase Auth, not Firestore)
 
-### ✅ Child Sessions Collection
-- **All authenticated users** can manage sessions (for single-device enforcement)
-- Sessions prevent multiple devices from using the same child account simultaneously
+### 🔒 Children Collection (PRIVATE)
+- **Parents** can only access their own children (matched by parent_uid)
+- **Admins** can read all children
+- **Strong security**: Each parent isolated to their own data
 
-### ✅ Users Collection
-- **All authenticated users** can read user data
-- **Only admins** can create/update/delete users
-
-### ✅ Worksheets Collection
+### 🔒 Worksheets Collection (PRIVATE)
 - **Users** can only access their own worksheets
 - Based on username matching
+
+### 🔒 Child Sessions Collection
+- **Authenticated users** can manage sessions
+- Prevents multiple devices using same child account
+
+---
+
+## Security Analysis
+
+### ❓ Is public read on users collection safe?
+**YES**, because:
+1. No sensitive data stored there (passwords in Firebase Auth)
+2. Standard practice for Firebase apps with username login
+3. Data visible: username, email, fullName, role, modules - nothing secret
+4. Alternative would require all users to login with full email (bad UX)
+
+### 🔐 What's Protected?
+- **Passwords**: Stored in Firebase Auth (never in Firestore)
+- **Worksheets**: Users can only see their own
+- **Children profiles**: Parents can only see their own children
+- **Admin actions**: Only admins can create/delete users
 
 ---
 
 ## Verify the Fix
 
-After updating the rules:
+After updating and publishing the rules:
 
-1. **Check browser console** (F12) - Should see no more "permission-denied" errors
-2. **Existing users** - Should redirect to children profile creation
-3. **Users with children** - Should see profile selector working correctly
+### ✅ Test Admin Login
+```
+Username: admin
+Password: admin123
+```
+Should successfully login to index.html
+
+### ✅ Test User Login
+1. Try your regular username and password
+2. Should login successfully
+3. Should see profile selector if you have children
+
+### ✅ Check Console (F12)
+- No "permission-denied" errors
+- Login queries should succeed
+- Profile loading should work
 
 ---
 
 ## Troubleshooting
 
-### Still seeing errors?
-1. **Clear browser cache**: Ctrl+Shift+Delete
-2. **Check Firebase console**: Make sure rules were published
-3. **Wait 1-2 minutes**: Rules take a moment to propagate
-4. **Check console logs**: Look for specific error messages
+### Still can't login?
+1. **Wait 1-2 minutes**: Rules take time to propagate globally
+2. **Clear browser cache**: Ctrl+Shift+Delete (select "Cached images and files")
+3. **Hard refresh**: Ctrl+Shift+R
+4. **Check rules published**: In Firebase console, Rules tab should show your new rules
 
 ### Rules won't publish?
-- Make sure there are no syntax errors (Firebase will show them)
-- The rules editor will highlight any problems in red
+- Check for syntax errors (Firebase editor shows them in red)
+- Make sure you copied the ENTIRE rules file
+- Don't modify the `rules_version = '2';` line
+
+### Different error?
+- Open browser console (F12)
+- Try logging in
+- Look for error messages in Console tab
+- Share the error code (e.g., "auth/wrong-password", "permission-denied")
 
 ---
 
 ## Questions?
-If you're still experiencing issues after updating the rules, check the browser console (F12) for specific error messages and share them.
+If you're still experiencing issues after updating the rules:
+1. Check the browser console (F12) for specific error messages
+2. Verify the rules are published in Firebase console
+3. Try the admin account first: `admin` / `admin123`

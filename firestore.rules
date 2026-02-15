@@ -7,10 +7,9 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return isAuthenticated() &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // Helper function to check if user owns this user document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid.substring(0, 20) == userId;
     }
 
     // Helper function to check if user is the parent of the child
@@ -18,16 +17,24 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == parentUid;
     }
 
-    // Users collection - authenticated users can read, only admins can write
+    // Users collection - public read for login flow, restricted write
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      // Allow public read for login username/email lookup
+      allow read: if true;
+
+      // Allow users to update their own profile
+      allow update: if isOwner(userId);
+
+      // Only admins can create/delete users (admin creates via secondary auth)
+      allow create, delete: if isAuthenticated() &&
+                               exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+                               get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
     }
 
     // Worksheets collection - users can only access their own
     match /worksheets/{worksheetId} {
       allow read, write: if isAuthenticated() &&
-                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username;
+                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.username;
       allow create: if isAuthenticated();
     }
 
@@ -46,7 +53,9 @@ service cloud.firestore {
                               resource.data.parent_uid == request.auth.uid;
 
       // Allow admins to read all children
-      allow read: if isAdmin();
+      allow read: if isAuthenticated() &&
+                    exists(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))) &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid.substring(0, 20))).data.role == 'admin';
     }
 
     // Child sessions collection - for single-device enforcement
