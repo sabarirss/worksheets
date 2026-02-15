@@ -561,10 +561,6 @@
 
         // Update input mode for current selected child or admin
         async function updateInputMode(mode) {
-            console.log('=== updateInputMode called ===');
-            console.log('Mode:', mode);
-            console.log('getSelectedChild function exists?', typeof getSelectedChild !== 'undefined');
-
             try {
                 const user = firebase.auth().currentUser;
                 if (!user) {
@@ -575,7 +571,6 @@
                 const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
                 const userData = userDoc.data();
                 const isAdmin = userData && userData.role === 'admin';
-                console.log('Is admin?', isAdmin);
 
                 if (isAdmin) {
                     // Admin: save to their own profile
@@ -591,8 +586,6 @@
                 } else {
                     // Non-admin: get selected child and update their profile
                     const child = getSelectedChild();
-                    console.log('Selected child:', child);
-
                     if (!child) {
                         showError('No child selected. Please select a child profile first.');
                         return;
@@ -606,16 +599,9 @@
                     }
 
                     const childData = childDoc.data();
-                    console.log('Child data from Firestore:');
-                    console.log('  - Name:', childData.name);
-                    console.log('  - Version:', childData.version);
-                    console.log('  - Version type:', typeof childData.version);
-                    console.log('  - Version === "full"?', childData.version === 'full');
 
                     // Check if pencil mode is allowed
                     if (mode === 'pencil' && childData.version !== 'full') {
-                        console.error('PENCIL MODE DENIED - Version check failed');
-                        console.error('Expected: "full", Got:', childData.version);
                         showError(`✨ Pencil Mode requires Full Version! ${child.name} has ${childData.version || 'demo'} version.`);
 
                         // Reset radio button to keyboard
