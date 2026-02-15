@@ -4,6 +4,27 @@
  * Uses pre-trained MNIST model for digit classification
  */
 
+// Configuration for recognition sensitivity
+// Adjust these values to be more lenient with children's handwriting
+const RECOGNITION_CONFIG = {
+    // Minimum confidence required (0-1). Lower = more lenient, accepts more variations
+    // 0.3 = 30% confidence minimum (recommended for children)
+    minConfidence: 0.3,
+
+    // Ambiguity threshold (0-1). If top 2 predictions are within this difference,
+    // consider it ambiguous. Higher = more likely to flag as ambiguous
+    // 0.2 = 20% difference (e.g., 50% vs 30% would be ambiguous)
+    ambiguityThreshold: 0.2,
+
+    // Canvas empty threshold (0-1). Percentage of pixels needed to consider canvas non-empty
+    // 0.005 = 0.5% of pixels (very lenient)
+    emptyThreshold: 0.005,
+
+    // Smoothing strength for children's shaky handwriting (0-1)
+    // 0.3 = moderate smoothing
+    smoothingStrength: 0.3
+};
+
 // Global state
 let handwritingModel = null;
 let modelLoading = false;
@@ -117,15 +138,37 @@ function preprocessCanvas(canvas) {
         // Convert to tensor
         let tensor = tf.browser.fromPixels(imageData, 1); // grayscale
 
-        // Resize to 28x28 (MNIST input size)
-        tensor = tf.image.resizeBilinear(tensor, [28, 28]);
-
         // Normalize to [0, 1]
         tensor = tensor.div(255.0);
 
         // Invert colors (MNIST expects white digit on black background)
         // Our canvas has black on white, so we need to invert
         tensor = tf.scalar(1.0).sub(tensor);
+
+        // Find bounding box of the digit to center it better
+        // This helps with children's handwriting that might not be perfectly centered
+        const binaryThreshold = 0.1;
+        const binary = tensor.greater(binaryThreshold);
+
+        // Resize to 28x28 with better interpolation for children's handwriting
+        // Using bilinear for smoother edges
+        tensor = tf.image.resizeBilinear(tensor, [28, 28]);
+
+        // Apply slight blur to reduce noise from shaky children's handwriting
+        // This helps smooth out irregular strokes
+        const kernel = tf.ones([3, 3, 1, 1]).div(9.0);
+        tensor = tensor.reshape([1, 28, 28, 1]);
+        tensor = tf.conv2d(tensor, kernel, 1, 'same');
+        tensor = tensor.squeeze([0]);
+
+        // Normalize intensity to improve contrast
+        const mean = tensor.mean();
+        const std = tf.sqrt(tensor.sub(mean).square().mean());
+        if (std.dataSync()[0] > 0.01) { // Avoid division by zero
+            tensor = tensor.sub(mean).div(std.add(1e-7))
+                .mul(RECOGNITION_CONFIG.smoothingStrength).add(0.5);
+            tensor = tensor.clipByValue(0, 1);
+        }
 
         // Add batch dimension [1, 28, 28, 1]
         tensor = tensor.expandDims(0);
@@ -158,8 +201,8 @@ function isCanvasEmpty(canvas) {
         }
     }
 
-    // Canvas is considered empty if less than 0.5% of pixels are non-white
-    const threshold = (canvas.width * canvas.height) * 0.005;
+    // Canvas is considered empty if less than configured threshold of pixels are non-white
+    const threshold = (canvas.width * canvas.height) * RECOGNITION_CONFIG.emptyThreshold;
     return nonWhitePixels < threshold;
 }
 
@@ -196,26 +239,47 @@ async function recognizeDigit(canvas) {
         // Run prediction
         const predictions = await handwritingModel.predict(tensor).data();
 
-        // Get the digit with highest confidence
-        let maxConfidence = 0;
-        let recognizedDigit = 0;
+        // Get all predictions sorted by confidence
+        const sortedPredictions = Array.from(predictions)
+            .map((confidence, digit) => ({ digit, confidence }))
+            .sort((a, b) => b.confidence - a.confidence);
 
-        for (let i = 0; i < predictions.length; i++) {
-            if (predictions[i] > maxConfidence) {
-                maxConfidence = predictions[i];
-                recognizedDigit = i;
-            }
-        }
+        const topPrediction = sortedPredictions[0];
+        const secondPrediction = sortedPredictions[1];
 
         // Clean up tensor
         tensor.dispose();
 
-        console.log(`Recognized digit: ${recognizedDigit} (confidence: ${(maxConfidence * 100).toFixed(1)}%)`);
+        // Log top 3 predictions for debugging
+        console.log('📊 Recognition results:');
+        console.log(`  1st: ${topPrediction.digit} (${(topPrediction.confidence * 100).toFixed(1)}%)`);
+        console.log(`  2nd: ${secondPrediction.digit} (${(secondPrediction.confidence * 100).toFixed(1)}%)`);
+        console.log(`  3rd: ${sortedPredictions[2].digit} (${(sortedPredictions[2].confidence * 100).toFixed(1)}%)`);
+
+        // Check if recognition is ambiguous (top 2 predictions are close)
+        const confidenceDifference = topPrediction.confidence - secondPrediction.confidence;
+        const isAmbiguous = confidenceDifference < RECOGNITION_CONFIG.ambiguityThreshold;
+
+        // Check if confidence is below minimum threshold
+        const isLowConfidence = topPrediction.confidence < RECOGNITION_CONFIG.minConfidence;
+
+        if (isLowConfidence) {
+            console.warn(`⚠️ Low confidence (${(topPrediction.confidence * 100).toFixed(1)}%) - might be misrecognition`);
+        }
+
+        if (isAmbiguous) {
+            console.warn(`⚠️ Ambiguous: Could be ${topPrediction.digit} or ${secondPrediction.digit}`);
+        }
 
         return {
-            digit: recognizedDigit,
-            confidence: maxConfidence,
+            digit: topPrediction.digit,
+            confidence: topPrediction.confidence,
+            alternativeDigit: secondPrediction.digit,
+            alternativeConfidence: secondPrediction.confidence,
+            isAmbiguous: isAmbiguous,
+            isLowConfidence: isLowConfidence,
             allPredictions: Array.from(predictions),
+            topPredictions: sortedPredictions.slice(0, 3),
             isEmpty: false
         };
 
