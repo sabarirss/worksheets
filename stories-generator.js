@@ -157,22 +157,45 @@ const storyData = {
     }
 };
 
-// Generate stories dynamically - ONLY unique hand-written stories
+// Generate stories dynamically with age-based content
 function generateStories(category, difficulty) {
     const stories = [];
 
-    // Get ONLY unique hand-written stories from database
-    if (typeof uniqueStories !== 'undefined' && uniqueStories[category] && uniqueStories[category][difficulty]) {
+    // Map age to age group
+    const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
+
+    // First, try to get age-appropriate stories from ageBasedStories
+    if (typeof ageBasedStories !== 'undefined' &&
+        ageBasedStories[ageGroup] &&
+        ageBasedStories[ageGroup][difficulty] &&
+        ageBasedStories[ageGroup][difficulty][category]) {
+        stories.push(...ageBasedStories[ageGroup][difficulty][category]);
+    }
+
+    // If no age-based stories, try uniqueStories as fallback
+    if (stories.length === 0 && typeof uniqueStories !== 'undefined' &&
+        uniqueStories[category] && uniqueStories[category][difficulty]) {
         stories.push(...uniqueStories[category][difficulty]);
     }
 
-    // NO template generation - only show unique quality stories
+    // If still no stories, generate from templates based on age and category
+    if (stories.length === 0) {
+        if (category === 'animals') {
+            stories.push(...generateAnimalStories(difficulty, 10));
+        } else {
+            stories.push(...generateGenericCategoryStories(category, difficulty, 10));
+        }
+    }
+
     return stories;
 }
 
 function generateAnimalStories(difficulty, count) {
     const stories = [];
     const data = storyData.animals[difficulty];
+
+    // Map age to age group for complexity adjustment
+    const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
 
     for (let i = 0; i < count; i++) {
         const theme = data.themes[i % data.themes.length];
@@ -185,7 +208,14 @@ function generateAnimalStories(difficulty, count) {
             const action = data.actions[i % data.actions.length];
             moral = data.morals[i % data.morals.length];
 
-            text = `Once upon a time, there was a little ${animal} named ${name}. ${name} had a kind heart and always tried to help others whenever possible. One beautiful sunny morning, ${name} noticed something special happening. With a warm smile and gentle paws, ${name} ${action}. When all the friends saw what ${name} had done, they gathered around with big smiles on their faces. "Thank you, ${name}!" they said together. ${name} felt wonderful inside, knowing that even small acts of kindness can make everyone's day brighter. From that day on, all the animals remembered that ${moral.toLowerCase()}`;
+            // Adjust sentence complexity by age
+            if (ageGroup === '4-5') {
+                text = `${name} the ${animal} was very kind. One day, ${name} ${action}. Everyone was happy! ${moral}`;
+            } else if (ageGroup === '6') {
+                text = `There was a little ${animal} named ${name}. ${name} had a kind heart. One sunny morning, ${name} ${action}. All the friends smiled and said "Thank you!" ${name} felt wonderful inside. ${moral}`;
+            } else {
+                text = `Once upon a time, there was a little ${animal} named ${name}. ${name} had a kind heart and always tried to help others whenever possible. One beautiful sunny morning, ${name} noticed something special happening. With a warm smile and gentle paws, ${name} ${action}. When all the friends saw what ${name} had done, they gathered around with big smiles on their faces. "Thank you, ${name}!" they said together. ${name} felt wonderful inside, knowing that even small acts of kindness can make everyone's day brighter. From that day on, all the animals remembered that ${moral.toLowerCase()}`;
+            }
         } else if (difficulty === 'medium') {
             const challenge = data.challenges[i % data.challenges.length];
             moral = data.morals[i % data.morals.length];
