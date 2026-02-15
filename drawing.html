@@ -323,7 +323,11 @@
                 if (typeof currentAge !== 'undefined') {
                     currentAge = childAge;
                 }
-            }, 100);
+                // Apply age-based content filtering
+                if (typeof filterLevelButtons === 'function') {
+                    filterLevelButtons();
+                }
+            }, 200);
         });
     </script>
 
