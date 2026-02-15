@@ -29,8 +29,8 @@ service cloud.firestore {
       // Allow public read for login username/email lookup
       allow read: if true;
 
-      // Allow users to update their own profile
-      allow update: if isOwner(userId);
+      // Allow users to update their own profile OR admins to update any profile
+      allow update: if isOwner(userId) || isAdmin();
 
       // Allow create if:
       // 1. User is creating their own account during signup (userId matches their auth.uid)
