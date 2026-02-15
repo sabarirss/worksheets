@@ -1182,7 +1182,26 @@
 
         // Update child's input mode
         async function updateChildInputMode(childId, childName, mode) {
+            console.log('=== updateChildInputMode called ===');
+            console.log('Child ID:', childId);
+            console.log('Child Name:', childName);
+            console.log('Mode:', mode);
+
+            // Fetch full child data to verify version
             try {
+                const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+                if (childDoc.exists) {
+                    const childData = childDoc.data();
+                    console.log('Child version from Firestore:', childData.version);
+
+                    // Check if child has full version before allowing pencil mode
+                    if (mode === 'pencil' && childData.version !== 'full') {
+                        showError(`✨ Pencil Mode requires Full Version! Child "${childName}" has ${childData.version || 'demo'} version.`);
+                        console.error('Pencil mode denied - child does not have full version');
+                        return;
+                    }
+                }
+
                 await firebase.firestore().collection('children').doc(childId).update({
                     inputMode: mode,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
