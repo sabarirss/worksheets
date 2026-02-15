@@ -2408,7 +2408,11 @@ function navigateWritingPage(direction) {
 // Render writing practice worksheet with pages
 function renderWritingWorksheet(ageGroup, difficulty, page) {
     const config = contentConfigs[ageGroup]?.[difficulty];
-    if (!config) return;
+    if (!config) {
+        alert(`Error: No config found for ${ageGroup} - ${difficulty}`);
+        console.error('renderWritingWorksheet: config not found', { ageGroup, difficulty, contentConfigs });
+        return;
+    }
 
     const today = new Date().toLocaleDateString();
     const activities = config.activities;
@@ -2953,19 +2957,20 @@ function renderWorksheet() {
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'english-worksheet-content';
-        document.querySelector('.container').appendChild(worksheetContainer);
+        const container = document.querySelector('.container');
+        if (container) {
+            container.appendChild(worksheetContainer);
+        } else {
+            document.body.appendChild(worksheetContainer);
+        }
     }
 
     worksheetContainer.innerHTML = html;
     worksheetContainer.style.display = 'block';
 
-    // Initialize handwriting inputs
+    // Initialize writing canvases
     setTimeout(() => {
-        initializeAllHandwritingInputs();
-        // Load saved worksheet after inputs are initialized
-        setTimeout(() => {
-            loadSavedWorksheet();
-        }, 200);
+        initializeAllWritingCanvases();
     }, 100);
 
     elapsedSeconds = 0;
