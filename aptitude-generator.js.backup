@@ -498,21 +498,19 @@ function loadPuzzles(difficulty, page = 1) {
     let count = counts[difficulty][currentType];
     let problems = [];
 
-    // NOW USING AGE! Pass currentAge to generators for age-appropriate content
     switch(currentType) {
-        case 'patterns': problems = generatePatternPuzzles(count, difficulty, currentAge); break;
-        case 'counting': problems = generateCountingPuzzles(count, difficulty, currentAge); break;
-        case 'sequences': problems = generateSequencePuzzles(count, difficulty, currentAge); break;
-        case 'matching': problems = generateMatchingPuzzles(count, difficulty, currentAge); break;
-        case 'oddone': problems = generateOddOnePuzzles(count, difficulty, currentAge); break;
-        case 'comparison': problems = generateComparisonPuzzles(count, difficulty, currentAge); break;
-        case 'logic': problems = generateLogicPuzzles(count, difficulty, currentAge); break;
+        case 'patterns': problems = generatePatternPuzzles(count, difficulty); break;
+        case 'counting': problems = generateCountingPuzzles(count, difficulty); break;
+        case 'sequences': problems = generateSequencePuzzles(count, difficulty); break;
+        case 'matching': problems = generateMatchingPuzzles(count, difficulty); break;
+        case 'oddone': problems = generateOddOnePuzzles(count, difficulty); break;
+        case 'comparison': problems = generateComparisonPuzzles(count, difficulty); break;
+        case 'logic': problems = generateLogicPuzzles(count, difficulty); break;
     }
 
     currentWorksheet = {
         type: currentType,
         difficulty,
-        age: currentAge,
         page: currentPage,
         problems
     };
