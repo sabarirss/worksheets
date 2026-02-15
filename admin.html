@@ -440,6 +440,22 @@
             </div>
         </div>
 
+        <!-- Version Upgrade Requests Section -->
+        <div id="upgrade-requests-section" class="upgrade-requests" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #4caf50; padding-bottom: 15px;">
+                📤 Version Upgrade Requests
+            </h2>
+            <p style="color: #666; margin-bottom: 25px;">
+                Review and approve or deny full version upgrade requests from users.
+            </p>
+            <div id="upgrade-requests-list" style="display: grid; gap: 15px;">
+                <!-- Requests will be loaded here -->
+            </div>
+            <div id="no-upgrade-requests" style="display: none; padding: 30px; text-align: center; color: #999;">
+                No pending upgrade requests
+            </div>
+        </div>
+
         <!-- Admin Level Selection Section -->
         <div class="admin-level-selection" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
             <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
@@ -744,7 +760,131 @@
         // Load parents and children on page load
         window.addEventListener('DOMContentLoaded', function() {
             loadParentsAndChildren();
+            loadUpgradeRequests();
         });
+
+        // ===== Version Upgrade Request Functions =====
+        async function loadUpgradeRequests() {
+            try {
+                console.log('Loading upgrade requests...');
+
+                // Get all users with pending upgrade requests
+                const usersSnapshot = await firebase.firestore()
+                    .collection('users')
+                    .where('versionUpgradeRequested', '==', true)
+                    .get();
+
+                const upgradeRequestsSection = document.getElementById('upgrade-requests-section');
+                const upgradeRequestsList = document.getElementById('upgrade-requests-list');
+                const noRequestsDiv = document.getElementById('no-upgrade-requests');
+
+                if (usersSnapshot.empty) {
+                    upgradeRequestsSection.style.display = 'none';
+                    return;
+                }
+
+                // Show the section
+                upgradeRequestsSection.style.display = 'block';
+                upgradeRequestsList.innerHTML = '';
+                noRequestsDiv.style.display = 'none';
+
+                usersSnapshot.forEach(doc => {
+                    const user = doc.data();
+                    const userId = doc.id;
+                    const requestDate = user.upgradeRequestedAt ?
+                        new Date(user.upgradeRequestedAt.toDate()).toLocaleDateString() :
+                        'Unknown date';
+
+                    const requestCard = document.createElement('div');
+                    requestCard.style.cssText = `
+                        border: 2px solid #e0e0e0;
+                        border-radius: 10px;
+                        padding: 20px;
+                        background: #fafafa;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 20px;
+                    `;
+
+                    requestCard.innerHTML = `
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">
+                                ${user.fullName || user.username}
+                            </h3>
+                            <p style="margin: 5px 0; color: #666;">
+                                <strong>Email:</strong> ${user.email}
+                            </p>
+                            <p style="margin: 5px 0; color: #666;">
+                                <strong>Current Version:</strong> ${user.version || 'demo'}
+                            </p>
+                            <p style="margin: 5px 0; color: #999; font-size: 0.9em;">
+                                <strong>Requested:</strong> ${requestDate}
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary btn-small" onclick="approveUpgradeRequest('${userId}', '${user.fullName || user.username}')">
+                                ✓ Approve
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="denyUpgradeRequest('${userId}', '${user.fullName || user.username}')">
+                                ✗ Deny
+                            </button>
+                        </div>
+                    `;
+
+                    upgradeRequestsList.appendChild(requestCard);
+                });
+
+                console.log('✓ Loaded', usersSnapshot.size, 'upgrade requests');
+            } catch (error) {
+                console.error('Error loading upgrade requests:', error);
+            }
+        }
+
+        async function approveUpgradeRequest(userId, userName) {
+            if (!confirm(`Approve full version upgrade for ${userName}?`)) {
+                return;
+            }
+
+            try {
+                await firebase.firestore().collection('users').doc(userId).update({
+                    version: 'full',
+                    versionUpgradeRequested: false,
+                    upgradeApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    upgradeApprovedBy: firebase.auth().currentUser.email
+                });
+
+                alert(`✓ Full version approved for ${userName}!`);
+
+                // Reload upgrade requests to refresh the list
+                await loadUpgradeRequests();
+            } catch (error) {
+                console.error('Error approving upgrade:', error);
+                alert('Failed to approve upgrade: ' + error.message);
+            }
+        }
+
+        async function denyUpgradeRequest(userId, userName) {
+            if (!confirm(`Deny full version upgrade request for ${userName}?`)) {
+                return;
+            }
+
+            try {
+                await firebase.firestore().collection('users').doc(userId).update({
+                    versionUpgradeRequested: false,
+                    upgradeDeniedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    upgradeDeniedBy: firebase.auth().currentUser.email
+                });
+
+                alert(`Request denied for ${userName}.`);
+
+                // Reload upgrade requests to refresh the list
+                await loadUpgradeRequests();
+            } catch (error) {
+                console.error('Error denying upgrade:', error);
+                alert('Failed to deny upgrade: ' + error.message);
+            }
+        }
 
         async function loadParentsAndChildren() {
             try {
