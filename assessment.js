@@ -1,0 +1,557 @@
+/**
+ * Assessment System for Math and English Modules
+ * Determines child's appropriate level through 10-question assessment
+ * Stores results and unlocks appropriate content level
+ */
+
+// Assessment state
+let currentAssessment = null;
+let assessmentQuestions = [];
+let assessmentAnswers = [];
+
+/**
+ * Get or initialize assessment data for a child
+ * @param {string} childId - Child's unique identifier
+ * @returns {Object} Assessment data structure
+ */
+function getAssessmentData(childId) {
+    const key = `assessment_${childId}`;
+    const stored = localStorage.getItem(key);
+
+    if (stored) {
+        return JSON.parse(stored);
+    }
+
+    // Initialize new assessment data
+    const data = {
+        childId: childId,
+        assessments: {
+            // Math operations
+            addition: { level: null, score: null, date: null, taken: false },
+            subtraction: { level: null, score: null, date: null, taken: false },
+            multiplication: { level: null, score: null, date: null, taken: false },
+            division: { level: null, score: null, date: null, taken: false },
+            // English
+            english: { level: null, score: null, date: null, taken: false }
+        }
+    };
+
+    localStorage.setItem(key, JSON.stringify(data));
+    return data;
+}
+
+/**
+ * Save assessment result
+ * @param {string} childId - Child's unique identifier
+ * @param {string} subject - Subject/operation name (e.g., 'addition', 'english')
+ * @param {number} score - Score percentage (0-100)
+ * @param {number} assignedLevel - Level assigned based on score (1-12)
+ */
+function saveAssessmentResult(childId, subject, score, assignedLevel) {
+    const data = getAssessmentData(childId);
+
+    data.assessments[subject] = {
+        level: assignedLevel,
+        score: score,
+        date: new Date().toISOString(),
+        taken: true
+    };
+
+    const key = `assessment_${childId}`;
+    localStorage.setItem(key, JSON.stringify(data));
+
+    console.log(`Assessment saved: ${subject} - Level ${assignedLevel} (Score: ${score}%)`);
+}
+
+/**
+ * Check if child has taken assessment for a subject
+ * @param {string} childId - Child's unique identifier
+ * @param {string} subject - Subject/operation name
+ * @returns {boolean} True if assessment taken
+ */
+function hasCompletedAssessment(childId, subject) {
+    const data = getAssessmentData(childId);
+    return data.assessments[subject]?.taken || false;
+}
+
+/**
+ * Get assigned level for a subject
+ * @param {string} childId - Child's unique identifier
+ * @param {string} subject - Subject/operation name
+ * @returns {number|null} Assigned level or null if not assessed
+ */
+function getAssignedLevel(childId, subject) {
+    const data = getAssessmentData(childId);
+    return data.assessments[subject]?.level || null;
+}
+
+/**
+ * Calculate age group for one year younger
+ * @param {string} currentAgeGroup - Current age group (e.g., '6', '7', '4-5')
+ * @returns {string} One year younger age group
+ */
+function getYoungerAgeGroup(currentAgeGroup) {
+    const map = {
+        '4-5': '4-5',  // Can't go younger
+        '6': '4-5',
+        '7': '6',
+        '8': '7',
+        '9+': '8',
+        '10+': '9+'
+    };
+    return map[currentAgeGroup] || currentAgeGroup;
+}
+
+/**
+ * Calculate age group for one year older
+ * @param {string} currentAgeGroup - Current age group
+ * @returns {string} One year older age group
+ */
+function getOlderAgeGroup(currentAgeGroup) {
+    const map = {
+        '4-5': '6',
+        '6': '7',
+        '7': '8',
+        '8': '9+',
+        '9+': '10+',
+        '10+': '10+'  // Can't go older
+    };
+    return map[currentAgeGroup] || currentAgeGroup;
+}
+
+/**
+ * Generate 10 assessment questions for Math
+ * 5 from one year younger, 5 from age-appropriate
+ * @param {string} operation - Math operation (addition, subtraction, etc.)
+ * @param {string} ageGroup - Child's age group
+ * @returns {Array} Array of 10 questions with answers
+ */
+function generateMathAssessmentQuestions(operation, ageGroup) {
+    const questions = [];
+    const youngerAge = getYoungerAgeGroup(ageGroup);
+
+    // Get config access functions from worksheet-generator.js
+    if (typeof getConfigByAge === 'undefined') {
+        console.error('getConfigByAge not available - ensure worksheet-generator.js is loaded');
+        return [];
+    }
+
+    // Get 5 questions from younger age (easy difficulty)
+    const youngerConfig = getConfigByAge(operation, youngerAge, 'easy');
+    if (youngerConfig && youngerConfig.generator) {
+        const youngerProblems = youngerConfig.generator(5);
+        questions.push(...youngerProblems.map(p => ({
+            ...p,
+            sourceAge: youngerAge,
+            sourceDifficulty: 'easy'
+        })));
+    }
+
+    // Get 5 questions from current age (medium difficulty)
+    const currentConfig = getConfigByAge(operation, ageGroup, 'medium');
+    if (currentConfig && currentConfig.generator) {
+        const currentProblems = currentConfig.generator(5);
+        questions.push(...currentProblems.map(p => ({
+            ...p,
+            sourceAge: ageGroup,
+            sourceDifficulty: 'medium'
+        })));
+    }
+
+    // Shuffle questions so they're mixed
+    for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+
+    return questions.slice(0, 10); // Ensure exactly 10 questions
+}
+
+/**
+ * Determine level based on assessment score
+ * @param {number} score - Score percentage (0-100)
+ * @param {string} ageGroup - Child's age group
+ * @returns {Object} { level, ageGroup, difficulty, reason }
+ */
+function determineLevelFromScore(score, ageGroup) {
+    let targetAgeGroup;
+    let targetDifficulty;
+    let reason;
+
+    if (score < 30) {
+        // Use one year younger content
+        targetAgeGroup = getYoungerAgeGroup(ageGroup);
+        targetDifficulty = 'easy';
+        reason = 'Score below 30% - assigned easier content for building foundation';
+    } else if (score <= 75) {
+        // Use age-appropriate content
+        targetAgeGroup = ageGroup;
+        targetDifficulty = 'medium';
+        reason = 'Score 30-75% - assigned age-appropriate content';
+    } else {
+        // Use one year older content
+        targetAgeGroup = getOlderAgeGroup(ageGroup);
+        targetDifficulty = 'medium';
+        reason = 'Score above 75% - assigned advanced content for challenge';
+    }
+
+    // Convert to level number
+    const level = ageAndDifficultyToLevel(targetAgeGroup, targetDifficulty);
+
+    return {
+        level: level,
+        ageGroup: targetAgeGroup,
+        difficulty: targetDifficulty,
+        reason: reason
+    };
+}
+
+/**
+ * Start a new assessment
+ * @param {string} subject - Subject/operation name
+ * @param {string} operation - Operation for math (addition, subtraction, etc.)
+ * @param {string} ageGroup - Child's age group
+ */
+function startAssessment(subject, operation, ageGroup) {
+    // Generate questions
+    assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+    assessmentAnswers = new Array(10).fill(null);
+
+    currentAssessment = {
+        subject: subject,
+        operation: operation,
+        ageGroup: ageGroup,
+        startTime: new Date()
+    };
+
+    console.log(`Assessment started: ${subject} (${operation}) for age ${ageGroup}`);
+    console.log('Questions:', assessmentQuestions);
+
+    // Render assessment UI
+    renderAssessmentUI();
+}
+
+/**
+ * Render the assessment UI
+ */
+function renderAssessmentUI() {
+    const container = document.getElementById('assessment-container');
+    if (!container) {
+        console.error('Assessment container not found');
+        return;
+    }
+
+    let html = `
+        <div class="assessment-page">
+            <div class="assessment-header">
+                <h2>📝 Assessment Test - ${currentAssessment.operation.toUpperCase()}</h2>
+                <p class="assessment-instructions">
+                    Solve all 10 problems below. Write your answers clearly in the boxes.
+                    Click "Submit Assessment" when you're done.
+                </p>
+            </div>
+
+            <div class="assessment-questions">
+    `;
+
+    // Generate question UI
+    assessmentQuestions.forEach((question, index) => {
+        html += `
+            <div class="assessment-question">
+                <div class="question-number">${index + 1}.</div>
+                <div class="question-content">
+                    <div class="math-problem">${question.problem}</div>
+                    <div class="answer-section">
+                        <canvas id="assessment-answer-${index}"
+                                class="answer-canvas"
+                                width="120"
+                                height="80"></canvas>
+                        <button class="clear-btn" onclick="clearAssessmentCanvas(${index})">Clear</button>
+                    </div>
+                    <div class="feedback" id="assessment-feedback-${index}"></div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += `
+            </div>
+
+            <div class="assessment-actions">
+                <button class="submit-assessment-btn" onclick="submitAssessment()">
+                    ✓ Submit Assessment
+                </button>
+                <button class="cancel-assessment-btn" onclick="cancelAssessment()">
+                    Cancel
+                </button>
+            </div>
+
+            <div id="assessment-results" style="display: none;"></div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+    container.style.display = 'block';
+
+    // Initialize canvases
+    setTimeout(() => {
+        assessmentQuestions.forEach((_, index) => {
+            initializeAssessmentCanvas(index);
+        });
+    }, 100);
+}
+
+/**
+ * Initialize canvas for handwriting input
+ */
+function initializeAssessmentCanvas(index) {
+    const canvas = document.getElementById(`assessment-answer-${index}`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    // Set white background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    canvas.addEventListener('mousedown', (e) => {
+        drawing = true;
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        drawing = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        drawing = false;
+    });
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        drawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('touchend', () => {
+        drawing = false;
+    });
+}
+
+/**
+ * Clear assessment canvas
+ */
+function clearAssessmentCanvas(index) {
+    const canvas = document.getElementById(`assessment-answer-${index}`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Clear stored answer
+    assessmentAnswers[index] = null;
+}
+
+/**
+ * Submit assessment and evaluate answers
+ */
+async function submitAssessment() {
+    if (!currentAssessment) {
+        alert('No active assessment');
+        return;
+    }
+
+    const submitBtn = document.querySelector('.submit-assessment-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Checking answers...';
+
+    // Ensure handwriting model is loaded
+    try {
+        if (typeof loadHandwritingModel !== 'undefined') {
+            await loadHandwritingModel();
+        }
+    } catch (error) {
+        console.error('Failed to load handwriting model:', error);
+        alert('Error loading handwriting recognition. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Submit Assessment';
+        return;
+    }
+
+    let correct = 0;
+    const results = [];
+
+    // Check each answer
+    for (let i = 0; i < assessmentQuestions.length; i++) {
+        const canvas = document.getElementById(`assessment-answer-${i}`);
+        const feedback = document.getElementById(`assessment-feedback-${i}`);
+        const correctAnswer = assessmentQuestions[i].answer;
+
+        try {
+            const result = await recognizeDigit(canvas);
+
+            if (result.isEmpty) {
+                feedback.textContent = '⚠️ Empty';
+                feedback.style.color = '#999';
+                results.push({ question: i + 1, correct: false, isEmpty: true });
+            } else if (result.error) {
+                feedback.textContent = `Correct: ${correctAnswer}`;
+                feedback.style.color = '#ff9800';
+                results.push({ question: i + 1, correct: false, error: true });
+            } else {
+                const isCorrect = result.digit === correctAnswer;
+
+                if (isCorrect) {
+                    correct++;
+                    feedback.textContent = '✓ Correct!';
+                    feedback.style.color = '#4caf50';
+                    canvas.style.border = '2px solid #4caf50';
+                } else {
+                    feedback.textContent = `✗ Wrong (answer: ${correctAnswer})`;
+                    feedback.style.color = '#f44336';
+                    canvas.style.border = '2px solid #f44336';
+                }
+
+                results.push({
+                    question: i + 1,
+                    correct: isCorrect,
+                    recognized: result.digit,
+                    expected: correctAnswer,
+                    confidence: result.confidence
+                });
+            }
+
+            feedback.style.display = 'block';
+            feedback.style.fontWeight = 'bold';
+
+        } catch (error) {
+            console.error(`Error checking answer ${i}:`, error);
+            feedback.textContent = `Correct: ${correctAnswer}`;
+            feedback.style.color = '#ff9800';
+        }
+    }
+
+    // Calculate score
+    const scorePercentage = Math.round((correct / assessmentQuestions.length) * 100);
+
+    // Determine level
+    const levelResult = determineLevelFromScore(scorePercentage, currentAssessment.ageGroup);
+
+    // Save result
+    const child = getSelectedChild();
+    if (child) {
+        saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
+    }
+
+    // Show results
+    showAssessmentResults(correct, assessmentQuestions.length, scorePercentage, levelResult);
+}
+
+/**
+ * Show assessment results
+ */
+function showAssessmentResults(correct, total, scorePercentage, levelResult) {
+    const resultsDiv = document.getElementById('assessment-results');
+
+    let message = '';
+    let color = '';
+
+    if (scorePercentage < 30) {
+        message = 'Let\'s build a strong foundation! 💪';
+        color = '#ff9800';
+    } else if (scorePercentage <= 75) {
+        message = 'Good work! Keep practicing! 🌟';
+        color = '#2196f3';
+    } else {
+        message = 'Excellent! You\'re ready for a challenge! 🎉';
+        color = '#4caf50';
+    }
+
+    resultsDiv.innerHTML = `
+        <div class="assessment-results-card">
+            <h3>Assessment Complete!</h3>
+            <div class="score-display" style="color: ${color};">
+                <div class="score-big">${correct} / ${total}</div>
+                <div class="score-percentage">${scorePercentage}%</div>
+            </div>
+            <p class="result-message" style="color: ${color}; font-size: 1.2em; font-weight: bold;">
+                ${message}
+            </p>
+            <div class="level-assignment">
+                <h4>Your Assigned Level:</h4>
+                <div class="assigned-level">Level ${levelResult.level}</div>
+                <p class="level-reason">${levelResult.reason}</p>
+            </div>
+            <button class="start-learning-btn" onclick="startLearningAtLevel('${currentAssessment.operation}', ${levelResult.level})">
+                🚀 Start Learning
+            </button>
+        </div>
+    `;
+
+    resultsDiv.style.display = 'block';
+
+    // Hide submit button
+    document.querySelector('.submit-assessment-btn').style.display = 'none';
+    document.querySelector('.cancel-assessment-btn').style.display = 'none';
+}
+
+/**
+ * Start learning at assigned level
+ */
+function startLearningAtLevel(operation, level) {
+    // Convert level back to age+difficulty
+    const ageGroup = levelToAgeGroup(level);
+    const difficulty = levelToDifficulty(level);
+
+    // Close assessment
+    document.getElementById('assessment-container').style.display = 'none';
+
+    // Load worksheet at assigned level
+    if (typeof loadWorksheet === 'function') {
+        loadWorksheet(operation, ageGroup, difficulty, 1);
+    }
+}
+
+/**
+ * Cancel assessment
+ */
+function cancelAssessment() {
+    if (confirm('Are you sure you want to cancel the assessment?')) {
+        document.getElementById('assessment-container').style.display = 'none';
+        currentAssessment = null;
+        assessmentQuestions = [];
+        assessmentAnswers = [];
+    }
+}
+
+console.log('Assessment system loaded');

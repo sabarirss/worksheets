@@ -101,11 +101,118 @@ function showDifficulties(operation) {
         console.log('Auto-set age group to:', selectedAgeGroup);
     }
 
-    document.getElementById('math-operations').style.display = 'none';
-    document.getElementById('math-difficulties').style.display = 'block';
+    // Check if assessment has been completed for this operation
+    const child = getSelectedChild();
+    if (!child) {
+        alert('Please select a child profile first');
+        return;
+    }
 
-    // Update difficulty descriptions based on selected age and operation
-    updateDifficultyDescriptions();
+    // Check assessment status
+    const hasAssessment = hasCompletedAssessment(child.id, operation);
+
+    if (!hasAssessment) {
+        // Show assessment gate - user must take assessment first
+        showAssessmentGate(operation);
+    } else {
+        // Assessment completed - show worksheets at assigned level
+        const assignedLevel = getAssignedLevel(child.id, operation);
+        console.log(`Assessment completed - Level ${assignedLevel} assigned`);
+
+        // Convert level to age+difficulty for loading worksheets
+        const ageGroup = levelToAgeGroup(assignedLevel);
+        const difficulty = levelToDifficulty(assignedLevel);
+
+        // Load worksheet directly at assigned level
+        loadWorksheet(operation, ageGroup, difficulty, 1);
+    }
+}
+
+/**
+ * Show assessment gate - user must complete assessment to access worksheets
+ */
+function showAssessmentGate(operation) {
+    // Hide other sections
+    document.getElementById('math-operations').style.display = 'none';
+    document.getElementById('math-difficulties').style.display = 'none';
+
+    // Show assessment gate in the main container
+    const container = document.querySelector('.container');
+    const existingGate = document.getElementById('assessment-gate');
+
+    if (existingGate) {
+        existingGate.remove();
+    }
+
+    const gateHTML = `
+        <div id="assessment-gate" class="assessment-gate">
+            <div class="gate-content">
+                <div class="gate-icon">🔒</div>
+                <h2>Assessment Required</h2>
+                <p class="gate-message">
+                    Before starting ${operation} practice, we need to find the right level for you!
+                </p>
+                <p class="gate-description">
+                    You'll solve 10 simple problems, and we'll recommend the best starting level.
+                    This helps ensure you're challenged but not frustrated.
+                </p>
+                <div class="gate-info">
+                    <div class="info-item">
+                        <span class="info-icon">📝</span>
+                        <span>10 Questions</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">⏱️</span>
+                        <span>~5 Minutes</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🤖</span>
+                        <span>AI Grading</span>
+                    </div>
+                </div>
+                <div class="gate-actions">
+                    <button class="take-assessment-btn" onclick="startAssessmentFromGate('${operation}')">
+                        🚀 Take Assessment
+                    </button>
+                    <button class="gate-back-btn" onclick="backToOperations()">
+                        ← Back to Operations
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', gateHTML);
+}
+
+/**
+ * Start assessment from the gate screen
+ */
+function startAssessmentFromGate(operation) {
+    // Remove gate
+    const gate = document.getElementById('assessment-gate');
+    if (gate) {
+        gate.remove();
+    }
+
+    // Start assessment
+    if (typeof startAssessment === 'function') {
+        startAssessment(operation, operation, selectedAgeGroup);
+    } else {
+        alert('Assessment system not available. Please refresh the page.');
+    }
+}
+
+/**
+ * Go back to operations selection
+ */
+function backToOperations() {
+    const gate = document.getElementById('assessment-gate');
+    if (gate) {
+        gate.remove();
+    }
+
+    document.getElementById('math-operations').style.display = 'block';
 }
 
 function updateDifficultyDescriptions() {
