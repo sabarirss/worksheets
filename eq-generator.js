@@ -548,6 +548,10 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
+            </div>
+
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
                 📊 Age Group: ${currentAge}
             </div>
@@ -573,13 +577,10 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
-                <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
-                    <button onclick="changePage(-1)" id="prev-btn" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">← Previous Page</button>
-                    <span style="font-weight: bold; font-size: 1.2em;">Page <span id="current-page">${currentPage}</span> of <span id="total-pages">${totalPages}</span></span>
-                    <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next Page →</button>
-                </div>
+            <div class="page-navigation" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 20px 0;">
+                <button onclick="changePage(-1)" id="prev-btn" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">← Previous Page</button>
+                <span style="font-weight: bold; font-size: 1.2em;">Page <span id="current-page">${currentPage}</span> of <span id="total-pages">${totalPages}</span></span>
+                <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next Page →</button>
             </div>
 
             <div class="controls">
