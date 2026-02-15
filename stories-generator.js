@@ -164,12 +164,12 @@ function generateStories(category, difficulty) {
     // Map age to age group
     const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
 
-    // First, try to get age-appropriate stories from ageBasedStories
-    if (typeof ageBasedStories !== 'undefined' &&
-        ageBasedStories[ageGroup] &&
-        ageBasedStories[ageGroup][difficulty] &&
-        ageBasedStories[ageGroup][difficulty][category]) {
-        stories.push(...ageBasedStories[ageGroup][difficulty][category]);
+    // Get age-appropriate stories (maps to level internally)
+    if (typeof getStoriesByAge !== 'undefined') {
+        const ageStories = getStoriesByAge(ageGroup, difficulty, category);
+        if (ageStories && ageStories.length > 0) {
+            stories.push(...ageStories);
+        }
     }
 
     // If no age-based stories, try uniqueStories as fallback

@@ -9,6 +9,8 @@
  * - Age 8: 10+ sentences, complex vocabulary, multi-step plots
  * - Age 9+: 12+ sentences, abstract concepts, nuanced themes
  * - Age 10+: 15+ sentences, sophisticated language, deep lessons
+ *
+ * INTERNAL: Kept for future assessment system - use levelBasedStories for access
  */
 
 const ageBasedStories = {
@@ -243,5 +245,82 @@ const ageBasedStories = {
         ]
     }
 };
+
+// Convert age-based stories to level-based structure
+function buildLevelBasedStories() {
+    const levelStories = {};
+
+    for (const ageGroup in ageBasedStories) {
+        for (const difficulty in ageBasedStories[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            if (!levelStories[key]) {
+                levelStories[key] = {};
+            }
+
+            const ageContent = ageBasedStories[ageGroup][difficulty];
+
+            // Handle two structures: object with categories (easy) or array (medium/hard)
+            if (Array.isArray(ageContent)) {
+                // For medium/hard: direct array of stories
+                levelStories[key].general = ageContent.map(story => ({
+                    ...story,
+                    level: level,
+                    ageEquivalent: ageGroup,
+                    difficultyEquivalent: difficulty
+                }));
+            } else {
+                // For easy: object with categories (animals, nature, family, etc.)
+                for (const category in ageContent) {
+                    if (!levelStories[key][category]) {
+                        levelStories[key][category] = [];
+                    }
+
+                    const stories = ageContent[category];
+                    levelStories[key][category] = stories.map(story => ({
+                        ...story,
+                        level: level,
+                        ageEquivalent: ageGroup,
+                        difficultyEquivalent: difficulty,
+                        category: category
+                    }));
+                }
+            }
+        }
+    }
+    return levelStories;
+}
+
+const levelBasedStories = buildLevelBasedStories();
+
+// Helper functions for story access
+function getStoriesByLevel(level, difficulty, category) {
+    const levelKey = `level${level}`;
+    const levelContent = levelBasedStories[levelKey];
+
+    if (!levelContent) return [];
+
+    // If category specified, return that category
+    if (category && levelContent[category]) {
+        return levelContent[category];
+    }
+
+    // If no category specified, return all stories from all categories
+    const allStories = [];
+    for (const cat in levelContent) {
+        if (Array.isArray(levelContent[cat])) {
+            allStories.push(...levelContent[cat]);
+        }
+    }
+    return allStories;
+}
+
+function getStoriesByAge(ageGroup, difficulty, category) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getStoriesByLevel(level, difficulty, category);
+}
+
+console.log('Level-based story content loaded - 12 levels available');
 
 console.log('Age-based story content loaded');
