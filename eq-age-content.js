@@ -9,6 +9,8 @@
  * - Age 8: Complex emotions (disappointed, proud, jealous)
  * - Age 9+: Social situations (peer pressure, conflict resolution)
  * - Age 10+: Abstract emotions (anxiety, confidence, self-esteem)
+ *
+ * INTERNAL: Kept for future assessment system - use levelBasedEQScenarios for access
  */
 
 const ageBasedEQScenarios = {
@@ -516,5 +518,40 @@ const ageBasedEQScenarios = {
         ]
     }
 };
+
+// Convert age-based EQ scenarios to level-based structure
+function buildLevelBasedEQScenarios() {
+    const levelScenarios = {};
+
+    for (const ageGroup in ageBasedEQScenarios) {
+        for (const difficulty in ageBasedEQScenarios[ageGroup]) {
+            const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+            const key = `level${level}`;
+
+            const scenarios = ageBasedEQScenarios[ageGroup][difficulty];
+            levelScenarios[key] = scenarios.map(scenario => ({
+                ...scenario,
+                level: level,
+                ageEquivalent: ageGroup,
+                difficultyEquivalent: difficulty
+            }));
+        }
+    }
+    return levelScenarios;
+}
+
+const levelBasedEQScenarios = buildLevelBasedEQScenarios();
+
+// Helper functions for EQ scenario access
+function getEQScenariosByLevel(level) {
+    return levelBasedEQScenarios[`level${level}`] || [];
+}
+
+function getEQScenariosByAge(ageGroup, difficulty) {
+    const level = ageAndDifficultyToLevel(ageGroup, difficulty);
+    return getEQScenariosByLevel(level);
+}
+
+console.log('Level-based EQ content loaded - 12 levels available');
 
 console.log('Age-based EQ content loaded');

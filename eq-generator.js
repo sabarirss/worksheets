@@ -439,11 +439,9 @@ function loadActivities(difficulty, page = 1) {
     // Map age to age group
     const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
 
-    // Try to load age-appropriate scenarios from ageBasedEQScenarios
-    if (typeof ageBasedEQScenarios !== 'undefined' &&
-        ageBasedEQScenarios[ageGroup] &&
-        ageBasedEQScenarios[ageGroup][difficulty]) {
-        activities = ageBasedEQScenarios[ageGroup][difficulty];
+    // Load age-appropriate scenarios (maps to level internally)
+    if (typeof getEQScenariosByAge !== 'undefined') {
+        activities = getEQScenariosByAge(ageGroup, difficulty);
     }
 
     // Fallback to original generators if no age-based content
