@@ -399,7 +399,6 @@ let totalPages = 150; // Now always 150 pages (50 easy + 50 medium + 50 hard)
 let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
-let answersVisible = false;
 let hasUnsavedChanges = false; // Track if page has been modified
 let pageSubmissions = {}; // Track submitted pages: { operation: { absolutePage: { submitted, score, timestamp } } }
 
@@ -1407,13 +1406,7 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation" style="margin-top: 20px;">
-                <div id="answer-toggle-container" class="answer-toggle-container" style="display: inline-block;">
-                    <span class="answer-toggle-label">👀 Show Answers</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="answer-toggle-input" onchange="toggleAnswers(event)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+                <!-- Show Answers removed from Math worksheets -->
             </div>
         </div>
     `;
@@ -1454,8 +1447,6 @@ function renderWorksheet() {
         // Load saved worksheet after inputs are initialized
         setTimeout(() => {
             loadSavedWorksheet();
-            // Validate show answers toggle after loading
-            validateShowAnswersToggle();
 
             // Load submission data for current child
             loadPageSubmissions();
@@ -1727,15 +1718,6 @@ async function checkAnswers() {
         </p>
     `;
     resultsDiv.style.display = 'block';
-
-    // Show and check toggle switch
-    answersVisible = true;
-    const toggleContainer = document.getElementById('answer-toggle-container');
-    const toggleInput = document.getElementById('answer-toggle-input');
-    if (toggleContainer && toggleInput) {
-        toggleContainer.style.display = 'flex';
-        toggleInput.checked = true;
-    }
 }
 
 // Fallback function if handwriting recognition is not available
@@ -1767,15 +1749,6 @@ function checkAnswersManual() {
         <p>Time: ${document.getElementById('elapsed-time').textContent}</p>
     `;
     resultsDiv.style.display = 'block';
-
-    // Show and check toggle switch
-    answersVisible = true;
-    const toggleContainer = document.getElementById('answer-toggle-container');
-    const toggleInput = document.getElementById('answer-toggle-input');
-    if (toggleContainer && toggleInput) {
-        toggleContainer.style.display = 'flex';
-        toggleInput.checked = true;
-    }
 }
 
 // Show answer key
@@ -1849,29 +1822,7 @@ function savePDF() {
     });
 }
 
-// Toggle answer visibility
-function toggleAnswers(event) {
-    answersVisible = event ? event.target.checked : !answersVisible;
-
-    currentWorksheet.problems.forEach((problem, index) => {
-        const feedback = document.getElementById(`feedback-${index}`);
-        const correctAnswer = String(problem.answer);
-
-        if (feedback) {
-            if (answersVisible) {
-                // Show answer
-                feedback.textContent = correctAnswer;
-                feedback.style.color = '#4caf50';
-                feedback.style.fontSize = '1.5em';
-                feedback.style.fontWeight = 'bold';
-                feedback.style.display = 'inline';
-            } else {
-                // Hide answer
-                feedback.style.display = 'none';
-            }
-        }
-    });
-}
+// Toggle answer visibility - REMOVED (Show answers feature removed from Math)
 
 // Save current worksheet
 function saveCurrentWorksheet() {
@@ -1961,47 +1912,7 @@ function loadSavedWorksheet() {
     }
 }
 
-// Clear all answers on current worksheet
-// Validate if all handwriting canvases have content and enable/disable Show Answers toggle
-function validateShowAnswersToggle() {
-    const toggleInput = document.getElementById('answer-toggle-input');
-    const toggleContainer = document.getElementById('answer-toggle-container');
-
-    if (!toggleInput || !toggleContainer) return;
-
-    // Check if all handwriting inputs have content
-    let allCanvasesHaveContent = true;
-    if (handwritingInputs && handwritingInputs.length > 0) {
-        for (const input of handwritingInputs) {
-            if (input.isEmpty()) {
-                allCanvasesHaveContent = false;
-                break;
-            }
-        }
-    } else {
-        allCanvasesHaveContent = false;
-    }
-
-    // Enable/disable toggle based on canvas content
-    if (allCanvasesHaveContent) {
-        toggleInput.disabled = false;
-        toggleContainer.style.opacity = '1';
-        toggleContainer.style.cursor = 'pointer';
-        toggleContainer.title = '';
-    } else {
-        toggleInput.disabled = true;
-        toggleInput.checked = false;  // Uncheck if was checked
-        toggleContainer.style.opacity = '0.5';
-        toggleContainer.style.cursor = 'not-allowed';
-        toggleContainer.title = 'Please complete all problems to show answers';
-
-        // Hide answers if they were visible
-        if (answersVisible) {
-            answersVisible = false;
-            toggleAnswers();
-        }
-    }
-}
+// Validate show answers toggle - REMOVED (Show answers feature removed from Math)
 
 function clearAllAnswers() {
     if (!currentWorksheet) return;
@@ -2010,27 +1921,10 @@ function clearAllAnswers() {
         // Clear all canvases
         clearAllHandwritingInputs();
 
-        // Hide any visible answers
-        answersVisible = false;
-        const toggleInput = document.getElementById('answer-toggle-input');
-        if (toggleInput) {
-            toggleInput.checked = false;
-        }
-
-        currentWorksheet.problems.forEach((problem, index) => {
-            const feedback = document.getElementById(`feedback-${index}`);
-            if (feedback) {
-                feedback.style.display = 'none';
-            }
-        });
-
         // Reset timer
         stopTimer();
         elapsedSeconds = 0;
         updateTimerDisplay();
-
-        // Validate show answers toggle after clearing
-        validateShowAnswersToggle();
     }
 }
 
