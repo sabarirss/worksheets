@@ -350,32 +350,19 @@
             </div>
         </div>
 
-        <!-- Current Child Age Display -->
-        <div class="settings-section">
-            <h2>👶 Child's Current Age</h2>
-            <div class="form-group">
-                <label for="current-age-display">Age</label>
-                <input type="text" id="current-age-display" disabled style="font-size: 1.1em; font-weight: bold; color: #667eea;">
-            </div>
-            <div style="margin-top: 20px;">
-                <h4 style="color: #667eea; margin-bottom: 10px;">Currently Available Modules:</h4>
-                <div id="modules-display"></div>
-            </div>
-        </div>
-
         <!-- Parental Control Section (Hidden for Admin) -->
         <div class="settings-section" id="parental-control-section">
             <h2>👨‍👩‍👧 Parental Control</h2>
 
             <div class="parent-control-box">
-                <h3>🔒 Age Settings & Package Management</h3>
+                <h3>🔒 Package Management</h3>
                 <p style="color: #666; margin-bottom: 15px;">
-                    Parents can manage their child's age settings and learning modules. This affects which content your child can access.
+                    Parents can manage learning modules for each child profile. Enable or disable packages to control which content your children can access.
                     Requires parent verification.
                 </p>
 
                 <button class="btn btn-primary" onclick="openParentalControl()" style="width: 100%; font-size: 1.1em; padding: 15px;">
-                    🔐 Access Parental Control
+                    🔐 Manage Child Packages
                 </button>
 
                 <div class="age-guidelines" style="margin-top: 20px;">
@@ -499,38 +486,27 @@
     <!-- Parental Control Panel Modal -->
     <div class="modal" id="parental-control-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <h2 style="margin-top: 0; color: #667eea;">👨‍👩‍👧 Parental Control Panel</h2>
-            <p style="color: #666; margin-bottom: 30px;">Manage your child's age settings and learning modules.</p>
+            <h2 style="margin-top: 0; color: #667eea;">👨‍👩‍👧 Manage Child Packages</h2>
+            <p style="color: #666; margin-bottom: 30px;">Select a child to manage their learning modules.</p>
 
-            <!-- Age Settings -->
+            <!-- Child Selection -->
             <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-top: 0;">👶 Child's Age Settings</h3>
+                <h3 style="color: #667eea; margin-top: 0;">👶 Select Child</h3>
                 <div style="margin: 15px 0;">
-                    <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">Current Age:</label>
-                    <input type="text" id="panel-current-age" disabled style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1.1em; font-weight: bold; color: #667eea; background: white; box-sizing: border-box;">
-                </div>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">Change Age To:</label>
-                    <select id="panel-new-age" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
-                        <option value="">Keep current age</option>
-                        <option value="4">4 years old</option>
-                        <option value="5">5 years old</option>
-                        <option value="6">6 years old</option>
-                        <option value="7">7 years old</option>
-                        <option value="8">8 years old</option>
-                        <option value="9">9 years old</option>
-                        <option value="10">10 years old</option>
-                        <option value="11">11 years old</option>
-                        <option value="12">12 years old</option>
-                        <option value="13">13+ years old</option>
+                    <select id="panel-child-select" onchange="loadChildPackages()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
+                        <option value="">-- Select a child --</option>
                     </select>
+                </div>
+                <div id="child-age-display" style="margin-top: 15px; padding: 12px; background: white; border-radius: 8px; display: none;">
+                    <strong>Age:</strong> <span id="child-age-value" style="color: #667eea; font-weight: bold;"></span>
+                    <span style="color: #888; font-size: 0.9em; margin-left: 10px;">(calculated from date of birth)</span>
                 </div>
             </div>
 
             <!-- Package Management -->
-            <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+            <div id="package-management-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; display: none;">
                 <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages</h3>
-                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for your child:</p>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for <strong id="selected-child-name"></strong>:</p>
                 <div style="display: grid; gap: 10px;">
                     <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-math" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
@@ -560,18 +536,14 @@
                         <input type="checkbox" id="panel-toggle-german-kids" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
                         <span style="font-size: 1.05em;">🇩🇪 German Kids</span>
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
-                        <input type="checkbox" id="panel-toggle-learn-english-stories" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">📚 Learn English Stories</span>
-                    </label>
                 </div>
             </div>
 
             <div id="panel-error" style="color: #e74c3c; font-weight: bold; margin: 15px 0; display: none;"></div>
 
             <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button onclick="saveParentalControlChanges()" class="btn btn-primary" style="flex: 1;">
-                    💾 Save All Changes
+                <button onclick="saveChildPackages()" class="btn btn-primary" style="flex: 1;" id="save-packages-btn" disabled>
+                    💾 Save Changes
                 </button>
                 <button onclick="closeParentalControlPanel()" class="btn btn-secondary" style="flex: 1;">
                     Cancel
@@ -685,13 +657,6 @@
                     const isDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
                     document.getElementById('demo-preview-toggle').checked = isDemoPreview;
                 }
-
-                // Display current age
-                const ageDisplay = userData.age ? `${userData.age} years old` : 'Not set';
-                document.getElementById('current-age-display').value = ageDisplay;
-
-                // Display enabled modules (what parent has enabled for child)
-                displayModules(userData.enabledModules || {});
 
                 // Hide Parental Control section for admin users
                 if (userData.role === 'admin') {
@@ -851,47 +816,85 @@
             }
         }
 
-        function openParentalControlPanel() {
+        async function openParentalControlPanel() {
             document.getElementById('parental-control-panel').style.display = 'flex';
             document.getElementById('panel-error').style.display = 'none';
+            document.getElementById('package-management-section').style.display = 'none';
+            document.getElementById('save-packages-btn').disabled = true;
 
-            // Load current age
+            // Load children list
             if (currentUser) {
-                const ageDisplay = currentUser.age ? `${currentUser.age} years old` : 'Not set';
-                document.getElementById('panel-current-age').value = ageDisplay;
+                const childSelect = document.getElementById('panel-child-select');
+                childSelect.innerHTML = '<option value="">-- Select a child --</option>';
 
-                // Get assigned modules (what admin has made available)
-                const assignedModules = currentUser.modules || {};
-                // Get enabled modules (what parent has enabled) - fallback to modules if enabledModules doesn't exist
-                const enabledModules = currentUser.enabledModules || currentUser.modules || {};
+                try {
+                    const snapshot = await firebase.firestore()
+                        .collection('children')
+                        .where('parent_uid', '==', currentUser.uid)
+                        .orderBy('created_at', 'desc')
+                        .get();
 
-                // Package list
-                const allModules = [
-                    { key: 'math', id: 'panel-toggle-math' },
-                    { key: 'english', id: 'panel-toggle-english' },
-                    { key: 'aptitude', id: 'panel-toggle-aptitude' },
-                    { key: 'stories', id: 'panel-toggle-stories' },
-                    { key: 'emotional-quotient', id: 'panel-toggle-emotional-quotient' },
-                    { key: 'drawing', id: 'panel-toggle-drawing' },
-                    { key: 'german-kids', id: 'panel-toggle-german-kids' },
-                    { key: 'learn-english-stories', id: 'panel-toggle-learn-english-stories' }
-                ];
-
-                // Update each module checkbox
-                allModules.forEach(module => {
-                    const checkbox = document.getElementById(module.id);
-                    const label = checkbox.closest('label');
-
-                    if (assignedModules[module.key]) {
-                        // Package is assigned by admin - show and enable it
-                        label.style.display = 'flex';
-                        checkbox.disabled = false;
-                        checkbox.checked = enabledModules[module.key] || false;
-                    } else {
-                        // Package not assigned by admin - hide it
-                        label.style.display = 'none';
+                    if (snapshot.empty) {
+                        childSelect.innerHTML = '<option value="">No children profiles found</option>';
+                        return;
                     }
-                });
+
+                    snapshot.forEach(doc => {
+                        const child = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = child.name;
+                        childSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading children:', error);
+                    childSelect.innerHTML = '<option value="">Error loading children</option>';
+                }
+            }
+        }
+
+        async function loadChildPackages() {
+            const childId = document.getElementById('panel-child-select').value;
+
+            if (!childId) {
+                document.getElementById('package-management-section').style.display = 'none';
+                document.getElementById('child-age-display').style.display = 'none';
+                document.getElementById('save-packages-btn').disabled = true;
+                return;
+            }
+
+            try {
+                const doc = await firebase.firestore().collection('children').doc(childId).get();
+
+                if (!doc.exists) {
+                    alert('Child not found');
+                    return;
+                }
+
+                const child = doc.data();
+
+                // Show child's age (calculated from DOB)
+                document.getElementById('child-age-value').textContent = `${child.age} years old`;
+                document.getElementById('child-age-display').style.display = 'block';
+                document.getElementById('selected-child-name').textContent = child.name;
+
+                // Show package management section
+                document.getElementById('package-management-section').style.display = 'block';
+                document.getElementById('save-packages-btn').disabled = false;
+
+                // Load child's enabled modules
+                const modules = child.enabledModules || { math: true };
+
+                document.getElementById('panel-toggle-math').checked = modules.math || false;
+                document.getElementById('panel-toggle-english').checked = modules.english || false;
+                document.getElementById('panel-toggle-aptitude').checked = modules.aptitude || false;
+                document.getElementById('panel-toggle-stories').checked = modules.stories || false;
+                document.getElementById('panel-toggle-emotional-quotient').checked = modules['emotional-quotient'] || false;
+                document.getElementById('panel-toggle-drawing').checked = modules.drawing || false;
+                document.getElementById('panel-toggle-german-kids').checked = modules['german-kids'] || false;
+            } catch (error) {
+                console.error('Error loading child packages:', error);
+                alert('Error loading child data: ' + error.message);
             }
         }
 
@@ -899,23 +902,18 @@
             document.getElementById('parental-control-panel').style.display = 'none';
         }
 
-        async function saveParentalControlChanges() {
-            if (!currentUser) return;
+        async function saveChildPackages() {
+            const childId = document.getElementById('panel-child-select').value;
+
+            if (!childId) {
+                alert('Please select a child first');
+                return;
+            }
 
             const errorDiv = document.getElementById('panel-error');
-            const newAge = document.getElementById('panel-new-age').value;
 
             try {
-                const userDoc = firebase.firestore().collection('users').doc(currentUser.uid.substring(0, 20));
-                const updates = {};
-
-                // Update age if changed
-                if (newAge) {
-                    updates.age = parseInt(newAge);
-                    currentUser.age = parseInt(newAge);
-                }
-
-                // Update enabled modules (parent controls these)
+                // Collect enabled modules
                 const enabledModules = {
                     math: document.getElementById('panel-toggle-math').checked,
                     english: document.getElementById('panel-toggle-english').checked,
@@ -923,30 +921,28 @@
                     stories: document.getElementById('panel-toggle-stories').checked,
                     'emotional-quotient': document.getElementById('panel-toggle-emotional-quotient').checked,
                     drawing: document.getElementById('panel-toggle-drawing').checked,
-                    'german-kids': document.getElementById('panel-toggle-german-kids').checked,
-                    'learn-english-stories': document.getElementById('panel-toggle-learn-english-stories').checked
+                    german: false, // German B1 is admin-only
+                    'german-kids': document.getElementById('panel-toggle-german-kids').checked
                 };
 
-                // Add enabled module updates
-                for (const [key, value] of Object.entries(enabledModules)) {
-                    updates[`enabledModules.${key}`] = value;
-                }
-
-                // Save to Firestore
-                await userDoc.update(updates);
-
-                // Update local cache
-                currentUser.enabledModules = enabledModules;
+                // Save to child's document
+                await firebase.firestore().collection('children').doc(childId).update({
+                    enabledModules: enabledModules,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
                 closeParentalControlPanel();
-                showSuccess('Settings updated successfully! Page will reload to apply changes.');
+                showSuccess('Package settings updated successfully! Changes will apply on next page load.');
 
-                // Reload after 2 seconds
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                // Reload after 2 seconds if this is the currently selected child
+                const selectedChild = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+                if (selectedChild && selectedChild.id === childId) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                }
             } catch (error) {
-                console.error('Error saving parental control changes:', error);
+                console.error('Error saving child packages:', error);
                 errorDiv.textContent = 'Failed to save changes: ' + error.message;
                 errorDiv.style.display = 'block';
             }
