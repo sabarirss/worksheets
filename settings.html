@@ -298,19 +298,6 @@
                 <div class="info-text">Only admins can change account types</div>
             </div>
 
-            <div class="form-group">
-                <label for="version">Version</label>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <input type="text" id="version" disabled style="flex: 1;">
-                    <button id="request-upgrade-btn" class="btn" style="background: #4caf50; color: white; display: none; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;" onclick="requestVersionUpgrade()">
-                        🛒 Buy Full Version
-                    </button>
-                    <span id="upgrade-requested-badge" style="display: none; background: #ff9800; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">
-                        ⏳ Upgrade Requested
-                    </span>
-                </div>
-                <div class="info-text" id="version-info-text">Demo version limited to 2 pages per activity</div>
-            </div>
 
             <!-- Input Mode Selection -->
             <div class="form-group" id="input-mode-section">
@@ -381,6 +368,17 @@
                 <button class="btn btn-primary" onclick="openParentalControl()" style="width: 100%; font-size: 1.1em; padding: 15px;">
                     🔐 Manage Child Packages
                 </button>
+            </div>
+
+            <!-- Children Version Management -->
+            <div id="children-version-section" style="margin-top: 30px;">
+                <h3>📦 Version Management (Per Child)</h3>
+                <p style="color: #666; margin-bottom: 15px;">
+                    Manage version and upgrade requests for each child individually.
+                </p>
+                <div id="children-version-list">
+                    <!-- Will be populated dynamically -->
+                </div>
             </div>
         </div>
 
@@ -627,31 +625,8 @@
                 document.getElementById('email').value = userData.email || '';
                 document.getElementById('role').value = userData.role || 'student';
 
-                // Display version and upgrade controls
-                const version = userData.version || 'demo';
-                const versionDisplay = version === 'demo' ? 'Demo (Limited)' : 'Full (Unlimited)';
-                document.getElementById('version').value = versionDisplay;
-
-                // Show/hide upgrade request button based on version and request status
-                const requestBtn = document.getElementById('request-upgrade-btn');
-                const requestedBadge = document.getElementById('upgrade-requested-badge');
-                const versionInfoText = document.getElementById('version-info-text');
-
-                if (version === 'demo') {
-                    if (userData.versionUpgradeRequested) {
-                        requestBtn.style.display = 'none';
-                        requestedBadge.style.display = 'inline-block';
-                        versionInfoText.textContent = 'Upgrade request pending admin approval';
-                    } else {
-                        requestBtn.style.display = 'inline-block';
-                        requestedBadge.style.display = 'none';
-                        versionInfoText.textContent = 'Demo version limited to 2 pages per activity';
-                    }
-                } else {
-                    requestBtn.style.display = 'none';
-                    requestedBadge.style.display = 'none';
-                    versionInfoText.textContent = 'Full version with unlimited access';
-                }
+                // Load children version information
+                await loadChildrenVersionInfo();
 
                 // Show admin demo preview toggle for admin users
                 if (userData.role === 'admin') {
@@ -662,31 +637,10 @@
                     document.getElementById('demo-preview-toggle').checked = isDemoPreview;
                 }
 
-                // Load input mode (for all users)
-                const inputMode = userData.inputMode || 'keyboard';
-                const keyboardRadio = document.getElementById('input-mode-keyboard');
-                const pencilRadio = document.getElementById('input-mode-pencil');
-                const keyboardLabel = document.getElementById('keyboard-label');
-                const stylusLabel = document.getElementById('stylus-label');
-                const stylusBadge = document.getElementById('stylus-full-version-badge');
-
-                // Set selected input mode
-                if (inputMode === 'pencil') {
-                    pencilRadio.checked = true;
-                    stylusLabel.style.borderColor = '#667eea';
-                    stylusLabel.style.background = '#f0f4ff';
-                } else {
-                    keyboardRadio.checked = true;
-                    keyboardLabel.style.borderColor = '#667eea';
-                    keyboardLabel.style.background = '#f0f4ff';
-                }
-
-                // Show "Full Version" badge for stylus if demo version
-                if (version === 'demo') {
-                    stylusBadge.style.display = 'inline';
-                    pencilRadio.disabled = true;
-                    stylusLabel.style.opacity = '0.5';
-                    stylusLabel.style.cursor = 'not-allowed';
+                // Input mode is now managed per-child, hide from parent settings
+                const inputModeSection = document.getElementById('input-mode-section');
+                if (inputModeSection) {
+                    inputModeSection.style.display = 'none';
                 }
 
                 // Hide Parental Control section for admin users
@@ -1094,26 +1048,102 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Request version upgrade
-        async function requestVersionUpgrade() {
+        // Load children version information
+        async function loadChildrenVersionInfo() {
             if (!currentUser) return;
 
-            if (!confirm('Request full version upgrade? An admin will review your request.')) {
+            const versionSection = document.getElementById('children-version-section');
+            const versionList = document.getElementById('children-version-list');
+
+            // Hide for admin
+            if (currentUser.role === 'admin') {
+                versionSection.style.display = 'none';
                 return;
             }
 
             try {
-                // Use full UID (not truncated) to match security rules
-                const uid = currentUser.uid;
-                await firebase.firestore().collection('users').doc(uid).update({
+                const snapshot = await firebase.firestore()
+                    .collection('children')
+                    .where('parent_uid', '==', currentUser.uid)
+                    .get();
+
+                if (snapshot.empty) {
+                    versionList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No children profiles yet. Add children to manage their versions.</p>';
+                    return;
+                }
+
+                versionList.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    const child = doc.data();
+                    const childId = doc.id;
+                    const version = child.version || 'demo';
+                    const versionUpgradeRequested = child.versionUpgradeRequested || false;
+
+                    const childCard = document.createElement('div');
+                    childCard.style.cssText = `
+                        background: #f8f9fa;
+                        border: 2px solid #e0e0e0;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 15px;
+                    `;
+
+                    const versionBadge = version === 'full'
+                        ? '<span style="background: #4caf50; color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">✨ Full Version</span>'
+                        : '<span style="background: #ff9800; color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">📦 Demo Version</span>';
+
+                    let actionButton = '';
+                    if (version === 'demo') {
+                        if (versionUpgradeRequested) {
+                            actionButton = '<span style="background: #ff9800; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">⏳ Upgrade Requested</span>';
+                        } else {
+                            actionButton = `<button onclick="requestChildVersionUpgrade('${childId}', '${child.name}')" style="background: #4caf50; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">🛒 Buy Full Version</button>`;
+                        }
+                    }
+
+                    childCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">
+                                    ${child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶'} ${child.name}
+                                </h4>
+                                <div style="margin-bottom: 8px;">${versionBadge}</div>
+                                <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                                    ${version === 'demo' ? 'Limited to 2 pages per activity' : 'Unlimited access to all content'}
+                                </p>
+                            </div>
+                            <div>
+                                ${actionButton}
+                            </div>
+                        </div>
+                    `;
+
+                    versionList.appendChild(childCard);
+                });
+
+            } catch (error) {
+                console.error('Error loading children version info:', error);
+                versionList.innerHTML = '<p style="color: #e74c3c;">Error loading children information</p>';
+            }
+        }
+
+        // Request version upgrade for specific child
+        async function requestChildVersionUpgrade(childId, childName) {
+            if (!confirm(`Request full version upgrade for ${childName}?\n\nAn admin will review your request.`)) {
+                return;
+            }
+
+            try {
+                await firebase.firestore().collection('children').doc(childId).update({
                     versionUpgradeRequested: true,
                     upgradeRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                showSuccess('Full version upgrade requested! An admin will review your request.');
+                showSuccess(`Full version upgrade requested for ${childName}! An admin will review your request.`);
 
-                // Reload profile to update UI
-                await loadUserProfile();
+                // Reload children version info
+                await loadChildrenVersionInfo();
             } catch (error) {
                 console.error('Error requesting upgrade:', error);
                 showError('Failed to request upgrade: ' + error.message);
@@ -1136,61 +1166,7 @@
             }, 1500);
         }
 
-        // Update input mode
-        async function updateInputMode(mode) {
-            if (!currentUser) return;
-
-            try {
-                // Check if switching to pencil mode with demo version
-                if (mode === 'pencil') {
-                    const version = currentUser.version || 'demo';
-                    if (version === 'demo') {
-                        alert('⚠️ Stylus mode is only available in Full Version.\n\nPlease upgrade to Full Version first.');
-                        // Reset to keyboard
-                        document.getElementById('input-mode-keyboard').checked = true;
-                        document.getElementById('keyboard-label').style.borderColor = '#667eea';
-                        document.getElementById('keyboard-label').style.background = '#f0f4ff';
-                        document.getElementById('stylus-label').style.borderColor = '#e0e0e0';
-                        document.getElementById('stylus-label').style.background = 'white';
-                        return;
-                    }
-                }
-
-                // Update in Firestore
-                const uid = currentUser.uid;
-                await firebase.firestore().collection('users').doc(uid).update({
-                    inputMode: mode,
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // Update current user data
-                currentUser.inputMode = mode;
-
-                // Update UI styling
-                const keyboardLabel = document.getElementById('keyboard-label');
-                const stylusLabel = document.getElementById('stylus-label');
-
-                if (mode === 'pencil') {
-                    keyboardLabel.style.borderColor = '#e0e0e0';
-                    keyboardLabel.style.background = 'white';
-                    stylusLabel.style.borderColor = '#667eea';
-                    stylusLabel.style.background = '#f0f4ff';
-                } else {
-                    keyboardLabel.style.borderColor = '#667eea';
-                    keyboardLabel.style.background = '#f0f4ff';
-                    stylusLabel.style.borderColor = '#e0e0e0';
-                    stylusLabel.style.background = 'white';
-                }
-
-                // Show success message
-                const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
-                const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
-                showSuccess(`✓ Input mode changed to: ${modeIcon} ${modeName}`);
-            } catch (error) {
-                console.error('Error updating input mode:', error);
-                showError('Failed to update input mode: ' + error.message);
-            }
-        }
+        // Input mode is now managed per-child in the generators, not here
 
         // Password change modal functions
         function openPasswordChangeModal() {

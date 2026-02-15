@@ -766,11 +766,11 @@
         // ===== Version Upgrade Request Functions =====
         async function loadUpgradeRequests() {
             try {
-                console.log('Loading upgrade requests...');
+                console.log('Loading upgrade requests from children collection...');
 
-                // Get all users with pending upgrade requests
-                const usersSnapshot = await firebase.firestore()
-                    .collection('users')
+                // Get all children with pending upgrade requests
+                const childrenSnapshot = await firebase.firestore()
+                    .collection('children')
                     .where('versionUpgradeRequested', '==', true)
                     .get();
 
@@ -778,7 +778,7 @@
                 const upgradeRequestsList = document.getElementById('upgrade-requests-list');
                 const noRequestsDiv = document.getElementById('no-upgrade-requests');
 
-                if (usersSnapshot.empty) {
+                if (childrenSnapshot.empty) {
                     upgradeRequestsSection.style.display = 'none';
                     return;
                 }
@@ -788,12 +788,24 @@
                 upgradeRequestsList.innerHTML = '';
                 noRequestsDiv.style.display = 'none';
 
-                usersSnapshot.forEach(doc => {
-                    const user = doc.data();
-                    const userId = doc.id;
-                    const requestDate = user.upgradeRequestedAt ?
-                        new Date(user.upgradeRequestedAt.toDate()).toLocaleDateString() :
+                // Load parent info for each child
+                for (const doc of childrenSnapshot.docs) {
+                    const child = doc.data();
+                    const childId = doc.id;
+                    const requestDate = child.upgradeRequestedAt ?
+                        new Date(child.upgradeRequestedAt.toDate()).toLocaleDateString() :
                         'Unknown date';
+
+                    // Get parent info
+                    let parentEmail = 'Unknown';
+                    try {
+                        const parentDoc = await firebase.firestore().collection('users').doc(child.parent_uid).get();
+                        if (parentDoc.exists) {
+                            parentEmail = parentDoc.data().email || 'Unknown';
+                        }
+                    } catch (err) {
+                        console.error('Error loading parent:', err);
+                    }
 
                     const requestCard = document.createElement('div');
                     requestCard.style.cssText = `
@@ -807,54 +819,59 @@
                         gap: 20px;
                     `;
 
+                    const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
+
                     requestCard.innerHTML = `
                         <div style="flex: 1;">
                             <h3 style="margin: 0 0 10px 0; color: #2c3e50;">
-                                ${user.fullName || user.username}
+                                ${avatar} Child: ${child.name}
                             </h3>
                             <p style="margin: 5px 0; color: #666;">
-                                <strong>Email:</strong> ${user.email}
+                                <strong>Parent Email:</strong> ${parentEmail}
                             </p>
                             <p style="margin: 5px 0; color: #666;">
-                                <strong>Current Version:</strong> ${user.version || 'demo'}
+                                <strong>Child Age:</strong> ${child.age} years old
+                            </p>
+                            <p style="margin: 5px 0; color: #666;">
+                                <strong>Current Version:</strong> ${child.version || 'demo'}
                             </p>
                             <p style="margin: 5px 0; color: #999; font-size: 0.9em;">
                                 <strong>Requested:</strong> ${requestDate}
                             </p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-primary btn-small" onclick="approveUpgradeRequest('${userId}', '${user.fullName || user.username}')">
+                            <button class="btn btn-primary btn-small" onclick="approveChildUpgradeRequest('${childId}', '${child.name}')">
                                 ✓ Approve
                             </button>
-                            <button class="btn btn-danger btn-small" onclick="denyUpgradeRequest('${userId}', '${user.fullName || user.username}')">
+                            <button class="btn btn-danger btn-small" onclick="denyChildUpgradeRequest('${childId}', '${child.name}')">
                                 ✗ Deny
                             </button>
                         </div>
                     `;
 
                     upgradeRequestsList.appendChild(requestCard);
-                });
+                }
 
-                console.log('✓ Loaded', usersSnapshot.size, 'upgrade requests');
+                console.log('✓ Loaded', childrenSnapshot.size, 'child upgrade requests');
             } catch (error) {
                 console.error('Error loading upgrade requests:', error);
             }
         }
 
-        async function approveUpgradeRequest(userId, userName) {
-            if (!confirm(`Approve full version upgrade for ${userName}?`)) {
+        async function approveChildUpgradeRequest(childId, childName) {
+            if (!confirm(`Approve full version upgrade for ${childName}?`)) {
                 return;
             }
 
             try {
-                await firebase.firestore().collection('users').doc(userId).update({
+                await firebase.firestore().collection('children').doc(childId).update({
                     version: 'full',
                     versionUpgradeRequested: false,
                     upgradeApprovedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     upgradeApprovedBy: firebase.auth().currentUser.email
                 });
 
-                alert(`✓ Full version approved for ${userName}!`);
+                alert(`✓ Full version approved for ${childName}!`);
 
                 // Reload upgrade requests to refresh the list
                 await loadUpgradeRequests();
@@ -864,19 +881,19 @@
             }
         }
 
-        async function denyUpgradeRequest(userId, userName) {
-            if (!confirm(`Deny full version upgrade request for ${userName}?`)) {
+        async function denyChildUpgradeRequest(childId, childName) {
+            if (!confirm(`Deny full version upgrade request for ${childName}?`)) {
                 return;
             }
 
             try {
-                await firebase.firestore().collection('users').doc(userId).update({
+                await firebase.firestore().collection('children').doc(childId).update({
                     versionUpgradeRequested: false,
                     upgradeDeniedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     upgradeDeniedBy: firebase.auth().currentUser.email
                 });
 
-                alert(`Request denied for ${userName}.`);
+                alert(`Request denied for ${childName}.`);
 
                 // Reload upgrade requests to refresh the list
                 await loadUpgradeRequests();
@@ -1048,17 +1065,29 @@
                 const enabledCount = Object.values(enabledModules).filter(Boolean).length;
 
                 const currentVersion = child.version || 'demo';
+                const versionBadge = currentVersion === 'full'
+                    ? '<span style="background: #4caf50; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">✨ Full</span>'
+                    : '<span style="background: #ff9800; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">📦 Demo</span>';
 
                 return `
                     <div class="child-card">
                         <div class="child-header">
                             <div class="child-avatar">${avatar}</div>
                             <div class="child-details">
-                                <div class="child-name">${child.name}</div>
+                                <div class="child-name">${child.name} ${versionBadge}</div>
                                 <div class="child-info-line">Age: ${age} years old | Grade: ${child.grade || 'Not set'}</div>
                                 <div class="child-info-line">Born: ${formatDate(child.date_of_birth)}</div>
                                 <div class="child-info-line" style="color: #667eea; font-weight: bold; margin-top: 8px;">
                                     ✓ Assigned: ${assignedCount} | Enabled by Parent: ${enabledCount}
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    <label style="font-size: 0.9em; color: #666; display: flex; align-items: center; gap: 8px;">
+                                        <strong>Version:</strong>
+                                        <select onchange="updateChildVersion('${child.id}', this.value)" style="padding: 4px 8px; border: 2px solid #ddd; border-radius: 6px; cursor: pointer;">
+                                            <option value="demo" ${currentVersion === 'demo' ? 'selected' : ''}>Demo</option>
+                                            <option value="full" ${currentVersion === 'full' ? 'selected' : ''}>Full</option>
+                                        </select>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -1280,6 +1309,24 @@ Would you like to view their children profiles?
                     // Trigger visual feedback
                     saveAdminLevelSelection(module, level);
                 }
+            }
+        }
+
+        // Update child version
+        async function updateChildVersion(childId, newVersion) {
+            try {
+                await firebase.firestore().collection('children').doc(childId).update({
+                    version: newVersion,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert(`✓ Child version updated to ${newVersion}!`);
+
+                // Reload data
+                await loadParentsAndChildren();
+            } catch (error) {
+                console.error('Error updating child version:', error);
+                alert('Failed to update version: ' + error.message);
             }
         }
 

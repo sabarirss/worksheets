@@ -6,7 +6,7 @@
 
 // Global state
 window.inputMode = 'keyboard'; // Default for all users
-window.userVersion = 'demo'; // Will be updated when user data loads
+window.childVersion = 'demo'; // Will be updated when child is selected
 
 /**
  * Initialize input mode from localStorage
@@ -19,6 +19,10 @@ function initializeInputMode() {
         return;
     }
 
+    // Get child's version
+    window.childVersion = child.version || 'demo';
+    console.log('Child version:', window.childVersion);
+
     // Load saved preference
     const saved = localStorage.getItem(`inputMode_${child.id}`);
 
@@ -26,9 +30,9 @@ function initializeInputMode() {
     if (!saved) {
         window.inputMode = 'keyboard';
     } else {
-        // Only allow pencil mode if Full version
-        if (saved === 'pencil' && window.userVersion !== 'full') {
-            console.log('Pencil mode requested but user is not Full version, defaulting to keyboard');
+        // Only allow pencil mode if child has Full version
+        if (saved === 'pencil' && window.childVersion !== 'full') {
+            console.log('Pencil mode requested but child does not have Full version, defaulting to keyboard');
             window.inputMode = 'keyboard';
         } else {
             window.inputMode = saved;
@@ -41,7 +45,7 @@ function initializeInputMode() {
 
 /**
  * Set input mode (keyboard or pencil)
- * Only allows pencil for Full version users
+ * Only allows pencil for children with Full version
  */
 function setInputMode(mode) {
     // Validate mode
@@ -50,20 +54,25 @@ function setInputMode(mode) {
         return false;
     }
 
-    // Check if pencil mode is allowed
-    if (mode === 'pencil' && window.userVersion !== 'full') {
-        alert('✨ Pencil Mode is a Full Version feature!\n\nUpgrade to Full Version to use handwriting recognition with your iPad/tablet pencil.');
+    const child = getSelectedChild();
+    if (!child) {
+        console.error('No child selected');
         return false;
     }
 
-    // Save preference
-    const child = getSelectedChild();
-    if (child) {
-        localStorage.setItem(`inputMode_${child.id}`, mode);
+    // Check if pencil mode is allowed for this child
+    const childVersion = child.version || 'demo';
+    if (mode === 'pencil' && childVersion !== 'full') {
+        alert(`✨ Pencil Mode is a Full Version feature!\n\nUpgrade ${child.name}'s profile to Full Version to use handwriting recognition with your iPad/tablet pencil.`);
+        return false;
     }
 
+    // Save preference per child
+    localStorage.setItem(`inputMode_${child.id}`, mode);
+
     window.inputMode = mode;
-    console.log('Input mode changed to:', mode);
+    window.childVersion = childVersion;
+    console.log('Input mode changed to:', mode, 'for child:', child.name);
 
     updateInputModeUI();
     return true;
@@ -84,10 +93,14 @@ function isPencilMode() {
 }
 
 /**
- * Check if pencil mode is available for current user
+ * Check if pencil mode is available for current child
  */
 function isPencilModeAvailable() {
-    return window.userVersion === 'full';
+    const child = getSelectedChild();
+    if (!child) return false;
+
+    const childVersion = child.version || 'demo';
+    return childVersion === 'full';
 }
 
 /**
@@ -150,15 +163,15 @@ function createInputModeToggle() {
 }
 
 /**
- * Set user version (called when user data loads)
+ * Set child version (called when child is selected)
  */
 function setUserVersion(version) {
-    window.userVersion = version || 'demo';
-    console.log('User version set to:', window.userVersion);
+    window.childVersion = version || 'demo';
+    console.log('Child version set to:', window.childVersion);
 
     // Re-validate input mode
-    if (window.inputMode === 'pencil' && window.userVersion !== 'full') {
-        console.log('User downgraded or version changed, switching to keyboard mode');
+    if (window.inputMode === 'pencil' && window.childVersion !== 'full') {
+        console.log('Child does not have Full version, switching to keyboard mode');
         window.inputMode = 'keyboard';
         const child = getSelectedChild();
         if (child) {

@@ -29,8 +29,12 @@ function isDemoMode() {
         return adminDemoPreview; // Admin can toggle demo preview
     }
 
-    // Treat users without version field as demo (for existing users)
-    const version = user.version || 'demo';
+    // Get selected child and check their version
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    if (!child) return true; // Default to demo if no child selected
+
+    // Check child's version (default to demo for backward compatibility)
+    const version = child.version || 'demo';
     return version === 'demo';
 }
 

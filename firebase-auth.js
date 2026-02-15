@@ -309,14 +309,13 @@ async function createUser(userData) {
         );
 
         // Create user document in Firestore (using main app)
+        // Note: version is now per-child, not per-user
         const newUser = {
             uid: userCredential.user.uid,
             username: userData.username,
             email: email,
             role: userData.role || 'student',
             fullName: userData.fullName || userData.username,
-            version: 'demo', // New users start with demo version
-            versionUpgradeRequested: false,
             modules: userData.modules || {
                 math: true,
                 english: false,
