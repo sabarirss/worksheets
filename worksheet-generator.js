@@ -125,8 +125,20 @@ function showDifficulties(operation) {
         console.log('Auto-set age group to:', selectedAgeGroup);
     }
 
+    // Check if user is admin
+    const isAdmin = window.currentUserRole === 'admin';
+
     // Check if assessment has been completed for this operation
     const child = getSelectedChild();
+
+    // Admin users can bypass child selection and assessment
+    if (isAdmin) {
+        console.log('Admin user - skipping child check and assessment');
+        // Load worksheet at page 1 for admin
+        loadWorksheetByPage(operation, 1);
+        return;
+    }
+
     if (!child) {
         alert('Please select a child profile first');
         return;

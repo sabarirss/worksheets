@@ -702,6 +702,9 @@
                     // Store globally for Math module
                     window.detectedChildAge = childAge;
 
+                    // Store user role globally for access checks
+                    window.currentUserRole = userData.role;
+
                     // Initialize UI with user data
                     initializeUserInterface(userData);
                 } else {
