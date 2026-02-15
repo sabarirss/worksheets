@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Practice Worksheets</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -182,6 +183,52 @@
             color: rgba(255,255,255,0.9);
         }
 
+        /* Writing Practice Example Styles */
+        .writing-example-box {
+            background: #fff9e6;
+            border: 3px dashed #ffd700;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .example-label {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .handwriting-example {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            /* Ruled lines background */
+            background-image:
+                linear-gradient(transparent 19%, #ddd 20%, #ddd 20%, transparent 21%),
+                linear-gradient(transparent 39%, #e8e8e8 40%, #e8e8e8 40%, transparent 41%),
+                linear-gradient(transparent 59%, #2c3e50 60%, #2c3e50 61%, transparent 62%),
+                linear-gradient(transparent 79%, #ddd 80%, #ddd 80%, transparent 81%);
+            background-size: 100% 100px;
+            background-position: 0 0;
+        }
+
+        .handwritten-text {
+            font-family: 'Caveat', cursive;
+            font-size: 4em;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
         /* Mobile responsive */
         @media (max-width: 768px) {
             .story-illustration {
@@ -200,6 +247,15 @@
             .answer-btn {
                 padding: 12px 20px;
                 font-size: 1em;
+            }
+
+            .handwritten-text {
+                font-size: 3em;
+            }
+
+            .handwriting-example {
+                padding: 20px;
+                min-height: 100px;
             }
         }
     </style>

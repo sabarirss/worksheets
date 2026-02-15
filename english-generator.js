@@ -2428,6 +2428,9 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
         pageActivities.push(activities[activityIdx]);
     }
 
+    // Check if age group should show example (only up to age 8)
+    const shouldShowExample = ['4-5', '6', '7', '8'].includes(ageGroup);
+
     // Generate HTML for writing canvases
     let problemsHTML = '';
     pageActivities.forEach((activity, index) => {
@@ -2440,10 +2443,13 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
                     <span class="problem-number">${index + 1}.</span>
                     <span class="problem-title">${activity.prompt}</span>
                 </div>
-                ${activity.example ? `
-                    <div class="writing-example">
-                        <span style="font-size: 1.3em; font-weight: bold;">${activity.example}</span>
-                        ${meaningEmoji}
+                ${activity.example && shouldShowExample ? `
+                    <div class="writing-example-box">
+                        <div class="example-label">✏️ Example to copy:</div>
+                        <div class="handwriting-example">
+                            <span class="handwritten-text">${activity.example}</span>
+                            ${meaningEmoji}
+                        </div>
                     </div>
                 ` : ''}
                 <div class="writing-canvas-container">
