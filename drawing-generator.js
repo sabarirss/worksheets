@@ -1388,8 +1388,13 @@ function loadTutorialList(difficulty) {
 
     // Get tutorials for current age and difficulty
     const tutorials = drawingTutorials[currentAge][difficulty];
+    const tutorialEntries = Object.entries(tutorials);
 
-    for (const [key, tutorial] of Object.entries(tutorials)) {
+    // Limit to 2 tutorials in demo mode
+    const limit = getDemoLimit(tutorialEntries.length);
+    const limitedTutorials = tutorialEntries.slice(0, limit);
+
+    for (const [key, tutorial] of limitedTutorials) {
         const card = document.createElement('div');
         card.className = 'tutorial-card';
         card.onclick = () => loadDrawingTutorial(key);

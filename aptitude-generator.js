@@ -760,12 +760,6 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="page-navigation" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 20px 0;">
-                <button onclick="changePage(-1)" id="prev-btn" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">← Previous Page</button>
-                <span style="font-weight: bold; font-size: 1.2em;">Page <span id="current-page">${currentPage}</span> of <span id="total-pages">${totalPages}</span></span>
-                <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next Page →</button>
-            </div>
-
             <div class="controls">
                 <div class="timer">
                     <span id="timer-display">00:00</span>
@@ -788,6 +782,12 @@ function renderWorksheet() {
 
             <div class="aptitude-problems-container">${problemsHTML}</div>
 
+            <div class="page-navigation" style="margin: 30px 0;">
+                <button onclick="changePage(-1)" id="prev-btn" ${currentPage <= 1 ? 'disabled' : ''}>← Previous Page</button>
+                <span class="page-counter">Page <span id="current-page">${currentPage}</span> of <span id="total-pages">${totalPages}</span></span>
+                <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''}>Next Page →</button>
+            </div>
+
             <div class="navigation">
                 <div id="answer-toggle-container" class="answer-toggle-container" style="margin-bottom: 20px;">
                     <span class="answer-toggle-label">Show Answers</span>
@@ -800,13 +800,29 @@ function renderWorksheet() {
         </div>
     `;
 
-    document.body.innerHTML = html;
+    // Hide navigation and show worksheet in container
+    document.getElementById('age-selection').style.display = 'none';
+    document.getElementById('type-selection').style.display = 'none';
+    document.getElementById('difficulty-selection').style.display = 'none';
+
+    // Get or create worksheet container
+    let worksheetContainer = document.getElementById('worksheet-content');
+    if (!worksheetContainer) {
+        worksheetContainer = document.createElement('div');
+        worksheetContainer.id = 'worksheet-content';
+        document.querySelector('.container').appendChild(worksheetContainer);
+    }
+
+    worksheetContainer.innerHTML = html;
+    worksheetContainer.style.display = 'block';
 
     setTimeout(() => {
         initializeAllHandwritingInputs();
         // Load saved worksheet after inputs are initialized
         setTimeout(() => {
             loadSavedWorksheet();
+            // Validate show answers toggle after loading
+            validateShowAnswersToggle();
         }, 200);
     }, 100);
 
@@ -1269,6 +1285,47 @@ function loadSavedWorksheet() {
 }
 
 // Clear all answers on current worksheet
+// Validate if all handwriting canvases have content and enable/disable Show Answers toggle
+function validateShowAnswersToggle() {
+    const toggleInput = document.getElementById('answer-toggle-input');
+    const toggleContainer = document.getElementById('answer-toggle-container');
+
+    if (!toggleInput || !toggleContainer) return;
+
+    // Check if all handwriting inputs have content
+    let allCanvasesHaveContent = true;
+    if (handwritingInputs && handwritingInputs.length > 0) {
+        for (const input of handwritingInputs) {
+            if (input.isEmpty()) {
+                allCanvasesHaveContent = false;
+                break;
+            }
+        }
+    } else {
+        allCanvasesHaveContent = false;
+    }
+
+    // Enable/disable toggle based on canvas content
+    if (allCanvasesHaveContent) {
+        toggleInput.disabled = false;
+        toggleContainer.style.opacity = '1';
+        toggleContainer.style.cursor = 'pointer';
+        toggleContainer.title = '';
+    } else {
+        toggleInput.disabled = true;
+        toggleInput.checked = false;  // Uncheck if was checked
+        toggleContainer.style.opacity = '0.5';
+        toggleContainer.style.cursor = 'not-allowed';
+        toggleContainer.title = 'Please complete all problems to show answers';
+
+        // Hide answers if they were visible
+        if (answersVisible) {
+            answersVisible = false;
+            toggleAnswers();
+        }
+    }
+}
+
 function clearAllAnswers() {
     if (!currentWorksheet) return;
 
@@ -1305,6 +1362,14 @@ function clearAllAnswers() {
                 feedback.style.display = 'none';
             }
         });
+
+        // Reset timer
+        stopTimer();
+        elapsedSeconds = 0;
+        updateTimerDisplay();
+
+        // Validate show answers toggle after clearing
+        validateShowAnswersToggle();
     }
 }
 

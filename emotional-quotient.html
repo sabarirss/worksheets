@@ -132,6 +132,63 @@
             text-align: center;
             margin: 20px 0;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 480px) {
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .difficulty-btn {
+                padding: 20px 15px;
+                font-size: 0.95em;
+            }
+
+            .emoji-large {
+                font-size: 3em;
+            }
+
+            .situation-image {
+                font-size: 2em;
+            }
+
+            .question-text {
+                font-size: 1.1em;
+            }
+
+            .emotion-options {
+                gap: 10px;
+            }
+
+            .emotion-btn {
+                padding: 12px;
+                font-size: 0.95em;
+                min-width: 120px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .difficulty-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .difficulty-btn {
+                padding: 30px 18px;
+            }
+
+            .emoji-large {
+                font-size: 4em;
+            }
+
+            .situation-image {
+                font-size: 2.5em;
+            }
+
+            .emotion-btn {
+                min-width: 140px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -175,7 +232,7 @@
             </div>
         </div>
 
-        <div class="eq-selection" id="eq-selection" style="display: none;">
+        <div class="eq-selection" id="difficulty-selection" style="display: none;">
             <h2>Select Difficulty Level</h2>
             <div class="difficulty-grid">
                 <button onclick="loadActivities('easy')" class="difficulty-btn">

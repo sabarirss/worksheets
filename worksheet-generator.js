@@ -919,13 +919,8 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="top-navigation" style="margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
-                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">← Back to Difficulty</button>
-                <div class="page-navigation" style="display: flex; gap: 10px; align-items: center;">
-                    <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">⬅️ Previous</button>
-                    <span class="page-counter" style="font-weight: bold; font-size: 1.1em;">📄 Page ${currentPage} of ${totalPages}</span>
-                    <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''} style="padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Next ➡️</button>
-                </div>
+            <div class="navigation" style="margin-bottom: 20px;">
+                <button onclick="backToWorksheetSelection()">← Back to Difficulty</button>
             </div>
 
             <div class="controls">
@@ -985,6 +980,12 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <div class="page-navigation" style="margin: 30px 0;">
+                <button onclick="navigatePage(-1)" ${currentPage <= 1 ? 'disabled' : ''}>← Previous Page</button>
+                <span class="page-counter">Page ${currentPage} of ${totalPages}</span>
+                <button onclick="navigatePage(1)" ${currentPage >= totalPages ? 'disabled' : ''}>Next Page →</button>
+            </div>
+
             <div class="navigation" style="margin-top: 20px;">
                 <div id="answer-toggle-container" class="answer-toggle-container" style="display: inline-block;">
                     <span class="answer-toggle-label">👀 Show Answers</span>
@@ -1019,6 +1020,8 @@ function renderWorksheet() {
         // Load saved worksheet after inputs are initialized
         setTimeout(() => {
             loadSavedWorksheet();
+            // Validate show answers toggle after loading
+            validateShowAnswersToggle();
         }, 200);
     }, 100);
 
@@ -1300,6 +1303,47 @@ function loadSavedWorksheet() {
 }
 
 // Clear all answers on current worksheet
+// Validate if all handwriting canvases have content and enable/disable Show Answers toggle
+function validateShowAnswersToggle() {
+    const toggleInput = document.getElementById('answer-toggle-input');
+    const toggleContainer = document.getElementById('answer-toggle-container');
+
+    if (!toggleInput || !toggleContainer) return;
+
+    // Check if all handwriting inputs have content
+    let allCanvasesHaveContent = true;
+    if (handwritingInputs && handwritingInputs.length > 0) {
+        for (const input of handwritingInputs) {
+            if (input.isEmpty()) {
+                allCanvasesHaveContent = false;
+                break;
+            }
+        }
+    } else {
+        allCanvasesHaveContent = false;
+    }
+
+    // Enable/disable toggle based on canvas content
+    if (allCanvasesHaveContent) {
+        toggleInput.disabled = false;
+        toggleContainer.style.opacity = '1';
+        toggleContainer.style.cursor = 'pointer';
+        toggleContainer.title = '';
+    } else {
+        toggleInput.disabled = true;
+        toggleInput.checked = false;  // Uncheck if was checked
+        toggleContainer.style.opacity = '0.5';
+        toggleContainer.style.cursor = 'not-allowed';
+        toggleContainer.title = 'Please complete all problems to show answers';
+
+        // Hide answers if they were visible
+        if (answersVisible) {
+            answersVisible = false;
+            toggleAnswers();
+        }
+    }
+}
+
 function clearAllAnswers() {
     if (!currentWorksheet) return;
 
@@ -1320,6 +1364,14 @@ function clearAllAnswers() {
                 feedback.style.display = 'none';
             }
         });
+
+        // Reset timer
+        stopTimer();
+        elapsedSeconds = 0;
+        updateTimerDisplay();
+
+        // Validate show answers toggle after clearing
+        validateShowAnswersToggle();
     }
 }
 

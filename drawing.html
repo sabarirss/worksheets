@@ -208,6 +208,74 @@
             height: auto;
             max-height: 300px;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 480px) {
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .difficulty-btn {
+                padding: 20px 15px;
+                font-size: 0.95em;
+            }
+
+            /* Split screen to single column on mobile */
+            .split-screen {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .tutorial-icon {
+                font-size: 2.5em;
+            }
+
+            .color-dot {
+                width: 35px;
+                height: 35px;
+            }
+
+            .brush-size-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            #eraser-slider {
+                width: 100px;
+            }
+
+            .tutorial-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .difficulty-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .split-screen {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .tutorial-icon {
+                font-size: 3em;
+            }
+
+            .tutorial-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
+        /* For wider screens, keep 2-column split */
+        @media (min-width: 769px) {
+            .split-screen {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
 <body>

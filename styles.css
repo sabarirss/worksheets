@@ -27,7 +27,7 @@ header {
 }
 
 header h1 {
-    font-size: 2.5em;
+    font-size: clamp(1.8em, 5vw, 2.5em);
     font-weight: bold;
     margin-bottom: 10px;
 }
@@ -166,6 +166,8 @@ header h1 {
     margin-bottom: 30px;
     padding-bottom: 15px;
     border-bottom: 2px solid #000;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .worksheet-info h2 {
@@ -851,13 +853,315 @@ footer {
     }
 }
 
-@media (max-width: 768px) {
+/* ============================================
+   RESPONSIVE MEDIA QUERIES
+   Mobile-first responsive design
+   ============================================ */
+
+/* Small Mobile Devices (320px - 480px) */
+@media (max-width: 480px) {
+    /* Header adjustments */
+    header h1 {
+        font-size: clamp(1.5em, 6vw, 2em);
+    }
+
+    .subtitle {
+        font-size: 0.9em;
+    }
+
+    /* Container padding reduction */
+    .container {
+        padding: 15px;
+    }
+
+    .worksheet-container {
+        padding: 15px;
+    }
+
+    /* Subject/Level buttons */
+    .subject-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .subject-btn {
+        padding: 20px 15px;
+    }
+
+    .subject-name {
+        font-size: 1.3em;
+    }
+
+    .subject-desc {
+        font-size: 0.9em;
+    }
+
+    .level-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .level-btn {
+        padding: 15px;
+    }
+
+    .level-name {
+        font-size: 1.1em;
+    }
+
+    .level-desc {
+        font-size: 0.85em;
+    }
+
+    /* Worksheet header */
+    .worksheet-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .worksheet-title {
+        font-size: 1.3em;
+        text-align: center;
+    }
+
+    .student-info {
+        text-align: left;
+        width: 100%;
+    }
+
+    .info-row input {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    /* Problems grid - single column on small mobile */
+    .problems-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .problem {
+        font-size: 1em;
+        flex-wrap: wrap;
+    }
+
+    /* Answer inputs */
+    .answer-input {
+        width: 60px;
+        font-size: 1.2em;
+    }
+
+    /* Answer key grid - 2 columns on small mobile */
+    .answer-key-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        font-size: 0.9em;
+    }
+
+    /* Pattern display */
+    .pattern-display {
+        font-size: 2em;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .pattern-item {
+        min-width: 45px;
+        padding: 8px;
+    }
+
+    /* Counting display */
+    .counting-display {
+        font-size: 2em;
+        padding: 15px;
+    }
+
+    /* Sequence display */
+    .sequence-display {
+        font-size: 1.8em;
+        gap: 8px;
+    }
+
+    .sequence-item {
+        min-width: 45px;
+        padding: 8px 15px;
+    }
+
+    /* Maze elements */
+    .maze-start, .maze-end {
+        font-size: 2.5em;
+    }
+
+    /* Controls */
+    .controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .control-buttons {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .control-buttons button {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+
+    /* Page info */
+    .page-info {
+        font-size: 0.9em;
+    }
+
+    /* Writing canvas */
     .writing-canvas {
         height: 150px;
     }
 
     .writing-example {
+        font-size: 1em;
+    }
+
+    /* Page navigation - stack vertically on small mobile */
+    .page-navigation {
+        flex-direction: column;
+        gap: 12px;
+        padding: 15px;
+    }
+
+    .page-navigation button {
+        width: 100%;
+        max-width: 250px;
+        padding: 12px 20px;
+        font-size: 1em;
+        min-width: auto;
+    }
+
+    .page-counter {
+        font-size: 1.1em;
+        padding: 10px 20px;
+        order: -1; /* Show page count first on mobile */
+    }
+}
+
+/* Large Mobile Devices (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    /* Header */
+    header h1 {
+        font-size: 2em;
+    }
+
+    /* Container */
+    .worksheet-container {
+        padding: 20px;
+    }
+
+    /* Subject/Level grids - 2 columns on larger mobile */
+    .subject-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .subject-btn {
+        padding: 30px 20px;
+    }
+
+    .subject-name {
+        font-size: 1.5em;
+    }
+
+    .level-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+
+    .level-btn {
+        padding: 18px;
+    }
+
+    .level-name {
         font-size: 1.2em;
+    }
+
+    /* Worksheet header */
+    .worksheet-header {
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .worksheet-title {
+        font-size: 1.5em;
+    }
+
+    /* Problems grid - 2 columns */
+    .problems-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px 25px;
+    }
+
+    .problem {
+        font-size: 1.05em;
+    }
+
+    /* Answer key - 3 columns */
+    .answer-key-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Pattern/Counting displays */
+    .pattern-display {
+        font-size: 2.5em;
+        gap: 12px;
+    }
+
+    .counting-display {
+        font-size: 2.5em;
+        padding: 20px;
+    }
+
+    .sequence-display {
+        font-size: 2em;
+    }
+
+    /* Maze */
+    .maze-start, .maze-end {
+        font-size: 3em;
+    }
+
+    /* Writing canvas */
+    .writing-canvas {
+        height: 200px;
+    }
+
+    .writing-example {
+        font-size: 1.2em;
+    }
+}
+
+/* Tablet Devices (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Subject/Level grids */
+    .subject-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .level-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    /* Worksheet */
+    .worksheet-title {
+        font-size: 1.8em;
+    }
+
+    /* Problems grid */
+    .problems-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Writing canvas */
+    .writing-canvas {
+        height: 250px;
     }
 }
 

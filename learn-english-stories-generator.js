@@ -1321,6 +1321,10 @@ function loadStoryList() {
 
     const stories = storyDatabase[currentAge]?.[currentDifficulty] || [];
 
+    // Limit to 2 stories per age-difficulty in demo mode
+    const limit = getDemoLimit(stories.length);
+    const limitedStories = stories.slice(0, limit);
+
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-selection').style.display = 'block';
 
@@ -1330,12 +1334,12 @@ function loadStoryList() {
         hard: '⭐⭐⭐'
     };
 
-    const title = `Age ${currentAge} - ${difficultyStars[currentDifficulty]} ${currentDifficulty.toUpperCase()} Stories`;
+    const title = `Age ${currentAge} - ${difficultyStars[currentDifficulty]} ${currentDifficulty.toUpperCase()} Stories (${limitedStories.length})`;
     document.getElementById('story-list-title').textContent = title;
 
     const listContainer = document.getElementById('story-list');
 
-    if (stories.length === 0) {
+    if (limitedStories.length === 0) {
         listContainer.innerHTML = `
             <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
                 <p style="font-size: 1.2em; color: #666;">No stories available for this age and difficulty level yet.</p>
@@ -1345,7 +1349,7 @@ function loadStoryList() {
         return;
     }
 
-    listContainer.innerHTML = stories.map(story => `
+    listContainer.innerHTML = limitedStories.map(story => `
         <div class="story-card" onclick="loadStory(${story.id})">
             <div class="story-icon">${story.icon}</div>
             <div class="story-title">${story.title}</div>

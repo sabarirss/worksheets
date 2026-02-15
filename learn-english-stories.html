@@ -201,6 +201,91 @@
             color: #2e7d32;
             margin-bottom: 15px;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 480px) {
+            .age-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .difficulty-btn {
+                padding: 20px 15px;
+                font-size: 0.95em;
+            }
+
+            .story-list {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .story-card {
+                padding: 15px;
+            }
+
+            .story-icon {
+                font-size: 2em;
+            }
+
+            .story-title {
+                font-size: 1.1em;
+            }
+
+            .story-reader {
+                padding: 20px;
+            }
+
+            .story-content {
+                font-size: 1em;
+                padding: 15px;
+                line-height: 1.7;
+            }
+
+            .vocabulary-box,
+            .grammar-focus {
+                padding: 15px;
+            }
+
+            .comprehension-question {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            h3 {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .age-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .difficulty-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .story-list {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            }
+
+            .story-reader {
+                padding: 30px;
+            }
+
+            .story-content {
+                font-size: 1.1em;
+                padding: 25px;
+            }
+        }
     </style>
 
     <!-- Firebase SDK -->

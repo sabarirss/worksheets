@@ -93,7 +93,13 @@ class HandwritingInput {
     }
 
     stopDrawing() {
-        this.isDrawing = false;
+        if (this.isDrawing) {
+            this.isDrawing = false;
+            // Call validation callback if it exists (after user finishes drawing)
+            if (typeof validateShowAnswersToggle === 'function') {
+                setTimeout(() => validateShowAnswersToggle(), 100);
+            }
+        }
     }
 
     getPosition(e) {
@@ -121,6 +127,11 @@ class HandwritingInput {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.setupCanvas();
         this.hasContent = false;
+
+        // Call validation callback if it exists
+        if (typeof validateShowAnswersToggle === 'function') {
+            setTimeout(() => validateShowAnswersToggle(), 100);
+        }
     }
 
     isEmpty() {

@@ -318,6 +318,10 @@ function showStories(difficulty) {
     currentList = generateStories(currentCategory, difficulty);
     console.log('Loaded', currentList.length, 'unique stories');
 
+    // Limit to 2 stories per age-difficulty in demo mode
+    const limit = getDemoLimit(currentList.length);
+    const limitedList = currentList.slice(0, limit);
+
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('story-list').style.display = 'block';
 
@@ -336,12 +340,12 @@ function showStories(difficulty) {
         hard: '⭐⭐⭐ Hard'
     };
 
-    document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - ${difficultyStars[difficulty]} (${currentList.length} stories)`;
+    document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - ${difficultyStars[difficulty]} (${limitedList.length} stories)`;
 
     const container = document.getElementById('stories-container');
     container.innerHTML = '';
 
-    currentList.forEach((story, index) => {
+    limitedList.forEach((story, index) => {
         const card = document.createElement('div');
         card.className = 'story-card';
         card.onclick = () => readStory(index);

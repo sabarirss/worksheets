@@ -103,6 +103,56 @@
                 opacity: 1;
             }
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 480px) {
+            .user-header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .user-info {
+                font-size: 1em;
+                text-align: center;
+            }
+
+            .user-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .header-btn {
+                padding: 10px 15px;
+                font-size: 0.9em;
+                width: 100%;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+                max-width: calc(100% - 40px);
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .user-header {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+            }
+
+            .modal-content {
+                padding: 30px;
+                margin: 20px;
+                max-width: 500px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .modal-content {
+                max-width: 600px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -387,10 +437,6 @@
                 <button onclick="window.location.href='german-kids.html'" class="subject-btn">
                     <span class="subject-name">🇩🇪 German Kids</span>
                     <span class="subject-desc">Simple Stories for Ages 6-8</span>
-                </button>
-                <button onclick="window.location.href='learn-english-stories.html'" class="subject-btn">
-                    <span class="subject-name">📚 Learn English Stories</span>
-                    <span class="subject-desc">Interactive Stories with Comprehension Questions</span>
                 </button>
             </div>
         </div>

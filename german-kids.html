@@ -235,6 +235,82 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 480px) {
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .difficulty-btn {
+                padding: 20px 15px;
+                font-size: 0.95em;
+            }
+
+            .story-illustration {
+                font-size: 4em;
+            }
+
+            .story-title {
+                font-size: 1.5em;
+            }
+
+            .story-text {
+                font-size: 1.1em;
+                padding: 15px;
+                line-height: 1.8;
+            }
+
+            .vocabulary-box {
+                padding: 15px;
+            }
+
+            .vocab-word {
+                font-size: 1em;
+            }
+
+            .question-text {
+                font-size: 1.1em;
+            }
+
+            .answer-btn {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+
+            .story-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .story-icon {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .difficulty-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .story-illustration {
+                font-size: 6em;
+            }
+
+            .story-text {
+                font-size: 1.2em;
+                padding: 20px;
+            }
+
+            .story-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .story-icon {
+                font-size: 3em;
+            }
+        }
     </style>
 </head>
 <body>

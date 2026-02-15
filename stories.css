@@ -214,7 +214,72 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+/* Mobile Responsive Styles */
+@media (max-width: 480px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .category-btn {
+        padding: 20px 15px;
+    }
+
+    .category-icon {
+        font-size: 2.5em;
+    }
+
+    .category-name {
+        font-size: 1.1em;
+    }
+
+    .story-list {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .story-card {
+        padding: 15px;
+    }
+
+    .story-illustration {
+        font-size: 3em;
+        padding: 10px;
+    }
+
+    .story-title {
+        font-size: 1.3em;
+    }
+
+    .story-text {
+        font-size: 1em;
+        line-height: 1.7;
+        padding: 15px;
+    }
+
+    .story-content {
+        padding: 15px;
+    }
+
+    .vocab-item {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .category-icon {
+        font-size: 3em;
+    }
+
+    .story-list {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
     .story-illustration {
         font-size: 5em;
         padding: 20px;
@@ -227,6 +292,10 @@
 
     .story-title {
         font-size: 1.8em;
+    }
+
+    .story-content {
+        padding: 25px;
     }
 }
 
