@@ -213,8 +213,26 @@ function determineLevelFromScore(score, ageGroup) {
  * @param {string} ageGroup - Child's age group
  */
 function startAssessment(subject, operation, ageGroup) {
+    console.log('startAssessment called:', { subject, operation, ageGroup });
+
+    // Validate inputs
+    if (!operation || !ageGroup) {
+        console.error('Missing required parameters:', { operation, ageGroup });
+        alert('Error: Missing operation or age group. Please try again.');
+        return;
+    }
+
     // Generate questions
     assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+
+    if (!assessmentQuestions || assessmentQuestions.length === 0) {
+        console.error('Failed to generate assessment questions');
+        alert('Error generating assessment questions. Please try again.');
+        return;
+    }
+
+    console.log(`Generated ${assessmentQuestions.length} questions for ${operation}`);
+
     assessmentAnswers = new Array(10).fill(null);
 
     currentAssessment = {
@@ -238,8 +256,17 @@ function renderAssessmentUI() {
     const container = document.getElementById('assessment-container');
     if (!container) {
         console.error('Assessment container not found');
+        alert('Error: Assessment container not found. Please refresh the page.');
         return;
     }
+
+    // Hide other page elements
+    const mainContainer = document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.style.display = 'none';
+    }
+
+    console.log('Rendering assessment with', assessmentQuestions.length, 'questions');
 
     let html = `
         <div class="assessment-page">
@@ -291,13 +318,20 @@ function renderAssessmentUI() {
     `;
 
     container.innerHTML = html;
+
+    // Ensure container is visible
     container.style.display = 'block';
+    container.style.position = 'relative';
+    container.style.zIndex = '1000';
+
+    console.log('Assessment HTML rendered, initializing canvases...');
 
     // Initialize canvases
     setTimeout(() => {
         assessmentQuestions.forEach((_, index) => {
             initializeAssessmentCanvas(index);
         });
+        console.log('All canvases initialized');
     }, 100);
 }
 
@@ -529,16 +563,32 @@ function showAssessmentResults(correct, total, scorePercentage, levelResult) {
  * Start learning at assigned level
  */
 function startLearningAtLevel(operation, level) {
+    console.log('Starting learning:', { operation, level });
+
     // Convert level back to age+difficulty
     const ageGroup = levelToAgeGroup(level);
     const difficulty = levelToDifficulty(level);
 
-    // Close assessment
-    document.getElementById('assessment-container').style.display = 'none';
+    console.log('Converted to:', { ageGroup, difficulty });
+
+    // Hide assessment container
+    const container = document.getElementById('assessment-container');
+    if (container) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+
+    // Show main container
+    const mainContainer = document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.style.display = 'block';
+    }
 
     // Load worksheet at assigned level
     if (typeof loadWorksheet === 'function') {
         loadWorksheet(operation, ageGroup, difficulty, 1);
+    } else {
+        alert('Error: Worksheet loader not available. Please refresh the page.');
     }
 }
 
@@ -547,10 +597,31 @@ function startLearningAtLevel(operation, level) {
  */
 function cancelAssessment() {
     if (confirm('Are you sure you want to cancel the assessment?')) {
-        document.getElementById('assessment-container').style.display = 'none';
+        // Hide assessment container
+        const container = document.getElementById('assessment-container');
+        if (container) {
+            container.style.display = 'none';
+            container.innerHTML = '';
+        }
+
+        // Show main container
+        const mainContainer = document.querySelector('.container');
+        if (mainContainer) {
+            mainContainer.style.display = 'block';
+        }
+
+        // Show operations selection
+        const mathOps = document.getElementById('math-operations');
+        if (mathOps) {
+            mathOps.style.display = 'block';
+        }
+
+        // Clear assessment state
         currentAssessment = null;
         assessmentQuestions = [];
         assessmentAnswers = [];
+
+        console.log('Assessment cancelled');
     }
 }
 

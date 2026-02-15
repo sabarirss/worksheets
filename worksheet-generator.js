@@ -132,9 +132,22 @@ function showDifficulties(operation) {
  * Show assessment gate - user must complete assessment to access worksheets
  */
 function showAssessmentGate(operation) {
-    // Hide other sections
+    console.log('Showing assessment gate for:', operation);
+
+    // Hide all main sections
     document.getElementById('math-operations').style.display = 'none';
     document.getElementById('math-difficulties').style.display = 'none';
+
+    const subjectSelection = document.querySelector('.subject-selection');
+    if (subjectSelection) subjectSelection.style.display = 'none';
+
+    // Hide worksheet container if visible
+    const worksheetContainer = document.querySelector('.worksheet-container');
+    if (worksheetContainer) worksheetContainer.style.display = 'none';
+
+    // Hide footer
+    const footer = document.querySelector('footer');
+    if (footer) footer.style.display = 'none';
 
     // Show assessment gate in the main container
     const container = document.querySelector('.container');
@@ -212,6 +225,11 @@ function backToOperations() {
         gate.remove();
     }
 
+    // Show footer again
+    const footer = document.querySelector('footer');
+    if (footer) footer.style.display = 'block';
+
+    // Show operations
     document.getElementById('math-operations').style.display = 'block';
 }
 
