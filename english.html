@@ -202,31 +202,38 @@
 
         .handwriting-example {
             background: white;
-            padding: 30px;
+            padding: 20px;
+            padding-left: 30px;
             border-radius: 8px;
             position: relative;
-            min-height: 120px;
+            height: 100px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            /* Ruled lines background */
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 15px;
+            padding-top: 28px;
+            /* Ruled lines background - matching canvas colors */
             background-image:
-                linear-gradient(transparent 19%, #ddd 20%, #ddd 20%, transparent 21%),
-                linear-gradient(transparent 39%, #e8e8e8 40%, #e8e8e8 40%, transparent 41%),
-                linear-gradient(transparent 59%, #2c3e50 60%, #2c3e50 61%, transparent 62%),
-                linear-gradient(transparent 79%, #ddd 80%, #ddd 80%, transparent 81%);
-            background-size: 100% 100px;
-            background-position: 0 0;
+                linear-gradient(to right, transparent 0%, transparent 5%, #e74c3c 5%, #e74c3c 95%, transparent 95%),
+                linear-gradient(to right, transparent 0%, transparent 5%, #3498db 5%, #3498db 95%, transparent 95%),
+                linear-gradient(to right, transparent 0%, transparent 5%, #3498db 5%, #3498db 95%, transparent 95%),
+                linear-gradient(to right, transparent 0%, transparent 5%, #e74c3c 5%, #e74c3c 95%, transparent 95%);
+            background-size: 100% 2px;
+            background-position: 0 20%, 0 40%, 0 60%, 0 80%;
+            background-repeat: no-repeat;
         }
 
         .handwritten-text {
             font-family: 'Caveat', cursive;
-            font-size: 4em;
+            font-size: 2.8em;
             font-weight: 700;
             color: #2c3e50;
             line-height: 1;
             text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+            margin: 0;
+            padding: 0;
+            position: relative;
+            top: 32px;
         }
 
         /* Mobile responsive */
@@ -250,12 +257,17 @@
             }
 
             .handwritten-text {
-                font-size: 3em;
+                font-size: 2.2em;
+                top: 26px;
             }
 
             .handwriting-example {
-                padding: 20px;
-                min-height: 100px;
+                padding: 15px;
+                padding-left: 25px;
+                padding-top: 22px;
+                height: 80px;
+                background-size: 100% 2px;
+                background-position: 0 20%, 0 40%, 0 60%, 0 80%;
             }
         }
     </style>

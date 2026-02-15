@@ -1923,27 +1923,68 @@ const writingActivities = {
         ]
     },
     '8': {
-        sentences: [
-            // Complex present tense
-            { prompt: 'Copy this sentence:', example: 'The young boy runs very fast every morning.' },
-            { prompt: 'Copy this sentence:', example: 'She reads her favorite book before bedtime.' },
-            { prompt: 'Copy this sentence:', example: 'They like to play outside together every day after school.' },
-            // Past tense narratives
-            { prompt: 'Copy this sentence:', example: 'Yesterday, I visited my grandmother and we baked cookies.' },
-            { prompt: 'Copy this sentence:', example: 'Last week, our class went on a field trip to the museum.' },
-            { prompt: 'Copy this sentence:', example: 'My friend taught me how to ride a bicycle last summer.' },
-            // Compound sentences
-            { prompt: 'Copy this sentence:', example: 'I finished my homework, and then I watched television.' },
-            { prompt: 'Copy this sentence:', example: 'She wanted to play outside, but it was raining heavily.' },
-            { prompt: 'Copy this sentence:', example: 'We can go to the park, or we can stay home and play games.' },
-            // Complex descriptive
-            { prompt: 'Copy this sentence:', example: 'The beautiful garden was full of colorful flowers and tall trees.' },
-            { prompt: 'Copy this sentence:', example: 'My little sister is learning to swim in the community pool.' },
-            { prompt: 'Copy this sentence:', example: 'The teacher explained the difficult math problem step by step.' },
-            // Questions and commands
-            { prompt: 'Copy this sentence:', example: 'Have you finished your homework yet?' },
-            { prompt: 'Copy this sentence:', example: 'Please remember to bring your lunch tomorrow.' },
-            { prompt: 'Copy this sentence:', example: 'Why do birds fly south for the winter?' }
+        cursive: [
+            // Cursive lowercase letters
+            { prompt: 'Practice cursive writing:', example: 'a', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'b', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'c', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'd', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'e', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'f', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'g', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'h', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'i', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'j', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'k', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'l', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'm', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'n', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'o', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'p', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'q', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'r', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 's', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 't', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'u', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'v', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'w', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'x', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'y', type: 'cursive-letter' },
+            { prompt: 'Practice cursive writing:', example: 'z', type: 'cursive-letter' },
+            // Cursive words - Common words
+            { prompt: 'Practice cursive writing:', example: 'the', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'and', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'for', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'are', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'but', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'not', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'you', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'all', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'can', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'her', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'was', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'one', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'our', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'out', type: 'cursive-word' },
+            { prompt: 'Practice cursive writing:', example: 'day', type: 'cursive-word' },
+            // Cursive phrases - Short phrases for joining practice
+            { prompt: 'Practice cursive writing:', example: 'good morning', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'thank you', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'have fun', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'see you', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'happy birthday', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'best wishes', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'good night', type: 'cursive-phrase' },
+            { prompt: 'Practice cursive writing:', example: 'love you', type: 'cursive-phrase' },
+            // Cursive sentences - Simple joined sentences
+            { prompt: 'Copy in cursive:', example: 'I like to read books.' },
+            { prompt: 'Copy in cursive:', example: 'The cat sleeps on the bed.' },
+            { prompt: 'Copy in cursive:', example: 'We play games together.' },
+            { prompt: 'Copy in cursive:', example: 'She writes in her journal.' },
+            { prompt: 'Copy in cursive:', example: 'My dog runs very fast.' },
+            { prompt: 'Copy in cursive:', example: 'They go to school early.' },
+            { prompt: 'Copy in cursive:', example: 'He helps his mother cook.' },
+            { prompt: 'Copy in cursive:', example: 'We learn something new today.' }
         ]
     },
     '9+': {
@@ -2103,10 +2144,10 @@ const contentConfigs = {
             type: 'readingComprehension'
         },
         writing: {
-            name: 'Age 8 - Writing Practice',
-            description: 'Sentence practice with ruled lines',
+            name: 'Age 8 - Cursive Writing Practice',
+            description: 'Joined handwriting with ruled lines',
             type: 'writing',
-            activities: writingActivities['8'].sentences,
+            activities: writingActivities['8'].cursive,
             activitiesPerPage: 3
         }
     },
@@ -2628,31 +2669,33 @@ function drawRuledLines(canvas) {
     const baseLine = height * 0.60;
     const bottomLine = height * 0.80;
 
-    ctx.strokeStyle = '#aaa';
-    ctx.lineWidth = 1;
+    // Top line - RED, solid
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(50, topLine);
     ctx.lineTo(width - 10, topLine);
     ctx.stroke();
 
-    ctx.strokeStyle = '#bbb';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
+    // Mid line - BLUE, solid
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(50, midLine);
     ctx.lineTo(width - 10, midLine);
     ctx.stroke();
-    ctx.setLineDash([]);
 
-    ctx.strokeStyle = '#2c3e50';
-    ctx.lineWidth = 3;
+    // Base line - BLUE, solid
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(50, baseLine);
     ctx.lineTo(width - 10, baseLine);
     ctx.stroke();
 
-    ctx.strokeStyle = '#aaa';
-    ctx.lineWidth = 1;
+    // Bottom line - RED, solid
+    ctx.strokeStyle = '#e74c3c';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(50, bottomLine);
     ctx.lineTo(width - 10, bottomLine);
