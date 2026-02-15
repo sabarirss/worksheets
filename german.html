@@ -22,6 +22,14 @@
     <script src="profile-selector.js"></script>
 </head>
 <body>
+    <script>
+        // Wait for Firebase auth to initialize
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div>
