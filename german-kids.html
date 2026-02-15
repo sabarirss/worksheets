@@ -358,10 +358,7 @@
                 if (typeof currentAge !== 'undefined') {
                     currentAge = childAge;
                 }
-                // Apply age-based content filtering
-                if (typeof filterLevelButtons === 'function') {
-                    filterLevelButtons();
-                }
+                // Age-based filtering removed - all children can access all difficulty levels
             }, 200);
         });
     </script>

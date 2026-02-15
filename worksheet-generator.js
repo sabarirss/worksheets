@@ -40,12 +40,7 @@ function showMathLevels() {
     document.getElementById('math-operations').style.display = 'block';
     document.getElementById('math-difficulties').style.display = 'none';
 
-    // Apply age-based filtering to difficulty buttons when they're shown later
-    setTimeout(function() {
-        if (typeof filterLevelButtons === 'function') {
-            filterLevelButtons();
-        }
-    }, 100);
+    // Age-based filtering removed - all children can access all difficulty levels
 }
 
 function showMathAgeGroups() {
