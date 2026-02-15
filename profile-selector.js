@@ -329,56 +329,69 @@ function clearSelectedChild() {
 }
 
 // Open child settings modal
-function openChildSettings(childId, childName) {
+async function openChildSettings(childId, childName) {
     // Close profile dropdown
     const dropdown = document.getElementById('profile-dropdown');
     if (dropdown) dropdown.style.display = 'none';
 
-    // Get current input mode for this child
-    const currentMode = localStorage.getItem(`inputMode_${childId}`) || 'keyboard';
+    // Fetch child data from Firestore to get current version and input mode
+    try {
+        const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+        if (!childDoc.exists) {
+            alert('Child profile not found');
+            return;
+        }
 
-    // Create modal
-    const modal = document.createElement('div');
-    modal.id = 'child-settings-modal';
-    modal.innerHTML = `
-        <div class="child-settings-modal-overlay" onclick="closeChildSettings()"></div>
-        <div class="child-settings-modal-content">
-            <div class="child-settings-header">
-                <h2>⚙️ ${childName}'s Settings</h2>
-                <button class="close-btn" onclick="closeChildSettings()">✕</button>
-            </div>
+        const childData = childDoc.data();
+        const childVersion = childData.version || 'demo';
+        const currentMode = childData.inputMode || 'keyboard';
 
-            <div class="child-settings-body">
-                <div class="settings-section">
-                    <h3>Input Mode</h3>
-                    <p class="settings-description">Choose how ${childName} will answer questions</p>
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'child-settings-modal';
+        modal.innerHTML = `
+            <div class="child-settings-modal-overlay" onclick="closeChildSettings()"></div>
+            <div class="child-settings-modal-content">
+                <div class="child-settings-header">
+                    <h2>⚙️ ${childName}'s Settings</h2>
+                    <button class="close-btn" onclick="closeChildSettings()">✕</button>
+                </div>
 
-                    <div class="input-mode-options">
-                        <div class="input-mode-option ${currentMode === 'keyboard' ? 'selected' : ''}"
-                             onclick="selectInputMode('${childId}', 'keyboard')">
-                            <div class="mode-icon">⌨️</div>
-                            <div class="mode-label">Keyboard</div>
-                            <div class="mode-desc">Type answers with keyboard</div>
-                        </div>
+                <div class="child-settings-body">
+                    <div class="settings-section">
+                        <h3>Input Mode</h3>
+                        <p class="settings-description">Choose how ${childName} will answer questions</p>
 
-                        <div class="input-mode-option ${currentMode === 'pencil' ? 'selected' : ''}"
-                             onclick="selectInputMode('${childId}', 'pencil')">
-                            <div class="mode-icon">✏️</div>
-                            <div class="mode-label">Pencil</div>
-                            <div class="mode-desc">Draw answers with stylus</div>
-                            ${window.userVersion !== 'full' ? '<div class="mode-badge">Full Version Only</div>' : ''}
+                        <div class="input-mode-options">
+                            <div class="input-mode-option ${currentMode === 'keyboard' ? 'selected' : ''}"
+                                 onclick="selectInputMode('${childId}', 'keyboard')">
+                                <div class="mode-icon">⌨️</div>
+                                <div class="mode-label">Keyboard</div>
+                                <div class="mode-desc">Type answers with keyboard</div>
+                            </div>
+
+                            <div class="input-mode-option ${currentMode === 'pencil' ? 'selected' : ''}"
+                                 onclick="selectInputMode('${childId}', 'pencil')">
+                                <div class="mode-icon">✏️</div>
+                                <div class="mode-label">Pencil</div>
+                                <div class="mode-desc">Draw answers with stylus</div>
+                                ${childVersion !== 'full' ? '<div class="mode-badge">Full Version Only</div>' : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="child-settings-footer">
-                <button class="settings-close-btn" onclick="closeChildSettings()">Close</button>
+                <div class="child-settings-footer">
+                    <button class="settings-close-btn" onclick="closeChildSettings()">Close</button>
+                </div>
             </div>
-        </div>
-    `;
+        `;
 
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
+    } catch (error) {
+        console.error('Error opening child settings:', error);
+        alert('Failed to load child settings');
+    }
 }
 
 // Close child settings modal
@@ -390,34 +403,60 @@ function closeChildSettings() {
 }
 
 // Select input mode for child
-function selectInputMode(childId, mode) {
-    // Check if pencil mode is allowed
-    if (mode === 'pencil' && window.userVersion !== 'full') {
-        alert('Pencil Mode is a Full Version feature!\n\nUpgrade to Full Version to unlock:\n✏️ Handwriting input for all modules\n📊 Advanced analytics\n🎯 Personalized learning paths');
-        return;
-    }
+async function selectInputMode(childId, mode) {
+    // Fetch child's version from Firestore to check if pencil mode is allowed
+    try {
+        const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+        if (!childDoc.exists) {
+            alert('Child profile not found. Please refresh the page.');
+            return;
+        }
 
-    // Save the preference
-    localStorage.setItem(`inputMode_${childId}`, mode);
+        const childData = childDoc.data();
+        const childVersion = childData.version || 'demo';
 
-    // Update global state if this is the currently selected child
-    const selectedChild = getSelectedChild();
-    if (selectedChild && selectedChild.id === childId) {
-        if (typeof setInputMode === 'function') {
-            setInputMode(mode);
-        } else {
+        // Check if pencil mode is allowed for THIS child
+        if (mode === 'pencil' && childVersion !== 'full') {
+            alert(`Pencil Mode is a Full Version feature!\n\nUpgrade ${childData.name}'s profile to Full Version to unlock:\n✏️ Handwriting input for all modules\n📊 Advanced analytics\n🎯 Personalized learning paths`);
+            return;
+        }
+
+        // Save the preference to Firestore
+        await firebase.firestore().collection('children').doc(childId).update({
+            inputMode: mode,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Update global state if this is the currently selected child
+        const selectedChild = getSelectedChild();
+        if (selectedChild && selectedChild.id === childId) {
             window.inputMode = mode;
         }
+
+        // Update UI
+        const options = document.querySelectorAll('.input-mode-option');
+        options.forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Find the clicked option and mark it selected
+        const clickedOption = document.querySelector(`.input-mode-option[onclick*="'${mode}'"]`);
+        if (clickedOption) {
+            clickedOption.classList.add('selected');
+        }
+
+        console.log(`Input mode set to ${mode} for child ${childId}`);
+
+        // Close and reopen modal to refresh badge visibility
+        const childData = await firebase.firestore().collection('children').doc(childId).get();
+        const childName = childData.exists ? childData.data().name : 'Child';
+        closeChildSettings();
+        setTimeout(() => openChildSettings(childId, childName), 100);
+
+    } catch (error) {
+        console.error('Error setting input mode:', error);
+        alert('Failed to update input mode. Please try again.');
     }
-
-    // Update UI
-    const options = document.querySelectorAll('.input-mode-option');
-    options.forEach(option => {
-        option.classList.remove('selected');
-    });
-    event.target.closest('.input-mode-option').classList.add('selected');
-
-    console.log(`Input mode set to ${mode} for child ${childId}`);
 }
 
 // Add styles for the profile selector
