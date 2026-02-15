@@ -283,10 +283,47 @@
 <body>
     <script>
         // Wait for Firebase auth to initialize
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
                 window.location.href = 'login.html';
+                return;
             }
+
+            // Check if user is admin
+            const userDoc = await firebase.firestore().collection('users')
+                .where('email', '==', user.email.toLowerCase())
+                .limit(1)
+                .get();
+
+            let isAdmin = false;
+            if (!userDoc.empty) {
+                const userData = userDoc.docs[0].data();
+                isAdmin = userData.role === 'admin';
+            }
+
+            let childAge;
+            if (isAdmin) {
+                // Admin doesn't need child profile - use default age 10+ (full access)
+                childAge = '10';
+                console.log('Admin user - using default age:', childAge);
+            } else {
+                // Auto-detect child's age from selected profile
+                const child = getSelectedChild();
+                if (!child || !child.age) {
+                    alert('Please select a child profile first');
+                    window.location.href = 'children-profiles.html';
+                    return;
+                }
+                childAge = child.age.toString();
+                console.log('Auto-detected age for drawing:', childAge);
+            }
+
+            // Set current age automatically (defined in drawing-generator.js)
+            setTimeout(function() {
+                if (typeof currentAge !== 'undefined') {
+                    currentAge = childAge;
+                }
+            }, 100);
         });
     </script>
 
@@ -299,41 +336,7 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <!-- Age Group Selection -->
-        <div class="level-selection" id="age-selection">
-            <h2>Select Age Group</h2>
-            <div class="level-grid">
-                <button onclick="selectAge('4-5')" class="level-btn">
-                    <span class="level-name">👶 Ages 4-5</span>
-                    <span class="level-desc">Pre-kindergarten level</span>
-                </button>
-                <button onclick="selectAge('6')" class="level-btn">
-                    <span class="level-name">🧒 Age 6</span>
-                    <span class="level-desc">Kindergarten/1st grade</span>
-                </button>
-                <button onclick="selectAge('7')" class="level-btn">
-                    <span class="level-name">👦 Age 7</span>
-                    <span class="level-desc">1st/2nd grade</span>
-                </button>
-                <button onclick="selectAge('8')" class="level-btn">
-                    <span class="level-name">👧 Age 8</span>
-                    <span class="level-desc">2nd/3rd grade</span>
-                </button>
-                <button onclick="selectAge('9+')" class="level-btn">
-                    <span class="level-name">🧑 Ages 9+</span>
-                    <span class="level-desc">3rd/4th grade and above</span>
-                </button>
-                <button onclick="selectAge('10+')" class="level-btn">
-                    <span class="level-name">👨 Ages 10+</span>
-                    <span class="level-desc">Advanced (5th grade+)</span>
-                </button>
-            </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
-        <div class="drawing-selection" id="difficulty-selection" style="display: none;">
+        <div class="drawing-selection" id="difficulty-selection">
             <h2>Select Difficulty Level</h2>
             <div class="difficulty-grid">
                 <button onclick="loadTutorialList('easy')" class="difficulty-btn">
@@ -348,9 +351,6 @@
                     ⭐⭐⭐ HARD<br>
                     <span style="font-size: 0.8em;">Detailed Art</span>
                 </button>
-            </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToAges()">← Back to Age Groups</button>
             </div>
             <div class="navigation">
                 <button onclick="window.location.href='index.html'">← Back to Subjects</button>

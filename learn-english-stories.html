@@ -305,10 +305,47 @@
 <body>
     <script>
         // Wait for Firebase auth to initialize
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
                 window.location.href = 'login.html';
+                return;
             }
+
+            // Check if user is admin
+            const userDoc = await firebase.firestore().collection('users')
+                .where('email', '==', user.email.toLowerCase())
+                .limit(1)
+                .get();
+
+            let isAdmin = false;
+            if (!userDoc.empty) {
+                const userData = userDoc.docs[0].data();
+                isAdmin = userData.role === 'admin';
+            }
+
+            let childAge;
+            if (isAdmin) {
+                // Admin doesn't need child profile - use default age 10+ (full access)
+                childAge = '10';
+                console.log('Admin user - using default age:', childAge);
+            } else {
+                // Auto-detect child's age from selected profile
+                const child = getSelectedChild();
+                if (!child || !child.age) {
+                    alert('Please select a child profile first');
+                    window.location.href = 'children-profiles.html';
+                    return;
+                }
+                childAge = child.age.toString();
+                console.log('Auto-detected age for Learn English Stories:', childAge);
+            }
+
+            // Set current age automatically (defined in learn-english-stories-generator.js)
+            setTimeout(function() {
+                if (typeof currentAge !== 'undefined') {
+                    currentAge = childAge;
+                }
+            }, 100);
         });
     </script>
 
@@ -321,42 +358,8 @@
             <div id="profile-selector-container"></div>
         </header>
 
-        <!-- Age Selection -->
-        <div class="age-selection" id="age-selection">
-            <h2>Select Age Group</h2>
-            <div class="age-grid">
-                <button onclick="selectAge('4-5')" class="age-btn">
-                    👶 Ages 4-5<br>
-                    <span style="font-size: 0.8em;">Pre-kindergarten level</span>
-                </button>
-                <button onclick="selectAge('6')" class="age-btn">
-                    🧒 Age 6<br>
-                    <span style="font-size: 0.8em;">Kindergarten/1st grade</span>
-                </button>
-                <button onclick="selectAge('7')" class="age-btn">
-                    👦 Age 7<br>
-                    <span style="font-size: 0.8em;">1st/2nd grade</span>
-                </button>
-                <button onclick="selectAge('8')" class="age-btn">
-                    👧 Age 8<br>
-                    <span style="font-size: 0.8em;">2nd/3rd grade</span>
-                </button>
-                <button onclick="selectAge('9+')" class="age-btn">
-                    🧑 Ages 9+<br>
-                    <span style="font-size: 0.8em;">3rd/4th grade and above</span>
-                </button>
-                <button onclick="selectAge('10+')" class="age-btn">
-                    👨 Ages 10+<br>
-                    <span style="font-size: 0.8em;">Advanced (5th grade+)</span>
-                </button>
-            </div>
-            <div class="navigation">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
-            </div>
-        </div>
-
         <!-- Difficulty Selection -->
-        <div class="age-selection" id="difficulty-selection" style="display: none;">
+        <div class="age-selection" id="difficulty-selection">
             <h2>Choose Difficulty Level</h2>
             <div class="age-grid">
                 <button onclick="selectDifficulty('easy')" class="age-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
@@ -373,7 +376,7 @@
                 </button>
             </div>
             <div class="navigation">
-                <button onclick="backToAges()">← Back to Age Groups</button>
+                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
             </div>
         </div>
 
