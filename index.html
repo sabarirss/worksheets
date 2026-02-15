@@ -417,10 +417,18 @@
             margin: 15px 0;
         }
 
-        .level-reason {
+        .level-reason,
+        .level-description {
             color: #666;
             font-style: italic;
             margin-top: 10px;
+        }
+
+        .assessment-actions-final {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .start-learning-btn {
@@ -438,6 +446,23 @@
         .start-learning-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .retake-assessment-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .retake-assessment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
 
         /* Assessment Gate Styles */
@@ -838,26 +863,52 @@
 
     <div class="container">
         <div class="user-header" id="user-header">
+            <!-- Left side: Child selector -->
             <div style="display: flex; align-items: center; gap: 15px;">
-                <div class="user-info" onclick="window.location.href='settings.html'" style="cursor: pointer; transition: all 0.3s; padding: 10px; border-radius: 8px;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='transparent'">
-                    <span style="font-size: 1.3em;">👤</span>
-                    <strong id="user-name-display"></strong>
-                    <span style="font-size: 0.8em; opacity: 0.8; margin-left: 5px;">⚙️</span>
-                </div>
+                <div id="profile-selector-container"></div>
+            </div>
+
+            <!-- Right side: Version badge, Admin, Settings -->
+            <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
                 <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings.html'" title="Click to upgrade">
                 </div>
-            </div>
-            <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
-                <div id="profile-selector-container"></div>
-                <div id="input-mode-container"></div>
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
                     👤 Admin Panel
                 </button>
-                <button class="header-btn" onclick="logout()">
-                    Logout
-                </button>
+
+                <!-- Parent Settings Dropdown -->
+                <div style="position: relative;">
+                    <button class="header-btn" onclick="toggleParentSettings()" id="parent-settings-btn" title="Settings">
+                        ⚙️
+                    </button>
+                    <div id="parent-settings-dropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); min-width: 200px; z-index: 1000;">
+                        <div onclick="window.location.href='settings.html'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            ⚙️ Account Settings
+                        </div>
+                        <div onclick="logout()" style="padding: 12px 20px; cursor: pointer; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            🚪 Logout
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <script>
+        // Toggle parent settings dropdown
+        function toggleParentSettings() {
+            const dropdown = document.getElementById('parent-settings-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('parent-settings-dropdown');
+            const button = document.getElementById('parent-settings-btn');
+            if (dropdown && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        </script>
 
         <!-- Parent Mode Verification Modal -->
         <div id="parent-mode-modal" class="modal">

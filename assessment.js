@@ -603,17 +603,13 @@ async function submitAssessment() {
 function showAssessmentResults(correct, total, scorePercentage, levelResult) {
     const resultsDiv = document.getElementById('assessment-results');
 
-    let message = '';
+    // Determine color based on score
     let color = '';
-
     if (scorePercentage < 30) {
-        message = 'Let\'s build a strong foundation! 💪';
         color = '#ff9800';
     } else if (scorePercentage <= 75) {
-        message = 'Good work! Keep practicing! 🌟';
         color = '#2196f3';
     } else {
-        message = 'Excellent! You\'re ready for a challenge! 🎉';
         color = '#4caf50';
     }
 
@@ -624,17 +620,19 @@ function showAssessmentResults(correct, total, scorePercentage, levelResult) {
                 <div class="score-big">${correct} / ${total}</div>
                 <div class="score-percentage">${scorePercentage}%</div>
             </div>
-            <p class="result-message" style="color: ${color}; font-size: 1.2em; font-weight: bold;">
-                ${message}
-            </p>
             <div class="level-assignment">
-                <h4>Your Assigned Level:</h4>
+                <h4>Your Identified Level:</h4>
                 <div class="assigned-level">Level ${levelResult.level}</div>
-                <p class="level-reason">${levelResult.reason}</p>
+                <p class="level-description">${levelResult.reason}</p>
             </div>
-            <button class="start-learning-btn" onclick="startLearningAtLevel('${currentAssessment.operation}', ${levelResult.level})">
-                🚀 Start Learning
-            </button>
+            <div class="assessment-actions-final">
+                <button class="start-learning-btn" onclick="startLearningAtLevel('${currentAssessment.operation}', ${levelResult.level})">
+                    🚀 Start Learning
+                </button>
+                <button class="retake-assessment-btn" onclick="confirmRetakeAssessment()">
+                    🔄 Re-take Assessment
+                </button>
+            </div>
         </div>
     `;
 
@@ -674,6 +672,64 @@ function startLearningAtLevel(operation, level) {
     } else {
         alert('Error: Worksheet loader not available. Please refresh the page.');
     }
+}
+
+/**
+ * Confirm retake assessment with warning
+ */
+function confirmRetakeAssessment() {
+    const message = `⚠️ Re-taking the Assessment\n\n` +
+                   `Re-taking this assessment may affect the AI's level prediction and your learning path.\n\n` +
+                   `Your previous score will be replaced with the new one.\n\n` +
+                   `Are you sure you want to re-take the assessment?`;
+
+    if (confirm(message)) {
+        retakeAssessment();
+    }
+}
+
+/**
+ * Retake the assessment
+ */
+function retakeAssessment() {
+    if (!currentAssessment) {
+        console.error('No current assessment to retake');
+        return;
+    }
+
+    console.log('Retaking assessment for:', currentAssessment.operation);
+
+    // Store operation and age group
+    const operation = currentAssessment.operation;
+    const ageGroup = currentAssessment.ageGroup;
+
+    // Clear previous results
+    const resultsDiv = document.getElementById('assessment-results');
+    if (resultsDiv) {
+        resultsDiv.style.display = 'none';
+        resultsDiv.innerHTML = '';
+    }
+
+    // Show submit button again
+    const submitBtn = document.querySelector('.submit-assessment-btn');
+    const cancelBtn = document.querySelector('.cancel-assessment-btn');
+    if (submitBtn) {
+        submitBtn.style.display = 'inline-block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Submit Assessment';
+    }
+    if (cancelBtn) {
+        cancelBtn.style.display = 'inline-block';
+    }
+
+    // Generate new questions
+    assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+    assessmentAnswers = [];
+
+    // Re-render assessment UI with new questions
+    renderAssessmentUI();
+
+    console.log('Assessment restarted with new questions');
 }
 
 /**

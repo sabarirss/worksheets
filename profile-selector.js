@@ -138,14 +138,18 @@ function renderChildOption(child, selectedChildId) {
     const isSelected = child.id === selectedChildId;
 
     return `
-        <div class="profile-dropdown-item ${isSelected ? 'selected' : ''}"
-             onclick="selectChildFromDropdown('${child.id}', '${child.name}', ${child.age}, '${child.gender}')">
-            <span class="profile-avatar">${avatar}</span>
-            <div class="profile-info">
-                <span class="profile-name">${child.name}</span>
-                <span class="profile-age">Age ${child.age}</span>
+        <div class="profile-dropdown-item ${isSelected ? 'selected' : ''}" style="display: flex; align-items: center; justify-content: space-between;">
+            <div onclick="selectChildFromDropdown('${child.id}', '${child.name}', ${child.age}, '${child.gender}')" style="display: flex; align-items: center; gap: 12px; flex: 1; padding-right: 10px;">
+                <span class="profile-avatar">${avatar}</span>
+                <div class="profile-info">
+                    <span class="profile-name">${child.name}</span>
+                    <span class="profile-age">Age ${child.age}</span>
+                </div>
+                ${isSelected ? '<span class="check-mark">✓</span>' : ''}
             </div>
-            ${isSelected ? '<span class="check-mark">✓</span>' : ''}
+            <button onclick="event.stopPropagation(); openChildSettings('${child.id}', '${child.name}')" style="background: none; border: none; padding: 8px; cursor: pointer; font-size: 1.2em; color: #667eea; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Child Settings">
+                ⚙️
+            </button>
         </div>
     `;
 }
@@ -258,6 +262,98 @@ function clearSelectedChild() {
     if (typeof stopActivityTracking === 'function') {
         stopActivityTracking();
     }
+}
+
+// Open child settings modal
+function openChildSettings(childId, childName) {
+    // Close profile dropdown
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown) dropdown.style.display = 'none';
+
+    // Get current input mode for this child
+    const currentMode = localStorage.getItem(`inputMode_${childId}`) || 'keyboard';
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'child-settings-modal';
+    modal.innerHTML = `
+        <div class="child-settings-modal-overlay" onclick="closeChildSettings()"></div>
+        <div class="child-settings-modal-content">
+            <div class="child-settings-header">
+                <h2>⚙️ ${childName}'s Settings</h2>
+                <button class="close-btn" onclick="closeChildSettings()">✕</button>
+            </div>
+
+            <div class="child-settings-body">
+                <div class="settings-section">
+                    <h3>Input Mode</h3>
+                    <p class="settings-description">Choose how ${childName} will answer questions</p>
+
+                    <div class="input-mode-options">
+                        <div class="input-mode-option ${currentMode === 'keyboard' ? 'selected' : ''}"
+                             onclick="selectInputMode('${childId}', 'keyboard')">
+                            <div class="mode-icon">⌨️</div>
+                            <div class="mode-label">Keyboard</div>
+                            <div class="mode-desc">Type answers with keyboard</div>
+                        </div>
+
+                        <div class="input-mode-option ${currentMode === 'pencil' ? 'selected' : ''}"
+                             onclick="selectInputMode('${childId}', 'pencil')">
+                            <div class="mode-icon">✏️</div>
+                            <div class="mode-label">Pencil</div>
+                            <div class="mode-desc">Draw answers with stylus</div>
+                            ${window.userVersion !== 'full' ? '<div class="mode-badge">Full Version Only</div>' : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="child-settings-footer">
+                <button class="settings-close-btn" onclick="closeChildSettings()">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Close child settings modal
+function closeChildSettings() {
+    const modal = document.getElementById('child-settings-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Select input mode for child
+function selectInputMode(childId, mode) {
+    // Check if pencil mode is allowed
+    if (mode === 'pencil' && window.userVersion !== 'full') {
+        alert('Pencil Mode is a Full Version feature!\n\nUpgrade to Full Version to unlock:\n✏️ Handwriting input for all modules\n📊 Advanced analytics\n🎯 Personalized learning paths');
+        return;
+    }
+
+    // Save the preference
+    localStorage.setItem(`inputMode_${childId}`, mode);
+
+    // Update global state if this is the currently selected child
+    const selectedChild = getSelectedChild();
+    if (selectedChild && selectedChild.id === childId) {
+        if (typeof setInputMode === 'function') {
+            setInputMode(mode);
+        } else {
+            window.inputMode = mode;
+        }
+    }
+
+    // Update UI
+    const options = document.querySelectorAll('.input-mode-option');
+    options.forEach(option => {
+        option.classList.remove('selected');
+    });
+    event.target.closest('.input-mode-option').classList.add('selected');
+
+    console.log(`Input mode set to ${mode} for child ${childId}`);
 }
 
 // Add styles for the profile selector
@@ -504,6 +600,214 @@ profileSelectorStyles.textContent = `
             left: -10px;
             width: auto;
             min-width: auto;
+        }
+    }
+
+    /* Child Settings Modal Styles */
+    #child-settings-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .child-settings-modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .child-settings-modal-content {
+        position: relative;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .child-settings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 25px 30px;
+        border-bottom: 2px solid #f0f0f0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .child-settings-header h2 {
+        margin: 0;
+        color: white;
+        font-size: 1.5em;
+    }
+
+    .child-settings-header .close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 1.5em;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .child-settings-header .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .child-settings-body {
+        padding: 30px;
+    }
+
+    .settings-section {
+        margin-bottom: 25px;
+    }
+
+    .settings-section h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 1.2em;
+    }
+
+    .settings-description {
+        color: #666;
+        margin: 0 0 20px 0;
+        font-size: 0.95em;
+    }
+
+    .input-mode-options {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .input-mode-option {
+        flex: 1;
+        min-width: 180px;
+        padding: 20px;
+        border: 3px solid #e0e0e0;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        position: relative;
+    }
+
+    .input-mode-option:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .input-mode-option.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea15, #764ba215);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .mode-icon {
+        font-size: 3em;
+        margin-bottom: 10px;
+    }
+
+    .mode-label {
+        font-weight: bold;
+        font-size: 1.1em;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .mode-desc {
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .mode-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff9800;
+        color: white;
+        font-size: 0.7em;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .child-settings-footer {
+        padding: 20px 30px;
+        border-top: 2px solid #f0f0f0;
+        text-align: right;
+    }
+
+    .settings-close-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .settings-close-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    @media (max-width: 600px) {
+        .input-mode-options {
+            flex-direction: column;
+        }
+
+        .input-mode-option {
+            min-width: auto;
+        }
+
+        .child-settings-modal-content {
+            width: 95%;
+        }
+
+        .child-settings-header {
+            padding: 20px;
+        }
+
+        .child-settings-body {
+            padding: 20px;
         }
     }
 `;
