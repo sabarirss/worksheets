@@ -359,18 +359,6 @@
         <div class="settings-section" id="parental-control-section">
             <h2>👨‍👩‍👧 Parental Control</h2>
 
-            <div class="parent-control-box">
-                <h3>🔒 Package Management</h3>
-                <p style="color: #666; margin-bottom: 15px;">
-                    Parents can manage learning modules for each child profile. Enable or disable packages to control which content your children can access.
-                    Requires parent verification.
-                </p>
-
-                <button class="btn btn-primary" onclick="openParentalControl()" style="width: 100%; font-size: 1.1em; padding: 15px;">
-                    🔐 Manage Child Packages
-                </button>
-            </div>
-
             <!-- Children Management -->
             <div id="children-version-section" style="margin-top: 30px;">
                 <h3>👶 Children Management</h3>
@@ -925,20 +913,38 @@
         }
 
         async function openParentalControlPanelForChild(childId, childName) {
+            // Show the modal
             document.getElementById('parental-control-panel').style.display = 'flex';
             document.getElementById('panel-error').style.display = 'none';
 
-            // Hide the child selector section when opening for specific child
+            // IMPORTANT: Hide the child selector section when opening for specific child
             const childSelectionSection = document.getElementById('child-selection-section');
             if (childSelectionSection) {
                 childSelectionSection.style.display = 'none';
             }
 
             // Show package management section immediately
-            document.getElementById('package-management-section').style.display = 'block';
+            const packageSection = document.getElementById('package-management-section');
+            if (packageSection) {
+                packageSection.style.display = 'block';
+            }
+
+            // Enable save button
+            const saveBtn = document.getElementById('save-packages-btn');
+            if (saveBtn) {
+                saveBtn.disabled = false;
+            }
 
             // Set child info and load packages
             window.selectedChildForPackages = { id: childId, name: childName };
+
+            // Update the selected child name display
+            const selectedChildNameSpan = document.getElementById('selected-child-name');
+            if (selectedChildNameSpan) {
+                selectedChildNameSpan.textContent = childName;
+            }
+
+            // Load packages for this child
             await loadChildPackages(childId, childName);
         }
 
@@ -1126,6 +1132,17 @@
         function closeParentalControlPanel() {
             document.getElementById('parental-control-panel').style.display = 'none';
             window.selectedChildForPackages = null; // Clear selected child
+
+            // Reset visibility for next time
+            const childSelectionSection = document.getElementById('child-selection-section');
+            if (childSelectionSection) {
+                childSelectionSection.style.display = 'block'; // Show by default
+            }
+
+            const packageSection = document.getElementById('package-management-section');
+            if (packageSection) {
+                packageSection.style.display = 'none'; // Hide by default
+            }
         }
 
         async function saveChildPackages() {
