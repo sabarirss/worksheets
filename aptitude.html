@@ -21,6 +21,18 @@
     <script src="admin-level-manager.js"></script>
     <script src="child-session-manager.js"></script>
     <script src="profile-selector.js"></script>
+    <style>
+        /* Hide content initially to prevent flash of inappropriate content */
+        .container {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* Show content after auth and profile check completes */
+        .container.content-loaded {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <script>
@@ -68,6 +80,9 @@
                     currentAge = childAge;
                 }
                 // Age-based filtering removed - all children can access all difficulty levels
+
+                // Show content now that auth and profile check is complete
+                document.querySelector('.container').classList.add('content-loaded');
             }, 200);
         });
     </script>

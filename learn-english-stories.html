@@ -286,6 +286,17 @@
                 padding: 25px;
             }
         }
+
+        /* Hide content initially to prevent flash of inappropriate content */
+        .container {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        /* Show content after auth and profile check completes */
+        .container.content-loaded {
+            opacity: 1;
+        }
     </style>
 
     <!-- Firebase SDK -->
@@ -348,6 +359,9 @@
                 }
                 // Age-based filtering removed - all children can access all difficulty levels
             }, 200);
+
+                // Show content now that auth and profile check is complete
+                document.querySelector('.container').classList.add('content-loaded');
         });
     </script>
 
