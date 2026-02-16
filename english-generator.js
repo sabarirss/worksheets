@@ -2016,6 +2016,7 @@ const wordBanks = {
     ],
     sightWords1: ['the', 'and', 'is', 'a', 'to', 'in', 'it', 'of', 'he', 'she', 'we', 'can', 'see', 'you', 'me', 'my', 'for', 'are', 'be', 'on'],
     sightWords2: ['have', 'they', 'has', 'with', 'from', 'this', 'that', 'said', 'will', 'there', 'what', 'when', 'where', 'who', 'how', 'out', 'up', 'down', 'but', 'not'],
+    sightWords3: ['could', 'would', 'should', 'their', 'these', 'those', 'because', 'before', 'after', 'about', 'other', 'which', 'make', 'than', 'then', 'into', 'over', 'many', 'some', 'very'],
     nouns: ['cat', 'dog', 'house', 'tree', 'book', 'car', 'ball', 'sun', 'moon', 'star', 'bird', 'fish', 'table', 'chair', 'door', 'window'],
     verbs: ['run', 'jump', 'play', 'eat', 'sleep', 'read', 'write', 'sing', 'dance', 'walk', 'talk', 'swim', 'fly', 'sit', 'stand'],
     adjectives: ['big', 'small', 'happy', 'sad', 'fast', 'slow', 'hot', 'cold', 'new', 'old', 'good', 'bad', 'tall', 'short', 'long'],
@@ -2575,10 +2576,10 @@ const ageBasedContentConfigs = {
     '6': {
         easy: {
             name: 'Age 6 - Easy English',
-            description: 'Basic sight words',
+            description: 'Intermediate sight words',
             problemCount: 15,
             type: 'sightWords',
-            wordList: wordBanks.sightWords1
+            wordList: wordBanks.sightWords2
         },
         medium: {
             name: 'Age 6 - Medium English',
@@ -2605,10 +2606,10 @@ const ageBasedContentConfigs = {
     '7': {
         easy: {
             name: 'Age 7 - Easy English',
-            description: 'Simple sentences',
-            problemCount: 12,
-            type: 'sentenceFill',
-            difficulty: 'easy'
+            description: 'Advanced sight words',
+            problemCount: 15,
+            type: 'sightWords',
+            wordList: wordBanks.sightWords3
         },
         medium: {
             name: 'Age 7 - Medium English',
@@ -2634,15 +2635,16 @@ const ageBasedContentConfigs = {
     '8': {
         easy: {
             name: 'Age 8 - Easy English',
-            description: 'Vocabulary building',
-            problemCount: 15,
-            type: 'synonymsAntonyms'
+            description: 'Sentence completion',
+            problemCount: 12,
+            type: 'sentenceFill',
+            difficulty: 'medium'
         },
         medium: {
             name: 'Age 8 - Medium English',
-            description: 'Parts of speech',
+            description: 'Vocabulary building',
             problemCount: 15,
-            type: 'partsOfSpeech'
+            type: 'synonymsAntonyms'
         },
         hard: {
             name: 'Age 8 - Hard English',
@@ -2661,9 +2663,10 @@ const ageBasedContentConfigs = {
     '9+': {
         easy: {
             name: 'Ages 9+ - Easy English',
-            description: 'Advanced grammar',
+            description: 'Advanced vocabulary',
             problemCount: 15,
-            type: 'partsOfSpeech'
+            type: 'synonymsAntonyms',
+            difficulty: 'advanced'
         },
         medium: {
             name: 'Ages 9+ - Medium English',
@@ -2688,9 +2691,10 @@ const ageBasedContentConfigs = {
     '10+': {
         easy: {
             name: 'Ages 10+ - Easy English',
-            description: 'Complex reading',
-            problemCount: 8,
-            type: 'readingComprehension'
+            description: 'Parts of speech mastery',
+            problemCount: 15,
+            type: 'partsOfSpeech',
+            difficulty: 'advanced'
         },
         medium: {
             name: 'Ages 10+ - Medium English',

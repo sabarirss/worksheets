@@ -453,9 +453,9 @@ const ageBasedContentConfigs = {
         '6': {
             easy: {
                 name: 'Age 6 - Easy Addition',
-                description: 'Adding numbers up to 10',
+                description: 'Adding numbers up to 12',
                 problemCount: 20,
-                generator: () => generateSimpleAddition(1, 9, 10)
+                generator: () => generateSimpleAddition(2, 10, 12)
             },
             medium: {
                 name: 'Age 6 - Medium Addition',
@@ -473,9 +473,9 @@ const ageBasedContentConfigs = {
         '7': {
             easy: {
                 name: 'Age 7 - Easy Addition',
-                description: 'Adding numbers up to 20',
+                description: 'Adding numbers up to 25',
                 problemCount: 20,
-                generator: () => generateSimpleAddition(5, 15, 20)
+                generator: () => generateSimpleAddition(10, 20, 25)
             },
             medium: {
                 name: 'Age 7 - Medium Addition',
@@ -493,9 +493,9 @@ const ageBasedContentConfigs = {
         '8': {
             easy: {
                 name: 'Age 8 - Easy Addition',
-                description: 'Two-digit + One-digit numbers',
+                description: 'Two-digit + Two-digit (small numbers)',
                 problemCount: 20,
-                generator: () => generateMixedAddition(10, 99, 1, 9)
+                generator: () => generateMixedAddition(10, 50, 10, 50)
             },
             medium: {
                 name: 'Age 8 - Medium Addition',
@@ -533,9 +533,9 @@ const ageBasedContentConfigs = {
         '10+': {
             easy: {
                 name: 'Ages 10+ - Easy Addition',
-                description: 'Large number addition',
+                description: 'Four-digit addition',
                 problemCount: 20,
-                generator: () => generateMixedAddition(100, 999, 100, 999)
+                generator: () => generateMixedAddition(1000, 9999, 100, 999)
             },
             medium: {
                 name: 'Ages 10+ - Medium Addition',
@@ -575,9 +575,9 @@ const ageBasedContentConfigs = {
         '6': {
             easy: {
                 name: 'Age 6 - Easy Subtraction',
-                description: 'Subtracting within 10',
+                description: 'Subtracting within 12',
                 problemCount: 20,
-                generator: () => generateSimpleSubtraction(1, 10)
+                generator: () => generateSimpleSubtraction(3, 12)
             },
             medium: {
                 name: 'Age 6 - Medium Subtraction',
@@ -595,9 +595,9 @@ const ageBasedContentConfigs = {
         '7': {
             easy: {
                 name: 'Age 7 - Easy Subtraction',
-                description: 'Subtracting within 20',
+                description: 'Subtracting within 25',
                 problemCount: 20,
-                generator: () => generateSimpleSubtraction(5, 20)
+                generator: () => generateSimpleSubtraction(10, 25)
             },
             medium: {
                 name: 'Age 7 - Medium Subtraction',
@@ -615,9 +615,9 @@ const ageBasedContentConfigs = {
         '8': {
             easy: {
                 name: 'Age 8 - Easy Subtraction',
-                description: 'Two-digit - One-digit numbers',
+                description: 'Two-digit - Two-digit (easier)',
                 problemCount: 20,
-                generator: () => generateMixedSubtraction(10, 99, 1, 9)
+                generator: () => generateMixedSubtraction(30, 99, 10, 40)
             },
             medium: {
                 name: 'Age 8 - Medium Subtraction',
@@ -655,9 +655,9 @@ const ageBasedContentConfigs = {
         '10+': {
             easy: {
                 name: 'Ages 10+ - Easy Subtraction',
-                description: 'Large number subtraction',
+                description: 'Four-digit subtraction',
                 problemCount: 20,
-                generator: () => generateMixedSubtraction(100, 999, 100, 500)
+                generator: () => generateMixedSubtraction(1000, 9999, 100, 999)
             },
             medium: {
                 name: 'Ages 10+ - Medium Subtraction',
@@ -697,9 +697,9 @@ const ageBasedContentConfigs = {
         '6': {
             easy: {
                 name: 'Age 6 - Easy Multiplication',
-                description: 'Multiply by 1 and 2',
+                description: 'Multiply by 2 and 3',
                 problemCount: 20,
-                generator: () => generateMultiplication([1, 2], 1, 10)
+                generator: () => generateMultiplication([2, 3], 1, 10)
             },
             medium: {
                 name: 'Age 6 - Medium Multiplication',
@@ -717,9 +717,9 @@ const ageBasedContentConfigs = {
         '7': {
             easy: {
                 name: 'Age 7 - Easy Multiplication',
-                description: 'Multiply by 3, 4, 5',
+                description: 'Multiply by 4, 5, 6',
                 problemCount: 20,
-                generator: () => generateMultiplication([3, 4, 5], 1, 10)
+                generator: () => generateMultiplication([4, 5, 6], 1, 10)
             },
             medium: {
                 name: 'Age 7 - Medium Multiplication',
@@ -737,9 +737,9 @@ const ageBasedContentConfigs = {
         '8': {
             easy: {
                 name: 'Age 8 - Easy Multiplication',
-                description: 'Multiply by 6, 7, 8, 9',
+                description: 'Multiply by 7, 8, 9, 10',
                 problemCount: 20,
-                generator: () => generateMultiplication([6, 7, 8, 9], 1, 10)
+                generator: () => generateMultiplication([7, 8, 9, 10], 1, 12)
             },
             medium: {
                 name: 'Age 8 - Medium Multiplication',
@@ -757,9 +757,9 @@ const ageBasedContentConfigs = {
         '9+': {
             easy: {
                 name: 'Ages 9+ - Easy Multiplication',
-                description: 'Two-digit × Two-digit',
+                description: 'Two-digit × One-digit (larger)',
                 problemCount: 20,
-                generator: () => generateAdvancedMultiplication(10, 50, 10, 50)
+                generator: () => generateAdvancedMultiplication(20, 99, 5, 9)
             },
             medium: {
                 name: 'Ages 9+ - Medium Multiplication',
@@ -777,9 +777,9 @@ const ageBasedContentConfigs = {
         '10+': {
             easy: {
                 name: 'Ages 10+ - Easy Multiplication',
-                description: 'Three-digit × Two-digit',
+                description: 'Two-digit × Two-digit (larger)',
                 problemCount: 20,
-                generator: () => generateAdvancedMultiplication(100, 999, 10, 99)
+                generator: () => generateAdvancedMultiplication(30, 99, 20, 99)
             },
             medium: {
                 name: 'Ages 10+ - Medium Multiplication',
@@ -819,9 +819,9 @@ const ageBasedContentConfigs = {
         '6': {
             easy: {
                 name: 'Age 6 - Easy Division',
-                description: 'Divide by 1 and 2',
+                description: 'Divide by 2 and 3',
                 problemCount: 20,
-                generator: () => generateDivision([1, 2], 1, 20)
+                generator: () => generateDivision([2, 3], 1, 10)
             },
             medium: {
                 name: 'Age 6 - Medium Division',
@@ -839,9 +839,9 @@ const ageBasedContentConfigs = {
         '7': {
             easy: {
                 name: 'Age 7 - Easy Division',
-                description: 'Divide by 3, 4, 5',
+                description: 'Divide by 4, 5, 6',
                 problemCount: 20,
-                generator: () => generateDivision([3, 4, 5], 1, 10)
+                generator: () => generateDivision([4, 5, 6], 1, 10)
             },
             medium: {
                 name: 'Age 7 - Medium Division',
@@ -859,9 +859,9 @@ const ageBasedContentConfigs = {
         '8': {
             easy: {
                 name: 'Age 8 - Easy Division',
-                description: 'Divide by 6, 7, 8, 9',
+                description: 'Divide by 7, 8, 9, 10',
                 problemCount: 20,
-                generator: () => generateDivision([6, 7, 8, 9], 1, 10)
+                generator: () => generateDivision([7, 8, 9, 10], 1, 12)
             },
             medium: {
                 name: 'Age 8 - Medium Division',
@@ -879,9 +879,9 @@ const ageBasedContentConfigs = {
         '9+': {
             easy: {
                 name: 'Ages 9+ - Easy Division',
-                description: 'Division with remainders',
+                description: 'Two-digit ÷ One-digit (larger)',
                 problemCount: 20,
-                generator: () => generateAdvancedDivision(10, 99, 2, 9, true)
+                generator: () => generateAdvancedDivision(20, 99, 5, 9, false)
             },
             medium: {
                 name: 'Ages 9+ - Medium Division',
@@ -899,9 +899,9 @@ const ageBasedContentConfigs = {
         '10+': {
             easy: {
                 name: 'Ages 10+ - Easy Division',
-                description: 'Three-digit ÷ Two-digit',
+                description: 'Division with remainders (advanced)',
                 problemCount: 20,
-                generator: () => generateAdvancedDivision(100, 999, 10, 50, false)
+                generator: () => generateAdvancedDivision(50, 200, 6, 12, true)
             },
             medium: {
                 name: 'Ages 10+ - Medium Division',
@@ -1373,7 +1373,7 @@ function renderWorksheet() {
                 }).join('')}
             </div>
 
-            <div class="answer-key" id="answer-key">
+            <div class="answer-key" id="answer-key" style="display: none;">
                 <h3>Answer Key</h3>
                 <div class="answer-key-grid">
                     ${problems.map((problem, index) => `
@@ -1406,7 +1406,13 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation" style="margin-top: 20px;">
-                <!-- Show Answers removed from Math worksheets -->
+                <div id="answer-toggle-container" class="answer-toggle-container" style="margin-bottom: 20px;">
+                    <span class="answer-toggle-label">Show Answers</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="answer-toggle-input" onchange="toggleMathAnswers(event)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     `;
@@ -1456,6 +1462,9 @@ function renderWorksheet() {
 
             // Update submission status display
             updateSubmissionStatusDisplay();
+
+            // Validate show answers toggle
+            setTimeout(() => validateShowAnswersToggle(), 100);
         }, 200);
     }, 100);
 
@@ -1480,12 +1489,24 @@ function addChangeTracking() {
 
         if (usePencil) {
             // For canvas, track drawing events
-            answerElement.addEventListener('pointerdown', markAsChanged);
-            answerElement.addEventListener('touchstart', markAsChanged);
+            answerElement.addEventListener('pointerdown', () => {
+                markAsChanged();
+                setTimeout(() => validateShowAnswersToggle(), 100);
+            });
+            answerElement.addEventListener('touchstart', () => {
+                markAsChanged();
+                setTimeout(() => validateShowAnswersToggle(), 100);
+            });
         } else {
             // For input fields, track input events
-            answerElement.addEventListener('input', markAsChanged);
-            answerElement.addEventListener('change', markAsChanged);
+            answerElement.addEventListener('input', () => {
+                markAsChanged();
+                validateShowAnswersToggle();
+            });
+            answerElement.addEventListener('change', () => {
+                markAsChanged();
+                validateShowAnswersToggle();
+            });
         }
     }
 }
@@ -2242,6 +2263,84 @@ function clearWorksheet() {
     hasUnsavedChanges = false;
 
     console.log('Worksheet cleared');
+
+    // Validate show answers toggle after clearing
+    validateShowAnswersToggle();
+}
+
+/**
+ * Toggle visibility of answer key
+ */
+let answersVisible = false;
+function toggleMathAnswers(event) {
+    const answerKey = document.getElementById('answer-key');
+    if (!answerKey) return;
+
+    if (event && event.target && event.target.checked) {
+        answerKey.style.display = 'block';
+        answersVisible = true;
+    } else {
+        answerKey.style.display = 'none';
+        answersVisible = false;
+    }
+}
+
+/**
+ * Validate if all inputs are filled and enable/disable Show Answers toggle
+ */
+function validateShowAnswersToggle() {
+    const toggleInput = document.getElementById('answer-toggle-input');
+    const toggleContainer = document.getElementById('answer-toggle-container');
+
+    if (!toggleInput || !toggleContainer) return;
+
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+    let allFieldsFilled = true;
+
+    // Check all answer inputs
+    if (currentWorksheet && currentWorksheet.problems) {
+        for (let i = 0; i < currentWorksheet.problems.length; i++) {
+            const answerElement = document.getElementById(`answer-${i}`);
+            if (!answerElement) continue;
+
+            if (usePencil) {
+                // Check if canvas has content (using handwriting input system)
+                if (typeof handwritingInputs !== 'undefined' && handwritingInputs.length > 0) {
+                    const input = handwritingInputs.find(input => input.canvas.id === `answer-${i}`);
+                    if (input && input.isEmpty()) {
+                        allFieldsFilled = false;
+                        break;
+                    }
+                }
+            } else {
+                // Check if text input has value
+                if (!answerElement.value || answerElement.value.trim() === '') {
+                    allFieldsFilled = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Enable/disable toggle based on whether all fields are filled
+    if (allFieldsFilled) {
+        toggleInput.disabled = false;
+        toggleContainer.style.opacity = '1';
+        toggleContainer.style.cursor = 'pointer';
+        toggleContainer.title = '';
+    } else {
+        toggleInput.disabled = true;
+        toggleInput.checked = false;
+        toggleContainer.style.opacity = '0.5';
+        toggleContainer.style.cursor = 'not-allowed';
+        toggleContainer.title = 'Please complete all problems to show answers';
+
+        // Hide answers if they were visible
+        if (answersVisible) {
+            answersVisible = false;
+            toggleMathAnswers();
+        }
+    }
 }
 
 /**

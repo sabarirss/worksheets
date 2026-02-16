@@ -238,7 +238,7 @@ function generateCountingPuzzles(count, difficulty, age) {
     // Load counting configuration (maps age to level internally)
     let config;
     if (typeof getCountingByAge !== 'undefined') {
-        config = getCountingByAge(ageGroup);
+        config = getCountingByAge(ageGroup, difficulty);
     }
 
     if (!config) {
@@ -291,60 +291,15 @@ function generateSequencePuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    let sequences = [];
-
-    if (difficulty === 'easy') {
-        // Age 4-5: Very simple repeating patterns
-        if (ageGroup === '4-5') {
-            sequences = [
-                { seq: ['1️⃣', '2️⃣', '3️⃣'], answer: '4️⃣', options: ['4️⃣', '5️⃣', '2️⃣'] },
-                { seq: ['🔴', '🔴'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
-                { seq: ['😊', '😊'], answer: '😊', options: ['😊', '😢', '😡'] },
-                { seq: ['⭐', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️'] }
-            ];
-        } else {
-            // Age 6+: Simple sequences with variety
-            sequences = [
-                { seq: ['1️⃣', '2️⃣', '3️⃣'], answer: '4️⃣', options: ['4️⃣', '5️⃣', '2️⃣'] },
-                { seq: ['🔴', '🔴'], answer: '🔴', options: ['🔴', '🔵', '🟢'] },
-                { seq: ['A', 'B'], answer: 'C', options: ['C', 'D', 'B'] },
-                { seq: ['😊', '😊'], answer: '😊', options: ['😊', '😢', '😡'] },
-                { seq: ['🌱', '🌿'], answer: '🌳', options: ['🌳', '🌱', '🍃'] },
-                { seq: ['🐣', '🐥'], answer: '🐔', options: ['🐔', '🐣', '🥚'] }
-            ];
-        }
-    } else if (difficulty === 'medium') {
-        sequences = [
-            { seq: ['2️⃣', '4️⃣', '6️⃣'], answer: '8️⃣', options: ['8️⃣', '7️⃣', '9️⃣'] },
-            { seq: ['🔴', '🔵', '🔴'], answer: '🔵', options: ['🔵', '🔴', '🟢'] },
-            { seq: ['🌙', '⭐', '⭐'], answer: '⭐', options: ['⭐', '🌙', '☀️'] },
-            { seq: ['🔺', '🔺', '⭕'], answer: '⭕', options: ['⭕', '🔺', '🔶'] },
-            { seq: ['1️⃣', '2️⃣', '2️⃣', '3️⃣'], answer: '3️⃣', options: ['3️⃣', '4️⃣', '2️⃣'] },
-            { seq: ['😊', '😢', '😊'], answer: '😢', options: ['😢', '😊', '😡'] },
-            { seq: ['A', 'B', 'C'], answer: 'D', options: ['D', 'E', 'C'] },
-            { seq: ['🌞', '🌙', '🌞'], answer: '🌙', options: ['🌙', '🌞', '⭐'] }
-        ];
-    } else {
-        sequences = [
-            { seq: ['1️⃣', '3️⃣', '5️⃣', '7️⃣'], answer: '9️⃣', options: ['9️⃣', '8️⃣', '🔟'] },
-            { seq: ['🔴', '🔴', '🔵', '🔵'], answer: '🟢', options: ['🟢', '🔴', '🔵'] },
-            { seq: ['A', 'B', 'A', 'B', 'A'], answer: 'B', options: ['B', 'A', 'C'] },
-            { seq: ['🌱', '🌿', '🌳', '🌲'], answer: '🎄', options: ['🎄', '🌱', '🍃'] },
-            { seq: ['🥚', '🐣', '🐥', '🐔'], answer: '🍗', options: ['🍗', '🥚', '🐣'] },
-            { seq: ['😊', '😊', '😢', '😢', '😡'], answer: '😡', options: ['😡', '😊', '😢'] },
-            { seq: ['🔺', '⭕', '🔺', '⭕'], answer: '🔺', options: ['🔺', '⭕', '🔶'] },
-            { seq: ['1️⃣', '1️⃣', '2️⃣', '2️⃣', '3️⃣'], answer: '3️⃣', options: ['3️⃣', '4️⃣', '2️⃣'] },
-            { seq: ['🌞', '🌙', '🌞', '🌙', '🌞'], answer: '🌙', options: ['🌙', '🌞', '⭐'] },
-            { seq: ['🔴', '🔵', '🟢', '🔴', '🔵'], answer: '🟢', options: ['🟢', '🔴', '🔵'] }
-        ];
-    }
+    // Get age-appropriate sequences from age-based content
+    const sequences = ageBasedSequences[ageGroup]?.[difficulty] || ageBasedSequences['6'][difficulty];
 
     return sequences.slice(0, count).map(s => ({
         type: 'sequence',
-        sequence: s.seq,
+        sequence: s.sequence,
         answer: s.answer,
         options: s.options,
-        reason: s.reason || 'Sequence continues'
+        reason: s.reason
     }));
 }
 
@@ -352,49 +307,8 @@ function generateMatchingPuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    let pairs = [];
-
-    if (difficulty === 'easy') {
-        // Direct, obvious animal-food associations (suitable for all ages)
-        pairs = [
-            { left: '🐱', right: '🥛', options: ['🥛', '🦴', '🥕'], reason: 'Cats drink milk' },
-            { left: '🐶', right: '🦴', options: ['🦴', '🥛', '🌻'], reason: 'Dogs love bones' },
-            { left: '🐝', right: '🌻', options: ['🌻', '🦴', '🌊'], reason: 'Bees get nectar from flowers' },
-            { left: '🐟', right: '🌊', options: ['🌊', '🪺', '🥛'], reason: 'Fish live in water' },
-            { left: '🐦', right: '🪺', options: ['🪺', '🥕', '🌻'], reason: 'Birds live in nests' },
-            { left: '🐰', right: '🥕', options: ['🥕', '🦴', '🥛'], reason: 'Rabbits eat carrots' }
-        ];
-    } else if (difficulty === 'medium') {
-        // Functional relationships and cause-effect
-        pairs = [
-            { left: '🌧️', right: '☂️', options: ['☂️', '🧈', '🔋', '✏️'], reason: 'We use umbrellas when it rains' },
-            { left: '🔑', right: '🔒', options: ['🔒', '🔑', '🎶', '👓'], reason: 'Keys open locks' },
-            { left: '📱', right: '🔋', options: ['🔋', '📱', '🛬', '👓'], reason: 'Phones need batteries to work' },
-            { left: '🔥', right: '💧', options: ['💧', '🔥', '⭐', '🖌️'], reason: 'Water puts out fire' },
-            { left: '📚', right: '✏️', options: ['✏️', '🖌️', '💧', '🔋'], reason: 'We write in books with pencils' },
-            { left: '🎨', right: '🖌️', options: ['🖌️', '✏️', '🌻', '💧'], reason: 'We paint art with brushes' },
-            { left: '✈️', right: '🛬', options: ['🛬', '✈️', '🔋', '🥅'], reason: 'Airplanes land at airports' },
-            { left: '🌡️', right: '🤒', options: ['🤒', '👓', '☂️', '🔒'], reason: 'Thermometers check if you have a fever' },
-            { left: '⚽', right: '🥅', options: ['🥅', '⚽', '📖', '🛬'], reason: 'Soccer balls go into goals' },
-            { left: '🌾', right: '🍞', options: ['🍞', '🌾', '🥛', '☂️'], reason: 'Bread is made from wheat' }
-        ];
-    } else {
-        // Abstract relationships, opposites, and analogies
-        pairs = [
-            { left: '☀️', right: '🌙', options: ['🌙', '⭐', '🌞', '💧'], reason: 'Opposites: sun (day) and moon (night)' },
-            { left: '🔥', right: '❄️', options: ['❄️', '🔥', '💧', '⭐'], reason: 'Opposites: hot fire and cold ice' },
-            { left: '😊', right: '😢', options: ['😢', '😊', '😡', '🤔'], reason: 'Opposites: happy and sad emotions' },
-            { left: '⬆️', right: '⬇️', options: ['⬇️', '⬆️', '➡️', '⬅️'], reason: 'Opposites: up and down directions' },
-            { left: '🔊', right: '🔇', options: ['🔇', '🔊', '🔋', '💡'], reason: 'Opposites: loud and silent' },
-            { left: '💡', right: '🌑', options: ['🌑', '💡', '⭐', '🔥'], reason: 'Opposites: light bulb (bright) and darkness' },
-            { left: '🏃', right: '🧘', options: ['🧘', '🏃', '🛌', '🚶'], reason: 'Opposites: running (active) and meditating (still)' },
-            { left: '📈', right: '📉', options: ['📉', '📈', '📊', '💹'], reason: 'Opposites: chart going up vs going down' },
-            { left: '🔓', right: '🔒', options: ['🔒', '🔓', '🔑', '🚪'], reason: 'Opposites: unlocked and locked' },
-            { left: '🌱', right: '🍂', options: ['🍂', '🌱', '🌳', '🌸'], reason: 'Life cycle: young sprout vs fallen leaf' },
-            { left: '🐣', right: '🐔', options: ['🐔', '🐣', '🥚', '🐓'], reason: 'Growth: baby chick becomes adult chicken' },
-            { left: '🌅', right: '🌇', options: ['🌇', '🌅', '🌃', '🌆'], reason: 'Time: sunrise (beginning) vs sunset (ending)' }
-        ];
-    }
+    // Get age-appropriate matching puzzles from age-based content
+    const pairs = ageBasedMatching[ageGroup]?.[difficulty] || ageBasedMatching['6'][difficulty];
 
     return pairs.slice(0, count).map(p => ({
         type: 'matching',
@@ -409,42 +323,8 @@ function generateOddOnePuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    let sets = [];
-
-    if (difficulty === 'easy') {
-        sets = [
-            { items: ['🍎', '🍊', '🍋', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
-            { items: ['🐶', '🐱', '🐭', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
-            { items: ['⚽', '🏀', '🎾', '🍎'], answer: '🍎', reason: 'Apple is not a ball' },
-            { items: ['🟦', '🟥', '🟩', '⭕'], answer: '⭕', reason: 'Circle is not a square' },
-            { items: ['😊', '😢', '😡', '🚗'], answer: '🚗', reason: 'Car is not a face' },
-            { items: ['🐝', '🦋', '🐛', '🌸'], answer: '🌸', reason: 'Flower is not an insect' }
-        ];
-    } else if (difficulty === 'medium') {
-        sets = [
-            { items: ['🍎', '🍊', '🍋', '🍌', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
-            { items: ['🐶', '🐱', '🐭', '🐰', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
-            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '🅰️'], answer: '🅰️', reason: 'Letter is not a number' },
-            { items: ['🔴', '🔵', '🟢', '🟡', '🔺'], answer: '🔺', reason: 'Triangle is not a circle' },
-            { items: ['😊', '😢', '😡', '🤔', '🚗'], answer: '🚗', reason: 'Car is not an emotion' },
-            { items: ['🏠', '🏫', '🏥', '🏦', '🐱'], answer: '🐱', reason: 'Cat is not a building' },
-            { items: ['⚽', '🏀', '🎾', '⚾', '🍎'], answer: '🍎', reason: 'Apple is not a sports ball' },
-            { items: ['🐝', '🦋', '🐛', '🐜', '🌸'], answer: '🌸', reason: 'Flower is not an insect' }
-        ];
-    } else {
-        sets = [
-            { items: ['🍎', '🍊', '🍋', '🍌', '🍇', '🚗'], answer: '🚗', reason: 'Car is not a fruit' },
-            { items: ['🐶', '🐱', '🐭', '🐰', '🐹', '🌳'], answer: '🌳', reason: 'Tree is not an animal' },
-            { items: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '🅰️'], answer: '🅰️', reason: 'Letter is not a number' },
-            { items: ['🔴', '🔵', '🟢', '🟡', '🟠', '🔺'], answer: '🔺', reason: 'Triangle is not a circle' },
-            { items: ['😊', '😢', '😡', '🤔', '😴', '🚗'], answer: '🚗', reason: 'Car is not an emotion' },
-            { items: ['🏠', '🏫', '🏥', '🏦', '🏪', '🐱'], answer: '🐱', reason: 'Cat is not a building' },
-            { items: ['⚽', '🏀', '🎾', '⚾', '🏈', '🍎'], answer: '🍎', reason: 'Apple is not a sports ball' },
-            { items: ['🐝', '🦋', '🐛', '🐜', '🦗', '🌸'], answer: '🌸', reason: 'Flower is not an insect' },
-            { items: ['🚗', '🚙', '🚕', '🚌', '🚎', '🐶'], answer: '🐶', reason: 'Dog is not a vehicle' },
-            { items: ['📚', '📖', '📝', '✏️', '📏', '🍎'], answer: '🍎', reason: 'Apple is not a school supply' }
-        ];
-    }
+    // Get age-appropriate odd-one-out puzzles from age-based content
+    const sets = ageBasedOddOneOut[ageGroup]?.[difficulty] || ageBasedOddOneOut['6'][difficulty];
 
     return sets.slice(0, count).map(s => ({
         type: 'oddone',
@@ -458,47 +338,8 @@ function generateComparisonPuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
-    let comparisons = [];
-
-    if (difficulty === 'easy') {
-        comparisons = [
-            { item1: '🐘', item2: '🐭', question: 'Which is bigger?', answer: '🐘' },
-            { item1: '🌳', item2: '🌱', question: 'Which is bigger?', answer: '🌳' },
-            { item1: '⭐⭐⭐', item2: '⭐⭐', question: 'Which has more?', answer: '⭐⭐⭐' },
-            { item1: '🍎🍎', item2: '🍎🍎🍎🍎', question: 'Which has more?', answer: '🍎🍎🍎🍎' },
-            { item1: '🐜', item2: '🐻', question: 'Which is smaller?', answer: '🐜' },
-            { item1: '🏀', item2: '⚽', question: 'Which is bigger?', answer: '🏀' }
-        ];
-    } else if (difficulty === 'medium') {
-        comparisons = [
-            { item1: '🍪🍪🍪', item2: '🍪🍪🍪🍪🍪', question: 'Which has more?', answer: '🍪🍪🍪🍪🍪' },
-            { item1: '🌞', item2: '⭐', question: 'Which is bigger in the sky?', answer: '🌞' },
-            { item1: '🚗', item2: '🚂', question: 'Which is longer?', answer: '🚂' },
-            { item1: '🎈🎈🎈🎈', item2: '🎈🎈', question: 'Which has less?', answer: '🎈🎈' },
-            { item1: '🐘', item2: '🦒', question: 'Which is taller?', answer: '🦒' },
-            { item1: '🐢', item2: '🐇', question: 'Which is faster?', answer: '🐇' },
-            { item1: '🔥', item2: '❄️', question: 'Which is hotter?', answer: '🔥' },
-            { item1: '🪶', item2: '🧱', question: 'Which is heavier?', answer: '🧱' }
-        ];
-    } else {
-        // Use age-appropriate numbers for hard mode
-        const range = getNumberRange(ageGroup);
-        const num1 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-        const num2 = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-
-        comparisons = [
-            { item1: '🍪🍪🍪🍪🍪', item2: '🍪🍪🍪🍪🍪🍪🍪', question: 'Which has more?', answer: '🍪🍪🍪🍪🍪🍪🍪' },
-            { item1: num1.toString(), item2: num2.toString(), question: 'Which number is bigger?', answer: Math.max(num1, num2).toString() },
-            { item1: num1.toString(), item2: num2.toString(), question: 'Which number is smaller?', answer: Math.min(num1, num2).toString() },
-            { item1: '🌊', item2: '💧', question: 'Which has more water?', answer: '🌊' },
-            { item1: '🦕', item2: '🦖', question: 'Which is a carnivore?', answer: '🦖' },
-            { item1: '🌙', item2: '☀️', question: 'Which comes at night?', answer: '🌙' },
-            { item1: '🌱', item2: '🌳', question: 'Which is older?', answer: '🌳' },
-            { item1: '🐌', item2: '🚀', question: 'Which is faster?', answer: '🚀' },
-            { item1: '🏔️', item2: '⛰️', question: 'Which is taller?', answer: '🏔️' },
-            { item1: '🍉', item2: '🍇', question: 'Which is bigger?', answer: '🍉' }
-        ];
-    }
+    // Get age-appropriate comparison puzzles from age-based content
+    const comparisons = ageBasedComparison[ageGroup]?.[difficulty] || ageBasedComparison['6'][difficulty];
 
     return comparisons.slice(0, count).map(c => ({
         type: 'comparison',
@@ -513,57 +354,9 @@ function generateComparisonPuzzles(count, difficulty, age) {
 function generateLogicPuzzles(count, difficulty, age) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
-    const range = getNumberRange(ageGroup);
 
-    let puzzles = [];
-
-    if (difficulty === 'easy') {
-        // Use age-appropriate numbers in math questions
-        const num1 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
-        const num2 = Math.min(range.max, Math.floor(Math.random() * 3) + 1);
-        const num3 = Math.min(range.max, Math.floor(Math.random() * 3) + 1);
-
-        puzzles = [
-            { question: `I have ${num1} apples. Mom gives me ${num2} more. How many do I have?`, answer: (num1 + num2).toString() },
-            { question: `There are ${num1 + num2} birds. ${num2} flies away. How many are left?`, answer: num1.toString() },
-            { question: 'Count: 1, 2, 3, ___', answer: '4' },
-            { question: 'What color is the sky?', answer: 'blue' },
-            { question: 'How many legs does a dog have?', answer: '4' },
-            { question: 'What comes after 5? (5, 6, ___)', answer: '7' }
-        ];
-    } else if (difficulty === 'medium') {
-        const num1 = Math.min(range.max, Math.floor(Math.random() * 10) + 1);
-        const num2 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
-        const num3 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
-
-        puzzles = [
-            { question: `I have ${num1} cookies. I eat ${num2}. Then I get ${num3} more. How many do I have?`, answer: (num1 - num2 + num3).toString() },
-            { question: `There are ${num1} apples. I eat ${num2}. How many are left?`, answer: (num1 - num2).toString() },
-            { question: 'Count by 2s: 2, 4, 6, ___', answer: '8' },
-            { question: 'I am big and yellow. I shine in the sky. What am I?', answer: 'sun' },
-            { question: 'A cat has 4 legs. Two cats have ___ legs.', answer: '8' },
-            { question: 'What day comes after Monday?', answer: 'Tuesday' },
-            { question: 'Which is heavier: feather or rock?', answer: 'rock' },
-            { question: 'If today is Sunday, yesterday was ___?', answer: 'Saturday' }
-        ];
-    } else {
-        const num1 = Math.min(range.max, Math.floor(Math.random() * 20) + 5);
-        const num2 = Math.min(range.max, Math.floor(Math.random() * 10) + 1);
-        const num3 = Math.min(range.max, Math.floor(Math.random() * 5) + 1);
-
-        puzzles = [
-            { question: `I have ${num1} toys. I give ${num2} to my sister and ${num3} to my brother. How many do I have?`, answer: (num1 - num2 - num3).toString() },
-            { question: `A basket has ${num1} eggs. ${num2} break. How many good eggs are left?`, answer: (num1 - num2).toString() },
-            { question: 'Count by 5s: 5, 10, 15, ___', answer: '20' },
-            { question: 'If 🐱 + 🐱 = 2, then 🐱 + 🐱 + 🐱 = ___', answer: '3' },
-            { question: 'A triangle has ___ sides.', answer: '3' },
-            { question: 'There are 3 dogs. Each has 2 ears. How many ears total?', answer: '6' },
-            { question: 'Which month comes after July?', answer: 'August' },
-            { question: 'If 5 + 3 = 8, then 3 + 5 = ___', answer: '8' },
-            { question: 'I am cold and white. I fall from the sky in winter. What am I?', answer: 'snow' },
-            { question: 'A week has ___ days.', answer: '7' }
-        ];
-    }
+    // Get age-appropriate logic puzzles from age-based content
+    const puzzles = ageBasedLogic[ageGroup]?.[difficulty] || ageBasedLogic['6'][difficulty];
 
     return puzzles.slice(0, count).map(p => ({
         type: 'logic',
@@ -898,6 +691,9 @@ function renderWorksheet() {
             </div>
 
             <div class="navigation">
+                <button onclick="checkAnswers()" class="btn-primary" style="margin-bottom: 20px; padding: 12px 24px; font-size: 1.1em;">
+                    ✓ Check Answers
+                </button>
                 <div id="answer-toggle-container" class="answer-toggle-container" style="margin-bottom: 20px;">
                     <span class="answer-toggle-label">Show Answers</span>
                     <label class="toggle-switch">
@@ -1412,38 +1208,12 @@ function validateShowAnswersToggle() {
 
     if (!toggleInput || !toggleContainer) return;
 
-    // Check if all handwriting inputs have content
-    let allCanvasesHaveContent = true;
-    if (handwritingInputs && handwritingInputs.length > 0) {
-        for (const input of handwritingInputs) {
-            if (input.isEmpty()) {
-                allCanvasesHaveContent = false;
-                break;
-            }
-        }
-    } else {
-        allCanvasesHaveContent = false;
-    }
-
-    // Enable/disable toggle based on canvas content
-    if (allCanvasesHaveContent) {
-        toggleInput.disabled = false;
-        toggleContainer.style.opacity = '1';
-        toggleContainer.style.cursor = 'pointer';
-        toggleContainer.title = '';
-    } else {
-        toggleInput.disabled = true;
-        toggleInput.checked = false;  // Uncheck if was checked
-        toggleContainer.style.opacity = '0.5';
-        toggleContainer.style.cursor = 'not-allowed';
-        toggleContainer.title = 'Please complete all problems to show answers';
-
-        // Hide answers if they were visible
-        if (answersVisible) {
-            answersVisible = false;
-            toggleAnswers();
-        }
-    }
+    // For Aptitude worksheets, always enable Show Answers (no validation required)
+    // User can see answers anytime to learn from examples
+    toggleInput.disabled = false;
+    toggleContainer.style.opacity = '1';
+    toggleContainer.style.cursor = 'pointer';
+    toggleContainer.title = '';
 }
 
 function clearAllAnswers() {
