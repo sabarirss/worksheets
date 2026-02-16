@@ -18,6 +18,11 @@ async function initializeAptitudeML5() {
     try {
         console.log('🧩 Initializing ml5.js for aptitude puzzles...');
 
+        // Wait for TensorFlow.js if available
+        if (typeof tf !== 'undefined') {
+            await tf.ready();
+        }
+
         aptitudeML5Ready = true;
 
         console.log('✅ ml5.js ready for aptitude handwriting!');

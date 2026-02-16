@@ -57,6 +57,10 @@ async function loadHandwritingModel() {
         modelLoading = true;
         console.log('Loading handwriting recognition model...');
 
+        // Ensure TensorFlow.js is fully initialized first
+        await tf.ready();
+        await tf.setBackend('webgl'); // Use WebGL backend for best performance
+
         // Load pre-trained MNIST model from TensorFlow.js
         // This is a simple CNN model trained on MNIST dataset
         const modelUrl = 'https://storage.googleapis.com/tfjs-models/tfjs/mnist_transfer_cnn_v1/model.json';

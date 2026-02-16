@@ -18,6 +18,11 @@ async function initializeHandwritingRecognition() {
     try {
         console.log('Initializing handwriting recognition with ml5.js...');
 
+        // Wait for TensorFlow.js if available
+        if (typeof tf !== 'undefined') {
+            await tf.ready();
+        }
+
         // For now, we'll use a simple approach
         // In production, you would load a custom-trained model for handwriting
         // Example: handwritingClassifier = await ml5.imageClassifier('path/to/model.json');

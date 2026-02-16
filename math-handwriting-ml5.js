@@ -16,8 +16,16 @@ async function initializeMathML5() {
         return false;
     }
 
+    if (typeof tf === 'undefined') {
+        console.warn('TensorFlow.js not loaded. Waiting...');
+        return false;
+    }
+
     try {
         console.log('🎨 Initializing ml5.js for math handwriting...');
+
+        // Wait for TensorFlow.js to be fully ready first
+        await tf.ready();
 
         // ml5.js is ready
         ml5Ready = true;

@@ -1888,11 +1888,11 @@ function saveCurrentWorksheet() {
 }
 
 // Load saved worksheet
-function loadSavedWorksheet() {
+async function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const savedData = loadWorksheetFromStorage('math', identifier);
+    const savedData = await loadWorksheet('math', identifier);
 
     if (!savedData) return;
 
