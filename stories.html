@@ -63,8 +63,9 @@
                     window.location.href = 'children-profiles.html';
                     return;
                 }
+                // For Stories: Always use actual age from DOB (no assessment)
                 childAge = child.age.toString();
-                console.log('Auto-detected age for stories:', childAge);
+                console.log('Stories: Using actual age from DOB:', childAge);
             }
 
             // Set current age automatically (defined in stories-generator.js)
@@ -147,10 +148,10 @@
         </footer>
     </div>
 
+    <script src="level-mapper.js"></script>
     <script src="age-content-mapper.js"></script>
     <script src="stories-age-content.js"></script>
     <script src="unique-stories-database.js"></script>
-    <script src="level-mapper.js"></script>
     <script src="stories-generator.js"></script>
 </body>
 </html>

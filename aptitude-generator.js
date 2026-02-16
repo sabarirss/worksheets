@@ -49,13 +49,19 @@ function shuffleArray(array) {
 // Navigation
 function selectAge(age) {
     currentAge = age;
-    document.getElementById('age-selection').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'block';
+    const ageSelection = document.getElementById('age-selection');
+    const typeSelection = document.getElementById('type-selection');
+
+    if (ageSelection) ageSelection.style.display = 'none';
+    if (typeSelection) typeSelection.style.display = 'block';
 }
 
 function backToAges() {
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('age-selection').style.display = 'block';
+    const typeSelection = document.getElementById('type-selection');
+    const ageSelection = document.getElementById('age-selection');
+
+    if (typeSelection) typeSelection.style.display = 'none';
+    if (ageSelection) ageSelection.style.display = 'block';
 }
 
 function selectType(type) {
@@ -907,9 +913,14 @@ function renderWorksheet() {
     `;
 
     // Hide navigation and show worksheet in container
-    document.getElementById('age-selection').style.display = 'none';
-    document.getElementById('type-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'none';
+    // Safely hide elements only if they exist
+    const ageSelection = document.getElementById('age-selection');
+    const typeSelection = document.getElementById('type-selection');
+    const difficultySelection = document.getElementById('difficulty-selection');
+
+    if (ageSelection) ageSelection.style.display = 'none';
+    if (typeSelection) typeSelection.style.display = 'none';
+    if (difficultySelection) difficultySelection.style.display = 'none';
 
     // Get or create worksheet container
     let worksheetContainer = document.getElementById('worksheet-content');

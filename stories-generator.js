@@ -318,20 +318,27 @@ function capitalize(str) {
 // Navigation
 function selectAge(age) {
     currentAge = age;
-    document.getElementById('age-selection').style.display = 'none';
-    document.getElementById('category-selection').style.display = 'block';
+    const ageSelection = document.getElementById('age-selection');
+    const categorySelection = document.getElementById('category-selection');
+
+    if (ageSelection) ageSelection.style.display = 'none';
+    if (categorySelection) categorySelection.style.display = 'block';
 }
 
 function backToAges() {
-    document.getElementById('category-selection').style.display = 'none';
-    document.getElementById('age-selection').style.display = 'block';
+    const categorySelection = document.getElementById('category-selection');
+    const ageSelection = document.getElementById('age-selection');
+
+    if (categorySelection) categorySelection.style.display = 'none';
+    if (ageSelection) ageSelection.style.display = 'block';
 }
 
 function selectCategory(category) {
     currentCategory = category;
     currentDifficulty = 'easy'; // Default to easy when skipping difficulty selection
 
-    document.getElementById('category-selection').style.display = 'none';
+    const categorySelection = document.getElementById('category-selection');
+    if (categorySelection) categorySelection.style.display = 'none';
 
     // Skip difficulty selection and show stories directly
     showStories('easy');
@@ -361,7 +368,8 @@ function showStories(difficulty) {
     const limit = getDemoLimit(currentList.length);
     const limitedList = currentList.slice(0, limit);
 
-    document.getElementById('story-list').style.display = 'block';
+    const storyList = document.getElementById('story-list');
+    if (storyList) storyList.style.display = 'block';
 
     const categoryNames = {
         animals: '🦁 Animal Stories',
@@ -412,16 +420,22 @@ function backToDifficulty() {
 }
 
 function backToCategories() {
-    document.getElementById('story-list').style.display = 'none';
-    document.getElementById('category-selection').style.display = 'block';
+    const storyList = document.getElementById('story-list');
+    const categorySelection = document.getElementById('category-selection');
+
+    if (storyList) storyList.style.display = 'none';
+    if (categorySelection) categorySelection.style.display = 'block';
 }
 
 function readStory(index) {
     currentStoryIndex = index;
     const story = currentList[index];
 
-    document.getElementById('story-list').style.display = 'none';
-    document.getElementById('story-reader').style.display = 'block';
+    const storyListEl = document.getElementById('story-list');
+    const storyReaderEl = document.getElementById('story-reader');
+
+    if (storyListEl) storyListEl.style.display = 'none';
+    if (storyReaderEl) storyReaderEl.style.display = 'block';
 
     // Handle both unique stories (with 'image' and 'story') and generated stories (with 'illustration' and 'text')
     const illustrationHTML = story.image
@@ -456,8 +470,11 @@ function readStory(index) {
 }
 
 function backToList() {
-    document.getElementById('story-reader').style.display = 'none';
-    document.getElementById('story-list').style.display = 'block';
+    const storyReaderEl = document.getElementById('story-reader');
+    const storyListEl = document.getElementById('story-list');
+
+    if (storyReaderEl) storyReaderEl.style.display = 'none';
+    if (storyListEl) storyListEl.style.display = 'block';
 }
 
 function previousStory() {

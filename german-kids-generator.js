@@ -10,13 +10,19 @@ let currentScore = 0;
 // Navigation functions
 function selectAge(age) {
     currentAge = age;
-    document.getElementById('age-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    const ageSelection = document.getElementById('age-selection');
+    const difficultySelection = document.getElementById('difficulty-selection');
+
+    if (ageSelection) ageSelection.style.display = 'none';
+    if (difficultySelection) difficultySelection.style.display = 'block';
 }
 
 function backToAges() {
-    document.getElementById('difficulty-selection').style.display = 'none';
-    document.getElementById('age-selection').style.display = 'block';
+    const difficultySelection = document.getElementById('difficulty-selection');
+    const ageSelection = document.getElementById('age-selection');
+
+    if (difficultySelection) difficultySelection.style.display = 'none';
+    if (ageSelection) ageSelection.style.display = 'block';
 }
 
 // Demo version limiting
@@ -515,6 +521,20 @@ function getGermanStoriesByAge(ageGroup, difficulty) {
 
 // Load all stories from all difficulty levels (skip difficulty selection)
 function loadAllStories() {
+    // Ensure currentAge is set
+    if (!currentAge) {
+        // Get age from selected child or default to '6'
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            currentAge = child.age.toString();
+        } else if (window.currentUserRole === 'admin') {
+            currentAge = '10'; // Default admin age
+        } else {
+            currentAge = '6'; // Fallback default
+        }
+        console.log('German Kids: Set currentAge to:', currentAge);
+    }
+
     // Check for admin level override
     if (window.currentUserRole === 'admin') {
         const adminLevel = getAdminLevelForModule('german-kids');

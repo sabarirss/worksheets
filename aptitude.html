@@ -49,15 +49,16 @@
                 childAge = '10';
                 console.log('Admin user - using default age:', childAge);
             } else {
-                // Auto-detect child's age from selected profile
+                // Auto-detect child's age from selected profile (DOB-based)
                 const child = getSelectedChild();
                 if (!child || !child.age) {
                     alert('Please select a child profile first');
                     window.location.href = 'children-profiles.html';
                     return;
                 }
+                // For Aptitude: Always use actual age from DOB (no assessment)
                 childAge = child.age.toString();
-                console.log('Auto-detected age:', childAge);
+                console.log('Aptitude: Using actual age from DOB:', childAge);
             }
 
             // Set current age automatically (defined in aptitude-generator.js)

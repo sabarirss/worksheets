@@ -631,7 +631,9 @@ function renderWorksheet() {
         </div>
     `;
 
-    document.getElementById('eq-selection').style.display = 'none';
+    const eqSelection = document.getElementById('eq-selection');
+    if (eqSelection) eqSelection.style.display = 'none';
+
     const worksheetArea = document.getElementById('worksheet-area');
     worksheetArea.innerHTML = html;
 

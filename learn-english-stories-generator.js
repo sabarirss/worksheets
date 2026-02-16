@@ -33,14 +33,21 @@ function getDemoLimit(defaultCount) {
 // Navigation functions
 function selectAge(age) {
     currentAge = age;
-    document.getElementById('age-selection').style.display = 'none';
-    document.getElementById('difficulty-selection').style.display = 'block';
+    const ageSelection = document.getElementById('age-selection');
+    const difficultySelection = document.getElementById('difficulty-selection');
+
+    if (ageSelection) ageSelection.style.display = 'none';
+    if (difficultySelection) difficultySelection.style.display = 'block';
 }
 
 function backToAges() {
-    document.getElementById('difficulty-selection').style.display = 'none';
-    document.getElementById('story-selection').style.display = 'none';
-    document.getElementById('age-selection').style.display = 'block';
+    const difficultySelection = document.getElementById('difficulty-selection');
+    const storySelection = document.getElementById('story-selection');
+    const ageSelection = document.getElementById('age-selection');
+
+    if (difficultySelection) difficultySelection.style.display = 'none';
+    if (storySelection) storySelection.style.display = 'none';
+    if (ageSelection) ageSelection.style.display = 'block';
 }
 
 function selectDifficulty(difficulty) {
