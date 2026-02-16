@@ -28,17 +28,8 @@ function selectAgeGroup(ageGroup) {
 }
 
 function backToAgeGroups() {
-    const typeSelection = document.getElementById('type-selection');
-    if (typeSelection) typeSelection.style.display = 'none';
-
-    const writingDifficulties = document.getElementById('writing-difficulties');
-    if (writingDifficulties) writingDifficulties.style.display = 'none';
-
-    const readingDifficulties = document.getElementById('reading-difficulties');
-    if (readingDifficulties) readingDifficulties.style.display = 'none';
-
-    const ageGroups = document.getElementById('age-groups');
-    if (ageGroups) ageGroups.style.display = 'block';
+    // Since there's no age-groups div in english.html, redirect to type selection instead
+    backToTypeSelection();
 }
 
 function selectType(type) {

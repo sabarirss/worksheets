@@ -57,11 +57,8 @@ function selectAge(age) {
 }
 
 function backToAges() {
-    const typeSelection = document.getElementById('type-selection');
-    const ageSelection = document.getElementById('age-selection');
-
-    if (typeSelection) typeSelection.style.display = 'none';
-    if (ageSelection) ageSelection.style.display = 'block';
+    // Redirect to home page since there's no age selection in aptitude.html
+    window.location.href = 'index.html';
 }
 
 function selectType(type) {

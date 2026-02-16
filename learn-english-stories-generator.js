@@ -41,13 +41,8 @@ function selectAge(age) {
 }
 
 function backToAges() {
-    const difficultySelection = document.getElementById('difficulty-selection');
-    const storySelection = document.getElementById('story-selection');
-    const ageSelection = document.getElementById('age-selection');
-
-    if (difficultySelection) difficultySelection.style.display = 'none';
-    if (storySelection) storySelection.style.display = 'none';
-    if (ageSelection) ageSelection.style.display = 'block';
+    // Redirect to home page since there's no age selection in learn-english-stories.html
+    window.location.href = 'index.html';
 }
 
 function selectDifficulty(difficulty) {

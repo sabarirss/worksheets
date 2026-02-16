@@ -326,11 +326,8 @@ function selectAge(age) {
 }
 
 function backToAges() {
-    const categorySelection = document.getElementById('category-selection');
-    const ageSelection = document.getElementById('age-selection');
-
-    if (categorySelection) categorySelection.style.display = 'none';
-    if (ageSelection) ageSelection.style.display = 'block';
+    // Redirect to home page since there's no age selection in stories.html
+    window.location.href = 'index.html';
 }
 
 function selectCategory(category) {

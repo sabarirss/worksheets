@@ -18,11 +18,8 @@ function selectAge(age) {
 }
 
 function backToAges() {
-    const difficultySelection = document.getElementById('difficulty-selection');
-    const ageSelection = document.getElementById('age-selection');
-
-    if (difficultySelection) difficultySelection.style.display = 'none';
-    if (ageSelection) ageSelection.style.display = 'block';
+    // Redirect to home page since there's no age/difficulty selection in german-kids.html
+    window.location.href = 'index.html';
 }
 
 // Demo version limiting
