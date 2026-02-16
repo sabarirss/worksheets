@@ -371,11 +371,11 @@
                 </button>
             </div>
 
-            <!-- Children Version Management -->
+            <!-- Children Management -->
             <div id="children-version-section" style="margin-top: 30px;">
-                <h3>📦 Version Management (Per Child)</h3>
+                <h3>👶 Children Management</h3>
                 <p style="color: #666; margin-bottom: 15px;">
-                    Manage version and upgrade requests for each child individually.
+                    Manage version, upgrade requests, and package access for each child individually.
                 </p>
                 <div id="children-version-list">
                     <!-- Will be populated dynamically -->
@@ -493,7 +493,7 @@
             <p style="color: #666; margin-bottom: 30px;">Select a child to manage their learning modules.</p>
 
             <!-- Child Selection -->
-            <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
+            <div id="child-selection-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
                 <h3 style="color: #667eea; margin-top: 0;">👶 Select Child</h3>
                 <div style="margin: 15px 0;">
                     <select id="panel-child-select" onchange="loadChildPackages()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
@@ -891,9 +891,55 @@
 
             if (parentalVerificationAction === 'password') {
                 openPasswordChangeModal();
+            } else if (parentalVerificationAction === 'childPackage') {
+                const { childId, childName } = window.pendingChildPackageManagement;
+                openParentalControlPanelForChild(childId, childName);
+                window.pendingChildPackageManagement = null;
             } else {
                 openParentalControlPanel();
             }
+        }
+
+        // Open parental control for a specific child (from Children Management section)
+        async function openParentalControlForChild(childId, childName) {
+            // Skip age verification for admin users
+            if (currentUser && currentUser.role === 'admin') {
+                openParentalControlPanelForChild(childId, childName);
+                return;
+            }
+
+            // Store child info for after verification
+            window.pendingChildPackageManagement = { childId, childName };
+            parentalVerificationAction = 'childPackage';
+
+            document.getElementById('parent-verification-modal').style.display = 'flex';
+            document.getElementById('parent-dob-input').value = '';
+            document.getElementById('parent-verification-error').style.display = 'none';
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('parent-dob-input').max = today;
+
+            setTimeout(() => {
+                document.getElementById('parent-dob-input').focus();
+            }, 100);
+        }
+
+        async function openParentalControlPanelForChild(childId, childName) {
+            document.getElementById('parental-control-panel').style.display = 'flex';
+            document.getElementById('panel-error').style.display = 'none';
+
+            // Hide the child selector section when opening for specific child
+            const childSelectionSection = document.getElementById('child-selection-section');
+            if (childSelectionSection) {
+                childSelectionSection.style.display = 'none';
+            }
+
+            // Show package management section immediately
+            document.getElementById('package-management-section').style.display = 'block';
+
+            // Set child info and load packages
+            window.selectedChildForPackages = { id: childId, name: childName };
+            await loadChildPackages(childId, childName);
         }
 
         async function openParentalControlPanel() {
@@ -901,6 +947,12 @@
             document.getElementById('panel-error').style.display = 'none';
             document.getElementById('package-management-section').style.display = 'none';
             document.getElementById('save-packages-btn').disabled = true;
+
+            // Show the child selector section when opening normally
+            const childSelectionSection = document.getElementById('child-selection-section');
+            if (childSelectionSection) {
+                childSelectionSection.style.display = 'block';
+            }
 
             // Load children list
             if (currentUser) {
@@ -942,12 +994,17 @@
             }
         }
 
-        async function loadChildPackages() {
-            const childId = document.getElementById('panel-child-select').value;
+        async function loadChildPackages(childId = null, childName = null) {
+            // If called with parameters (from Manage Package button), use them
+            // Otherwise, get from dropdown
+            if (!childId) {
+                childId = document.getElementById('panel-child-select').value;
+            }
 
             if (!childId) {
                 document.getElementById('package-management-section').style.display = 'none';
-                document.getElementById('child-age-display').style.display = 'none';
+                const childAgeDisplay = document.getElementById('child-age-display');
+                if (childAgeDisplay) childAgeDisplay.style.display = 'none';
                 document.getElementById('save-packages-btn').disabled = true;
                 return;
             }
@@ -962,10 +1019,15 @@
 
                 const child = doc.data();
 
-                // Show child's age (calculated from DOB)
-                document.getElementById('child-age-value').textContent = `${child.age} years old`;
-                document.getElementById('child-age-display').style.display = 'block';
-                document.getElementById('selected-child-name').textContent = child.name;
+                // Update selected child name
+                document.getElementById('selected-child-name').textContent = childName || child.name;
+
+                // Show child's age (calculated from DOB) only if age display exists
+                const childAgeDisplay = document.getElementById('child-age-display');
+                if (childAgeDisplay) {
+                    document.getElementById('child-age-value').textContent = `${child.age} years old`;
+                    childAgeDisplay.style.display = 'block';
+                }
 
                 // Show package management section
                 document.getElementById('package-management-section').style.display = 'block';
@@ -1063,10 +1125,15 @@
 
         function closeParentalControlPanel() {
             document.getElementById('parental-control-panel').style.display = 'none';
+            window.selectedChildForPackages = null; // Clear selected child
         }
 
         async function saveChildPackages() {
-            const childId = document.getElementById('panel-child-select').value;
+            // Get child ID from either the dropdown or the selected child for packages
+            let childId = document.getElementById('panel-child-select')?.value;
+            if (!childId && window.selectedChildForPackages) {
+                childId = window.selectedChildForPackages.id;
+            }
 
             if (!childId) {
                 alert('Please select a child first');
@@ -1099,6 +1166,9 @@
 
                 closeParentalControlPanel();
                 showSuccess('✓ Package settings updated successfully!\n\nModules will appear based on both admin assignment and your enabled settings.');
+
+                // Reload children list in Children Management section
+                await loadChildrenVersionInfo();
 
                 // Reload after 2 seconds if this is the currently selected child
                 const selectedChild = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
@@ -1201,7 +1271,7 @@
 
                     childCard.innerHTML = `
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <div>
                                     <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">
                                         ${child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶'} ${child.name}
@@ -1214,6 +1284,11 @@
                                 <div>
                                     ${actionButton}
                                 </div>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <button onclick="openParentalControlForChild('${childId}', '${child.name}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: all 0.3s;">
+                                    📦 Manage Packages
+                                </button>
                             </div>
                         </div>
                     `;

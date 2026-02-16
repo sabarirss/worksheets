@@ -3602,6 +3602,17 @@ function renderWorksheet() {
                 </div>
             </div>
 
+            <!-- Manual Completion and Recognition Buttons -->
+            <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button onclick="checkHandwriting()" class="check-writing-btn" style="padding: 15px 30px; font-size: 1.1em; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
+                    🔍 Check My Writing
+                </button>
+                <button onclick="markEnglishWorksheetComplete()" class="complete-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                    ✓ Mark as Complete
+                </button>
+                <div id="completion-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
+            </div>
+
             <div class="navigation" style="margin-top: 20px;">
                 <div id="answer-toggle-container" class="answer-toggle-container" style="display: inline-block; margin-right: 20px;">
                     <span class="answer-toggle-label">👀 Show Answers</span>
@@ -3987,6 +3998,160 @@ function clearAllAnswers() {
         stopTimer();
         elapsedSeconds = 0;
         updateTimerDisplay();
+    }
+}
+
+/**
+ * Check handwriting using ml5.js recognition
+ */
+async function checkHandwriting() {
+    if (!currentWorksheet) {
+        alert('No worksheet loaded');
+        return;
+    }
+
+    const checkBtn = document.querySelector('.check-writing-btn');
+    if (checkBtn) {
+        checkBtn.disabled = true;
+        checkBtn.textContent = '⏳ Checking...';
+    }
+
+    try {
+        let checkedCount = 0;
+        let totalChecked = 0;
+
+        // Check each answer canvas
+        for (let i = 0; i < currentWorksheet.problems.length; i++) {
+            const problem = currentWorksheet.problems[i];
+            if (problem.type === 'passage') continue; // Skip passage boxes
+
+            const canvas = document.getElementById(`answer-${i}`);
+            const feedbackElement = document.getElementById(`feedback-${i}`);
+
+            if (!canvas || !feedbackElement) continue;
+
+            const expectedAnswer = String(problem.answer);
+
+            // Use handwriting recognition if available
+            if (typeof recognizeHandwriting === 'function') {
+                const result = await recognizeHandwriting(canvas, expectedAnswer);
+
+                if (result.isEmpty) {
+                    feedbackElement.textContent = '✏️ Empty - Try writing!';
+                    feedbackElement.style.color = '#999';
+                } else if (result.success) {
+                    const isCorrect = validateHandwriting(result.recognized, expectedAnswer);
+
+                    if (isCorrect) {
+                        checkedCount++;
+                        feedbackElement.textContent = '✓ Great!';
+                        feedbackElement.style.color = '#4caf50';
+                        feedbackElement.style.fontWeight = 'bold';
+                    } else {
+                        feedbackElement.textContent = `Keep trying! (Expected: ${expectedAnswer})`;
+                        feedbackElement.style.color = '#ff9800';
+                    }
+                    totalChecked++;
+                } else {
+                    feedbackElement.textContent = `Answer: ${expectedAnswer}`;
+                    feedbackElement.style.color = '#667eea';
+                }
+
+                feedbackElement.style.display = 'inline-block';
+                feedbackElement.style.marginLeft = '10px';
+            }
+        }
+
+        // Show summary
+        const statusDiv = document.getElementById('completion-status');
+        if (statusDiv && totalChecked > 0) {
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#667eea';
+            statusDiv.style.color = 'white';
+            statusDiv.innerHTML = `
+                Checked ${totalChecked} answers!
+                <div style="font-size: 0.95em; margin-top: 5px;">
+                    ${checkedCount > 0 ? `✓ ${checkedCount} look great!` : 'Keep practicing!'}
+                </div>
+            `;
+        }
+
+    } catch (error) {
+        console.error('Error checking handwriting:', error);
+        alert('Error checking writing. The handwriting recognition is still learning!');
+    } finally {
+        // Re-enable button
+        if (checkBtn) {
+            checkBtn.disabled = false;
+            checkBtn.textContent = '🔍 Check My Writing';
+        }
+    }
+}
+
+/**
+ * Mark English worksheet as manually completed
+ */
+async function markEnglishWorksheetComplete() {
+    if (!currentWorksheet) {
+        alert('No worksheet loaded');
+        return;
+    }
+
+    const completeBtn = document.querySelector('.complete-worksheet-btn');
+    if (completeBtn) {
+        completeBtn.disabled = true;
+        completeBtn.textContent = '⏳ Saving...';
+    }
+
+    try {
+        const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
+        const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+
+        // Manual completion - no score validation
+        const completionData = {
+            score: 100, // Manual completion counts as 100%
+            correctCount: 0,
+            totalProblems: 0,
+            completed: true,
+            manuallyMarked: true,
+            elapsedTime: elapsedTime,
+            attempts: 1
+        };
+
+        // Save to Firestore using completion manager
+        await savePageCompletion('english', identifier, completionData);
+
+        // Show success status
+        const statusDiv = document.getElementById('completion-status');
+        if (statusDiv) {
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#4caf50';
+            statusDiv.style.color = 'white';
+            statusDiv.innerHTML = `
+                ✓ Worksheet Completed!
+                <span style="display: inline-block; margin-left: 10px; font-size: 1.2em;">✓</span>
+                <div style="font-size: 0.95em; margin-top: 5px;">🌟 Great work! This worksheet is now marked as complete.</div>
+            `;
+        }
+
+        // Re-enable button
+        if (completeBtn) {
+            completeBtn.disabled = false;
+            completeBtn.textContent = '✓ Completed';
+            completeBtn.style.background = 'linear-gradient(135deg, #4caf50, #45a049)';
+        }
+
+        console.log(`English worksheet ${identifier} marked as completed manually`);
+
+    } catch (error) {
+        console.error('Error marking worksheet complete:', error);
+        alert('Error saving completion: ' + error.message);
+
+        // Re-enable button on error
+        if (completeBtn) {
+            completeBtn.disabled = false;
+            completeBtn.textContent = '✓ Mark as Complete';
+        }
     }
 }
 

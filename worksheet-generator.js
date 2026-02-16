@@ -1463,6 +1463,9 @@ function renderWorksheet() {
             // Update submission status display
             updateSubmissionStatusDisplay();
 
+            // Update navigation buttons based on completion
+            updateNavigationButtons();
+
             // Validate show answers toggle
             setTimeout(() => validateShowAnswersToggle(), 100);
         }, 200);
@@ -1955,7 +1958,7 @@ function updateCompletionBadge(operation, ageGroup, difficulty) {
 }
 
 // Navigate between pages
-function navigatePage(direction) {
+async function navigatePage(direction) {
     try {
         if (!currentWorksheet) {
             alert('Error: Worksheet not loaded properly. Please reload the page.');
@@ -1974,6 +1977,15 @@ function navigatePage(direction) {
             return; // User cancelled navigation
         }
 
+        // For forward navigation, check if current page is completed (95% threshold)
+        if (direction > 0) {
+            const currentPageSubmission = pageSubmissions[currentWorksheet.operation]?.[currentAbsolutePage];
+            if (!currentPageSubmission || !currentPageSubmission.completed) {
+                alert('⚠️ Complete the current page with 95% or higher score before moving to the next page!');
+                return;
+            }
+        }
+
         // Load new page
         loadWorksheet(currentWorksheet.operation, currentWorksheet.ageGroup, currentWorksheet.difficulty, newPage);
     } catch (error) {
@@ -1986,7 +1998,7 @@ function navigatePage(direction) {
  * Navigate by absolute page number (1-150)
  * @param {number} offset - Number of pages to move (-10, -1, +1, +10)
  */
-function navigateAbsolutePage(offset) {
+async function navigateAbsolutePage(offset) {
     try {
         if (!currentWorksheet) {
             alert('Error: Worksheet not loaded properly. Please reload the page.');
@@ -2005,11 +2017,75 @@ function navigateAbsolutePage(offset) {
             return; // User cancelled navigation
         }
 
+        // For forward navigation, check if all pages up to the current page are completed
+        if (offset > 0) {
+            // Check if current page is completed
+            const currentPageSubmission = pageSubmissions[currentWorksheet.operation]?.[currentAbsolutePage];
+            if (!currentPageSubmission || !currentPageSubmission.completed) {
+                alert('⚠️ Complete the current page with 95% or higher score before jumping forward!');
+                return;
+            }
+
+            // For larger jumps, check all pages in between
+            if (Math.abs(offset) > 1) {
+                for (let i = currentAbsolutePage + 1; i < newAbsolutePage; i++) {
+                    const pageSubmission = pageSubmissions[currentWorksheet.operation]?.[i];
+                    if (!pageSubmission || !pageSubmission.completed) {
+                        alert(`⚠️ You must complete pages sequentially. Page ${i} is not completed yet.`);
+                        return;
+                    }
+                }
+            }
+        }
+
         // Load new page by absolute page number
         loadWorksheetByPage(currentWorksheet.operation, newAbsolutePage);
     } catch (error) {
         console.error('Navigation error:', error);
         alert('Navigation error: ' + error.message);
+    }
+}
+
+/**
+ * Update navigation buttons based on completion status
+ */
+function updateNavigationButtons() {
+    if (!currentWorksheet) return;
+
+    const operation = currentWorksheet.operation;
+    const currentPageSubmission = pageSubmissions[operation]?.[currentAbsolutePage];
+    const isCurrentPageCompleted = currentPageSubmission?.completed || false;
+
+    // Find all next buttons
+    const nextButtons = document.querySelectorAll('[onclick*="navigatePage(1)"], [onclick*="navigateAbsolutePage(1)"], [onclick*="navigateAbsolutePage(10)"]');
+
+    nextButtons.forEach(button => {
+        if (!isCurrentPageCompleted) {
+            button.style.opacity = '0.5';
+            button.style.cursor = 'not-allowed';
+            button.title = 'Complete current page with 95% score to unlock';
+        } else {
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
+            button.title = '';
+        }
+    });
+
+    // Add completion indicator to page counter
+    const pageCounter = document.getElementById('page-counter');
+    if (pageCounter && currentPageSubmission) {
+        const indicator = getCompletionIndicator(isCurrentPageCompleted, currentPageSubmission.score || 0);
+
+        // Remove existing indicator
+        const existingIndicator = pageCounter.querySelector('.completion-badge');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+
+        // Add new indicator
+        if (currentPageSubmission.submitted) {
+            pageCounter.insertAdjacentHTML('beforeend', ' ' + indicator);
+        }
     }
 }
 
@@ -2153,6 +2229,10 @@ async function submitWorksheet() {
     // Calculate score
     const score = Math.round((correctCount / totalProblems) * 100);
 
+    // Check completion criteria (95% threshold for math)
+    const completionResult = isPageCompleted('math', score, false);
+    const isCompleted = completionResult.completed;
+
     // Mark page as submitted
     const operation = currentWorksheet.operation;
     if (!pageSubmissions[operation]) {
@@ -2163,35 +2243,66 @@ async function submitWorksheet() {
         score: score,
         correctCount: correctCount,
         totalProblems: totalProblems,
+        completed: isCompleted,
         timestamp: new Date().toISOString()
     };
 
-    // Save submissions to localStorage
+    // Save submissions to localStorage (for UI state)
     const child = getSelectedChild();
     if (child) {
         localStorage.setItem(`pageSubmissions_${child.id}`, JSON.stringify(pageSubmissions));
     }
 
+    // Save completion to Firestore
+    const identifier = `${operation}-level${Math.ceil(currentAbsolutePage / 10)}-page${((currentAbsolutePage - 1) % 10) + 1}`;
+    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+
+    const completionData = {
+        score: score,
+        correctCount: correctCount,
+        totalProblems: totalProblems,
+        completed: isCompleted,
+        manuallyMarked: false,
+        elapsedTime: elapsedTime,
+        attempts: 1
+    };
+
+    await savePageCompletion('math', identifier, completionData);
+
     // Clear unsaved changes flag
     hasUnsavedChanges = false;
 
-    // Show submission status
+    // Show submission status with 95% threshold messaging
     const statusDiv = document.getElementById('submission-status');
     if (statusDiv) {
         statusDiv.style.display = 'block';
-        statusDiv.style.background = score >= 80 ? '#4caf50' : score >= 60 ? '#ff9800' : '#f44336';
-        statusDiv.style.color = 'white';
-        statusDiv.innerHTML = `
-            ✓ Submitted! Score: ${correctCount}/${totalProblems} (${score}%)
-            ${score >= 80 ? '🌟 Excellent!' : score >= 60 ? '👍 Good job!' : '💪 Keep practicing!'}
-        `;
+
+        if (isCompleted) {
+            statusDiv.style.background = '#4caf50';
+            statusDiv.style.color = 'white';
+            statusDiv.innerHTML = `
+                ✓ Completed! Score: ${correctCount}/${totalProblems} (${score}%)
+                <span style="display: inline-block; margin-left: 10px; font-size: 1.2em;">✓</span>
+                <div style="font-size: 0.95em; margin-top: 5px;">🌟 Excellent! You can now move to the next page.</div>
+            `;
+        } else {
+            statusDiv.style.background = '#f44336';
+            statusDiv.style.color = 'white';
+            statusDiv.innerHTML = `
+                ✓ Submitted! Score: ${correctCount}/${totalProblems} (${score}%)
+                <div style="font-size: 0.95em; margin-top: 5px;">💪 ${completionResult.reason} Try again to unlock the next page!</div>
+            `;
+        }
     }
 
     // Re-enable submit button
     submitBtn.disabled = false;
     submitBtn.textContent = '✓ Resubmit';
 
-    console.log(`Page ${currentAbsolutePage} submitted: ${correctCount}/${totalProblems} (${score}%)`);
+    // Update navigation buttons state
+    updateNavigationButtons();
+
+    console.log(`Page ${currentAbsolutePage} submitted: ${correctCount}/${totalProblems} (${score}%) - Completed: ${isCompleted}`);
 }
 
 /**

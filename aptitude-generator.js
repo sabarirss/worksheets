@@ -690,10 +690,14 @@ function renderWorksheet() {
                 <button onclick="changePage(1)" id="next-btn" ${currentPage >= totalPages ? 'disabled' : ''}>Next Page →</button>
             </div>
 
-            <div class="navigation">
-                <button onclick="checkAnswers()" class="btn-primary" style="margin-bottom: 20px; padding: 12px 24px; font-size: 1.1em;">
-                    ✓ Check Answers
+            <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                    ✓ Submit for Evaluation
                 </button>
+                <div id="submission-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
+            </div>
+
+            <div class="navigation">
                 <div id="answer-toggle-container" class="answer-toggle-container" style="margin-bottom: 20px;">
                     <span class="answer-toggle-label">Show Answers</span>
                     <label class="toggle-switch">
@@ -1261,6 +1265,170 @@ function clearAllAnswers() {
         // Validate show answers toggle after clearing
         validateShowAnswersToggle();
     }
+}
+
+/**
+ * Submit and evaluate aptitude worksheet
+ */
+async function submitWorksheet() {
+    if (!currentWorksheet) {
+        alert('No worksheet loaded');
+        return;
+    }
+
+    const submitBtn = document.querySelector('.submit-worksheet-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Evaluating...';
+    }
+
+    let correctCount = 0;
+    const totalProblems = currentWorksheet.problems.length;
+
+    // Evaluate each answer
+    for (let i = 0; i < totalProblems; i++) {
+        const problem = currentWorksheet.problems[i];
+        const answerElement = document.getElementById(`answer-${i}`);
+        const feedbackElement = document.getElementById(`feedback-${i}`);
+        const correctAnswer = problem.answer;
+
+        if (!answerElement || !feedbackElement) continue;
+
+        let userAnswer = null;
+        let isEmpty = false;
+        let isCorrect = false;
+
+        try {
+            // Different evaluation based on problem type
+            if (problem.type === 'maze') {
+                // Maze: checkbox completion
+                isEmpty = !answerElement.checked;
+                isCorrect = answerElement.checked; // Any completion counts as correct
+                userAnswer = answerElement.checked ? 'completed' : null;
+            } else if (['pattern', 'sequence', 'matching', 'oddone', 'comparison'].includes(problem.type)) {
+                // Button-based: check hidden input value
+                userAnswer = answerElement.value.trim();
+                isEmpty = userAnswer === '';
+                isCorrect = userAnswer === String(correctAnswer);
+            } else if (problem.type === 'counting') {
+                // Canvas-based counting: use ml5.js enhanced recognition
+                if (typeof recognizeAptitudeAnswer === 'function') {
+                    const result = await recognizeAptitudeAnswer(answerElement, 'number');
+
+                    if (result.isEmpty) {
+                        isEmpty = true;
+                    } else if (result.success) {
+                        userAnswer = result.value;
+                        // Validate with lenient counting rules
+                        const validation = validateCountingAnswer(result, correctAnswer);
+                        isCorrect = validation.valid;
+                    }
+                } else {
+                    feedbackElement.textContent = 'Recognition loading...';
+                    feedbackElement.style.color = '#ff9800';
+                    feedbackElement.style.display = 'inline-block';
+                    continue;
+                }
+            } else if (problem.type === 'logic') {
+                // Canvas-based logic: manual review with ml5.js feedback
+                if (typeof recognizeAptitudeAnswer === 'function') {
+                    const result = await recognizeAptitudeAnswer(answerElement, 'text');
+
+                    if (result.isEmpty) {
+                        isEmpty = true;
+                    } else {
+                        feedbackElement.textContent = '✓ Answer recorded (manual review)';
+                        feedbackElement.style.color = '#667eea';
+                        feedbackElement.style.display = 'inline-block';
+                        continue;
+                    }
+                } else {
+                    feedbackElement.textContent = 'Manual review required';
+                    feedbackElement.style.color = '#ff9800';
+                    feedbackElement.style.display = 'inline-block';
+                    continue;
+                }
+            }
+
+            // Provide feedback
+            if (isEmpty) {
+                feedbackElement.textContent = '⚠️ Empty';
+                feedbackElement.style.color = '#999';
+            } else if (isCorrect) {
+                correctCount++;
+                feedbackElement.textContent = '✓ Correct!';
+                feedbackElement.style.color = '#4caf50';
+                feedbackElement.style.fontWeight = 'bold';
+            } else {
+                feedbackElement.textContent = `✗ Wrong (${correctAnswer})`;
+                feedbackElement.style.color = '#f44336';
+                feedbackElement.style.fontWeight = 'bold';
+            }
+
+            feedbackElement.style.display = 'inline-block';
+            feedbackElement.style.marginLeft = '10px';
+
+        } catch (error) {
+            console.error(`Error evaluating answer ${i}:`, error);
+            feedbackElement.textContent = `Answer: ${correctAnswer}`;
+            feedbackElement.style.color = '#ff9800';
+        }
+    }
+
+    // Calculate score (only counting evaluated problems)
+    // Logic puzzles still need manual review, but counting is now auto-evaluated
+    const unevaluatedProblems = currentWorksheet.problems.filter(p => p.type === 'logic').length;
+    const evaluatedProblems = totalProblems - unevaluatedProblems;
+    const score = evaluatedProblems > 0 ? Math.round((correctCount / evaluatedProblems) * 100) : 0;
+
+    // Check completion criteria (95% threshold for aptitude)
+    const completionResult = isPageCompleted('aptitude', score, false);
+    const isCompleted = completionResult.completed;
+
+    // Save completion to Firestore
+    const identifier = `${currentWorksheet.type}-${currentWorksheet.difficulty}`;
+    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+
+    const completionData = {
+        score: score,
+        correctCount: correctCount,
+        totalProblems: evaluatedProblems,
+        completed: isCompleted,
+        manuallyMarked: false,
+        elapsedTime: elapsedTime,
+        attempts: 1
+    };
+
+    await savePageCompletion('aptitude', identifier, completionData);
+
+    // Show submission status with 95% threshold messaging
+    const resultsDiv = document.getElementById('results-summary');
+    if (resultsDiv) {
+        resultsDiv.style.display = 'block';
+
+        if (isCompleted) {
+            resultsDiv.innerHTML = `
+                <h3>✓ Completed!</h3>
+                <p style="font-size: 1.3em; color: #4caf50; font-weight: bold;">Score: ${correctCount}/${evaluatedProblems} (${score}%)</p>
+                <span style="display: inline-block; font-size: 2em;">✓</span>
+                <p style="font-size: 1.1em; margin-top: 10px;">🌟 Excellent! You can now move to the next level.</p>
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <h3>✓ Submitted!</h3>
+                <p style="font-size: 1.3em; color: #f44336; font-weight: bold;">Score: ${correctCount}/${evaluatedProblems} (${score}%)</p>
+                <p style="font-size: 1.1em; margin-top: 10px;">💪 ${completionResult.reason} Try again to unlock the next level!</p>
+            `;
+        }
+    }
+
+    // Re-enable submit button
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Resubmit';
+    }
+
+    console.log(`Aptitude worksheet submitted: ${correctCount}/${evaluatedProblems} (${score}%) - Completed: ${isCompleted}`);
 }
 
 // Update completion badge on level selection screen
