@@ -3158,9 +3158,30 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     requestAnimationFrame(() => {
         setTimeout(() => {
             console.log('Initializing writing canvases...');
-            initializeAllWritingCanvases();
-            console.log('Writing canvases initialized:', writingCanvases.length);
-        }, 200);
+            const canvases = document.querySelectorAll('.writing-canvas');
+            console.log('Found writing canvases:', canvases.length);
+
+            if (canvases.length === 0) {
+                console.error('No writing canvases found in DOM!');
+                // Try again after a longer delay
+                setTimeout(() => {
+                    console.log('Retrying canvas initialization...');
+                    initializeAllWritingCanvases();
+                }, 500);
+            } else {
+                initializeAllWritingCanvases();
+                console.log('Writing canvases initialized:', writingCanvases.length);
+
+                // Verify event listeners are attached
+                canvases.forEach((canvas, i) => {
+                    console.log(`Canvas ${i} (${canvas.id}):`, {
+                        width: canvas.width,
+                        height: canvas.height,
+                        listeners: canvas.onclick !== null || canvas.onmousedown !== null
+                    });
+                });
+            }
+        }, 300);
     });
 
     elapsedSeconds = 0;
@@ -3634,9 +3655,30 @@ function renderWorksheet() {
     requestAnimationFrame(() => {
         setTimeout(() => {
             console.log('Initializing writing canvases...');
-            initializeAllWritingCanvases();
-            console.log('Writing canvases initialized:', writingCanvases.length);
-        }, 200);
+            const canvases = document.querySelectorAll('.writing-canvas');
+            console.log('Found writing canvases:', canvases.length);
+
+            if (canvases.length === 0) {
+                console.error('No writing canvases found in DOM!');
+                // Try again after a longer delay
+                setTimeout(() => {
+                    console.log('Retrying canvas initialization...');
+                    initializeAllWritingCanvases();
+                }, 500);
+            } else {
+                initializeAllWritingCanvases();
+                console.log('Writing canvases initialized:', writingCanvases.length);
+
+                // Verify event listeners are attached
+                canvases.forEach((canvas, i) => {
+                    console.log(`Canvas ${i} (${canvas.id}):`, {
+                        width: canvas.width,
+                        height: canvas.height,
+                        listeners: canvas.onclick !== null || canvas.onmousedown !== null
+                    });
+                });
+            }
+        }, 300);
     });
 
     elapsedSeconds = 0;

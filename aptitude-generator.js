@@ -850,7 +850,7 @@ function renderWorksheet() {
             </div>
             <div class="worksheet-header">
                 <div class="worksheet-info">
-                    <h2>${typeNames[type]} - ${difficultyStars[difficulty]} ${difficulty.toUpperCase()}</h2>
+                    <h2>${typeNames[type]} - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</h2>
                     <p>${problems.length} puzzles to solve!</p>
                 </div>
                 <div class="student-info">

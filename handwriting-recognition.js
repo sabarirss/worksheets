@@ -8,21 +8,25 @@
 // Adjust these values to be more lenient with children's handwriting
 const RECOGNITION_CONFIG = {
     // Minimum confidence required (0-1). Lower = more lenient, accepts more variations
-    // 0.3 = 30% confidence minimum (recommended for children)
-    minConfidence: 0.3,
+    // 0.15 = 15% confidence minimum (very lenient for children)
+    minConfidence: 0.15,
 
     // Ambiguity threshold (0-1). If top 2 predictions are within this difference,
     // consider it ambiguous. Higher = more likely to flag as ambiguous
-    // 0.2 = 20% difference (e.g., 50% vs 30% would be ambiguous)
-    ambiguityThreshold: 0.2,
+    // 0.25 = 25% difference (more lenient)
+    ambiguityThreshold: 0.25,
 
     // Canvas empty threshold (0-1). Percentage of pixels needed to consider canvas non-empty
-    // 0.005 = 0.5% of pixels (very lenient)
-    emptyThreshold: 0.005,
+    // 0.003 = 0.3% of pixels (very lenient for light strokes)
+    emptyThreshold: 0.003,
 
     // Smoothing strength for children's shaky handwriting (0-1)
-    // 0.3 = moderate smoothing
-    smoothingStrength: 0.3
+    // 0.5 = stronger smoothing for irregular strokes
+    smoothingStrength: 0.5,
+
+    // Binary threshold for detecting strokes (0-1)
+    // 0.05 = very sensitive, captures even light strokes
+    binaryThreshold: 0.05
 };
 
 // Global state
@@ -147,19 +151,26 @@ function preprocessCanvas(canvas) {
 
         // Find bounding box of the digit to center it better
         // This helps with children's handwriting that might not be perfectly centered
-        const binaryThreshold = 0.1;
-        const binary = tensor.greater(binaryThreshold);
+        // Use lower threshold to capture light strokes from children
+        const binary = tensor.greater(RECOGNITION_CONFIG.binaryThreshold);
 
         // Resize to 28x28 with better interpolation for children's handwriting
         // Using bilinear for smoother edges
         tensor = tf.image.resizeBilinear(tensor, [28, 28]);
 
-        // Apply slight blur to reduce noise from shaky children's handwriting
-        // This helps smooth out irregular strokes
-        const kernel = tf.ones([3, 3, 1, 1]).div(9.0);
+        // Apply stronger blur to reduce noise from shaky children's handwriting
+        // This helps smooth out irregular strokes and connect broken lines
+        // Use 5x5 kernel for better smoothing
+        const kernelSize = 5;
+        const kernel = tf.ones([kernelSize, kernelSize, 1, 1]).div(kernelSize * kernelSize);
         tensor = tensor.reshape([1, 28, 28, 1]);
         tensor = tf.conv2d(tensor, kernel, 1, 'same');
         tensor = tensor.squeeze([0]);
+
+        // Apply threshold to enhance digit after smoothing
+        // This helps with light/thin strokes from children
+        const enhancedTensor = tensor.mul(1.5).clipByValue(0, 1);
+        tensor = enhancedTensor;
 
         // Normalize intensity to improve contrast
         const mean = tensor.mean();

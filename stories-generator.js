@@ -380,13 +380,13 @@ function showStories(difficulty) {
         bedtime: '🌙 Bedtime Stories'
     };
 
-    const difficultyStars = {
-        easy: '⭐ Easy',
-        medium: '⭐⭐ Medium',
-        hard: '⭐⭐⭐ Hard'
+    const difficultyLabels = {
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Hard'
     };
 
-    document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - ${difficultyStars[difficulty]} (${limitedList.length} stories)`;
+    document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - ${difficultyLabels[difficulty]} (${limitedList.length} stories)`;
 
     const container = document.getElementById('stories-container');
     container.innerHTML = '';

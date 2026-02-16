@@ -628,9 +628,9 @@ function loadStoryList(difficulty) {
     storyArea.innerHTML = '';
 
     const titleMap = {
-        easy: '⭐ Einfache Geschichten (Easy Stories)',
-        medium: '⭐⭐ Mittlere Geschichten (Medium Stories)',
-        hard: '⭐⭐⭐ Schwere Geschichten (Hard Stories)'
+        easy: 'Einfache Geschichten (Easy Stories)',
+        medium: 'Mittlere Geschichten (Medium Stories)',
+        hard: 'Schwere Geschichten (Hard Stories)'
     };
 
     document.getElementById('story-list-title').textContent = titleMap[difficulty];

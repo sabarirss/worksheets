@@ -511,9 +511,9 @@ function renderWorksheet() {
     const today = new Date().toLocaleDateString();
 
     const difficultyLabels = {
-        easy: '⭐ EASY - Basic Emotions',
-        medium: '⭐⭐ MEDIUM - Understanding Feelings',
-        hard: '⭐⭐⭐ HARD - Complex Situations'
+        easy: 'Basic Emotions',
+        medium: 'Understanding Feelings',
+        hard: 'Complex Situations'
     };
 
     let problemsHTML = '';

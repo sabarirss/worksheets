@@ -1500,9 +1500,9 @@ function loadTutorialList(difficulty) {
     worksheetArea.innerHTML = '';
 
     const titleMap = {
-        easy: '⭐ Easy Tutorials',
-        medium: '⭐⭐ Medium Tutorials',
-        hard: '⭐⭐⭐ Hard Tutorials'
+        easy: 'Easy Tutorials',
+        medium: 'Medium Tutorials',
+        hard: 'Hard Tutorials'
     };
 
     document.getElementById('tutorial-list-title').textContent = titleMap[difficulty];
