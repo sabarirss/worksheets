@@ -29,12 +29,13 @@ header {
 header h1 {
     font-size: clamp(1.8em, 5vw, 2.5em);
     font-weight: bold;
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;  /* Reset all margins, consistent left alignment */
 }
 
 .subtitle {
     font-size: 1.1em;
     color: #555;
+    margin: 0;  /* Reset all margins for consistent alignment */
 }
 
 /* Subject Selection */
@@ -863,10 +864,12 @@ footer {
     /* Header adjustments */
     header h1 {
         font-size: clamp(1.5em, 6vw, 2em);
+        margin: 0 0 10px 0;  /* Consistent alignment on mobile */
     }
 
     .subtitle {
         font-size: 0.9em;
+        margin: 0;  /* Consistent alignment on mobile */
     }
 
     /* Container padding reduction */
@@ -1049,6 +1052,7 @@ footer {
     /* Header */
     header h1 {
         font-size: 2em;
+        margin: 0 0 10px 0;  /* Consistent alignment on large mobile */
     }
 
     /* Container */

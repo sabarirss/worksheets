@@ -7,7 +7,8 @@
 const APP_BRANDING = {
     name: 'GleeGrow',
     tagline: 'Happy Learning!',
-    color: '#28a745',  // Brand color (green)
+    color: '#28a745',  // Brand name color (green)
+    taglineColor: '#999',  // Tagline color (light grey)
     fontSize: '0.9em',   // Brand name font size
     taglineFontSize: '0.7em'  // Tagline font size
 };
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tagline = document.createElement('div');
         tagline.textContent = APP_BRANDING.tagline;
         tagline.style.fontSize = APP_BRANDING.taglineFontSize;
-        tagline.style.color = APP_BRANDING.color;
+        tagline.style.color = APP_BRANDING.taglineColor;
         tagline.style.fontWeight = 'normal';
         tagline.style.fontStyle = 'italic';
         tagline.style.marginTop = '2px';
