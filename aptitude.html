@@ -77,7 +77,10 @@
                 <h1>🧩 Aptitude & Logic Puzzles</h1>
                 <p class="subtitle">Fun brain exercises with difficulty levels!</p>
             </div>
-            <div id="profile-selector-container"></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="app-branding"></div>
+                <div id="profile-selector-container"></div>
+            </div>
         </header>
 
         <!-- Challenge Type Selection (Age is auto-detected from profile) -->
@@ -134,6 +137,7 @@
     <script src="aptitude-age-content.js"></script>
     <script src="level-mapper.js"></script>
     <script src="aptitude-generator.js"></script>
+    <script src="branding.js"></script>
     <script>
         // Add completion badges on page load
         document.addEventListener('DOMContentLoaded', function() {

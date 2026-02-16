@@ -1055,9 +1055,12 @@
             </div>
         </div>
 
-        <header>
-            <h1>Practice Worksheets</h1>
-            <p class="subtitle">Select a subject to begin</p>
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>Practice Worksheets</h1>
+                <p class="subtitle">Select a subject to begin</p>
+            </div>
+            <div id="app-branding"></div>
         </header>
 
         <div class="subject-selection">
@@ -1140,6 +1143,7 @@
     <script src="assessment.js"></script>
     <script src="parent-mode.js"></script>
     <script src="worksheet-generator.js"></script>
+    <script src="branding.js"></script>
     <script>
         // Add completion badges when worksheets load
         // This runs after user authentication is complete

@@ -335,7 +335,10 @@
                 <h1>🎨 Step-by-Step Drawing</h1>
                 <p class="subtitle">Learn to draw with easy tutorials!</p>
             </div>
-            <div id="profile-selector-container"></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="app-branding"></div>
+                <div id="profile-selector-container"></div>
+            </div>
         </header>
 
         <div id="tutorial-selection">
@@ -357,6 +360,7 @@
     <script src="handwriting-input.js"></script>
     <script src="level-mapper.js"></script>
     <script src="drawing-generator.js"></script>
+    <script src="branding.js"></script>
     <script>
         // Load all tutorials on page load (skip difficulty selection)
         document.addEventListener('DOMContentLoaded', function() {

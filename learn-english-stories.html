@@ -357,7 +357,10 @@
                 <h1>📚 Learn English with Stories</h1>
                 <p class="subtitle">Fun stories to build reading and grammar skills</p>
             </div>
-            <div id="profile-selector-container"></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="app-branding"></div>
+                <div id="profile-selector-container"></div>
+            </div>
         </header>
 
         <!-- Story List -->
@@ -379,6 +382,7 @@
 
     <script src="level-mapper.js"></script>
     <script src="learn-english-stories-generator.js"></script>
+    <script src="branding.js"></script>
     <script>
         // Load all stories on page load (skip difficulty selection)
         document.addEventListener('DOMContentLoaded', function() {

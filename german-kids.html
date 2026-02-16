@@ -370,7 +370,10 @@
                 <h1>🇩🇪 German for Kids</h1>
                 <p class="subtitle">Simple stories for ages 6-8 with fun questions!</p>
             </div>
-            <div id="profile-selector-container"></div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div id="app-branding"></div>
+                <div id="profile-selector-container"></div>
+            </div>
         </header>
 
         <div id="story-selection">
@@ -391,6 +394,7 @@
     <script src="storage-manager.js"></script>
     <script src="level-mapper.js"></script>
     <script src="german-kids-generator.js"></script>
+    <script src="branding.js"></script>
     <script>
         // Load all stories on page load (skip difficulty selection)
         document.addEventListener('DOMContentLoaded', function() {
