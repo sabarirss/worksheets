@@ -77,9 +77,6 @@ async function loadWorksheetFromFirestore(subject, identifier) {
     }
 }
 
-// Keep old name for backward compatibility
-const loadWorksheet = loadWorksheetFromFirestore;
-
 // Clear worksheet from Firestore
 async function clearWorksheet(subject, identifier) {
     const username = getCurrentUsername();
@@ -103,7 +100,7 @@ async function clearWorksheet(subject, identifier) {
 
 // Check if worksheet is completed
 async function isWorksheetCompleted(subject, identifier) {
-    const data = await loadWorksheet(subject, identifier);
+    const data = await loadWorksheetFromFirestore(subject, identifier);
     return data && data.completed === true;
 }
 
