@@ -3922,11 +3922,12 @@ function saveCurrentWorksheet() {
 }
 
 // Load saved worksheet
-function loadSavedWorksheet() {
+async function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
-    const savedData = loadWorksheet('english', identifier);
+    // Use the Firebase storage function explicitly to avoid naming collision
+    const savedData = await loadWorksheetFromFirestore('english', identifier);
 
     if (!savedData) return;
 

@@ -1,41 +1,35 @@
 /**
- * Math Handwriting Recognition using ml5.js
- * Kid-friendly enhancement for digit recognition
- * Wraps existing TensorFlow.js model with ml5.js's simpler API
+ * Math Handwriting Recognition - Kid-friendly enhancement
+ * Enhanced preprocessing for children's handwriting recognition
+ * Works with existing TensorFlow.js model
  */
 
-let ml5Ready = false;
-let ml5Classifier = null;
+let enhancementReady = false;
 
 /**
- * Initialize ml5.js for math handwriting
+ * Initialize math handwriting enhancements
  */
 async function initializeMathML5() {
-    if (typeof ml5 === 'undefined') {
-        console.warn('ml5.js not loaded. Using fallback TensorFlow.js recognition.');
-        return false;
-    }
-
     if (typeof tf === 'undefined') {
         console.warn('TensorFlow.js not loaded. Waiting...');
         return false;
     }
 
     try {
-        console.log('🎨 Initializing ml5.js for math handwriting...');
+        console.log('🎨 Initializing kid-friendly math handwriting...');
 
         // Wait for TensorFlow.js to be fully ready first
         await tf.ready();
 
-        // ml5.js is ready
-        ml5Ready = true;
+        // Enhancements are ready
+        enhancementReady = true;
 
-        console.log('✅ ml5.js ready for math handwriting recognition!');
-        console.log('📚 Using enhanced kid-friendly recognition');
+        console.log('✅ Kid-friendly math handwriting recognition ready!');
+        console.log('📚 Using enhanced preprocessing for children');
 
         return true;
     } catch (error) {
-        console.error('❌ Error initializing ml5.js:', error);
+        console.error('❌ Error initializing enhancements:', error);
         return false;
     }
 }
@@ -45,27 +39,33 @@ async function initializeMathML5() {
  * Provides kid-friendly enhancements on top of existing TensorFlow model
  */
 async function recognizeDigitML5(canvas) {
-    // Ensure ml5.js is initialized
-    if (!ml5Ready) {
+    // Ensure enhancements are initialized
+    if (!enhancementReady) {
         await initializeMathML5();
     }
 
-    // If ml5.js not available, fall back to original recognizeDigit
-    if (!ml5Ready || typeof recognizeDigit !== 'function') {
-        console.warn('ml5.js not ready, using standard recognition');
-        return recognizeDigit(canvas);
+    // Get the original recognition function
+    const fallbackFunction = window.recognizeDigitOriginal;
+
+    if (!enhancementReady || typeof fallbackFunction !== 'function') {
+        console.warn('Enhancements not ready, using standard recognition');
+        if (typeof fallbackFunction === 'function') {
+            return fallbackFunction(canvas);
+        }
+        // No recognition function available
+        return { isEmpty: true, error: 'No recognition function available' };
     }
 
     try {
-        // Enhanced preprocessing for kids' handwriting using ml5.js approach
+        // Enhanced preprocessing for kids' handwriting
         const enhancedCanvas = enhanceCanvasForKids(canvas);
 
-        // Use the existing TensorFlow recognition with enhanced canvas
-        const result = await recognizeDigit(enhancedCanvas);
+        // Use the ORIGINAL TensorFlow recognition with enhanced canvas (avoid infinite recursion)
+        const result = await window.recognizeDigitOriginal(enhancedCanvas);
 
-        // Add ml5.js enhancements to the result
+        // Add enhancement markers to the result
         if (result && !result.isEmpty && !result.error) {
-            result.ml5Enhanced = true;
+            result.enhanced = true;
             result.kidFriendly = true;
 
             // More lenient validation for kids
@@ -85,9 +85,12 @@ async function recognizeDigitML5(canvas) {
         return result;
 
     } catch (error) {
-        console.error('Error in ml5 enhanced recognition:', error);
-        // Fallback to standard recognition
-        return recognizeDigit(canvas);
+        console.error('Error in enhanced recognition:', error);
+        // Fallback to standard recognition (use original, not recursive call)
+        if (typeof window.recognizeDigitOriginal === 'function') {
+            return window.recognizeDigitOriginal(canvas);
+        }
+        return { isEmpty: false, error: error.message };
     }
 }
 
@@ -229,7 +232,7 @@ function getKidFriendlyFeedback(result) {
 
 /**
  * Batch recognize multiple digits (for multi-digit answers)
- * Enhanced for kids with ml5.js
+ * Enhanced for kids with preprocessing
  */
 async function recognizeMultipleDigitsML5(canvases) {
     const results = [];
@@ -252,7 +255,7 @@ async function recognizeMultipleDigitsML5(canvases) {
         digits: digits,
         confidence: avgConfidence,
         individual: results,
-        ml5Enhanced: true
+        enhanced: true
     };
 }
 
@@ -264,9 +267,9 @@ function showRecognitionFeedback(canvas, result) {
 
     // Create or update feedback element
     let feedbackEl = canvas.nextElementSibling;
-    if (!feedbackEl || !feedbackEl.classList.contains('ml5-feedback')) {
+    if (!feedbackEl || !feedbackEl.classList.contains('recognition-feedback')) {
         feedbackEl = document.createElement('div');
-        feedbackEl.className = 'ml5-feedback';
+        feedbackEl.className = 'recognition-feedback';
         feedbackEl.style.cssText = `
             font-size: 0.9em;
             margin-top: 5px;
@@ -284,23 +287,33 @@ function showRecognitionFeedback(canvas, result) {
 
 // Initialize when page loads
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeMathML5);
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeMathML5();
+        setupML5Override();
+    });
 } else {
     initializeMathML5();
+    // Wait a bit for other scripts to load before overriding
+    setTimeout(setupML5Override, 100);
 }
 
-// Override the global recognizeDigit function to use ml5.js enhancement
-const originalRecognizeDigit = typeof recognizeDigit !== 'undefined' ? recognizeDigit : null;
+/**
+ * Setup enhancement override after all scripts are loaded
+ */
+function setupML5Override() {
+    // Store the original recognizeDigit function before overriding
+    if (typeof recognizeDigit !== 'undefined' && !window.recognizeDigitOriginal) {
+        window.recognizeDigitOriginal = recognizeDigit;
 
-// Provide ml5 version as default
-if (originalRecognizeDigit) {
-    // Store original
-    window.recognizeDigitOriginal = originalRecognizeDigit;
+        // Replace with enhanced version
+        window.recognizeDigit = recognizeDigitML5;
 
-    // Replace with ml5 enhanced version
-    window.recognizeDigit = recognizeDigitML5;
-
-    console.log('✨ Math handwriting now using ml5.js kid-friendly recognition!');
+        console.log('✨ Math handwriting now using kid-friendly recognition!');
+    } else if (!window.recognizeDigitOriginal) {
+        console.warn('⚠️ recognizeDigit function not found yet. Enhancement will wait.');
+        // Try again after a delay
+        setTimeout(setupML5Override, 200);
+    }
 }
 
-console.log('📐 ml5.js Math handwriting helper loaded');
+console.log('📐 Kid-friendly math handwriting helper loaded');

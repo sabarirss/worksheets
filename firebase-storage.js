@@ -54,7 +54,7 @@ async function saveWorksheet(subject, identifier, data) {
 }
 
 // Load worksheet from Firestore
-async function loadWorksheet(subject, identifier) {
+async function loadWorksheetFromFirestore(subject, identifier) {
     const username = getCurrentUsername();
 
     if (!username) {
@@ -76,6 +76,9 @@ async function loadWorksheet(subject, identifier) {
         return null;
     }
 }
+
+// Keep old name for backward compatibility
+const loadWorksheet = loadWorksheetFromFirestore;
 
 // Clear worksheet from Firestore
 async function clearWorksheet(subject, identifier) {

@@ -1892,7 +1892,8 @@ async function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    const savedData = await loadWorksheet('math', identifier);
+    // Use the Firebase storage function explicitly to avoid naming collision
+    const savedData = await loadWorksheetFromFirestore('math', identifier);
 
     if (!savedData) return;
 
