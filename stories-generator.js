@@ -330,6 +330,83 @@ function backToAges() {
     window.location.href = 'index.html';
 }
 
+// Get ALL stories for a category (all difficulties combined)
+function getAllStoriesForCategory(category) {
+    const allStories = [];
+
+    // Get stories from all difficulty levels
+    const difficulties = ['easy', 'medium', 'hard'];
+
+    difficulties.forEach(difficulty => {
+        // Get stories from unique stories database
+        if (typeof uniqueStories !== 'undefined' &&
+            uniqueStories[category] &&
+            uniqueStories[category][difficulty]) {
+            allStories.push(...uniqueStories[category][difficulty]);
+        }
+
+        // Also get age-based stories if available
+        if (typeof getStoriesByAge !== 'undefined') {
+            const ageGroups = ['4-6', '7-9', '10+'];
+            ageGroups.forEach(ageGroup => {
+                const ageStories = getStoriesByAge(ageGroup, difficulty, category);
+                if (ageStories && ageStories.length > 0) {
+                    allStories.push(...ageStories);
+                }
+            });
+        }
+    });
+
+    // Remove duplicates based on title
+    const uniqueByTitle = [];
+    const seenTitles = new Set();
+    allStories.forEach(story => {
+        if (!seenTitles.has(story.title)) {
+            seenTitles.add(story.title);
+            uniqueByTitle.push(story);
+        }
+    });
+
+    return uniqueByTitle;
+}
+
+// Get age-appropriate stories for demo mode
+function getAgeAppropriateStories(category, count) {
+    const childAge = parseInt(currentAge) || 6;
+    let targetAgeGroup = '4-6'; // Default
+
+    // Map child age to age group
+    if (childAge >= 10) {
+        targetAgeGroup = '10+';
+    } else if (childAge >= 7) {
+        targetAgeGroup = '7-9';
+    } else {
+        targetAgeGroup = '4-6';
+    }
+
+    console.log('Finding stories for age group:', targetAgeGroup);
+
+    // Get all stories for category
+    const allStories = getAllStoriesForCategory(category);
+
+    // Filter stories by age group
+    const ageAppropriate = allStories.filter(story => {
+        // Stories have ageGroup property (e.g., "4-6", "7-9", "10+")
+        return story.ageGroup === targetAgeGroup;
+    });
+
+    console.log('Found', ageAppropriate.length, 'age-appropriate stories');
+
+    // If we have age-appropriate stories, return the first 'count' stories
+    if (ageAppropriate.length > 0) {
+        return ageAppropriate.slice(0, count);
+    }
+
+    // Fallback: if no age-specific stories, return first 'count' from all stories
+    console.log('No age-specific stories found, using fallback');
+    return allStories.slice(0, count);
+}
+
 function selectCategory(category) {
     currentCategory = category;
     currentDifficulty = 'easy'; // Default to easy when skipping difficulty selection
@@ -356,14 +433,21 @@ function showStories(difficulty) {
 
     currentDifficulty = difficulty;
 
-    // Get unique stories for the selected category and difficulty
-    console.log('Loading stories for:', currentCategory, difficulty);
-    currentList = generateStories(currentCategory, difficulty);
-    console.log('Loaded', currentList.length, 'unique stories');
+    // NEW BEHAVIOR: Stories module shows ALL stories for full version
+    // For demo version, show only 2 age-appropriate stories
+    let limitedList;
 
-    // Limit to 2 stories per age-difficulty in demo mode
-    const limit = getDemoLimit(currentList.length);
-    const limitedList = currentList.slice(0, limit);
+    if (isDemoMode()) {
+        // Demo mode: Select 2 age-appropriate stories based on child's age
+        console.log('Demo mode: Selecting 2 age-appropriate stories for age:', currentAge);
+        limitedList = getAgeAppropriateStories(currentCategory, 2);
+        console.log('Selected', limitedList.length, 'demo stories');
+    } else {
+        // Full version: Show ALL stories from ALL difficulties
+        console.log('Full version: Loading ALL stories for category:', currentCategory);
+        limitedList = getAllStoriesForCategory(currentCategory);
+        console.log('Loaded', limitedList.length, 'total stories');
+    }
 
     const storyList = document.getElementById('story-list');
     if (storyList) storyList.style.display = 'block';
@@ -377,13 +461,12 @@ function showStories(difficulty) {
         bedtime: '🌙 Bedtime Stories'
     };
 
-    const difficultyLabels = {
-        easy: 'Easy',
-        medium: 'Medium',
-        hard: 'Hard'
-    };
-
-    document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - ${difficultyLabels[difficulty]} (${limitedList.length} stories)`;
+    // Update title based on version
+    if (isDemoMode()) {
+        document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} - Demo Version (${limitedList.length} stories)`;
+    } else {
+        document.getElementById('category-title').textContent = `${categoryNames[currentCategory]} (${limitedList.length} stories)`;
+    }
 
     const container = document.getElementById('stories-container');
     container.innerHTML = '';
