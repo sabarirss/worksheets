@@ -449,7 +449,7 @@ function readStory(index) {
             <button onclick="backToList()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to List</button>
         </div>
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
-            📊 Age Group: ${currentAge}
+            📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
         <div class="story-meta">Story ${index + 1} of ${currentList.length}</div>
         <h1 class="story-title">${story.title}</h1>

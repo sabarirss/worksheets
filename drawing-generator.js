@@ -1553,7 +1553,7 @@ function loadDrawingTutorial(tutorialKey) {
         </div>
 
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
-            📊 Age Group: ${currentAge}
+            📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
 
         <div class="drawing-title">${tutorial.icon} ${tutorial.name}</div>
@@ -2073,7 +2073,7 @@ function savePDF() {
                         })()}</div>
                         <div><strong>📅 Date:</strong> ${dateStr}</div>
                         <div><strong>⏰ Time:</strong> ${timeStr}</div>
-                        <div><strong>📊 Age Group:</strong> ${currentAge}</div>
+                        <div><strong>📊 Level:</strong> ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}</div>
                     </div>
                 </div>
 
