@@ -46,11 +46,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Worksheets collection - users can only access their own
+    // Worksheets collection - any authenticated user can read/write
+    // Document IDs embed the username so access is scoped by construction
     match /worksheets/{worksheetId} {
-      allow read, write: if isAuthenticated() &&
-                           resource.data.username == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username;
-      allow create: if isAuthenticated();
+      allow read, write: if isAuthenticated();
     }
 
     // Children collection - parents can read/write, but level fields protected

@@ -1466,13 +1466,12 @@ function renderWorksheet() {
         </div>
     `;
 
-    // Hide navigation, header, footer and show worksheet in container
+    // Hide navigation and header, show worksheet in container (footer stays visible at bottom)
     const ageGroups = document.getElementById('math-age-groups');
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
     const subjectSelection = document.querySelector('.subject-selection');
     const pageHeader = document.querySelector('.container > header');
-    const pageFooter = document.querySelector('.container > footer');
     const weeklyProgress = document.getElementById('weekly-progress-container');
     const levelTestButtons = document.getElementById('level-test-buttons');
 
@@ -1481,7 +1480,6 @@ function renderWorksheet() {
     if (difficulties) difficulties.style.display = 'none';
     if (subjectSelection) subjectSelection.style.display = 'none';
     if (pageHeader) pageHeader.style.display = 'none';
-    if (pageFooter) pageFooter.style.display = 'none';
     if (weeklyProgress) weeklyProgress.style.display = 'none';
     if (levelTestButtons) levelTestButtons.style.display = 'none';
 
@@ -1958,15 +1956,17 @@ function saveCurrentWorksheet() {
     const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
-    // Collect canvas answers
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    // Collect answers based on input mode
     const canvasAnswers = [];
+    const keyboardAnswers = [];
     currentWorksheet.problems.forEach((problem, index) => {
-        const canvas = document.getElementById(`answer-${index}`);
-        if (canvas && canvas.toDataURL) {
-            canvasAnswers.push({
-                index: index,
-                imageData: canvas.toDataURL('image/png')
-            });
+        const el = document.getElementById(`answer-${index}`);
+        if (usePencil && el && el.toDataURL) {
+            canvasAnswers.push({ index, imageData: el.toDataURL('image/png') });
+        } else if (!usePencil && el && el.value !== undefined) {
+            keyboardAnswers.push({ index, value: el.value });
         }
     });
 
@@ -1975,6 +1975,7 @@ function saveCurrentWorksheet() {
         elapsedTime: elapsedTime,
         studentName: studentName,
         canvasAnswers: canvasAnswers,
+        keyboardAnswers: keyboardAnswers,
         buttonAnswers: {},
         checkboxAnswers: {}
     };
@@ -1986,12 +1987,11 @@ function saveCurrentWorksheet() {
 }
 
 // Load saved worksheet
-async function loadSavedWorksheet() {
+function loadSavedWorksheet() {
     if (!currentWorksheet) return;
 
     const identifier = `${currentWorksheet.operation}-${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}-page${currentPage}`;
-    // Use the Firebase storage function explicitly to avoid naming collision
-    const savedData = await loadWorksheetFromFirestore('math', identifier);
+    const savedData = loadWorksheetFromStorage('math', identifier);
 
     if (!savedData) return;
 
@@ -2007,7 +2007,9 @@ async function loadSavedWorksheet() {
         elapsedTimeSpan.textContent = savedData.elapsedTime;
     }
 
-    // Restore canvas answers
+    let restored = false;
+
+    // Restore canvas answers (pencil mode)
     if (savedData.canvasAnswers && savedData.canvasAnswers.length > 0) {
         savedData.canvasAnswers.forEach(answer => {
             const canvas = document.getElementById(`answer-${answer.index}`);
@@ -2021,8 +2023,21 @@ async function loadSavedWorksheet() {
                 img.src = answer.imageData;
             }
         });
+        restored = true;
+    }
 
-        // Show "Loaded saved page" message
+    // Restore keyboard answers (keyboard mode)
+    if (savedData.keyboardAnswers && savedData.keyboardAnswers.length > 0) {
+        savedData.keyboardAnswers.forEach(answer => {
+            const input = document.getElementById(`answer-${answer.index}`);
+            if (input && answer.value !== undefined) {
+                input.value = answer.value;
+            }
+        });
+        restored = true;
+    }
+
+    if (restored) {
         const resultsDiv = document.getElementById('results-summary');
         if (resultsDiv) {
             resultsDiv.innerHTML = `
@@ -2219,15 +2234,17 @@ function autoSavePage() {
     const studentName = document.getElementById('student-name')?.value || (child ? child.name : getCurrentUserFullName());
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
 
-    // Collect canvas answers
+    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+
+    // Collect answers based on input mode
     const canvasAnswers = [];
+    const keyboardAnswers = [];
     currentWorksheet.problems.forEach((problem, index) => {
-        const canvas = document.getElementById(`answer-${index}`);
-        if (canvas && canvas.toDataURL) {
-            canvasAnswers.push({
-                index: index,
-                imageData: canvas.toDataURL('image/png')
-            });
+        const el = document.getElementById(`answer-${index}`);
+        if (usePencil && el && el.toDataURL) {
+            canvasAnswers.push({ index, imageData: el.toDataURL('image/png') });
+        } else if (!usePencil && el && el.value !== undefined) {
+            keyboardAnswers.push({ index, value: el.value });
         }
     });
 
@@ -2236,6 +2253,7 @@ function autoSavePage() {
         elapsedTime: elapsedTime,
         studentName: studentName,
         canvasAnswers: canvasAnswers,
+        keyboardAnswers: keyboardAnswers,
         buttonAnswers: {},
         checkboxAnswers: {}
     };
