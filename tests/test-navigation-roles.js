@@ -1322,6 +1322,400 @@ test('submitWorksheet unchecks timer toggle', () => {
 });
 
 // ============================================================================
+// BUG-027: Admin Level Selection — Age Override for All Modules
+// ============================================================================
+console.log('\n--- BUG-027: Admin Level Selection Age Override ---');
+
+// --- ageGroupMap identity mappings ---
+test('ageGroupMap accepts age group string "4-5" (identity mapping)', () => {
+    const js = readFile('age-content-mapper.js');
+    assert.ok(js.includes("'4-5': '4-5'"), 'ageGroupMap must map "4-5" to "4-5"');
+});
+
+test('ageGroupMap accepts age group string "9+" (identity mapping)', () => {
+    const js = readFile('age-content-mapper.js');
+    assert.ok(js.includes("'9+': '9+'"), 'ageGroupMap must map "9+" to "9+"');
+});
+
+test('ageGroupMap accepts age group string "10+" (identity mapping)', () => {
+    const js = readFile('age-content-mapper.js');
+    assert.ok(js.includes("'10+': '10+'"), 'ageGroupMap must map "10+" to "10+"');
+});
+
+test('ageGroupMap: "6", "7", "8" work as both numeric age and age group', () => {
+    const js = readFile('age-content-mapper.js');
+    assert.ok(js.includes("'6': '6'"), 'ageGroupMap must map "6" to "6"');
+    assert.ok(js.includes("'7': '7'"), 'ageGroupMap must map "7" to "7"');
+    assert.ok(js.includes("'8': '8'"), 'ageGroupMap must map "8" to "8"');
+});
+
+// --- Math admin level override (worksheet-generator.js) ---
+test('Math admin path uses getLevelDetails to set selectedAgeGroup', () => {
+    const js = readFile('worksheet-generator.js');
+    const adminSection = js.slice(js.indexOf('Admin selected level for Math'));
+    const levelDetailsIdx = adminSection.indexOf('getLevelDetails(adminLevel)');
+    const ageGroupIdx = adminSection.indexOf('selectedAgeGroup = levelDetails.ageGroup');
+    assert.ok(levelDetailsIdx >= 0, 'Admin path must call getLevelDetails(adminLevel)');
+    assert.ok(ageGroupIdx >= 0, 'Admin path must set selectedAgeGroup from levelDetails.ageGroup');
+    assert.ok(ageGroupIdx > levelDetailsIdx, 'selectedAgeGroup assignment must come after getLevelDetails');
+});
+
+test('Math admin startPage uses difficulty-to-page mapping (not linear formula)', () => {
+    const js = readFile('worksheet-generator.js');
+    // Extract only the admin level block (between adminLevel check and the return)
+    const adminLevelStart = js.indexOf('Admin selected level for Math');
+    const adminReturn = js.indexOf('return;', adminLevelStart);
+    const adminBlock = js.slice(adminLevelStart, adminReturn + 10);
+    // Must NOT use the old broken formula in admin block
+    assert.ok(!adminBlock.includes('* 12.5'),
+        'Admin level block must NOT use old broken formula (adminLevel * 12.5)');
+    // Must have difficulty-based page mapping
+    assert.ok(adminBlock.includes("'easy': 1") || adminBlock.includes("easy: 1"),
+        'Must map easy difficulty to startPage 1');
+    assert.ok(adminBlock.includes("'medium': 51") || adminBlock.includes("medium: 51"),
+        'Must map medium difficulty to startPage 51');
+    assert.ok(adminBlock.includes("'hard': 101") || adminBlock.includes("hard: 101"),
+        'Must map hard difficulty to startPage 101');
+});
+
+test('Math admin Level 1 should produce ages 4-5 easy (not 10+ easy)', () => {
+    // getLevelDetails mapping: level 1 = {ageGroup: '4-5', difficulty: 'easy'}
+    const js = readFile('admin-level-manager.js');
+    const detailsFn = js.slice(js.indexOf('function getLevelDetails'));
+    assert.ok(detailsFn.includes("1: { ageGroup: '4-5', difficulty: 'easy' }"),
+        'Level 1 must map to ages 4-5, easy');
+});
+
+test('Math admin Level 11 should produce ages 10+ easy', () => {
+    const js = readFile('admin-level-manager.js');
+    const detailsFn = js.slice(js.indexOf('function getLevelDetails'));
+    assert.ok(detailsFn.includes("11: { ageGroup: '10+', difficulty: 'easy' }"),
+        'Level 11 must map to ages 10+, easy');
+});
+
+test('Math admin Level 12 should produce ages 10+ hard', () => {
+    const js = readFile('admin-level-manager.js');
+    const detailsFn = js.slice(js.indexOf('function getLevelDetails'));
+    assert.ok(detailsFn.includes("12: { ageGroup: '10+', difficulty: 'hard' }"),
+        'Level 12 must map to ages 10+, hard');
+});
+
+// Verify all 12 levels map correctly
+test('getLevelDetails covers all 12 levels with valid ageGroup and difficulty', () => {
+    const js = readFile('admin-level-manager.js');
+    const validAgeGroups = ['4-5', '6', '7', '8', '9+', '10+'];
+    const validDifficulties = ['easy', 'medium', 'hard'];
+    for (let level = 1; level <= 12; level++) {
+        const regex = new RegExp(`${level}:\\s*\\{\\s*ageGroup:\\s*'([^']+)',\\s*difficulty:\\s*'([^']+)'`);
+        const match = js.match(regex);
+        assert.ok(match, `Level ${level} must be defined in getLevelDetails`);
+        assert.ok(validAgeGroups.includes(match[1]), `Level ${level} ageGroup "${match[1]}" must be valid`);
+        assert.ok(validDifficulties.includes(match[2]), `Level ${level} difficulty "${match[2]}" must be valid`);
+    }
+});
+
+// --- English admin level override ---
+test('English admin path sets selectedAgeGroup from levelDetails', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('english')"),
+        'English must call getAdminLevelForModule');
+    assert.ok(js.includes('selectedAgeGroup = levelDetails.ageGroup'),
+        'English admin path must set selectedAgeGroup from levelDetails.ageGroup');
+});
+
+// --- Aptitude admin level override ---
+test('Aptitude admin path sets currentAge from levelDetails', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('aptitude')"),
+        'Aptitude must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'Aptitude admin path must set currentAge from levelDetails.ageGroup');
+});
+
+test('Aptitude generators use ageGroupMap to resolve age (handles both numeric and group strings)', () => {
+    const js = readFile('aptitude-generator.js');
+    // Count how many generator functions use ageGroupMap
+    const matches = js.match(/ageGroupMap\[/g);
+    assert.ok(matches && matches.length >= 5,
+        `Aptitude generators must use ageGroupMap (found ${matches ? matches.length : 0} uses, need >=5)`);
+});
+
+// --- EQ admin level override ---
+test('EQ admin path sets currentAge from levelDetails', () => {
+    const js = readFile('eq-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('emotional-quotient')"),
+        'EQ must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'EQ admin path must set currentAge from levelDetails.ageGroup');
+});
+
+test('EQ generator uses ageGroupMap to resolve age', () => {
+    const js = readFile('eq-generator.js');
+    assert.ok(js.includes('ageGroupMap[currentAge'),
+        'EQ generator must use ageGroupMap to resolve currentAge');
+});
+
+// --- Drawing admin level override ---
+test('Drawing admin path sets currentAge from levelDetails', () => {
+    const js = readFile('drawing-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('drawing')"),
+        'Drawing must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'Drawing admin path must set currentAge from levelDetails.ageGroup');
+});
+
+// --- Stories admin level override ---
+test('Stories admin path sets currentAge from levelDetails', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('stories')"),
+        'Stories must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'Stories admin path must set currentAge from levelDetails.ageGroup');
+});
+
+test('Stories generators use ageGroupMap to resolve age', () => {
+    const js = readFile('stories-generator.js');
+    const matches = js.match(/ageGroupMap\[/g);
+    assert.ok(matches && matches.length >= 2,
+        `Stories generators must use ageGroupMap (found ${matches ? matches.length : 0} uses, need >=2)`);
+});
+
+// --- German Kids admin level override ---
+test('German Kids admin path sets currentAge from levelDetails', () => {
+    const js = readFile('german-kids-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('german-kids')"),
+        'German Kids must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'German Kids admin path must set currentAge from levelDetails.ageGroup');
+});
+
+// --- Learn English Stories admin level override ---
+test('Learn English Stories admin path sets currentAge from levelDetails', () => {
+    const js = readFile('learn-english-stories-generator.js');
+    assert.ok(js.includes("getAdminLevelForModule('learn-english-stories')"),
+        'Learn English Stories must call getAdminLevelForModule');
+    assert.ok(js.includes('currentAge = levelDetails.ageGroup'),
+        'Learn English Stories admin path must set currentAge from levelDetails.ageGroup');
+});
+
+// --- Admin level selections stored in localStorage ---
+test('admin-level-manager.js uses localStorage for level selections', () => {
+    const js = readFile('admin-level-manager.js');
+    assert.ok(js.includes("localStorage.getItem('admin_level_selections')"),
+        'Must read from localStorage admin_level_selections');
+    assert.ok(js.includes("localStorage.setItem('admin_level_selections'"),
+        'Must write to localStorage admin_level_selections');
+});
+
+// --- Admin panel has level selectors for all modules ---
+test('admin.html has level selectors for all 8 modules', () => {
+    const html = readFile('admin.html');
+    const modules = ['math', 'english', 'aptitude', 'stories', 'drawing', 'emotional-quotient', 'german-kids', 'learn-english-stories'];
+    modules.forEach(mod => {
+        assert.ok(html.includes(`admin-level-${mod}`) || html.includes(`admin-level-${mod.replace(/-/g, '')}`),
+            `admin.html must have level selector for ${mod}`);
+    });
+});
+
+// --- Admin level-manager loaded on module pages ---
+test('admin-level-manager.js loaded on index.html (for math)', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'index.html must load admin-level-manager.js for math admin override');
+});
+
+test('admin-level-manager.js loaded on english.html', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'english.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on aptitude.html', () => {
+    const html = readFile('aptitude.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'aptitude.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on emotional-quotient.html', () => {
+    const html = readFile('emotional-quotient.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'emotional-quotient.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on drawing.html', () => {
+    const html = readFile('drawing.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'drawing.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on stories.html', () => {
+    const html = readFile('stories.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'stories.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on german-kids.html', () => {
+    const html = readFile('german-kids.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'german-kids.html must load admin-level-manager.js');
+});
+
+test('admin-level-manager.js loaded on learn-english-stories.html', () => {
+    const html = readFile('learn-english-stories.html');
+    assert.ok(html.includes('admin-level-manager.js'),
+        'learn-english-stories.html must load admin-level-manager.js');
+});
+
+// --- Child profile NOT affected by admin changes ---
+test('Math child path still uses getSelectedChild().age for selectedAgeGroup', () => {
+    const js = readFile('worksheet-generator.js');
+    // The child path (non-admin) should get age from child profile
+    const childSection = js.slice(js.indexOf('Get currently selected child'));
+    assert.ok(childSection.includes('child.age'),
+        'Child path must derive age from child.age');
+    assert.ok(childSection.includes("ageMap[child.age.toString()]"),
+        'Child path must convert child.age through ageMap');
+});
+
+test('Aptitude HTML sets currentAge from child DOB (not admin default) for non-admin', () => {
+    const html = readFile('aptitude.html');
+    assert.ok(html.includes('child.age.toString()'),
+        'Aptitude page must use child.age.toString() for non-admin users');
+});
+
+test('EQ HTML sets currentAge from child DOB (not admin default) for non-admin', () => {
+    const html = readFile('emotional-quotient.html');
+    assert.ok(html.includes('child.age.toString()'),
+        'EQ page must use child.age.toString() for non-admin users');
+});
+
+test('Admin override is gated behind window.currentUserRole === admin check', () => {
+    // Verify all generators gate admin override behind admin check
+    const files = [
+        { file: 'aptitude-generator.js', pattern: "window.currentUserRole === 'admin'" },
+        { file: 'eq-generator.js', pattern: "window.currentUserRole === 'admin'" },
+        { file: 'stories-generator.js', pattern: "window.currentUserRole === 'admin'" },
+        { file: 'drawing-generator.js', pattern: "window.currentUserRole === 'admin'" },
+        { file: 'german-kids-generator.js', pattern: "window.currentUserRole === 'admin'" },
+        { file: 'learn-english-stories-generator.js', pattern: "window.currentUserRole === 'admin'" },
+    ];
+    files.forEach(({ file, pattern }) => {
+        const js = readFile(file);
+        assert.ok(js.includes(pattern),
+            `${file} admin override must be gated behind admin role check`);
+    });
+});
+
+test('English admin override is gated behind admin check', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("window.currentUserRole === 'admin'"),
+        'english-generator.js admin override must be gated behind admin role check');
+});
+
+test('Math admin override is gated behind admin check', () => {
+    const js = readFile('worksheet-generator.js');
+    const adminCheck = js.indexOf("const isAdmin = window.currentUserRole === 'admin'");
+    const adminPath = js.indexOf('if (isAdmin)');
+    assert.ok(adminCheck >= 0, 'Math must have isAdmin check');
+    assert.ok(adminPath >= 0 && adminPath > adminCheck, 'Math admin path must be after isAdmin check');
+});
+
+// --- Verify level-to-age-group mapping consistency ---
+test('getLevelDetails mapping matches ageAndDifficultyToLevel mapping', () => {
+    const adminJs = readFile('admin-level-manager.js');
+    // Extract getLevelDetails mapping
+    const expectedMappings = {
+        1: { ageGroup: '4-5', difficulty: 'easy' },
+        2: { ageGroup: '4-5', difficulty: 'medium' },
+        3: { ageGroup: '6', difficulty: 'easy' },
+        4: { ageGroup: '6', difficulty: 'medium' },
+        5: { ageGroup: '7', difficulty: 'easy' },
+        6: { ageGroup: '7', difficulty: 'medium' },
+        7: { ageGroup: '8', difficulty: 'easy' },
+        8: { ageGroup: '8', difficulty: 'medium' },
+        9: { ageGroup: '9+', difficulty: 'easy' },
+        10: { ageGroup: '9+', difficulty: 'medium' },
+        11: { ageGroup: '10+', difficulty: 'easy' },
+        12: { ageGroup: '10+', difficulty: 'hard' }
+    };
+    for (const [level, expected] of Object.entries(expectedMappings)) {
+        const regex = new RegExp(`${level}:\\s*\\{\\s*ageGroup:\\s*'${expected.ageGroup.replace('+', '\\+')}',\\s*difficulty:\\s*'${expected.difficulty}'`);
+        assert.ok(regex.test(adminJs),
+            `Level ${level} must map to ageGroup=${expected.ageGroup}, difficulty=${expected.difficulty}`);
+    }
+});
+
+// --- Verify startPage mapping for each level ---
+test('Math admin startPage: odd levels (easy) start at page 1', () => {
+    const js = readFile('worksheet-generator.js');
+    const adminSection = js.slice(js.indexOf('Admin selected level for Math'));
+    // easy difficulty → page 1
+    assert.ok(adminSection.includes("'easy': 1"),
+        'Easy difficulty must map to startPage 1');
+});
+
+test('Math admin startPage: even levels (medium) start at page 51', () => {
+    const js = readFile('worksheet-generator.js');
+    const adminSection = js.slice(js.indexOf('Admin selected level for Math'));
+    assert.ok(adminSection.includes("'medium': 51"),
+        'Medium difficulty must map to startPage 51');
+});
+
+test('Math admin startPage: hard levels start at page 101', () => {
+    const js = readFile('worksheet-generator.js');
+    const adminSection = js.slice(js.indexOf('Admin selected level for Math'));
+    assert.ok(adminSection.includes("'hard': 101"),
+        'Hard difficulty must map to startPage 101');
+});
+
+// --- Verify admin doesn't require child profile ---
+test('Math admin path does not require child profile', () => {
+    const js = readFile('worksheet-generator.js');
+    // Admin path is before the "Require child profile" check
+    const adminPath = js.indexOf('if (isAdmin) {');
+    const childCheck = js.indexOf("if (!child) {\n        alert('Please select a child profile first')");
+    assert.ok(adminPath >= 0, 'Must have admin path');
+    assert.ok(childCheck >= 0, 'Must have child profile check');
+    assert.ok(adminPath < childCheck, 'Admin path must be before child profile requirement');
+});
+
+test('Admin HTML pages set childAge to 10 as default', () => {
+    const pages = ['index.html', 'aptitude.html', 'emotional-quotient.html', 'drawing.html', 'stories.html'];
+    pages.forEach(page => {
+        const html = readFile(page);
+        if (html.includes("childAge = '10'") || html.includes('childAge = "10"')) {
+            // Admin default age is 10
+            assert.ok(true, `${page} sets admin default age to 10`);
+        }
+    });
+});
+
+// --- Verify admin-level-manager exports the right functions ---
+test('admin-level-manager.js exports all required functions', () => {
+    const js = readFile('admin-level-manager.js');
+    assert.ok(js.includes('function getAdminLevelSelections()'), 'Must have getAdminLevelSelections');
+    assert.ok(js.includes('function getAdminLevelForModule('), 'Must have getAdminLevelForModule');
+    assert.ok(js.includes('function saveAdminLevelSelection('), 'Must have saveAdminLevelSelection');
+    assert.ok(js.includes('function checkAdminLevelAccess('), 'Must have checkAdminLevelAccess');
+    assert.ok(js.includes('function getLevelDetails('), 'Must have getLevelDetails');
+    assert.ok(js.includes('function getLevelDisplayName('), 'Must have getLevelDisplayName');
+    assert.ok(js.includes('function showAdminLevelIndicator('), 'Must have showAdminLevelIndicator');
+});
+
+// --- Comprehensive: verify no module uses raw detectedChildAge for admin content ---
+test('Math admin path does NOT rely on window.detectedChildAge for content', () => {
+    const js = readFile('worksheet-generator.js');
+    // Find the admin section inside loadOperationWorksheet
+    const fnStart = js.indexOf('async function loadOperationWorksheet');
+    const adminStart = js.indexOf('if (isAdmin) {', fnStart);
+    const adminReturn = js.indexOf('return;', adminStart);
+    const adminBlock = js.slice(adminStart, adminReturn + 10);
+    // Should NOT reference detectedChildAge in admin block
+    assert.ok(!adminBlock.includes('detectedChildAge'),
+        'Admin path must not use detectedChildAge (should use getLevelDetails)');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 

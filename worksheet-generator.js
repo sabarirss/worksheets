@@ -151,10 +151,21 @@ async function loadOperationWorksheet(operation) {
         console.log('Admin selected level for Math:', adminLevel);
 
         if (adminLevel) {
-            const startPage = Math.max(1, Math.floor((parseInt(adminLevel) - 1) * 12.5) + 1);
-            console.log(`Admin viewing Level ${adminLevel}, starting at page ${startPage}`);
-            window.adminViewingLevel = adminLevel;
-            loadWorksheetByPage(operation, startPage);
+            // Override selectedAgeGroup from admin's level selection
+            const levelDetails = typeof getLevelDetails === 'function' ? getLevelDetails(adminLevel) : null;
+            if (levelDetails) {
+                selectedAgeGroup = levelDetails.ageGroup;
+                // Map difficulty to correct page range: easy→1, medium→51, hard→101
+                const difficultyStartPages = { 'easy': 1, 'medium': 51, 'hard': 101 };
+                const startPage = difficultyStartPages[levelDetails.difficulty] || 1;
+                console.log(`Admin viewing Level ${adminLevel}: age=${selectedAgeGroup}, diff=${levelDetails.difficulty}, startPage=${startPage}`);
+                window.adminViewingLevel = adminLevel;
+                loadWorksheetByPage(operation, startPage);
+            } else {
+                // Fallback if getLevelDetails not available
+                window.adminViewingLevel = adminLevel;
+                loadWorksheetByPage(operation, 1);
+            }
         } else {
             console.log('Admin viewing all levels');
             window.adminViewingLevel = null;

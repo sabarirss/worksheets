@@ -15,6 +15,7 @@
  */
 
 const ageGroupMap = {
+    // Numeric ages → age groups
     '4': '4-5',
     '5': '4-5',
     '6': '6',
@@ -28,6 +29,11 @@ const ageGroupMap = {
     '14': '10+',
     '15': '10+',
     '16': '10+',
+    // Identity mappings: age group strings map to themselves
+    // (needed when admin-level-manager sets currentAge to an age group string)
+    '4-5': '4-5',
+    '9+': '9+',
+    '10+': '10+',
 };
 
 const agePrevNext = {
