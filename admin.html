@@ -456,6 +456,18 @@
             </div>
         </div>
 
+        <!-- Module Request Approval Section -->
+        <div id="module-requests-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
+                📦 Module Access Requests
+            </h2>
+            <p style="color: #666; margin-bottom: 25px;">
+                Parents have requested access to additional modules for their children. Approve or deny each request.
+            </p>
+            <div id="module-requests-list" style="display: grid; gap: 15px;">
+            </div>
+        </div>
+
         <!-- Admin Level Selection Section -->
         <div class="admin-level-selection" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
             <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
@@ -761,6 +773,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             loadParentsAndChildren();
             loadUpgradeRequests();
+            loadModuleRequests();
         });
 
         // ===== Version Upgrade Request Functions =====
@@ -900,6 +913,156 @@
             } catch (error) {
                 console.error('Error denying upgrade:', error);
                 alert('Failed to deny upgrade: ' + error.message);
+            }
+        }
+
+        // ===== Module Request Functions =====
+        async function loadModuleRequests() {
+            try {
+                // Get all children docs and check for pending moduleRequests
+                const childrenSnapshot = await firebase.firestore().collection('children').get();
+
+                const section = document.getElementById('module-requests-section');
+                const list = document.getElementById('module-requests-list');
+                list.innerHTML = '';
+
+                const MODULE_NAMES = {
+                    english: '📝 English',
+                    aptitude: '🧩 Aptitude',
+                    stories: '📚 Stories',
+                    'emotional-quotient': '❤️ EQ',
+                    drawing: '🎨 Drawing',
+                    'german-kids': '🇩🇪 German Kids',
+                    'learn-english-stories': '🌍 Learn English Stories'
+                };
+
+                let hasRequests = false;
+
+                for (const doc of childrenSnapshot.docs) {
+                    const child = doc.data();
+                    const childId = doc.id;
+                    const requests = child.moduleRequests || {};
+
+                    const pendingModules = Object.entries(requests)
+                        .filter(([, val]) => val && val.status === 'pending')
+                        .map(([key]) => key);
+
+                    if (pendingModules.length === 0) continue;
+                    hasRequests = true;
+
+                    // Get parent info
+                    let parentEmail = 'Unknown';
+                    try {
+                        if (child.parent_uid) {
+                            const parentDoc = await firebase.firestore().collection('users').doc(child.parent_uid).get();
+                            if (parentDoc.exists) parentEmail = parentDoc.data().email || 'Unknown';
+                        }
+                    } catch (err) {
+                        console.error('Error loading parent for module request:', err);
+                    }
+
+                    const avatar = child.gender === 'boy' ? '👦' : child.gender === 'girl' ? '👧' : '👶';
+
+                    const moduleButtons = pendingModules.map(mod => `
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px;">
+                            <span style="font-weight: bold;">${MODULE_NAMES[mod] || mod}</span>
+                            <button class="btn btn-primary btn-small" onclick="approveModuleRequest('${childId}', '${mod}', '${child.name}')" style="padding: 4px 10px; font-size: 0.85em;">Approve</button>
+                            <button class="btn btn-danger btn-small" onclick="denyModuleRequest('${childId}', '${mod}', '${child.name}')" style="padding: 4px 10px; font-size: 0.85em;">Deny</button>
+                        </div>
+                    `).join('');
+
+                    const requestDate = pendingModules.length > 0 && requests[pendingModules[0]]?.requestedAt
+                        ? new Date(requests[pendingModules[0]].requestedAt).toLocaleDateString()
+                        : 'Unknown';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = 'border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; background: #fafafa;';
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                            <div>
+                                <h3 style="margin: 0 0 8px 0; color: #2c3e50;">${avatar} ${child.name}</h3>
+                                <p style="margin: 3px 0; color: #666; font-size: 0.95em;">Parent: ${parentEmail}</p>
+                                <p style="margin: 3px 0; color: #999; font-size: 0.9em;">Requested: ${requestDate}</p>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${moduleButtons}
+                            </div>
+                        </div>
+                    `;
+
+                    list.appendChild(card);
+                }
+
+                section.style.display = hasRequests ? 'block' : 'none';
+            } catch (error) {
+                console.error('Error loading module requests:', error);
+            }
+        }
+
+        async function approveModuleRequest(childId, moduleKey, childName) {
+            if (!confirm(`Approve ${moduleKey} access for ${childName}?`)) return;
+
+            try {
+                const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+                const child = childDoc.data();
+
+                // Update assignedModules to include this module
+                const assignedModules = child.assignedModules || child.modules || { math: true };
+                assignedModules[moduleKey] = true;
+
+                // Also enable it for the child
+                const enabledModules = child.enabledModules || { math: true };
+                enabledModules[moduleKey] = true;
+
+                // Update request status
+                const moduleRequests = child.moduleRequests || {};
+                if (moduleRequests[moduleKey]) {
+                    moduleRequests[moduleKey].status = 'approved';
+                    moduleRequests[moduleKey].approvedAt = new Date().toISOString();
+                    moduleRequests[moduleKey].approvedBy = firebase.auth().currentUser.email;
+                }
+
+                await firebase.firestore().collection('children').doc(childId).update({
+                    assignedModules: assignedModules,
+                    enabledModules: enabledModules,
+                    modules: assignedModules,
+                    moduleRequests: moduleRequests,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert(`${moduleKey} approved for ${childName}!`);
+                await loadModuleRequests();
+                await loadParentsAndChildren();
+            } catch (error) {
+                console.error('Error approving module request:', error);
+                alert('Failed to approve: ' + error.message);
+            }
+        }
+
+        async function denyModuleRequest(childId, moduleKey, childName) {
+            if (!confirm(`Deny ${moduleKey} request for ${childName}?`)) return;
+
+            try {
+                const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+                const child = childDoc.data();
+
+                const moduleRequests = child.moduleRequests || {};
+                if (moduleRequests[moduleKey]) {
+                    moduleRequests[moduleKey].status = 'rejected';
+                    moduleRequests[moduleKey].rejectedAt = new Date().toISOString();
+                    moduleRequests[moduleKey].rejectedBy = firebase.auth().currentUser.email;
+                }
+
+                await firebase.firestore().collection('children').doc(childId).update({
+                    moduleRequests: moduleRequests,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert(`${moduleKey} request denied for ${childName}.`);
+                await loadModuleRequests();
+            } catch (error) {
+                console.error('Error denying module request:', error);
+                alert('Failed to deny: ' + error.message);
             }
         }
 

@@ -369,43 +369,43 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Enabled Modules (Parent Control)</label>
-                    <div style="margin-bottom: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; font-size: 0.9em; color: #1565c0;">
-                        ℹ️ <strong>Two-Tier System:</strong> Admin assigns available modules → Parents enable modules for their child → Child sees modules that are both assigned AND enabled.
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-math" checked>
-                            <span>📐 Math</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-english">
+                    <label>Modules</label>
+                    <div id="modules-section-create" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <!-- Math: always included -->
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 10px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50;">
+                            <input type="checkbox" id="module-math" checked disabled>
+                            <span style="font-weight: bold; color: #2e7d32;">📐 Math (Included)</span>
+                        </div>
+                        <!-- Other modules: Request buttons -->
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>📝 English</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-aptitude">
+                            <button type="button" class="module-request-btn" data-module="english" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🧩 Aptitude</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-stories">
+                            <button type="button" class="module-request-btn" data-module="aptitude" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>📚 Stories</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-eq">
+                            <button type="button" class="module-request-btn" data-module="stories" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>❤️ EQ</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-drawing">
+                            <button type="button" class="module-request-btn" data-module="emotional-quotient" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🎨 Drawing</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="module-german-kids">
+                            <button type="button" class="module-request-btn" data-module="drawing" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
+                        <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🇩🇪 German Kids</span>
-                        </label>
+                            <button type="button" class="module-request-btn" data-module="german-kids" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                        </div>
                     </div>
-                    <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 8px; font-size: 0.9em; color: #856404;">
-                        ℹ️ <strong>Note:</strong> German B1 is an admin-only module for adult learning and not available for children.
-                    </div>
+                    <!-- Approved modules shown when editing -->
+                    <div id="approved-modules-info" style="display: none; margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 8px; font-size: 0.9em; color: #2e7d32;"></div>
+                    <!-- Pending requests shown when editing -->
+                    <div id="pending-requests-info" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 8px; font-size: 0.9em; color: #856404;"></div>
                 </div>
 
                 <div class="form-group" style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
@@ -585,6 +585,23 @@
             currentEditChildId = null;
             document.getElementById('modal-title').textContent = 'Add Child Profile';
             document.getElementById('child-form').reset();
+
+            // Reset module request states
+            Object.keys(moduleRequests).forEach(k => moduleRequests[k] = false);
+            document.querySelectorAll('.module-request-btn').forEach(btn => {
+                btn.textContent = 'Request';
+                btn.style.background = 'white';
+                btn.style.color = '#667eea';
+                btn.style.borderColor = '#667eea';
+                btn.disabled = false;
+                btn.parentElement.style.borderColor = '#ddd';
+                btn.parentElement.style.background = '#f8f9fa';
+            });
+
+            // Hide info sections
+            document.getElementById('approved-modules-info').style.display = 'none';
+            document.getElementById('pending-requests-info').style.display = 'none';
+
             document.getElementById('child-modal').style.display = 'flex';
         }
 
@@ -604,23 +621,75 @@
                 // Set version (default to demo if not set)
                 document.getElementById('child-version').value = child.version || 'demo';
 
-                // Get assigned and enabled modules
+                // Get assigned modules and pending requests
                 const assignedModules = child.assignedModules || child.modules || { math: true };
-                const enabledModules = child.enabledModules || { math: true };
+                const pendingRequests = child.moduleRequests || {};
 
-                // When editing, show what parent has enabled
-                // But we should also show which are assigned (in a future enhancement, could disable non-assigned)
-                document.getElementById('module-math').checked = enabledModules.math || false;
-                document.getElementById('module-english').checked = enabledModules.english || false;
-                document.getElementById('module-aptitude').checked = enabledModules.aptitude || false;
-                document.getElementById('module-stories').checked = enabledModules.stories || false;
-                document.getElementById('module-eq').checked = enabledModules['emotional-quotient'] || false;
-                document.getElementById('module-drawing').checked = enabledModules.drawing || false;
-                document.getElementById('module-german-kids').checked = enabledModules['german-kids'] || false;
+                // Show approved modules info
+                const approvedInfo = document.getElementById('approved-modules-info');
+                const approvedList = Object.entries(assignedModules)
+                    .filter(([k, v]) => v && k !== 'math' && k !== 'german')
+                    .map(([k]) => {
+                        const names = { english: '📝 English', aptitude: '🧩 Aptitude', stories: '📚 Stories', 'emotional-quotient': '❤️ EQ', drawing: '🎨 Drawing', 'german-kids': '🇩🇪 German Kids' };
+                        return names[k] || k;
+                    });
+                if (approvedList.length > 0) {
+                    approvedInfo.innerHTML = '<strong>Approved modules:</strong> ' + approvedList.join(', ');
+                    approvedInfo.style.display = 'block';
+                } else {
+                    approvedInfo.style.display = 'none';
+                }
 
-                // German B1 is admin-only, no checkbox to set
+                // Show pending requests info
+                const pendingInfo = document.getElementById('pending-requests-info');
+                const pendingList = Object.entries(pendingRequests)
+                    .filter(([k, v]) => v && v.status === 'pending')
+                    .map(([k]) => {
+                        const names = { english: '📝 English', aptitude: '🧩 Aptitude', stories: '📚 Stories', 'emotional-quotient': '❤️ EQ', drawing: '🎨 Drawing', 'german-kids': '🇩🇪 German Kids' };
+                        return names[k] || k;
+                    });
+                if (pendingList.length > 0) {
+                    pendingInfo.innerHTML = '<strong>Pending requests:</strong> ' + pendingList.join(', ') + ' (awaiting admin approval)';
+                    pendingInfo.style.display = 'block';
+                } else {
+                    pendingInfo.style.display = 'none';
+                }
 
-                console.log('Loaded child for editing - Assigned:', assignedModules, 'Enabled:', enabledModules);
+                // Update request buttons to reflect current state
+                document.querySelectorAll('.module-request-btn').forEach(btn => {
+                    const moduleKey = btn.getAttribute('data-module');
+                    if (assignedModules[moduleKey]) {
+                        // Already approved by admin
+                        btn.textContent = 'Approved';
+                        btn.style.background = '#28a745';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = '#28a745';
+                        btn.disabled = true;
+                        btn.parentElement.style.borderColor = '#28a745';
+                        btn.parentElement.style.background = '#e8f5e9';
+                    } else if (pendingRequests[moduleKey] && pendingRequests[moduleKey].status === 'pending') {
+                        // Already requested, pending
+                        btn.textContent = 'Pending';
+                        btn.style.background = '#ffc107';
+                        btn.style.color = '#333';
+                        btn.style.borderColor = '#ffc107';
+                        btn.disabled = true;
+                        btn.parentElement.style.borderColor = '#ffc107';
+                        btn.parentElement.style.background = '#fff8e1';
+                    } else {
+                        // Available to request
+                        btn.textContent = 'Request';
+                        btn.style.background = 'white';
+                        btn.style.color = '#667eea';
+                        btn.style.borderColor = '#667eea';
+                        btn.disabled = false;
+                        btn.parentElement.style.borderColor = '#ddd';
+                        btn.parentElement.style.background = '#f8f9fa';
+                        moduleRequests[moduleKey] = false;
+                    }
+                });
+
+                console.log('Loaded child for editing - Assigned:', assignedModules, 'Requests:', pendingRequests);
 
                 document.getElementById('child-modal').style.display = 'flex';
             } catch (error) {
@@ -629,9 +698,37 @@
             }
         }
 
+        // Track which modules parent has requested
+        const moduleRequests = {};
+
+        function toggleModuleRequest(btn) {
+            const moduleKey = btn.getAttribute('data-module');
+            const isRequested = moduleRequests[moduleKey];
+
+            if (isRequested) {
+                // Un-request
+                moduleRequests[moduleKey] = false;
+                btn.textContent = 'Request';
+                btn.style.background = 'white';
+                btn.style.color = '#667eea';
+                btn.parentElement.style.borderColor = '#ddd';
+                btn.parentElement.style.background = '#f8f9fa';
+            } else {
+                // Mark as requested
+                moduleRequests[moduleKey] = true;
+                btn.textContent = 'Requested';
+                btn.style.background = '#667eea';
+                btn.style.color = 'white';
+                btn.parentElement.style.borderColor = '#667eea';
+                btn.parentElement.style.background = '#f0f4ff';
+            }
+        }
+
         function closeModal() {
             document.getElementById('child-modal').style.display = 'none';
             currentEditChildId = null;
+            // Reset request states
+            Object.keys(moduleRequests).forEach(k => moduleRequests[k] = false);
         }
 
         document.getElementById('child-form').addEventListener('submit', async function(e) {
@@ -668,27 +765,14 @@
                 return;
             }
 
-            // TWO-TIER PERMISSION SYSTEM
-            // When creating a child, initialize BOTH fields:
-            // - assignedModules: What admin assigns (default: math only)
-            // - enabledModules: What parent enables (default: same as checkboxes)
+            // MODULE REQUEST SYSTEM
+            // Math is always included. Other modules require admin approval via requests.
+            // - assignedModules: What admin has approved (default: math only)
+            // - enabledModules: What parent enables from assigned modules
+            // - moduleRequests: Pending requests for additional modules
 
-            // Collect what parent selected (will be enabledModules)
-            const selectedModules = {
-                math: document.getElementById('module-math').checked,
-                english: document.getElementById('module-english').checked,
-                aptitude: document.getElementById('module-aptitude').checked,
-                stories: document.getElementById('module-stories').checked,
-                'emotional-quotient': document.getElementById('module-eq').checked,
-                drawing: document.getElementById('module-drawing').checked,
-                german: false,  // German B1 is admin-only, never enabled for children
-                'german-kids': document.getElementById('module-german-kids').checked
-            };
-
-            // Initialize assignedModules (admin control) - default to math only
-            // Admin can change this later from admin panel
             const assignedModules = {
-                math: true,  // Math always assigned by default
+                math: true,
                 english: false,
                 aptitude: false,
                 stories: false,
@@ -698,8 +782,21 @@
                 'german-kids': false
             };
 
-            // Initialize enabledModules (parent control) based on what parent selected
-            const enabledModules = { ...selectedModules };
+            const enabledModules = {
+                math: true  // Math always enabled
+            };
+
+            // Collect new module requests from the toggle buttons
+            const newModuleRequests = {};
+            Object.entries(moduleRequests).forEach(([key, requested]) => {
+                if (requested) {
+                    newModuleRequests[key] = {
+                        status: 'pending',
+                        requestedAt: new Date().toISOString(),
+                        requestedBy: parentUid
+                    };
+                }
+            });
 
             const childData = {
                 name: name,
@@ -709,16 +806,16 @@
                 grade: grade,
                 parent_uid: parentUid,
                 version: version,
-                assignedModules: assignedModules,  // What admin makes available
-                enabledModules: enabledModules,    // What parent enables
-                modules: assignedModules           // Backward compatibility
+                assignedModules: assignedModules,
+                enabledModules: enabledModules,
+                modules: assignedModules,
+                moduleRequests: newModuleRequests
             };
 
             try {
                 if (currentEditChildId) {
                     // Update existing child
-                    // When editing from parent side, preserve assignedModules (admin control)
-                    // Only update enabledModules and basic info
+                    // Preserve assignedModules (admin control), only update basic info and new requests
                     const updateData = {
                         name: name,
                         gender: gender,
@@ -726,10 +823,21 @@
                         age: calculateAge(dateOfBirth),
                         grade: grade,
                         version: version,
-                        enabledModules: enabledModules,  // Update what parent enables
-                        // Do NOT update assignedModules - that's admin-only
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
                     };
+
+                    // Merge new module requests with existing ones (don't overwrite pending/approved)
+                    if (Object.keys(newModuleRequests).length > 0) {
+                        const existingDoc = await firebase.firestore().collection('children').doc(currentEditChildId).get();
+                        const existingRequests = existingDoc.data()?.moduleRequests || {};
+                        // Only add requests for modules not already pending or approved
+                        Object.entries(newModuleRequests).forEach(([key, val]) => {
+                            if (!existingRequests[key] || existingRequests[key].status === 'rejected') {
+                                existingRequests[key] = val;
+                            }
+                        });
+                        updateData.moduleRequests = existingRequests;
+                    }
 
                     await firebase.firestore().collection('children').doc(currentEditChildId).update(updateData);
                 } else {
