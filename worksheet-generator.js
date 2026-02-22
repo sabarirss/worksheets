@@ -2149,10 +2149,8 @@ async function navigateAbsolutePage(offset) {
             newAbsolutePage = accessiblePages[newIdx];
         }
 
-        // Check for unsaved changes
-        if (!checkUnsavedChanges()) {
-            return;
-        }
+        // Auto-save current page before navigating away
+        autoSavePage();
 
         // For forward navigation, check if current page is completed (95% threshold)
         if (offset > 0) {
@@ -2449,6 +2447,9 @@ async function submitWorksheet() {
         const allDone = accessiblePages.every(p => pageSubmissions[operation]?.[p]?.completed);
         if (allDone) setTimeout(() => showDemoUpgradePrompt(), 1500);
     }
+
+    // Auto-save answers to localStorage so they persist when navigating back
+    autoSavePage();
 
     // Clear unsaved changes flag
     hasUnsavedChanges = false;
