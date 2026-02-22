@@ -815,6 +815,102 @@ test('assessment.js saves results to both localStorage and Firestore', () => {
 });
 
 // ============================================================================
+// BUG-018: Post-Assessment Page Count + Weekly Sheet Generation
+// ============================================================================
+console.log('\n--- BUG-018: Post-Assessment Page Count & Immediate Sheet Generation ---');
+
+test('assessment.js startLearningAtLevel calls loadOperationWorksheet (not loadWorksheet)', () => {
+    const js = readFile('assessment.js');
+    const fnIdx = js.indexOf('function startLearningAtLevel');
+    assert.ok(fnIdx >= 0, 'Missing startLearningAtLevel function');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}', fnIdx + 200) + 2);
+    assert.ok(fnBody.includes('loadOperationWorksheet(operation)'),
+        'startLearningAtLevel must call loadOperationWorksheet for proper page access control');
+    assert.ok(!fnBody.includes('loadWorksheet(operation, ageGroup'),
+        'startLearningAtLevel must NOT call loadWorksheet directly (bypasses page limits)');
+});
+
+test('assessment.js startLearningAtLevel triggers first weekly assignment', () => {
+    const js = readFile('assessment.js');
+    const fnIdx = js.indexOf('function startLearningAtLevel');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}', fnIdx + 200) + 2);
+    assert.ok(fnBody.includes('generateFirstWeeklyAssignment'),
+        'startLearningAtLevel must call generateFirstWeeklyAssignment after assessment');
+});
+
+test('assessment.js startLearningAtLevel is async (awaits assignment generation)', () => {
+    const js = readFile('assessment.js');
+    const fnIdx = js.indexOf('function startLearningAtLevel');
+    const asyncPrefix = js.slice(Math.max(0, fnIdx - 10), fnIdx);
+    assert.ok(asyncPrefix.includes('async'),
+        'startLearningAtLevel must be async to await generateFirstWeeklyAssignment');
+});
+
+test('weekly-assignments.js has generateFirstWeeklyAssignment function', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes('function generateFirstWeeklyAssignment'),
+        'Missing generateFirstWeeklyAssignment function');
+});
+
+test('generateFirstWeeklyAssignment creates notification on generation', () => {
+    const js = readFile('weekly-assignments.js');
+    const fnIdx = js.indexOf('function generateFirstWeeklyAssignment');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('createNotification'),
+        'generateFirstWeeklyAssignment must create a notification');
+    assert.ok(fnBody.includes('new_sheets') || fnBody.includes('Worksheets Ready'),
+        'Notification should indicate worksheets are ready');
+});
+
+test('generateFirstWeeklyAssignment bypasses Monday 4pm gate', () => {
+    const js = readFile('weekly-assignments.js');
+    const fnIdx = js.indexOf('function generateFirstWeeklyAssignment');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(!fnBody.includes('isAssignmentGenerationAllowed'),
+        'generateFirstWeeklyAssignment must NOT check Monday 4pm gate');
+    assert.ok(fnBody.includes('assessment_completion'),
+        'Should mark generatedBy as assessment_completion');
+});
+
+test('generateFirstWeeklyAssignment checks for existing assignment (no duplicates)', () => {
+    const js = readFile('weekly-assignments.js');
+    const fnIdx = js.indexOf('function generateFirstWeeklyAssignment');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('.get()') && fnBody.includes('.exists'),
+        'Must check if assignment already exists before generating');
+});
+
+test('admin.html creates notification on full version approval', () => {
+    const html = readFile('admin.html');
+    const fnIdx = html.indexOf('function approveChildUpgradeRequest');
+    assert.ok(fnIdx >= 0, 'Missing approveChildUpgradeRequest function');
+    const fnEnd = html.indexOf('\n        }', fnIdx + 200);
+    const fnBody = html.slice(fnIdx, fnEnd + 10);
+    assert.ok(fnBody.includes('notifications') && fnBody.includes('Full Version Activated'),
+        'approveChildUpgradeRequest must create a notification about full version');
+});
+
+test('worksheet-generator.js default totalAccessiblePages is 150 (overridden per mode)', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('let totalAccessiblePages = 150'),
+        'Default totalAccessiblePages should be 150 (set correctly per mode in loadOperationWorksheet)');
+});
+
+test('worksheet-generator.js demo mode sets totalAccessiblePages to DEMO_PAGE_COUNT', () => {
+    const js = readFile('worksheet-generator.js');
+    const loadOpIdx = js.indexOf('async function loadOperationWorksheet');
+    const demoSection = js.indexOf('DEMO_PAGE_COUNT', loadOpIdx);
+    assert.ok(demoSection > 0, 'Demo path must use DEMO_PAGE_COUNT');
+    // Check a wider range since the variable assignment may be several lines after DEMO_PAGE_COUNT
+    const nearbyCode = js.slice(demoSection, demoSection + 400);
+    assert.ok(nearbyCode.includes('totalAccessiblePages = demoCount'),
+        'Demo mode must set totalAccessiblePages to demoCount');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 

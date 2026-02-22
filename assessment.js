@@ -787,7 +787,7 @@ function showAssessmentResults(correct, total, scorePercentage, levelResult) {
 /**
  * Start learning at assigned level
  */
-function startLearningAtLevel(operation, level) {
+async function startLearningAtLevel(operation, level) {
     console.log('Starting learning:', { operation, level });
 
     // Clear assessment active flag
@@ -807,7 +807,13 @@ function startLearningAtLevel(operation, level) {
         container.innerHTML = '';
     }
 
-    // Load worksheet based on subject
+    // Generate first weekly assignment immediately after assessment
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    if (child && typeof generateFirstWeeklyAssignment === 'function') {
+        await generateFirstWeeklyAssignment(child);
+    }
+
+    // Load worksheet through proper entry point (respects demo/full page limits)
     if (operation === 'english') {
         // English: Show type selection with assigned level active
         const typeSelection = document.getElementById('type-selection');
@@ -816,9 +822,9 @@ function startLearningAtLevel(operation, level) {
         }
         console.log('English assessment complete - showing worksheet types');
     } else {
-        // Math: Load worksheet at assigned level
-        if (typeof loadWorksheet === 'function') {
-            loadWorksheet(operation, ageGroup, difficulty, 1);
+        // Math: Route through loadOperationWorksheet for proper page access control
+        if (typeof loadOperationWorksheet === 'function') {
+            loadOperationWorksheet(operation);
         } else {
             alert('Error: Worksheet loader not available. Please refresh the page.');
         }

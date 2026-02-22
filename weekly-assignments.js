@@ -490,6 +490,70 @@ async function loadWeeklyAssignment(childId) {
 }
 
 /**
+ * Generate a child's first weekly assignment immediately after assessment completion.
+ * Bypasses the Monday 4pm gate since this is the initial assignment.
+ * Creates a notification to inform the user their sheets are ready.
+ * @param {object} child - Selected child object
+ * @returns {Promise<object|null>} The generated assignment, or null if already exists
+ */
+async function generateFirstWeeklyAssignment(child) {
+    if (!child || !child.id) return null;
+
+    const weekStr = getWeekString(new Date());
+    const docId = `${child.id}_${weekStr}`;
+
+    try {
+        // Check if assignment already exists for this week
+        const existing = await firebase.firestore()
+            .collection('weekly_assignments')
+            .doc(docId)
+            .get();
+
+        if (existing.exists) {
+            console.log('Weekly assignment already exists for', child.name, weekStr);
+            return { id: docId, ...existing.data() };
+        }
+
+        // Generate assignment (no gate check — this is triggered by assessment completion)
+        const assignment = generateWeeklyAssignment(child, weekStr, null);
+        assignment.generatedBy = 'assessment_completion';
+        assignment.notificationSent = false;
+
+        await firebase.firestore()
+            .collection('weekly_assignments')
+            .doc(docId)
+            .set(assignment);
+
+        console.log('Generated first weekly assignment after assessment for', child.name, weekStr,
+            '- Math pages:', assignment.math.pages.map(p => p.absolutePage).join(','),
+            '- English pages:', assignment.english.pages.map(p => p.pageIndex).join(','));
+
+        // Create notification for new sheets
+        const parentUid = firebase.auth().currentUser?.uid;
+        if (parentUid && typeof createNotification === 'function') {
+            createNotification(
+                child.id, parentUid,
+                'new_sheets',
+                'Worksheets Ready!',
+                `${child.name}'s first worksheets are ready: ${assignment.math.totalPages} Math and ${assignment.english.totalPages} English pages this week.`,
+                'index',
+                { weekStr, source: 'assessment_completion' }
+            );
+
+            await firebase.firestore()
+                .collection('weekly_assignments')
+                .doc(docId)
+                .update({ notificationSent: true });
+        }
+
+        return { id: docId, ...assignment };
+    } catch (error) {
+        console.error('Error generating first weekly assignment:', error);
+        return null;
+    }
+}
+
+/**
  * Update assignment progress when a page is completed.
  * Called from worksheet completion handlers.
  * @param {string} module - 'math' or 'english'
