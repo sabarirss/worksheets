@@ -1197,6 +1197,43 @@ test('autoSavePage is defined and saves to localStorage', () => {
 });
 
 // ============================================================================
+// BUG-024: Cloud Functions Region Mismatch (CORS)
+// ============================================================================
+console.log('\n--- BUG-024: Cloud Functions Region + SDK Consistency ---');
+
+test('All CF calls use europe-west1 region (no bare firebase.functions())', () => {
+    const files = ['worksheet-generator.js', 'english-generator.js', 'aptitude-generator.js', 'assessment.js', 'level-test.js'];
+    files.forEach(file => {
+        const js = readFile(file);
+        const matches = js.match(/firebase\.functions\(\)/g);
+        assert.ok(!matches, `${file} must NOT use firebase.functions() (defaults to us-central1). Use firebase.app().functions('europe-west1')`);
+    });
+});
+
+test('All CF calls use firebase.app().functions(region) pattern', () => {
+    const files = ['worksheet-generator.js', 'english-generator.js', 'aptitude-generator.js', 'assessment.js', 'level-test.js'];
+    files.forEach(file => {
+        const js = readFile(file);
+        if (js.includes('httpsCallable')) {
+            assert.ok(js.includes("functions('europe-west1')"),
+                `${file} must use functions('europe-west1') for CF calls`);
+        }
+    });
+});
+
+test('english.html loads Firebase Functions SDK', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('firebase-functions-compat.js'),
+        'english.html must load firebase-functions-compat.js (english-generator.js calls validateEnglishSubmission)');
+});
+
+test('aptitude.html loads Firebase Functions SDK', () => {
+    const html = readFile('aptitude.html');
+    assert.ok(html.includes('firebase-functions-compat.js'),
+        'aptitude.html must load firebase-functions-compat.js (aptitude-generator.js calls validateAptitudeSubmission)');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
