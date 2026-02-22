@@ -1483,15 +1483,19 @@ function renderWorksheet() {
     if (weeklyProgress) weeklyProgress.style.display = 'none';
     if (levelTestButtons) levelTestButtons.style.display = 'none';
 
-    // Get or create worksheet container inside .container (not document.body)
+    // Get or create worksheet container inside .container, before the footer
     let worksheetContainer = document.getElementById('worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'worksheet-content';
         const container = document.querySelector('.container');
         if (container) {
-            // Insert before footer so it stays inside the layout
-            container.appendChild(worksheetContainer);
+            const footer = container.querySelector('footer');
+            if (footer) {
+                container.insertBefore(worksheetContainer, footer);
+            } else {
+                container.appendChild(worksheetContainer);
+            }
         } else {
             document.body.appendChild(worksheetContainer);
         }

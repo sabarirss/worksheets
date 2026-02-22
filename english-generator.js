@@ -3275,14 +3275,19 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
     const writingDifficulties = document.getElementById('writing-difficulties');
     if (writingDifficulties) writingDifficulties.style.display = 'none';
 
-    // Get or create worksheet container
+    // Get or create worksheet container (insert before footer)
     let worksheetContainer = document.getElementById('english-worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'english-worksheet-content';
         const container = document.querySelector('.container');
         if (container) {
-            container.appendChild(worksheetContainer);
+            const footer = container.querySelector('footer');
+            if (footer) {
+                container.insertBefore(worksheetContainer, footer);
+            } else {
+                container.appendChild(worksheetContainer);
+            }
         } else {
             document.body.appendChild(worksheetContainer);
         }
@@ -3781,14 +3786,19 @@ function renderWorksheet() {
     const writingDifficulties = document.getElementById('writing-difficulties');
     if (writingDifficulties) writingDifficulties.style.display = 'none';
 
-    // Get or create worksheet container
+    // Get or create worksheet container (insert before footer)
     let worksheetContainer = document.getElementById('english-worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'english-worksheet-content';
         const container = document.querySelector('.container');
         if (container) {
-            container.appendChild(worksheetContainer);
+            const footer = container.querySelector('footer');
+            if (footer) {
+                container.insertBefore(worksheetContainer, footer);
+            } else {
+                container.appendChild(worksheetContainer);
+            }
         } else {
             document.body.appendChild(worksheetContainer);
         }

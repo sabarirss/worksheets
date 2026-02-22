@@ -547,7 +547,32 @@ function renderWorksheet() {
         </div>
     `;
 
-    document.body.innerHTML = html;
+    // Hide other sections, insert worksheet before footer
+    const levelSelection = document.getElementById('level-selection');
+    const a1StorySelection = document.getElementById('a1-story-selection');
+    const a1StoryContent = document.getElementById('a1-story-content');
+    if (levelSelection) levelSelection.style.display = 'none';
+    if (a1StorySelection) a1StorySelection.style.display = 'none';
+    if (a1StoryContent) a1StoryContent.style.display = 'none';
+
+    let worksheetContainer = document.getElementById('german-worksheet-content');
+    if (!worksheetContainer) {
+        worksheetContainer = document.createElement('div');
+        worksheetContainer.id = 'german-worksheet-content';
+        const container = document.querySelector('.container');
+        if (container) {
+            const footer = container.querySelector('footer');
+            if (footer) {
+                container.insertBefore(worksheetContainer, footer);
+            } else {
+                container.appendChild(worksheetContainer);
+            }
+        } else {
+            document.body.appendChild(worksheetContainer);
+        }
+    }
+    worksheetContainer.innerHTML = html;
+    worksheetContainer.style.display = 'block';
 
     setTimeout(() => {
         const firstInput = document.querySelector('input.answer-input, textarea');

@@ -1012,7 +1012,7 @@ test('renderWorksheet does NOT hide footer (footer stays at bottom)', () => {
 test('renderWorksheet hides header during worksheet display', () => {
     const js = readFile('worksheet-generator.js');
     const renderIdx = js.indexOf('worksheetContainer.innerHTML = html');
-    const setupCode = js.slice(Math.max(0, renderIdx - 800), renderIdx);
+    const setupCode = js.slice(Math.max(0, renderIdx - 1200), renderIdx);
     assert.ok(setupCode.includes("pageHeader.style.display = 'none'") ||
               setupCode.includes('pageHeader.style.display = "none"'),
         'renderWorksheet must hide the page header');
@@ -1231,6 +1231,64 @@ test('aptitude.html loads Firebase Functions SDK', () => {
     const html = readFile('aptitude.html');
     assert.ok(html.includes('firebase-functions-compat.js'),
         'aptitude.html must load firebase-functions-compat.js (aptitude-generator.js calls validateAptitudeSubmission)');
+});
+
+// ============================================================================
+// BUG-025: Footer Positioning — insertBefore footer in all generators
+// ============================================================================
+console.log('\n--- BUG-025: Footer Positioning in All Generators ---');
+
+test('worksheet-generator.js uses insertBefore footer (not appendChild)', () => {
+    const js = readFile('worksheet-generator.js');
+    const idx = js.indexOf("worksheetContainer.id = 'worksheet-content'");
+    assert.ok(idx >= 0, 'Missing worksheet-content creation');
+    const nearby = js.slice(idx, idx + 300);
+    assert.ok(nearby.includes('insertBefore(worksheetContainer, footer)'),
+        'worksheet-generator.js must use insertBefore footer');
+    assert.ok(!nearby.includes('container.appendChild(worksheetContainer)'),
+        'worksheet-generator.js must NOT use appendChild for worksheet container');
+});
+
+test('aptitude-generator.js uses insertBefore footer (not appendChild)', () => {
+    const js = readFile('aptitude-generator.js');
+    const idx = js.indexOf("worksheetContainer.id = 'worksheet-content'");
+    assert.ok(idx >= 0, 'Missing worksheet-content creation');
+    const nearby = js.slice(idx, idx + 300);
+    assert.ok(nearby.includes('insertBefore(worksheetContainer, footer)'),
+        'aptitude-generator.js must use insertBefore footer');
+});
+
+test('english-generator.js uses insertBefore footer (not appendChild)', () => {
+    const js = readFile('english-generator.js');
+    const idx = js.indexOf("worksheetContainer.id = 'english-worksheet-content'");
+    assert.ok(idx >= 0, 'Missing english-worksheet-content creation');
+    const nearby = js.slice(idx, idx + 300);
+    assert.ok(nearby.includes('insertBefore(worksheetContainer, footer)'),
+        'english-generator.js must use insertBefore footer');
+});
+
+test('german-generator.js does NOT use document.body.innerHTML', () => {
+    const js = readFile('german-generator.js');
+    assert.ok(!js.includes('document.body.innerHTML = html'),
+        'german-generator.js must NOT replace document.body.innerHTML (destroys page structure)');
+});
+
+test('german-generator.js uses insertBefore footer', () => {
+    const js = readFile('german-generator.js');
+    assert.ok(js.includes("insertBefore(worksheetContainer, footer)"),
+        'german-generator.js must use insertBefore footer');
+});
+
+test('No generator uses document.body.innerHTML to render worksheets', () => {
+    const generators = [
+        'worksheet-generator.js', 'english-generator.js', 'aptitude-generator.js',
+        'german-generator.js', 'german-kids-generator.js'
+    ];
+    generators.forEach(file => {
+        const js = readFile(file);
+        assert.ok(!js.includes('document.body.innerHTML = html'),
+            `${file} must NOT use document.body.innerHTML (destroys footer/header)`);
+    });
 });
 
 // ============================================================================

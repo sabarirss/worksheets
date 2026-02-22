@@ -695,12 +695,20 @@ function renderWorksheet() {
     if (typeSelection) typeSelection.style.display = 'none';
     if (difficultySelection) difficultySelection.style.display = 'none';
 
-    // Get or create worksheet container
+    // Get or create worksheet container (insert before footer)
     let worksheetContainer = document.getElementById('worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'worksheet-content';
-        document.querySelector('.container').appendChild(worksheetContainer);
+        const container = document.querySelector('.container');
+        if (container) {
+            const footer = container.querySelector('footer');
+            if (footer) {
+                container.insertBefore(worksheetContainer, footer);
+            } else {
+                container.appendChild(worksheetContainer);
+            }
+        }
     }
 
     worksheetContainer.innerHTML = html;
