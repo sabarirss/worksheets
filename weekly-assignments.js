@@ -576,6 +576,13 @@ async function renderWeeklyProgress(container) {
         return;
     }
 
+    // Weekly assignments are full version only
+    const childVersion = child.version || 'demo';
+    if (childVersion !== 'full') {
+        container.style.display = 'none';
+        return;
+    }
+
     const assignment = await loadWeeklyAssignment(child.id);
 
     // Handle lockout state (assignment is null + lockout active)
@@ -624,6 +631,9 @@ async function renderWeeklyProgress(container) {
     const now = new Date();
     const daysLeft = Math.max(0, Math.ceil((weekEnd - now) / (1000 * 60 * 60 * 24)));
 
+    // Format the due date for display
+    const dueDateStr = weekEnd.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
     let statusText = '';
     let statusColor = '#667eea';
     if (isCarryover) {
@@ -632,11 +642,11 @@ async function renderWeeklyProgress(container) {
     } else if (assignment.status === 'completed') {
         statusText = 'All Done!';
         statusColor = '#28a745';
-    } else if (daysLeft <= 1) {
+    } else if (daysLeft === 0) {
         statusText = 'Due Today!';
         statusColor = '#dc3545';
     } else {
-        statusText = `${daysLeft} days left`;
+        statusText = `Due ${dueDateStr}`;
     }
 
     let carryoverBanner = '';
@@ -797,6 +807,121 @@ function onEnglishPageCompleted(pageIndex, score, completed) {
             score: score,
             completed: true
         });
+    }
+}
+
+// ============================================================================
+// PAGE ACCESS CONTROL
+// ============================================================================
+
+/**
+ * Get the accessible pages for a child based on their mode (demo/admin/full).
+ * Single source of truth for which pages a child can access.
+ *
+ * @param {string} childId - The child's ID
+ * @param {string} module - 'math' or 'english'
+ * @returns {Promise<object>} Access info:
+ *   - pages: number[] (list of accessible absolute page numbers)
+ *   - minPage: number (lowest accessible page)
+ *   - maxPage: number (highest accessible page)
+ *   - totalAccessible: number (count of accessible pages)
+ *   - mode: 'demo' | 'admin' | 'full'
+ *   - pending: boolean (true if no assignment available yet)
+ *   - pendingReason: string (reason if pending)
+ */
+async function getAccessiblePages(childId, module = 'math') {
+    const isAdmin = window.currentUserRole === 'admin';
+    const maxPages = module === 'math' ? 150 : 50;
+
+    // Admin: unrestricted access
+    if (isAdmin) {
+        const allPages = [];
+        for (let i = 1; i <= maxPages; i++) allPages.push(i);
+        return {
+            pages: allPages,
+            minPage: 1,
+            maxPage: maxPages,
+            totalAccessible: maxPages,
+            mode: 'admin',
+            pending: false,
+        };
+    }
+
+    // Demo: fixed 2 pages
+    if (typeof isDemoMode === 'function' && isDemoMode()) {
+        const demoCount = APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT;
+        const pages = [];
+        for (let i = 1; i <= demoCount; i++) pages.push(i);
+        return {
+            pages: pages,
+            minPage: 1,
+            maxPage: demoCount,
+            totalAccessible: demoCount,
+            mode: 'demo',
+            pending: false,
+        };
+    }
+
+    // Full version: get weekly assignment pages
+    if (!childId) {
+        return { pages: [], minPage: 0, maxPage: 0, totalAccessible: 0, mode: 'full', pending: true, pendingReason: 'No child selected' };
+    }
+
+    try {
+        const assignment = await loadWeeklyAssignment(childId);
+
+        if (!assignment) {
+            // Check if locked out or before generation time
+            const lockout = await checkLockoutStatus(childId);
+            if (lockout.locked) {
+                return {
+                    pages: [],
+                    minPage: 0,
+                    maxPage: 0,
+                    totalAccessible: 0,
+                    mode: 'full',
+                    pending: true,
+                    pendingReason: 'lockout',
+                    lockoutWeeks: lockout.consecutiveWeeks,
+                };
+            }
+
+            // Before Monday 4pm or no assignment generated
+            return {
+                pages: [],
+                minPage: 0,
+                maxPage: 0,
+                totalAccessible: 0,
+                mode: 'full',
+                pending: true,
+                pendingReason: 'no_assignment',
+            };
+        }
+
+        // Extract pages from assignment
+        let pages = [];
+        if (module === 'math' && assignment.math && assignment.math.pages) {
+            pages = assignment.math.pages.map(p => p.absolutePage).sort((a, b) => a - b);
+        } else if (module === 'english' && assignment.english && assignment.english.pages) {
+            pages = assignment.english.pages.map(p => p.pageIndex).sort((a, b) => a - b);
+        }
+
+        if (pages.length === 0) {
+            return { pages: [], minPage: 0, maxPage: 0, totalAccessible: 0, mode: 'full', pending: true, pendingReason: 'no_pages' };
+        }
+
+        return {
+            pages: pages,
+            minPage: pages[0],
+            maxPage: pages[pages.length - 1],
+            totalAccessible: pages.length,
+            mode: 'full',
+            pending: false,
+            assignment: assignment,
+        };
+    } catch (error) {
+        console.error('Error getting accessible pages:', error);
+        return { pages: [], minPage: 0, maxPage: 0, totalAccessible: 0, mode: 'full', pending: true, pendingReason: 'error' };
     }
 }
 

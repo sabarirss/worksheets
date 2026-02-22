@@ -457,74 +457,100 @@ async function submitLevelTest() {
     if (!levelTestState) return;
 
     const { questions, module, childId, currentLevel } = levelTestState;
-    let correct = 0;
 
+    // Collect answers from DOM
+    const answers = [];
+    questions.forEach((q, idx) => {
+        const input = document.getElementById(`level-test-${idx}`);
+        answers.push(input ? input.value.trim() : '');
+    });
+
+    let correct, score, passed, newLevel, serverFeedback;
+
+    // Try Cloud Function validation first, fall back to local
+    try {
+        const submitLevelTestCF = firebase.functions().httpsCallable('submitLevelTest');
+        const result = await submitLevelTestCF({
+            childId: childId,
+            module: module,
+            answers: answers
+        });
+
+        correct = result.data.correct;
+        score = result.data.score;
+        passed = result.data.passed;
+        newLevel = result.data.newLevel;
+        serverFeedback = result.data.feedback;
+
+        console.log('Level test validated by server:', result.data);
+    } catch (cfError) {
+        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
+
+        // === FALLBACK: Local validation ===
+        correct = 0;
+        serverFeedback = [];
+
+        questions.forEach((q, idx) => {
+            const userAnswer = answers[idx];
+            let isCorrect = false;
+
+            if (module === 'math') {
+                isCorrect = parseInt(userAnswer) === q.answer;
+            } else {
+                isCorrect = userAnswer.toLowerCase() === String(q.answer).toLowerCase();
+            }
+
+            if (isCorrect) correct++;
+            serverFeedback.push({ correct: isCorrect, expected: q.answer, difficulty: q.difficulty });
+        });
+
+        score = Math.round((correct / questions.length) * 100);
+        passed = score >= LEVEL_TEST_CONFIG.PASS_SCORE;
+        newLevel = passed ? currentLevel + 1 : currentLevel;
+
+        // Fallback: save via client
+        const weekStr = typeof getWeekString === 'function' ? getWeekString(new Date()) : '';
+        try {
+            await firebase.firestore().collection('level_tests').add({
+                childId, module, week: weekStr, currentLevel, newLevel,
+                score, correct, total: questions.length, passed,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                questions: questions.map((q, idx) => ({
+                    difficulty: q.difficulty, answer: q.answer, userAnswer: answers[idx]
+                }))
+            });
+
+            if (passed) {
+                await advanceChildLevel(childId, module, newLevel);
+            }
+        } catch (error) {
+            console.error('Error saving level test result:', error);
+        }
+    }
+
+    // Render feedback from server (or local fallback)
     questions.forEach((q, idx) => {
         const input = document.getElementById(`level-test-${idx}`);
         const feedback = document.getElementById(`level-test-feedback-${idx}`);
         if (!input || !feedback) return;
 
-        const userAnswer = input.value.trim();
-        let isCorrect = false;
-
-        if (module === 'math') {
-            const numAnswer = parseInt(userAnswer);
-            isCorrect = numAnswer === q.answer;
-        } else {
-            isCorrect = userAnswer.toLowerCase() === String(q.answer).toLowerCase();
-        }
-
-        // Show feedback
+        const fb = serverFeedback[idx];
         feedback.style.display = 'inline-block';
         feedback.style.marginLeft = '10px';
         feedback.style.fontWeight = 'bold';
 
-        if (isCorrect) {
-            correct++;
+        if (fb && fb.correct) {
             feedback.textContent = '✓';
             feedback.style.color = '#28a745';
             input.style.borderColor = '#28a745';
         } else {
-            feedback.textContent = `✗ (${q.answer})`;
+            feedback.textContent = `✗ (${fb ? fb.expected : q.answer})`;
             feedback.style.color = '#dc3545';
             input.style.borderColor = '#dc3545';
         }
 
         input.disabled = true;
     });
-
-    const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= LEVEL_TEST_CONFIG.PASS_SCORE;
-    const newLevel = passed ? currentLevel + 1 : currentLevel;
-
-    // Save test result to Firestore
-    const weekStr = typeof getWeekString === 'function' ? getWeekString(new Date()) : '';
-    try {
-        await firebase.firestore().collection('level_tests').add({
-            childId: childId,
-            module: module,
-            week: weekStr,
-            currentLevel: currentLevel,
-            newLevel: newLevel,
-            score: score,
-            correct: correct,
-            total: questions.length,
-            passed: passed,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            questions: questions.map((q, idx) => ({
-                difficulty: q.difficulty,
-                answer: q.answer,
-                userAnswer: document.getElementById(`level-test-${idx}`)?.value || ''
-            }))
-        });
-
-        // If passed, update the child's level
-        if (passed) {
-            await advanceChildLevel(childId, module, newLevel);
-        }
-    } catch (error) {
-        console.error('Error saving level test result:', error);
-    }
 
     // Show results
     const resultsDiv = document.getElementById('level-test-results');

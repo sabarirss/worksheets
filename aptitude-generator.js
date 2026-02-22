@@ -1288,7 +1288,7 @@ async function submitWorksheet() {
                 isEmpty = userAnswer === '';
                 isCorrect = userAnswer === String(correctAnswer);
             } else if (problem.type === 'counting') {
-                // Canvas-based counting: use ml5.js enhanced recognition
+                // Canvas-based counting: use enhanced recognition
                 if (typeof recognizeAptitudeAnswer === 'function') {
                     const result = await recognizeAptitudeAnswer(answerElement, 'number');
 
@@ -1307,7 +1307,7 @@ async function submitWorksheet() {
                     continue;
                 }
             } else if (problem.type === 'logic') {
-                // Canvas-based logic: manual review with ml5.js feedback
+                // Canvas-based logic: manual review with enhanced feedback
                 if (typeof recognizeAptitudeAnswer === 'function') {
                     const result = await recognizeAptitudeAnswer(answerElement, 'text');
 
@@ -1362,21 +1362,50 @@ async function submitWorksheet() {
     const completionResult = isPageCompleted('aptitude', score, false);
     const isCompleted = completionResult.completed;
 
-    // Save completion to Firestore
+    // Save completion — try Cloud Function first, fall back to local
     const identifier = `${currentWorksheet.type}-${currentWorksheet.difficulty}`;
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
-    const completionData = {
-        score: score,
-        correctCount: correctCount,
-        totalProblems: evaluatedProblems,
-        completed: isCompleted,
-        manuallyMarked: false,
-        elapsedTime: elapsedTime,
-        attempts: 1
-    };
+    try {
+        const validateAptitude = firebase.functions().httpsCallable('validateAptitudeSubmission');
+        const serverResult = await validateAptitude({
+            childId: child ? child.id : null,
+            problemType: currentWorksheet.type,
+            difficulty: currentWorksheet.difficulty,
+            answers: currentWorksheet.problems.map((p, idx) => {
+                if (p.type === 'maze') {
+                    const el = document.getElementById(`answer-${idx}`);
+                    return el && el.checked ? 'completed' : null;
+                }
+                if (['pattern', 'sequence', 'matching', 'oddone', 'comparison'].includes(p.type)) {
+                    const el = document.getElementById(`answer-${idx}`);
+                    return el ? el.value.trim() : null;
+                }
+                return null; // Canvas-based answers handled by problemData
+            }),
+            problemData: currentWorksheet.problems.map(p => ({
+                type: p.type,
+                answer: p.answer
+            })),
+            elapsedTime: elapsedTime
+        });
+        console.log('Aptitude submission validated by server:', serverResult.data);
+    } catch (cfError) {
+        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
 
-    await savePageCompletion('aptitude', identifier, completionData);
+        const completionData = {
+            score: score,
+            correctCount: correctCount,
+            totalProblems: evaluatedProblems,
+            completed: isCompleted,
+            manuallyMarked: false,
+            elapsedTime: elapsedTime,
+            attempts: 1
+        };
+
+        await savePageCompletion('aptitude', identifier, completionData);
+    }
 
     // Show submission status with 95% threshold messaging
     const resultsDiv = document.getElementById('results-summary');

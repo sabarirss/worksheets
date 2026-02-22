@@ -595,160 +595,143 @@ async function submitAssessment() {
         }
     }
 
-    let correct = 0;
-    const results = [];
-
-    // Check each answer
     const isEnglish = currentAssessment.subject === 'english';
+    const child = getSelectedChild();
 
+    // Collect answers from DOM
+    const answers = [];
     for (let i = 0; i < assessmentQuestions.length; i++) {
         const answerElement = document.getElementById(`assessment-answer-${i}`);
-        const feedback = document.getElementById(`assessment-feedback-${i}`);
-        const correctAnswer = assessmentQuestions[i].answer;
+        if (!answerElement) {
+            answers.push(null);
+            continue;
+        }
 
-        try {
-            let userAnswer = null;
-            let isEmpty = false;
-
-            if (usePencil) {
-                // Pencil mode: Use handwriting recognition
+        if (usePencil) {
+            try {
                 if (isEnglish) {
-                    // Try EMNIST character recognition if available
                     if (typeof recognizeCharacter === 'function') {
                         const charResult = await recognizeCharacter(answerElement, {
-                            expectedAnswer: String(correctAnswer).charAt(0),
+                            expectedAnswer: String(assessmentQuestions[i].answer).charAt(0),
                             expectedType: 'letter'
                         });
-
-                        if (charResult.isEmpty) {
-                            isEmpty = true;
-                        } else if (charResult.modelMissing) {
-                            // EMNIST not loaded - mark as handwritten (can't score)
-                            userAnswer = 'handwritten';
-                        } else if (charResult.error) {
-                            userAnswer = null;
-                        } else {
-                            userAnswer = charResult.character || 'handwritten';
-                        }
+                        answers.push(charResult.isEmpty ? null : (charResult.character || null));
                     } else {
-                        // No recognition engine - check for canvas content
-                        const canvas = answerElement;
-                        const ctx = canvas.getContext('2d');
-                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const hasContent = Array.from(imageData.data).some((value, index) => {
-                            return index % 4 === 3 && value > 0;
-                        });
-
-                        if (!hasContent) {
-                            isEmpty = true;
-                        } else {
-                            userAnswer = 'handwritten';
-                        }
+                        answers.push(null); // Can't recognize
                     }
                 } else {
-                    // Math: Use digit recognition
                     const result = await recognizeDigit(answerElement);
-
-                    if (result.isEmpty) {
-                        isEmpty = true;
-                    } else if (result.error) {
-                        userAnswer = null;
-                    } else {
-                        userAnswer = result.digit;
-                    }
+                    answers.push(result.isEmpty ? null : result.digit);
                 }
-            } else {
-                // Keyboard mode: Get value from input field
-                const inputValue = answerElement.value.trim();
-                if (inputValue === '') {
-                    isEmpty = true;
-                } else {
-                    if (isEnglish) {
-                        userAnswer = inputValue; // Keep as string for English
-                    } else {
-                        userAnswer = parseInt(inputValue); // Parse as number for Math
-                    }
-                }
+            } catch {
+                answers.push(null);
             }
-
-            // Provide feedback
-            if (isEmpty) {
-                feedback.textContent = '⚠️ Empty';
-                feedback.style.color = '#999';
-                results.push({ question: i + 1, correct: false, isEmpty: true });
-            } else if (userAnswer === null || (!isEnglish && isNaN(userAnswer))) {
-                feedback.textContent = `❓ Unclear (answer: ${correctAnswer})`;
-                feedback.style.color = '#ff9800';
-                results.push({ question: i + 1, correct: false, error: true });
-            } else if (isEnglish && userAnswer === 'handwritten') {
-                // Handwritten but no recognition available -
-                // show answer, mark incorrect (don't inflate scores)
-                feedback.textContent = `📝 Handwritten (answer: ${correctAnswer})`;
-                feedback.style.color = '#2196f3';
-                if (usePencil) {
-                    answerElement.style.border = '2px solid #2196f3';
-                }
-                results.push({ question: i + 1, correct: false, handwritten: true, expected: correctAnswer });
+        } else {
+            const inputValue = answerElement.value.trim();
+            if (inputValue === '') {
+                answers.push(null);
+            } else if (isEnglish) {
+                answers.push(inputValue);
             } else {
-                let isCorrect;
-
-                if (isEnglish) {
-                    // Case-insensitive string comparison for English answers
-                    isCorrect = userAnswer.toLowerCase() === String(correctAnswer).toLowerCase();
-                } else {
-                    // Number comparison for Math
-                    isCorrect = userAnswer === correctAnswer;
-                }
-
-                if (isCorrect) {
-                    correct++;
-                    feedback.textContent = '✓ Correct!';
-                    feedback.style.color = '#4caf50';
-                    if (usePencil) {
-                        answerElement.style.border = '2px solid #4caf50';
-                    } else {
-                        answerElement.style.borderColor = '#4caf50';
-                        answerElement.style.borderWidth = '2px';
-                    }
-                } else {
-                    feedback.textContent = `✗ Wrong (answer: ${correctAnswer})`;
-                    feedback.style.color = '#f44336';
-                    if (usePencil) {
-                        answerElement.style.border = '2px solid #f44336';
-                    } else {
-                        answerElement.style.borderColor = '#f44336';
-                        answerElement.style.borderWidth = '2px';
-                    }
-                }
-
-                results.push({
-                    question: i + 1,
-                    correct: isCorrect,
-                    userAnswer: userAnswer,
-                    expected: correctAnswer
-                });
+                answers.push(parseInt(inputValue));
             }
-
-            feedback.style.display = 'block';
-            feedback.style.fontWeight = 'bold';
-
-        } catch (error) {
-            console.error(`Error checking answer ${i}:`, error);
-            feedback.textContent = `❓ Error (answer: ${correctAnswer})`;
-            feedback.style.color = '#ff9800';
         }
     }
 
-    // Calculate score
-    const scorePercentage = Math.round((correct / assessmentQuestions.length) * 100);
+    let correct, scorePercentage, levelResult, serverFeedback;
 
-    // Determine level
-    const levelResult = determineLevelFromScore(scorePercentage, currentAssessment.ageGroup);
+    // Try Cloud Function validation first, fall back to local
+    try {
+        const submitAssessmentCF = firebase.functions().httpsCallable('submitAssessment');
+        const result = await submitAssessmentCF({
+            childId: child ? child.id : null,
+            subject: currentAssessment.subject,
+            operation: currentAssessment.operation,
+            answers: answers
+        });
 
-    // Save result
-    const child = getSelectedChild();
-    if (child) {
-        saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
+        correct = result.data.correct;
+        scorePercentage = result.data.score;
+        levelResult = {
+            level: result.data.level,
+            ageGroup: result.data.ageGroup,
+            difficulty: result.data.difficulty,
+            reason: result.data.reason
+        };
+        serverFeedback = result.data.feedback;
+
+        console.log('Assessment validated by server:', result.data);
+    } catch (cfError) {
+        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
+
+        // === FALLBACK: Local validation ===
+        correct = 0;
+        serverFeedback = [];
+
+        for (let i = 0; i < assessmentQuestions.length; i++) {
+            const correctAnswer = assessmentQuestions[i].answer;
+            const userAnswer = answers[i];
+            let isCorrect = false;
+
+            if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
+                if (isEnglish) {
+                    isCorrect = String(userAnswer).toLowerCase() === String(correctAnswer).toLowerCase();
+                } else {
+                    isCorrect = Number(userAnswer) === Number(correctAnswer);
+                }
+            }
+
+            if (isCorrect) correct++;
+            serverFeedback.push({ correct: isCorrect, expected: correctAnswer });
+        }
+
+        scorePercentage = Math.round((correct / assessmentQuestions.length) * 100);
+        levelResult = determineLevelFromScore(scorePercentage, currentAssessment.ageGroup);
+
+        // Save via client fallback
+        if (child) {
+            saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
+        }
+    }
+
+    // Render feedback from server (or local fallback)
+    for (let i = 0; i < assessmentQuestions.length; i++) {
+        const answerElement = document.getElementById(`assessment-answer-${i}`);
+        const feedback = document.getElementById(`assessment-feedback-${i}`);
+        if (!feedback) continue;
+
+        const fb = serverFeedback[i];
+        if (!fb) continue;
+
+        if (answers[i] === null || answers[i] === undefined || answers[i] === '') {
+            feedback.textContent = '⚠️ Empty';
+            feedback.style.color = '#999';
+        } else if (fb.correct) {
+            feedback.textContent = '✓ Correct!';
+            feedback.style.color = '#4caf50';
+            if (answerElement) {
+                if (usePencil) {
+                    answerElement.style.border = '2px solid #4caf50';
+                } else {
+                    answerElement.style.borderColor = '#4caf50';
+                    answerElement.style.borderWidth = '2px';
+                }
+            }
+        } else {
+            feedback.textContent = `✗ Wrong (answer: ${fb.expected})`;
+            feedback.style.color = '#f44336';
+            if (answerElement) {
+                if (usePencil) {
+                    answerElement.style.border = '2px solid #f44336';
+                } else {
+                    answerElement.style.borderColor = '#f44336';
+                    answerElement.style.borderWidth = '2px';
+                }
+            }
+        }
+
+        feedback.style.display = 'block';
+        feedback.style.fontWeight = 'bold';
     }
 
     // Show results

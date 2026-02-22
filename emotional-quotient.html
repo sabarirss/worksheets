@@ -240,19 +240,21 @@
                     return;
                 }
                 childAge = child.age.toString();
-                // For EQ: Always use actual age from DOB (no assessment)\n                console.log('EQ: Using actual age from DOB:', childAge);
+                console.log('EQ: Using actual age from DOB:', childAge);
             }
 
-            // Set current age automatically (defined in eq-generator.js)
-            setTimeout(function() {
-                if (typeof currentAge !== 'undefined') {
-                    currentAge = childAge;
-                }
-                // Age-based filtering removed - all children can access all difficulty levels
-            }, 200);
+            // Set current age and load activities
+            if (typeof currentAge !== 'undefined') {
+                currentAge = childAge;
+            }
 
-                // Show content now that auth and profile check is complete
-                document.querySelector('.container').classList.add('content-loaded');
+            // Show content now that auth and profile check is complete
+            document.querySelector('.container').classList.add('content-loaded');
+
+            // Load activities now that age is set
+            if (typeof loadActivities === 'function') {
+                loadActivities('easy', 1);
+            }
         });
     </script>
     <div class="container">
@@ -276,18 +278,11 @@
     </div>
 
     <script src="age-content-mapper.js"></script>
-    <script src="eq-age-content.js"></script>
     <script src="level-mapper.js"></script>
+    <script src="eq-age-content.js"></script>
     <script src="app-constants.js"></script>
     <script src="eq-generator.js"></script>
     <script src="branding.js"></script>
-    <script>
-        // Load activity directly on page load (skip difficulty selection)
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof loadActivities === 'function') {
-                loadActivities('easy', 1);
-            }
-        });
-    </script>
+    <!-- Activities loaded from onAuthStateChanged callback after age is set -->
 </body>
 </html>

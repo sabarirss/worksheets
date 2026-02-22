@@ -37,6 +37,12 @@ const APP_CONFIG = {
     // Demo Mode
     DEMO_LIMIT: 2,
 
+    // Page Access Control
+    PAGE_ACCESS: {
+        DEMO_PAGE_COUNT: 2,
+        WEEKLY_PAGE_COUNT: 7,
+    },
+
     // Assessment
     ASSESSMENT: {
         QUESTION_COUNT: 10,

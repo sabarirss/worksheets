@@ -1,5 +1,12 @@
 // Emotional Quotient Activities Generator
 
+// Safe fallback for getCurrentUserFullName (defined in firebase-storage.js, not always loaded)
+if (typeof getCurrentUserFullName === 'undefined') {
+    function getCurrentUserFullName() {
+        const user = firebase.auth().currentUser;
+        return user ? (user.displayName || user.email || 'Student') : 'Student';
+    }
+}
 
 let currentAge = null;
 let currentDifficulty = null;
@@ -532,7 +539,7 @@ function renderWorksheet() {
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
-        } else if (activity.type === 'empathy' || activity.type === 'social' || activity.type === 'self-regulation' || activity.type === 'consequence') {
+        } else if (activity.type === 'empathy' || activity.type === 'social' || activity.type === 'self-regulation' || activity.type === 'consequence' || activity.type === 'mixed-emotion' || activity.type === 'emotional-growth' || activity.type === 'self-awareness') {
             const showSituation = activity.situation ? `<div class="situation-image">${activity.situation}</div>` : '';
             problemsHTML += `
                 <div class="eq-problem">

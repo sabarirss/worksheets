@@ -101,7 +101,7 @@ function showMathOperationsBack() {
 }
 
 // New function to directly load worksheet from operation selection (skipping difficulty)
-function loadOperationWorksheet(operation) {
+async function loadOperationWorksheet(operation) {
     selectedOperation = operation;
 
     console.log('loadOperationWorksheet called:', {
@@ -127,25 +127,25 @@ function loadOperationWorksheet(operation) {
     // Check if assessment has been completed for this operation
     const child = getSelectedChild();
 
-    // Admin users can bypass child selection and assessment
+    // === PATH 1: Admin — unrestricted access ===
     if (isAdmin) {
         console.log('Admin user - checking level selection');
+        currentAccessMode = 'admin';
+        accessiblePages = [];
+        for (let i = 1; i <= 150; i++) accessiblePages.push(i);
+        accessibleMinPage = 1;
+        accessibleMaxPage = 150;
+        totalAccessiblePages = 150;
 
-        // Check if admin has selected a specific level for Math
         const adminLevel = typeof getAdminLevelForModule === 'function' ? getAdminLevelForModule('math') : null;
         console.log('Admin selected level for Math:', adminLevel);
 
         if (adminLevel) {
-            // Admin selected a specific level - load that level's content
             const startPage = Math.max(1, Math.floor((parseInt(adminLevel) - 1) * 12.5) + 1);
             console.log(`Admin viewing Level ${adminLevel}, starting at page ${startPage}`);
-
-            // Set a flag so worksheet UI knows to show level indicator
             window.adminViewingLevel = adminLevel;
-
             loadWorksheetByPage(operation, startPage);
         } else {
-            // No level selected - show all content (default behavior)
             console.log('Admin viewing all levels');
             window.adminViewingLevel = null;
             loadWorksheetByPage(operation, 1);
@@ -153,6 +153,22 @@ function loadOperationWorksheet(operation) {
         return;
     }
 
+    // === PATH 2: Demo — fixed 2 pages, no assessment required ===
+    if (typeof isDemoMode === 'function' && isDemoMode()) {
+        console.log('Demo mode - loading limited pages');
+        currentAccessMode = 'demo';
+        const demoCount = APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT;
+        accessiblePages = [];
+        for (let i = 1; i <= demoCount; i++) accessiblePages.push(i);
+        accessibleMinPage = 1;
+        accessibleMaxPage = demoCount;
+        totalAccessiblePages = demoCount;
+
+        loadWorksheetByPage(operation, 1);
+        return;
+    }
+
+    // === PATH 3: Full version — weekly assigned pages only ===
     if (!child) {
         alert('Please select a child profile first');
         return;
@@ -162,18 +178,38 @@ function loadOperationWorksheet(operation) {
     const hasAssessment = hasCompletedAssessment(child.id, operation);
 
     if (!hasAssessment) {
-        // Show assessment gate - user must take assessment first
         showAssessmentGate(operation);
+        return;
+    }
+
+    // Assessment completed — get accessible pages from weekly assignment
+    currentAccessMode = 'full';
+
+    if (typeof getAccessiblePages === 'function') {
+        const access = await getAccessiblePages(child.id, 'math');
+        console.log('Accessible pages:', access);
+
+        if (access.pending) {
+            showNoAssignmentMessage(access.pendingReason, access.lockoutWeeks);
+            return;
+        }
+
+        accessiblePages = access.pages;
+        accessibleMinPage = access.minPage;
+        accessibleMaxPage = access.maxPage;
+        totalAccessiblePages = access.totalAccessible;
+
+        loadWorksheetByPage(operation, accessibleMinPage);
     } else {
-        // Assessment completed - show page navigator for all 150 pages
+        // Fallback if weekly-assignments.js not loaded
         const assignedLevel = getAssignedLevel(child.id, operation);
-        console.log(`Assessment completed - Level ${assignedLevel} assigned`);
-
-        // Calculate starting page based on assigned level (levels 1-12 map to pages 1-150)
-        // Level 1 = page 1, Level 6 = page 50, Level 7 = page 75, Level 12 = page 150
+        console.log(`Assessment completed - Level ${assignedLevel} assigned (no weekly system)`);
         const startPage = Math.max(1, Math.floor((assignedLevel - 1) * 12.5) + 1);
-
-        // Load worksheet at starting page
+        accessiblePages = [];
+        for (let i = 1; i <= 150; i++) accessiblePages.push(i);
+        accessibleMinPage = 1;
+        accessibleMaxPage = 150;
+        totalAccessiblePages = 150;
         loadWorksheetByPage(operation, startPage);
     }
 }
@@ -369,6 +405,13 @@ let startTime = null;
 let elapsedSeconds = 0;
 let hasUnsavedChanges = false; // Track if page has been modified
 let pageSubmissions = {}; // Track submitted pages: { operation: { absolutePage: { submitted, score, timestamp } } }
+
+// Page access control state
+let accessiblePages = [];        // Array of accessible absolute page numbers
+let accessibleMinPage = 1;
+let accessibleMaxPage = 150;
+let totalAccessiblePages = 150;
+let currentAccessMode = 'admin';  // 'demo' | 'full' | 'admin'
 
 // Seeded random number generator for deterministic worksheets
 class SeededRandom {
@@ -1160,8 +1203,21 @@ function generateFractionDivision() {
  * Pages 101-150: Hard
  */
 function loadWorksheetByPage(operation, absolutePage) {
-    // Ensure page is within bounds
-    absolutePage = Math.max(1, Math.min(150, absolutePage));
+    // Clamp to accessible range based on access mode
+    if (currentAccessMode === 'admin') {
+        absolutePage = Math.max(1, Math.min(150, absolutePage));
+    } else if (currentAccessMode === 'demo') {
+        absolutePage = Math.max(1, Math.min(accessibleMaxPage, absolutePage));
+    } else {
+        // Full mode: snap to nearest accessible page
+        if (accessiblePages.length > 0 && !accessiblePages.includes(absolutePage)) {
+            // Find nearest accessible page
+            const nearest = accessiblePages.reduce((prev, curr) =>
+                Math.abs(curr - absolutePage) < Math.abs(prev - absolutePage) ? curr : prev
+            );
+            absolutePage = nearest;
+        }
+    }
 
     // Map absolute page to difficulty and relative page
     let difficulty, relativePage;
@@ -1177,7 +1233,7 @@ function loadWorksheetByPage(operation, absolutePage) {
         relativePage = absolutePage - 100;
     }
 
-    console.log(`Loading page ${absolutePage} -> ${difficulty} page ${relativePage}`);
+    console.log(`Loading page ${absolutePage} -> ${difficulty} page ${relativePage} (mode: ${currentAccessMode})`);
 
     // Store absolute page for navigation
     currentAbsolutePage = absolutePage;
@@ -1371,13 +1427,13 @@ function renderWorksheet() {
             </div>
 
             <div class="page-navigation" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                <button onclick="navigateAbsolutePage(-10)" ${currentAbsolutePage <= 10 ? 'disabled' : ''} title="Go back 10 pages">⏪ -10</button>
-                <button onclick="navigateAbsolutePage(-1)" ${currentAbsolutePage <= 1 ? 'disabled' : ''} title="Previous page">← Prev</button>
+                ${totalAccessiblePages > 10 ? `<button onclick="navigateAbsolutePage(-10)" ${currentAbsolutePage <= accessibleMinPage + 9 ? 'disabled' : ''} title="Go back 10 pages">⏪ -10</button>` : ''}
+                <button onclick="navigateAbsolutePage(-1)" ${currentAbsolutePage <= accessibleMinPage ? 'disabled' : ''} title="Previous page">← Prev</button>
                 <span id="page-counter" class="page-counter">
-                    Page ${currentAbsolutePage} of 150
+                    Page ${getPageIndex(currentAbsolutePage)} of ${totalAccessiblePages}
                 </span>
-                <button onclick="navigateAbsolutePage(1)" ${currentAbsolutePage >= 150 ? 'disabled' : ''} title="Next page">Next →</button>
-                <button onclick="navigateAbsolutePage(10)" ${currentAbsolutePage >= 141 ? 'disabled' : ''} title="Go forward 10 pages">+10 ⏩</button>
+                <button onclick="navigateAbsolutePage(1)" ${currentAbsolutePage >= accessibleMaxPage ? 'disabled' : ''} title="Next page">Next →</button>
+                ${totalAccessiblePages > 10 ? `<button onclick="navigateAbsolutePage(10)" ${currentAbsolutePage >= accessibleMaxPage - 9 ? 'disabled' : ''} title="Go forward 10 pages">+10 ⏩</button>` : ''}
             </div>
 
             <div class="navigation" style="margin-top: 20px;">
@@ -1519,7 +1575,7 @@ function updateSubmissionStatusDisplay() {
         // Add "Done" badge to page counter
         if (pageCounter) {
             pageCounter.innerHTML = `
-                Page ${currentAbsolutePage} of 150
+                Page ${getPageIndex(currentAbsolutePage)} of ${totalAccessiblePages}
                 <span style="margin-left: 10px; padding: 3px 8px; background: #4caf50; color: white; border-radius: 5px; font-size: 0.9em;">✓ Done</span>
             `;
         }
@@ -1535,7 +1591,7 @@ function updateSubmissionStatusDisplay() {
 
         // Remove "Done" badge
         if (pageCounter) {
-            pageCounter.textContent = `Page ${currentAbsolutePage} of 150`;
+            pageCounter.textContent = `Page ${getPageIndex(currentAbsolutePage)} of ${totalAccessiblePages}`;
         }
     }
 }
@@ -1972,6 +2028,7 @@ async function navigatePage(direction) {
 
 /**
  * Navigate by absolute page number (1-150)
+ * Respects access mode: demo (2 pages), full (7 weekly), admin (all 150)
  * @param {number} offset - Number of pages to move (-10, -1, +1, +10)
  */
 async function navigateAbsolutePage(offset) {
@@ -1981,29 +2038,50 @@ async function navigateAbsolutePage(offset) {
             return;
         }
 
-        const newAbsolutePage = currentAbsolutePage + offset;
+        // Calculate target page based on access mode
+        let newAbsolutePage;
 
-        // Check bounds (1-150)
-        if (newAbsolutePage < 1 || newAbsolutePage > 150) {
-            return;
+        if (currentAccessMode === 'admin') {
+            // Admin: navigate freely within 1-150
+            newAbsolutePage = currentAbsolutePage + offset;
+            if (newAbsolutePage < 1 || newAbsolutePage > 150) return;
+        } else if (currentAccessMode === 'demo') {
+            // Demo: navigate within accessible pages
+            newAbsolutePage = currentAbsolutePage + offset;
+            if (newAbsolutePage < accessibleMinPage) return;
+            if (newAbsolutePage > accessibleMaxPage) {
+                // Past last demo page — show upgrade prompt
+                showDemoUpgradePrompt();
+                return;
+            }
+        } else {
+            // Full: navigate only within assigned pages
+            const currentIdx = accessiblePages.indexOf(currentAbsolutePage);
+            const newIdx = currentIdx + offset;
+            if (newIdx < 0) return;
+            if (newIdx >= accessiblePages.length) {
+                // Past last assigned page — all done for the week
+                showWeekCompleteMessage();
+                return;
+            }
+            newAbsolutePage = accessiblePages[newIdx];
         }
 
         // Check for unsaved changes
         if (!checkUnsavedChanges()) {
-            return; // User cancelled navigation
+            return;
         }
 
-        // For forward navigation, check if all pages up to the current page are completed
+        // For forward navigation, check if current page is completed (95% threshold)
         if (offset > 0) {
-            // Check if current page is completed
             const currentPageSubmission = pageSubmissions[currentWorksheet.operation]?.[currentAbsolutePage];
             if (!currentPageSubmission || !currentPageSubmission.completed) {
-                alert('⚠️ Complete the current page with 95% or higher score before jumping forward!');
+                alert('⚠️ Complete the current page with 95% or higher score before moving to the next page!');
                 return;
             }
 
-            // For larger jumps, check all pages in between
-            if (Math.abs(offset) > 1) {
+            // For admin with large jumps, check pages in between
+            if (currentAccessMode === 'admin' && Math.abs(offset) > 1) {
                 for (let i = currentAbsolutePage + 1; i < newAbsolutePage; i++) {
                     const pageSubmission = pageSubmissions[currentWorksheet.operation]?.[i];
                     if (!pageSubmission || !pageSubmission.completed) {
@@ -2135,89 +2213,136 @@ async function submitWorksheet() {
         }
     }
 
-    let correctCount = 0;
     const totalProblems = currentWorksheet.problems.length;
 
-    // Evaluate each answer
+    // Collect answers from DOM
+    const answers = [];
     for (let i = 0; i < totalProblems; i++) {
         const answerElement = document.getElementById(`answer-${i}`);
-        const feedbackElement = document.getElementById(`feedback-${i}`);
-        const correctAnswer = currentWorksheet.problems[i].answer;
+        if (!answerElement) {
+            answers.push(null);
+            continue;
+        }
 
-        if (!answerElement || !feedbackElement) continue;
-
-        try {
-            let userAnswer = null;
-            let isEmpty = false;
-
-            if (usePencil) {
-                // Pencil mode: handwriting recognition
+        if (usePencil) {
+            try {
                 const result = await recognizeDigit(answerElement);
-                if (result.isEmpty) {
-                    isEmpty = true;
-                } else if (!result.error) {
-                    userAnswer = result.digit;
-                }
+                answers.push(result.isEmpty ? null : result.digit);
+            } catch {
+                answers.push(null);
+            }
+        } else {
+            const value = answerElement.value.trim();
+            if (value === '') {
+                answers.push(null);
             } else {
-                // Keyboard mode: get input value
-                const value = answerElement.value.trim();
-                if (value === '') {
-                    isEmpty = true;
+                const correctAnswer = currentWorksheet.problems[i].answer;
+                if (typeof correctAnswer === 'string') {
+                    answers.push(value);
                 } else {
-                    // Handle string answers (fractions like "3/4", remainders like "12 R3")
-                    if (typeof correctAnswer === 'string') {
-                        userAnswer = value; // Keep as string for comparison
-                    } else {
-                        userAnswer = parseInt(value);
-                    }
+                    answers.push(parseInt(value));
                 }
             }
-
-            // Provide feedback
-            if (isEmpty) {
-                feedbackElement.textContent = '⚠️ Empty';
-                feedbackElement.style.color = '#999';
-                answerElement.style.borderColor = '#999';
-            } else if (userAnswer === null || (typeof correctAnswer !== 'string' && isNaN(userAnswer))) {
-                feedbackElement.textContent = `Answer: ${correctAnswer}`;
-                feedbackElement.style.color = '#ff9800';
-                answerElement.style.borderColor = '#ff9800';
-            } else if (typeof correctAnswer === 'string'
-                ? String(userAnswer).replace(/\s+/g, '').toLowerCase() === String(correctAnswer).replace(/\s+/g, '').toLowerCase()
-                : userAnswer === correctAnswer) {
-                correctCount++;
-                feedbackElement.textContent = '✓ Correct!';
-                feedbackElement.style.color = '#4caf50';
-                feedbackElement.style.fontWeight = 'bold';
-                answerElement.style.borderColor = '#4caf50';
-                answerElement.style.borderWidth = '3px';
-            } else {
-                feedbackElement.textContent = `✗ Wrong (${correctAnswer})`;
-                feedbackElement.style.color = '#f44336';
-                feedbackElement.style.fontWeight = 'bold';
-                answerElement.style.borderColor = '#f44336';
-                answerElement.style.borderWidth = '3px';
-            }
-
-            feedbackElement.style.display = 'inline-block';
-            feedbackElement.style.marginLeft = '10px';
-
-        } catch (error) {
-            console.error(`Error evaluating answer ${i}:`, error);
-            feedbackElement.textContent = `Answer: ${correctAnswer}`;
-            feedbackElement.style.color = '#ff9800';
         }
     }
 
-    // Calculate score
-    const score = Math.round((correctCount / totalProblems) * 100);
-
-    // Check completion criteria (95% threshold for math)
-    const completionResult = isPageCompleted('math', score, false);
-    const isCompleted = completionResult.completed;
-
-    // Mark page as submitted
     const operation = currentWorksheet.operation;
+    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+    const child = getSelectedChild();
+
+    let score, correctCount, isCompleted, completionResult, feedback;
+
+    // Try Cloud Function validation first, fall back to local
+    try {
+        const validateMath = firebase.functions().httpsCallable('validateMathSubmission');
+        const result = await validateMath({
+            childId: child ? child.id : null,
+            operation: operation,
+            absolutePage: currentAbsolutePage,
+            answers: answers,
+            elapsedTime: elapsedTime
+        });
+
+        score = result.data.score;
+        correctCount = result.data.correctCount;
+        isCompleted = result.data.completed;
+        feedback = result.data.feedback;
+        completionResult = { completed: isCompleted, reason: isCompleted ? '' : `Score ${score}% is below 95% threshold. Try again!` };
+
+        console.log('Server-validated submission:', result.data);
+    } catch (error) {
+        console.warn('Cloud Function unavailable, using local validation:', error.message);
+
+        // === FALLBACK: Local validation (existing logic) ===
+        correctCount = 0;
+        feedback = [];
+
+        for (let i = 0; i < totalProblems; i++) {
+            const correctAnswer = currentWorksheet.problems[i].answer;
+            const userAnswer = answers[i];
+            let isCorrect = false;
+
+            if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
+                if (typeof correctAnswer === 'string') {
+                    isCorrect = String(userAnswer).replace(/\s+/g, '').toLowerCase() === String(correctAnswer).replace(/\s+/g, '').toLowerCase();
+                } else {
+                    isCorrect = Number(userAnswer) === Number(correctAnswer);
+                }
+            }
+
+            if (isCorrect) correctCount++;
+            feedback.push({ correct: isCorrect, expected: correctAnswer });
+        }
+
+        score = Math.round((correctCount / totalProblems) * 100);
+        completionResult = isPageCompleted('math', score, false);
+        isCompleted = completionResult.completed;
+
+        // Save completion to Firestore via client (fallback)
+        const identifier = `${operation}-level${Math.ceil(currentAbsolutePage / 10)}-page${((currentAbsolutePage - 1) % 10) + 1}`;
+        await savePageCompletion('math', identifier, {
+            score, correctCount, totalProblems, completed: isCompleted,
+            manuallyMarked: false, elapsedTime, attempts: 1
+        });
+
+        // Update weekly assignment progress via client (fallback)
+        if (typeof onMathPageCompleted === 'function') {
+            onMathPageCompleted(operation, currentAbsolutePage, score, isCompleted);
+        }
+    }
+
+    // Render feedback from server (or local fallback)
+    for (let i = 0; i < totalProblems; i++) {
+        const answerElement = document.getElementById(`answer-${i}`);
+        const feedbackElement = document.getElementById(`feedback-${i}`);
+        if (!answerElement || !feedbackElement) continue;
+
+        const fb = feedback[i];
+        if (!fb) continue;
+
+        if (answers[i] === null || answers[i] === undefined || answers[i] === '') {
+            feedbackElement.textContent = '⚠️ Empty';
+            feedbackElement.style.color = '#999';
+            answerElement.style.borderColor = '#999';
+        } else if (fb.correct) {
+            feedbackElement.textContent = '✓ Correct!';
+            feedbackElement.style.color = '#4caf50';
+            feedbackElement.style.fontWeight = 'bold';
+            answerElement.style.borderColor = '#4caf50';
+            answerElement.style.borderWidth = '3px';
+        } else {
+            feedbackElement.textContent = `✗ Wrong (${fb.expected})`;
+            feedbackElement.style.color = '#f44336';
+            feedbackElement.style.fontWeight = 'bold';
+            answerElement.style.borderColor = '#f44336';
+            answerElement.style.borderWidth = '3px';
+        }
+
+        feedbackElement.style.display = 'inline-block';
+        feedbackElement.style.marginLeft = '10px';
+    }
+
+    // Mark page as submitted (local UI state)
     if (!pageSubmissions[operation]) {
         pageSubmissions[operation] = {};
     }
@@ -2230,31 +2355,14 @@ async function submitWorksheet() {
         timestamp: new Date().toISOString()
     };
 
-    // Save submissions to localStorage (for UI state)
-    const child = getSelectedChild();
     if (child) {
         localStorage.setItem(`pageSubmissions_${child.id}`, JSON.stringify(pageSubmissions));
     }
 
-    // Save completion to Firestore
-    const identifier = `${operation}-level${Math.ceil(currentAbsolutePage / 10)}-page${((currentAbsolutePage - 1) % 10) + 1}`;
-    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
-
-    const completionData = {
-        score: score,
-        correctCount: correctCount,
-        totalProblems: totalProblems,
-        completed: isCompleted,
-        manuallyMarked: false,
-        elapsedTime: elapsedTime,
-        attempts: 1
-    };
-
-    await savePageCompletion('math', identifier, completionData);
-
-    // Update weekly assignment progress
-    if (typeof onMathPageCompleted === 'function') {
-        onMathPageCompleted(operation, currentAbsolutePage, score, isCompleted);
+    // Demo mode: show upgrade prompt after completing all accessible pages
+    if (currentAccessMode === 'demo' && isCompleted) {
+        const allDone = accessiblePages.every(p => pageSubmissions[operation]?.[p]?.completed);
+        if (allDone) setTimeout(() => showDemoUpgradePrompt(), 1500);
     }
 
     // Clear unsaved changes flag
@@ -2474,5 +2582,128 @@ function loadPageSubmissions() {
             pageSubmissions = {};
         }
     }
+}
+
+// ============================================================================
+// PAGE ACCESS HELPERS
+// ============================================================================
+
+/**
+ * Get 1-based display index for an absolute page number.
+ * E.g., if accessible pages are [37,38,39,40,41,42,43], page 39 → "3"
+ * For admin mode, returns the absolute page number as-is.
+ */
+function getPageIndex(absolutePage) {
+    if (currentAccessMode === 'admin') {
+        return absolutePage;
+    }
+    const idx = accessiblePages.indexOf(absolutePage);
+    return idx >= 0 ? idx + 1 : absolutePage;
+}
+
+/**
+ * Show upgrade prompt for demo users who have completed all accessible pages.
+ */
+function showDemoUpgradePrompt() {
+    // Remove existing prompt if any
+    const existing = document.getElementById('demo-upgrade-prompt');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'demo-upgrade-prompt';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    overlay.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:3em;margin-bottom:15px;">&#127775;</div>
+            <h2 style="margin:0 0 10px;color:#333;font-size:1.4em;">Great Job!</h2>
+            <p style="color:#666;line-height:1.6;margin-bottom:25px;">
+                You've completed the demo worksheets! Unlock the full version to access weekly progressive worksheets tailored to your child's level.
+            </p>
+            <button onclick="window.location.href='children-profiles.html'" style="
+                padding:14px 32px;font-size:1.1em;background:linear-gradient(135deg,#667eea,#764ba2);
+                color:white;border:none;border-radius:12px;cursor:pointer;font-weight:bold;
+                box-shadow:0 4px 15px rgba(102,126,234,0.4);margin-bottom:12px;display:block;width:100%;
+            ">Upgrade Now</button>
+            <button onclick="document.getElementById('demo-upgrade-prompt').remove()" style="
+                padding:10px 24px;font-size:0.95em;background:none;color:#999;border:none;cursor:pointer;
+            ">Maybe Later</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+/**
+ * Show message when no weekly assignment is available (lockout or pre-Monday-4pm).
+ */
+function showNoAssignmentMessage(reason, lockoutWeeks) {
+    // Hide all main sections
+    const operations = document.getElementById('math-operations');
+    const subjectSelection = document.querySelector('.subject-selection');
+    if (operations) operations.style.display = 'none';
+    if (subjectSelection) subjectSelection.style.display = 'none';
+
+    const worksheetContainer = document.querySelector('.worksheet-container');
+    if (worksheetContainer) worksheetContainer.style.display = 'none';
+
+    const footer = document.querySelector('footer');
+    if (footer) footer.style.display = 'none';
+
+    // Remove existing message
+    const existing = document.getElementById('no-assignment-message');
+    if (existing) existing.remove();
+
+    let icon, title, message;
+    if (reason === 'lockout') {
+        icon = '&#128274;';
+        title = 'Worksheets Paused';
+        message = `You have ${lockoutWeeks || 2}+ weeks of incomplete worksheets. Please complete previous weeks' assignments before new ones unlock.`;
+    } else {
+        icon = '&#128197;';
+        title = 'New Worksheets Coming Soon';
+        message = 'New worksheets are available every Monday at 4:00 PM. Complete any pending worksheets in the meantime!';
+    }
+
+    const container = document.querySelector('.container');
+    const html = `
+        <div id="no-assignment-message" style="
+            max-width:500px;margin:40px auto;text-align:center;padding:40px 30px;
+            background:white;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);
+        ">
+            <div style="font-size:3em;margin-bottom:15px;">${icon}</div>
+            <h2 style="margin:0 0 12px;color:#333;">${title}</h2>
+            <p style="color:#666;line-height:1.6;margin-bottom:25px;">${message}</p>
+            <button onclick="backToOperations()" style="
+                padding:12px 28px;font-size:1em;background:linear-gradient(135deg,#667eea,#764ba2);
+                color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
+            ">&#8592; Back</button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Show "all done for the week" message when navigating past last assigned page.
+ */
+function showWeekCompleteMessage() {
+    const existing = document.getElementById('week-complete-prompt');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'week-complete-prompt';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    overlay.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:3em;margin-bottom:15px;">&#127942;</div>
+            <h2 style="margin:0 0 10px;color:#28a745;">All Done This Week!</h2>
+            <p style="color:#666;line-height:1.6;margin-bottom:20px;">
+                You've completed all assigned pages for this week. New worksheets will be available next Monday at 4:00 PM.
+            </p>
+            <button onclick="document.getElementById('week-complete-prompt').remove()" style="
+                padding:12px 28px;font-size:1em;background:linear-gradient(135deg,#28a745,#20c997);
+                color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
+            ">Got it!</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
 }
 

@@ -7,6 +7,13 @@ let selectedDifficulty = null;
 let selectedType = null; // 'writing' or 'reading'
 let currentStory = null;
 
+// English page access control state
+let englishAccessiblePages = [];
+let englishAccessibleMinPage = 1;
+let englishAccessibleMaxPage = 50;
+let englishTotalAccessiblePages = 50;
+let englishAccessMode = 'admin'; // 'demo' | 'full' | 'admin'
+
 // Helper function to convert age to age group
 function getAgeGroup(age) {
     if (age <= 5) return '4-5';
@@ -218,25 +225,54 @@ function updateWritingDifficultyDescriptions() {
     }
 }
 
-function loadWorksheetNew(difficulty) {
+async function loadWorksheetNew(difficulty) {
     // Check if user is admin with level selection
     const isAdmin = window.currentUserRole === 'admin';
 
+    // === Admin path ===
     if (isAdmin && typeof getAdminLevelForModule === 'function') {
         const adminLevel = getAdminLevelForModule('english');
         if (adminLevel) {
-            // Admin has selected a specific level - use that level's age/difficulty
             const levelDetails = getLevelDetails(adminLevel);
             selectedAgeGroup = levelDetails.ageGroup;
-            // For 'writing' difficulty, keep it as 'writing', otherwise use the selected difficulty
             selectedDifficulty = difficulty === 'writing' ? 'writing' : levelDetails.difficulty;
             console.log(`Admin viewing English Level ${adminLevel}: ${selectedAgeGroup} ${selectedDifficulty}`);
-            loadWorksheet(selectedAgeGroup, selectedDifficulty);
-            return;
         }
+        // Admin: unrestricted
+        englishAccessMode = 'admin';
+        englishAccessiblePages = [];
+        const maxPg = 50;
+        for (let i = 1; i <= maxPg; i++) englishAccessiblePages.push(i);
+        englishAccessibleMinPage = 1;
+        englishAccessibleMaxPage = maxPg;
+        englishTotalAccessiblePages = maxPg;
+        loadWorksheet(selectedAgeGroup, selectedDifficulty);
+        return;
     }
 
-    // Check if child has selected and completed assessment
+    // === Demo path ===
+    if (typeof isDemoMode === 'function' && isDemoMode()) {
+        englishAccessMode = 'demo';
+        const demoCount = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT : 2;
+        englishAccessiblePages = [];
+        for (let i = 1; i <= demoCount; i++) englishAccessiblePages.push(i);
+        englishAccessibleMinPage = 1;
+        englishAccessibleMaxPage = demoCount;
+        englishTotalAccessiblePages = demoCount;
+
+        // Auto-detect age group for demo
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+        if (child && child.age) {
+            selectedAgeGroup = getAgeGroup(child.age);
+        } else {
+            selectedAgeGroup = selectedAgeGroup || '6';
+        }
+        selectedDifficulty = difficulty;
+        loadWorksheet(selectedAgeGroup, selectedDifficulty, 1);
+        return;
+    }
+
+    // === Full version path ===
     const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
     if (!child) {
@@ -248,7 +284,6 @@ function loadWorksheetNew(difficulty) {
     const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, 'english');
 
     if (!hasAssessment) {
-        // Show assessment gate - child must take assessment first
         showEnglishAssessmentGate(child);
         return;
     }
@@ -257,27 +292,40 @@ function loadWorksheetNew(difficulty) {
     const assignedLevel = typeof getAssignedLevel === 'function' ? getAssignedLevel(child.id, 'english') : null;
 
     if (assignedLevel) {
-        // Convert assigned level to age group and difficulty
         const levelDetails = getLevelDetails(assignedLevel);
         selectedAgeGroup = levelDetails.ageGroup;
-
-        // For 'writing' difficulty, keep it as 'writing', otherwise use the level's difficulty
-        if (difficulty === 'writing') {
-            selectedDifficulty = 'writing';
-        } else {
-            // Map the assigned level difficulty to the requested difficulty type
-            selectedDifficulty = difficulty;
-        }
-
+        selectedDifficulty = difficulty === 'writing' ? 'writing' : difficulty;
         console.log(`Assessment completed - English Level ${assignedLevel} assigned: ${selectedAgeGroup} ${selectedDifficulty}`);
     } else {
-        // Fallback to age-based if no level assigned (shouldn't happen after assessment)
         selectedAgeGroup = child.age ? getAgeGroup(child.age) : '6';
         selectedDifficulty = difficulty;
-        console.warn('No assigned level found, using age-based content:', selectedAgeGroup);
     }
 
-    loadWorksheet(selectedAgeGroup, selectedDifficulty);
+    // Get accessible pages from weekly assignment for writing
+    englishAccessMode = 'full';
+    if (difficulty === 'writing' && typeof getAccessiblePages === 'function') {
+        const access = await getAccessiblePages(child.id, 'english');
+        console.log('English accessible pages:', access);
+
+        if (access.pending) {
+            showEnglishNoAssignmentMessage(access.pendingReason, access.lockoutWeeks);
+            return;
+        }
+
+        englishAccessiblePages = access.pages;
+        englishAccessibleMinPage = access.minPage;
+        englishAccessibleMaxPage = access.maxPage;
+        englishTotalAccessiblePages = access.totalAccessible;
+        loadWorksheet(selectedAgeGroup, selectedDifficulty, englishAccessibleMinPage);
+    } else {
+        // Non-writing or no weekly system
+        englishAccessiblePages = [];
+        for (let i = 1; i <= 50; i++) englishAccessiblePages.push(i);
+        englishAccessibleMinPage = 1;
+        englishAccessibleMaxPage = 50;
+        englishTotalAccessiblePages = 50;
+        loadWorksheet(selectedAgeGroup, selectedDifficulty);
+    }
 }
 
 /**
@@ -3044,7 +3092,7 @@ function loadWorksheet(ageGroup, difficulty, page = 1) {
 
     // Handle writing practice with pages
     if (config.type === 'writing') {
-        totalPages = isDemoMode() ? 2 : 50;
+        totalPages = englishTotalAccessiblePages;
         renderWritingWorksheet(ageGroup, difficulty, page);
         return;
     }
@@ -3089,9 +3137,35 @@ function loadWorksheet(ageGroup, difficulty, page = 1) {
 
 // Navigate between writing practice pages
 function navigateWritingPage(direction) {
-    const newPage = currentPage + direction;
-    if (newPage < 1 || newPage > totalPages) return;
-    loadWorksheet(selectedAgeGroup, selectedDifficulty, newPage);
+    if (englishAccessMode === 'admin') {
+        const newPage = currentPage + direction;
+        if (newPage < 1 || newPage > totalPages) return;
+        loadWorksheet(selectedAgeGroup, selectedDifficulty, newPage);
+    } else if (englishAccessMode === 'demo') {
+        const newPage = currentPage + direction;
+        if (newPage < englishAccessibleMinPage) return;
+        if (newPage > englishAccessibleMaxPage) {
+            // Past last demo page — show upgrade prompt
+            if (typeof showDemoUpgradePrompt === 'function') {
+                showDemoUpgradePrompt();
+            }
+            return;
+        }
+        loadWorksheet(selectedAgeGroup, selectedDifficulty, newPage);
+    } else {
+        // Full mode: navigate within assigned pages
+        const currentIdx = englishAccessiblePages.indexOf(currentPage);
+        const newIdx = currentIdx + direction;
+        if (newIdx < 0) return;
+        if (newIdx >= englishAccessiblePages.length) {
+            // Past last assigned page — show week complete message
+            if (typeof showWeekCompleteMessage === 'function') {
+                showWeekCompleteMessage();
+            }
+            return;
+        }
+        loadWorksheet(selectedAgeGroup, selectedDifficulty, englishAccessiblePages[newIdx]);
+    }
 }
 
 // Render writing practice worksheet with pages
@@ -3154,7 +3228,7 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
                 <div class="worksheet-info">
                     <h2>✍️ ${config.name}</h2>
                     <p>${config.description}</p>
-                    <p>Page ${page} of ${totalPages}</p>
+                    <p>Page ${getEnglishPageIndex(page)} of ${englishTotalAccessiblePages}</p>
                 </div>
                 <div class="student-info">
                     <div class="info-row">
@@ -3185,9 +3259,9 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
             <div class="problems-container">${problemsHTML}</div>
 
             <div class="page-navigation" style="margin: 30px 0;">
-                <button onclick="navigateWritingPage(-1)" ${page <= 1 ? 'disabled' : ''}>← Previous Page</button>
-                <span class="page-counter">Page ${page} of ${totalPages}</span>
-                <button onclick="navigateWritingPage(1)" ${page >= totalPages ? 'disabled' : ''}>Next Page →</button>
+                <button onclick="navigateWritingPage(-1)" ${page <= englishAccessibleMinPage ? 'disabled' : ''}>&#8592; Previous Page</button>
+                <span class="page-counter">Page ${getEnglishPageIndex(page)} of ${englishTotalAccessiblePages}</span>
+                <button onclick="navigateWritingPage(1)" ${page >= englishAccessibleMaxPage ? 'disabled' : ''}>Next Page &#8594;</button>
             </div>
         </div>
     `;
@@ -4076,7 +4150,7 @@ function clearAllAnswers() {
 }
 
 /**
- * Check handwriting using ml5.js recognition
+ * Check handwriting using TensorFlow.js recognition
  */
 async function checkHandwriting() {
     if (!currentWorksheet) {
@@ -4180,24 +4254,39 @@ async function markEnglishWorksheetComplete() {
     try {
         const identifier = `${currentWorksheet.ageGroup}-${currentWorksheet.difficulty}`;
         const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
-        // Manual completion - no score validation
-        const completionData = {
-            score: 100, // Manual completion counts as 100%
-            correctCount: 0,
-            totalProblems: 0,
-            completed: true,
-            manuallyMarked: true,
-            elapsedTime: elapsedTime,
-            attempts: 1
-        };
+        // Try Cloud Function validation first, fall back to local
+        try {
+            const validateEnglish = firebase.functions().httpsCallable('validateEnglishSubmission');
+            await validateEnglish({
+                childId: child ? child.id : null,
+                pageIndex: currentPage,
+                ageGroup: currentWorksheet.ageGroup,
+                difficulty: currentWorksheet.difficulty,
+                manuallyMarked: true,
+                elapsedTime: elapsedTime
+            });
+            console.log('English submission validated by server');
+        } catch (cfError) {
+            console.warn('Cloud Function unavailable, using local validation:', cfError.message);
 
-        // Save to Firestore using completion manager
-        await savePageCompletion('english', identifier, completionData);
+            // Fallback: save via client
+            const completionData = {
+                score: 100,
+                correctCount: 0,
+                totalProblems: 0,
+                completed: true,
+                manuallyMarked: true,
+                elapsedTime: elapsedTime,
+                attempts: 1
+            };
 
-        // Update weekly assignment progress
-        if (typeof onEnglishPageCompleted === 'function') {
-            onEnglishPageCompleted(currentPage, score, isCompleted);
+            await savePageCompletion('english', identifier, completionData);
+
+            if (typeof onEnglishPageCompleted === 'function') {
+                onEnglishPageCompleted(currentPage, 100, true);
+            }
         }
 
         // Show success status
@@ -4237,4 +4326,62 @@ async function markEnglishWorksheetComplete() {
 // Update completion badge on level selection screen
 function updateCompletionBadge(level) {
     console.log(`English worksheet ${level} marked as completed`);
+}
+
+// ============================================================================
+// ENGLISH PAGE ACCESS HELPERS
+// ============================================================================
+
+/**
+ * Get 1-based display index for an English writing page.
+ */
+function getEnglishPageIndex(absolutePage) {
+    if (englishAccessMode === 'admin') return absolutePage;
+    const idx = englishAccessiblePages.indexOf(absolutePage);
+    return idx >= 0 ? idx + 1 : absolutePage;
+}
+
+/**
+ * Show message when no English weekly assignment is available.
+ */
+function showEnglishNoAssignmentMessage(reason, lockoutWeeks) {
+    const typeSelection = document.getElementById('type-selection');
+    const writingDifficulties = document.getElementById('writing-difficulties');
+    if (typeSelection) typeSelection.style.display = 'none';
+    if (writingDifficulties) writingDifficulties.style.display = 'none';
+
+    const worksheetContainer = document.getElementById('english-worksheet-content');
+    if (worksheetContainer) worksheetContainer.style.display = 'none';
+
+    const existing = document.getElementById('english-no-assignment-message');
+    if (existing) existing.remove();
+
+    let icon, title, message;
+    if (reason === 'lockout') {
+        icon = '&#128274;';
+        title = 'Worksheets Paused';
+        message = `You have ${lockoutWeeks || 2}+ weeks of incomplete worksheets. Please complete previous weeks' assignments before new ones unlock.`;
+    } else {
+        icon = '&#128197;';
+        title = 'New Worksheets Coming Soon';
+        message = 'New worksheets are available every Monday at 4:00 PM. Complete any pending worksheets in the meantime!';
+    }
+
+    const container = document.querySelector('.container');
+    if (!container) return;
+
+    container.insertAdjacentHTML('beforeend', `
+        <div id="english-no-assignment-message" style="
+            max-width:500px;margin:40px auto;text-align:center;padding:40px 30px;
+            background:white;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);
+        ">
+            <div style="font-size:3em;margin-bottom:15px;">${icon}</div>
+            <h2 style="margin:0 0 12px;color:#333;">${title}</h2>
+            <p style="color:#666;line-height:1.6;margin-bottom:25px;">${message}</p>
+            <button onclick="backToTypeSelection()" style="
+                padding:12px 28px;font-size:1em;background:linear-gradient(135deg,#667eea,#764ba2);
+                color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
+            ">&#8592; Back</button>
+        </div>
+    `);
 }

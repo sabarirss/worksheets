@@ -1,18 +1,25 @@
 /**
  * GleeGrow Cloud Functions (2nd gen / v2 API)
  *
- * 1. scheduledWeeklyGeneration — Monday 4pm: generate weekly assignments for all children
- * 2. scheduledEmailReminder — Daily 5pm: send email reminders for incomplete worksheets
+ * Scheduled Functions:
+ *   1. scheduledWeeklyGeneration — Monday 4pm: generate weekly assignments for all children
+ *   2. scheduledEmailReminder — Daily 5pm: send email reminders for incomplete worksheets
+ *
+ * Callable Functions (server-side validation):
+ *   3. validateMathSubmission — Server-authoritative math answer validation
+ *   4. validateEnglishSubmission — Server-authoritative English completion validation
+ *   5. validateAptitudeSubmission — Server-authoritative aptitude answer validation
+ *   6. checkPageAccess — Server-side page access control
+ *   7. getAccessiblePages — Server-authoritative accessible page list
+ *   8. submitAssessment — Server-side assessment grading and level assignment
+ *   9. submitLevelTest — Server-side level test grading and advancement
+ *  10. checkLevelTestEligibility — Server-side eligibility check
  *
  * Deployment:
  *   firebase deploy --only functions
  *
  * Configuration:
  *   Create functions/.env with:
- *     SENDGRID_FROM_EMAIL=noreply@gleegrow.com
- *     APP_URL=https://worksheets-app-76ee9.web.app
- *
- *   Add all config to functions/.env:
  *     SENDGRID_KEY=SG.your_key_here
  *     SENDGRID_FROM_EMAIL=noreply@gleegrow.com
  *     APP_URL=https://worksheets-app-76ee9.web.app
@@ -551,3 +558,22 @@ async function sendReminderEmail(sgMail, fromEmail, appUrl, toEmail, parentName,
 
     await sgMail.send(msg);
 }
+
+// ============================================================================
+// CALLABLE FUNCTIONS — Server-side validation & access control
+// ============================================================================
+
+// Import callable functions from separate modules
+const { validateMathSubmission, validateEnglishSubmission, validateAptitudeSubmission } = require('./validators');
+const { checkPageAccess, getAccessiblePages: getAccessiblePagesFunc } = require('./access-control');
+const { submitAssessment, submitLevelTest, checkLevelTestEligibility } = require('./level-functions');
+
+// Export all callable functions
+exports.validateMathSubmission = validateMathSubmission;
+exports.validateEnglishSubmission = validateEnglishSubmission;
+exports.validateAptitudeSubmission = validateAptitudeSubmission;
+exports.checkPageAccess = checkPageAccess;
+exports.getAccessiblePages = getAccessiblePagesFunc;
+exports.submitAssessment = submitAssessment;
+exports.submitLevelTest = submitLevelTest;
+exports.checkLevelTestEligibility = checkLevelTestEligibility;
