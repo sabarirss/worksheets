@@ -189,16 +189,5 @@ function getAgeAppropriateInstruction(instruction, ageGroup) {
     return result;
 }
 
-// Export functions for use in generators
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        getContentMapping,
-        getNumberRange,
-        getVocabularyLevel,
-        filterByAge,
-        getAgeAppropriateInstruction,
-        ageGroupMap
-    };
-}
-
+// Node.js module.exports removed - browser-only code
 console.log('Age content mapper loaded');

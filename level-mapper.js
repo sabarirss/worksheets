@@ -72,12 +72,13 @@ function levelToAgeGroup(level) {
     return '10+';
 }
 
-// Convert level number to difficulty (for backward compatibility)
+// Convert level number to difficulty
+// Even levels represent combined medium/hard content
+// Level 11 is easy/medium, Level 12 is hard (special case for 10+)
 function levelToDifficulty(level) {
-    // Odd levels = easy, Even levels = medium/hard
-    if (level === 1) return 'easy';
+    if (level === 12) return 'hard';
     if (level % 2 === 1) return 'easy';
-    return 'medium'; // We'll use medium for most even levels
+    return 'hard'; // Even levels use 'hard' (the last-written config in buildLevelBasedConfigs)
 }
 
 // Convert level number to display name

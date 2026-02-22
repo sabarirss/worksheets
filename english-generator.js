@@ -184,15 +184,6 @@ function backToStoryListFromReader() {
     if (storySelection) storySelection.style.display = 'block';
 }
 
-// Legacy functions for compatibility
-function showAgeGroups() {
-    backToAgeGroups();
-}
-
-function showDifficulties(ageGroup) {
-    selectAgeGroup(ageGroup);
-}
-
 function updateWritingDifficultyDescriptions() {
     // Auto-detect age from selected child to update descriptions on page load
     if (!selectedAgeGroup) {
@@ -245,22 +236,128 @@ function loadWorksheetNew(difficulty) {
         }
     }
 
-    // Auto-detect age from selected child if not already set
-    if (!selectedAgeGroup) {
-        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-        if (child && child.age) {
-            selectedAgeGroup = getAgeGroup(child.age);
-            console.log('Auto-detected age group from child:', selectedAgeGroup);
-        } else {
-            // Default to age 6 if no child selected
-            selectedAgeGroup = '6';
-            console.warn('No child selected, defaulting to age 6');
-        }
+    // Check if child has selected and completed assessment
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+
+    if (!child) {
+        alert('Please select a child profile first');
+        return;
     }
 
-    selectedDifficulty = difficulty;
-    if (selectedAgeGroup && selectedDifficulty) {
-        loadWorksheet(selectedAgeGroup, selectedDifficulty);
+    // Check assessment status for English
+    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, 'english');
+
+    if (!hasAssessment) {
+        // Show assessment gate - child must take assessment first
+        showEnglishAssessmentGate(child);
+        return;
+    }
+
+    // Assessment completed - get assigned level and load appropriate content
+    const assignedLevel = typeof getAssignedLevel === 'function' ? getAssignedLevel(child.id, 'english') : null;
+
+    if (assignedLevel) {
+        // Convert assigned level to age group and difficulty
+        const levelDetails = getLevelDetails(assignedLevel);
+        selectedAgeGroup = levelDetails.ageGroup;
+
+        // For 'writing' difficulty, keep it as 'writing', otherwise use the level's difficulty
+        if (difficulty === 'writing') {
+            selectedDifficulty = 'writing';
+        } else {
+            // Map the assigned level difficulty to the requested difficulty type
+            selectedDifficulty = difficulty;
+        }
+
+        console.log(`Assessment completed - English Level ${assignedLevel} assigned: ${selectedAgeGroup} ${selectedDifficulty}`);
+    } else {
+        // Fallback to age-based if no level assigned (shouldn't happen after assessment)
+        selectedAgeGroup = child.age ? getAgeGroup(child.age) : '6';
+        selectedDifficulty = difficulty;
+        console.warn('No assigned level found, using age-based content:', selectedAgeGroup);
+    }
+
+    loadWorksheet(selectedAgeGroup, selectedDifficulty);
+}
+
+/**
+ * Show assessment gate - child must complete assessment to access English worksheets
+ */
+function showEnglishAssessmentGate(child) {
+    console.log('Showing English assessment gate for child:', child.name);
+
+    // Hide main sections
+    const typeSelection = document.getElementById('type-selection');
+    if (typeSelection) typeSelection.style.display = 'none';
+
+    const worksheetContainer = document.getElementById('english-worksheet-content');
+    if (worksheetContainer) worksheetContainer.style.display = 'none';
+
+    // Hide footer
+    const footer = document.querySelector('footer');
+    if (footer) footer.style.display = 'none';
+
+    // Show assessment gate
+    const container = document.querySelector('.container');
+    const existingGate = document.getElementById('english-assessment-gate');
+
+    if (existingGate) {
+        existingGate.remove();
+    }
+
+    const gateHTML = `
+        <div id="english-assessment-gate" class="assessment-gate">
+            <div class="gate-content">
+                <div class="gate-icon">🔒</div>
+                <h2>Assessment Required</h2>
+                <p class="gate-message">
+                    Before starting English practice, we need to find the right level for ${child.name}!
+                </p>
+                <p class="gate-details">
+                    The assessment has 10 questions and will take about 5-10 minutes.<br>
+                    Based on the results, we'll assign the perfect level for ${child.name}'s learning journey.
+                </p>
+                <div class="gate-actions">
+                    <button class="take-assessment-btn" onclick="startEnglishAssessment()">
+                        📝 Take English Assessment
+                    </button>
+                    <button class="back-btn" onclick="backToHome()">
+                        ← Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (container) {
+        container.insertAdjacentHTML('beforeend', gateHTML);
+    }
+}
+
+/**
+ * Start English assessment from the gate
+ */
+function startEnglishAssessment() {
+    const child = getSelectedChild();
+    if (!child) {
+        alert('Error: No child selected');
+        return;
+    }
+
+    const gate = document.getElementById('english-assessment-gate');
+    if (gate) {
+        gate.remove();
+    }
+
+    // Get child's age group
+    const ageGroup = child.age ? getAgeGroup(child.age) : '6';
+
+    // Start assessment
+    if (typeof startAssessment === 'function') {
+        startAssessment('english', 'english', ageGroup);
+    } else {
+        console.error('startAssessment function not available');
+        alert('Error: Assessment system not loaded');
     }
 }
 
@@ -284,29 +381,7 @@ let elapsedSeconds = 0;
 let answersVisible = false;
 let writingCanvases = [];
 
-// Demo version limiting
-function isDemoMode() {
-    const user = getCurrentUser();
-    if (!user) return true; // Default to demo if no user
-
-    // Check for admin demo preview mode
-    if (user.role === 'admin') {
-        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
-        return adminDemoPreview; // Admin can toggle demo preview
-    }
-
-    // Get selected child and check their version
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return true; // Default to demo if no child selected
-
-    // Check child's version (default to demo for backward compatibility)
-    const version = child.version || 'demo';
-    return version === 'demo';
-}
-
-function getDemoLimit(defaultCount) {
-    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
-}
+// isDemoMode() and getDemoLimit() provided by app-constants.js
 
 // Story Database - Original educational stories
 // Organized by age group and difficulty level
@@ -3495,7 +3570,6 @@ function renderWorksheet() {
                                 class="handwriting-input"
                                 data-width="250"
                                 data-height="80"
-                                data-answer="${problem.answer}"
                                 style="touch-action: none;">
                             </canvas>
                             <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>
@@ -3517,7 +3591,6 @@ function renderWorksheet() {
                                 class="handwriting-input"
                                 data-width="400"
                                 data-height="80"
-                                data-answer="${problem.answer}"
                                 style="touch-action: none;">
                             </canvas>
                             <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>
@@ -3656,31 +3729,31 @@ function renderWorksheet() {
         showAdminLevelIndicator('english', worksheetContainer);
     }
 
-    // Initialize writing canvases
+    // Initialize handwriting input canvases
     // Use requestAnimationFrame + setTimeout to ensure DOM is ready
     requestAnimationFrame(() => {
         setTimeout(() => {
-            console.log('Initializing writing canvases...');
-            const canvases = document.querySelectorAll('.writing-canvas');
-            console.log('Found writing canvases:', canvases.length);
+            console.log('Initializing handwriting input canvases...');
+            const canvases = document.querySelectorAll('.handwriting-input');
+            console.log('Found handwriting input canvases:', canvases.length);
 
             if (canvases.length === 0) {
-                console.error('No writing canvases found in DOM!');
+                console.error('No handwriting input canvases found in DOM!');
                 // Try again after a longer delay
                 setTimeout(() => {
                     console.log('Retrying canvas initialization...');
-                    initializeAllWritingCanvases();
+                    initializeAllHandwritingInputs();
                 }, 500);
             } else {
-                initializeAllWritingCanvases();
-                console.log('Writing canvases initialized:', writingCanvases.length);
+                initializeAllHandwritingInputs();
+                console.log('Handwriting input canvases initialized:', handwritingInputs.length);
 
                 // Verify event listeners are attached
                 canvases.forEach((canvas, i) => {
                     console.log(`Canvas ${i} (${canvas.id}):`, {
                         width: canvas.width,
                         height: canvas.height,
-                        listeners: canvas.onclick !== null || canvas.onmousedown !== null
+                        initialized: handwritingInputs.some(inp => inp.canvasId === canvas.id)
                     });
                 });
             }
@@ -4121,6 +4194,11 @@ async function markEnglishWorksheetComplete() {
 
         // Save to Firestore using completion manager
         await savePageCompletion('english', identifier, completionData);
+
+        // Update weekly assignment progress
+        if (typeof onEnglishPageCompleted === 'function') {
+            onEnglishPageCompleted(currentPage, score, isCompleted);
+        }
 
         // Show success status
         const statusDiv = document.getElementById('completion-status');

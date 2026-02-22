@@ -155,7 +155,8 @@ function renderProfileSelector(container, children, selectedChildId) {
         </div>
     `;
 
-    // Close dropdown when clicking outside
+    // Close dropdown when clicking outside (remove previous listener to prevent accumulation)
+    document.removeEventListener('click', closeProfileDropdownOutside);
     document.addEventListener('click', closeProfileDropdownOutside);
 }
 

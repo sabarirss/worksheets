@@ -204,7 +204,11 @@
             Continue with Google
         </button>
 
-        <div id="signup-link" style="margin-top: 20px; text-align: center; color: #666; font-size: 0.95em;">
+        <div id="forgot-password-link" style="margin-top: 15px; text-align: center;">
+            <a href="#" onclick="showForgotPassword(); return false;" style="color: #667eea; text-decoration: none; font-size: 0.9em;">Forgot Password?</a>
+        </div>
+
+        <div id="signup-link" style="margin-top: 10px; text-align: center; color: #666; font-size: 0.95em;">
             Don't have an account? <a href="signup.html" style="color: #667eea; text-decoration: none; font-weight: bold;">Sign Up</a>
         </div>
 
@@ -277,11 +281,20 @@
                         // Email not verified
                         await firebase.auth().signOut();
 
-                        errorMsg.innerHTML = `
-                            <strong>Email not verified</strong><br>
-                            Please check your email and click the verification link.<br>
-                            <a href="#" onclick="resendVerification('${firebaseUser.email}'); return false;" style="color: #667eea; text-decoration: underline;">Resend verification email</a>
-                        `;
+                        // Build verification message safely (no raw email in onclick to prevent XSS)
+                        errorMsg.innerHTML = '';
+                        const verifyMsg = document.createElement('div');
+                        verifyMsg.innerHTML = '<strong>Email not verified</strong><br>Please check your email and click the verification link.<br>';
+                        const resendLink = document.createElement('a');
+                        resendLink.href = '#';
+                        resendLink.style.cssText = 'color: #667eea; text-decoration: underline;';
+                        resendLink.textContent = 'Resend verification email';
+                        resendLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            resendVerification(firebaseUser.email);
+                        });
+                        verifyMsg.appendChild(resendLink);
+                        errorMsg.appendChild(verifyMsg);
                         errorMsg.style.display = 'block';
                         loginForm.style.display = 'block';
                         signupLink.style.display = 'block';
@@ -314,9 +327,6 @@
                     if (googleBtn) googleBtn.style.display = 'flex';
                     loading.style.display = 'none';
 
-                    // Also show alert for visibility
-                    alert('Login failed: ' + result.error);
-
                     // Clear password field
                     document.getElementById('password').value = '';
                     document.getElementById('password').focus();
@@ -334,29 +344,43 @@
                 if (googleBtn) googleBtn.style.display = 'flex';
                 loading.style.display = 'none';
 
-                // Show alert for visibility
-                alert('Login error: ' + errorText);
+                // Error displayed in errorMsg div above
             }
         }
 
         // Resend verification email
+        // NOTE: User is signed out before showing this link, so we need to
+        // temporarily sign back in using the stored password to send the email.
         async function resendVerification(email) {
             try {
                 const errorMsg = document.getElementById('error-message');
                 errorMsg.textContent = 'Sending verification email...';
                 errorMsg.style.display = 'block';
 
-                // User needs to be signed in to resend
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    await user.sendEmailVerification();
-                    errorMsg.innerHTML = '<strong>Verification email sent!</strong><br>Please check your inbox.';
-                } else {
-                    errorMsg.textContent = 'Please try logging in again to resend verification email.';
+                // Try to get password from the form (user may have just typed it)
+                const passwordField = document.getElementById('password');
+                const password = passwordField ? passwordField.value : '';
+
+                if (!password) {
+                    errorMsg.textContent = 'Please enter your password above and click "Resend verification email" again.';
+                    return;
+                }
+
+                // Temporarily sign in to resend verification
+                const credential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                if (credential.user) {
+                    await credential.user.sendEmailVerification();
+                    await firebase.auth().signOut();
+                    errorMsg.innerHTML = '<strong>Verification email sent!</strong><br>Please check your inbox and click the link, then log in again.';
                 }
             } catch (error) {
                 console.error('Resend error:', error);
-                document.getElementById('error-message').textContent = 'Failed to send email. Please try again later.';
+                const errorMsg = document.getElementById('error-message');
+                if (error.code === 'auth/wrong-password') {
+                    errorMsg.textContent = 'Incorrect password. Please re-enter your password and try again.';
+                } else {
+                    errorMsg.textContent = 'Failed to send email. Please try again later.';
+                }
             }
         }
 
@@ -458,15 +482,36 @@
             }
         }
 
-        // Enter key submit
-        document.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                const form = document.getElementById('login-form');
-                if (form.style.display !== 'none') {
-                    handleLogin(event);
+        // Forgot password flow
+        async function showForgotPassword() {
+            const email = prompt('Enter your email address to reset your password:');
+            if (!email || !email.trim()) return;
+
+            const errorMsg = document.getElementById('error-message');
+
+            try {
+                await firebase.auth().sendPasswordResetEmail(email.trim());
+                errorMsg.style.display = 'block';
+                errorMsg.style.color = '#28a745';
+                errorMsg.style.background = '#d4edda';
+                errorMsg.style.borderColor = '#c3e6cb';
+                errorMsg.textContent = 'Password reset email sent! Check your inbox.';
+            } catch (error) {
+                errorMsg.style.display = 'block';
+                errorMsg.style.color = '#721c24';
+                errorMsg.style.background = '#f8d7da';
+                errorMsg.style.borderColor = '#f5c6cb';
+                if (error.code === 'auth/user-not-found') {
+                    errorMsg.textContent = 'No account found with this email address.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg.textContent = 'Please enter a valid email address.';
+                } else {
+                    errorMsg.textContent = 'Failed to send reset email. Please try again.';
                 }
             }
-        });
+        }
+
+        // Enter key already handled by form onsubmit - removed duplicate listener
     </script>
 </body>
 </html>

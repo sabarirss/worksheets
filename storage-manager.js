@@ -92,7 +92,7 @@ function loadWorksheetFromStorage(subject, identifier) {
  * @returns {boolean} - True if completed
  */
 function isWorksheetCompleted(subject, identifier) {
-    const data = loadWorksheet(subject, identifier);
+    const data = loadWorksheetFromStorage(subject, identifier);
     return data ? data.completed === true : false;
 }
 

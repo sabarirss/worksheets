@@ -180,9 +180,10 @@ async function getCompletionsForLevel(module, levelPrefix) {
  * @param {string} module - Module name
  * @param {number} pageNumber - Page number to access
  * @param {number} currentPage - Current page number
+ * @param {string} identifierPrefix - Module-specific identifier prefix (e.g., "addition-level1")
  * @returns {object} - { allowed: boolean, reason: string }
  */
-async function canAccessPage(module, pageNumber, currentPage) {
+async function canAccessPage(module, pageNumber, currentPage, identifierPrefix) {
     const rule = getCompletionRule(module);
 
     // Non-sequential modules allow free navigation
@@ -195,9 +196,11 @@ async function canAccessPage(module, pageNumber, currentPage) {
         return { allowed: true, reason: 'Can navigate to previous pages' };
     }
 
-    // Check if previous page is completed
+    // Check if previous page is completed using module-specific identifier format
     const previousPage = pageNumber - 1;
-    const identifier = `${module}-page${previousPage}`; // This will need to be more specific
+    const identifier = identifierPrefix
+        ? `${identifierPrefix}-page${previousPage}`
+        : `${module}-page${previousPage}`;
     const completion = await loadPageCompletion(module, identifier);
 
     if (!completion || !completion.completed) {
@@ -271,14 +274,29 @@ async function getLevelCompletion(module, level) {
 }
 
 /**
- * Estimate total pages for a module/level
- * This is a rough estimate - should be replaced with actual page counts
+ * Get total pages for a module/level based on actual app configuration.
+ * Uses APP_CONFIG page counts when available.
+ * @param {string} module - Module name
+ * @param {number} level - Level number (used for math operation-specific counts)
+ * @returns {number} - Total pages for this module/level
  */
 function estimateTotalPages(module, level) {
+    // Use APP_CONFIG values if available
+    if (typeof APP_CONFIG !== 'undefined') {
+        const pages = APP_CONFIG.PAGES;
+        switch (module) {
+            case 'math': return pages.MATH_PER_OPERATION || 150;
+            case 'aptitude': return pages.APTITUDE_PER_TYPE || 50;
+            case 'english': return pages.ENGLISH_WRITING || 20;
+            case 'stories': return pages.STORIES_DEMO || 10;
+            default: break;
+        }
+    }
+    // Fallback estimates for modules without APP_CONFIG entries
     const estimates = {
-        'math': 10,        // Configurable per operation
-        'english': 12,     // Configurable per activity type
-        'aptitude': 10,    // Configurable per puzzle type
+        'math': 150,
+        'english': 20,
+        'aptitude': 50,
         'drawing': 5,
         'german': 5,
         'german-kids': 5,

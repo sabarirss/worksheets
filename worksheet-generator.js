@@ -83,11 +83,6 @@ function showMathLevels() {
     // Age-based filtering removed - all children can access all difficulty levels
 }
 
-function showMathAgeGroups() {
-    // This function is no longer used but kept for backward compatibility
-    showMathLevels();
-}
-
 function showMathOperations(ageGroup) {
     selectedAgeGroup = ageGroup;
     const operations = document.getElementById('math-operations');
@@ -181,11 +176,6 @@ function loadOperationWorksheet(operation) {
         // Load worksheet at starting page
         loadWorksheetByPage(operation, startPage);
     }
-}
-
-// Keep old function for backward compatibility but redirect to new function
-function showDifficulties(operation) {
-    loadOperationWorksheet(operation);
 }
 
 /**
@@ -370,29 +360,7 @@ function backToWorksheetSelection() {
 let currentWorksheet = null;
 let currentOperation = null;
 
-// Demo version limiting
-function isDemoMode() {
-    const user = getCurrentUser();
-    if (!user) return true; // Default to demo if no user
-
-    // Check for admin demo preview mode
-    if (user.role === 'admin') {
-        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
-        return adminDemoPreview; // Admin can toggle demo preview
-    }
-
-    // Get selected child and check their version
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return true; // Default to demo if no child selected
-
-    // Check child's version (default to demo for backward compatibility)
-    const version = child.version || 'demo';
-    return version === 'demo';
-}
-
-function getDemoLimit(defaultCount) {
-    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
-}
+// isDemoMode() and getDemoLimit() provided by app-constants.js
 let currentPage = 1;
 let currentAbsolutePage = 1; // Absolute page number (1-150)
 let totalPages = 150; // Now always 150 pages (50 easy + 50 medium + 50 hard)
@@ -921,32 +889,41 @@ const ageBasedContentConfigs = {
 
 // Convert age-based configs to level-based structure (Level 1-12)
 // This provides the external-facing level-based interface while keeping age data internal
+// NOTE: Medium and hard within the same age group map to the same level number.
+// We prioritize 'hard' for even levels (the more challenging content for that tier).
+// 'easy' always maps to odd levels. This is by design.
 function buildLevelBasedConfigs() {
     const levelConfigs = {};
+    // Priority order: hard > medium > easy (when multiple difficulties map to same level)
+    const difficultyPriority = { 'hard': 3, 'medium': 2, 'easy': 1 };
 
-    // For each operation (addition, subtraction, multiplication, division)
     for (const operation in ageBasedContentConfigs) {
         levelConfigs[operation] = {};
         const ageConfigs = ageBasedContentConfigs[operation];
 
-        // Convert each age+difficulty combination to a level
         for (const ageGroup in ageConfigs) {
             for (const difficulty in ageConfigs[ageGroup]) {
                 const level = ageAndDifficultyToLevel(ageGroup, difficulty);
                 const config = ageConfigs[ageGroup][difficulty];
+                const levelKey = `level${level}`;
 
-                // Create level-based config with age metadata
-                levelConfigs[operation][`level${level}`] = {
-                    level: level,
-                    name: `Level ${level} - ${operation.charAt(0).toUpperCase() + operation.slice(1)}`,
-                    description: config.description,
-                    problemCount: config.problemCount,
-                    generator: config.generator,
-                    // Keep age data as metadata (for future assessment system)
-                    ageEquivalent: ageGroup,
-                    difficultyEquivalent: difficulty,
-                    originalName: config.name
-                };
+                // Only overwrite if this difficulty has higher priority
+                const existing = levelConfigs[operation][levelKey];
+                const existingPriority = existing ? (difficultyPriority[existing.difficultyEquivalent] || 0) : 0;
+                const newPriority = difficultyPriority[difficulty] || 0;
+
+                if (!existing || newPriority > existingPriority) {
+                    levelConfigs[operation][levelKey] = {
+                        level: level,
+                        name: `Level ${level} - ${operation.charAt(0).toUpperCase() + operation.slice(1)}`,
+                        description: config.description,
+                        problemCount: config.problemCount,
+                        generator: config.generator,
+                        ageEquivalent: ageGroup,
+                        difficultyEquivalent: difficulty,
+                        originalName: config.name
+                    };
+                }
             }
         }
     }
@@ -1341,7 +1318,6 @@ function renderWorksheet() {
                                     class="handwriting-input"
                                     data-width="100"
                                     data-height="60"
-                                    data-answer="${problem.answer}"
                                     style="touch-action: none;">
                                 </canvas>
                                 <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>
@@ -1353,7 +1329,6 @@ function renderWorksheet() {
                             <input type="number"
                                    id="answer-${index}"
                                    class="keyboard-answer-input"
-                                   data-answer="${problem.answer}"
                                    placeholder=""
                                    inputmode="numeric">
                         `;
@@ -2189,7 +2164,12 @@ async function submitWorksheet() {
                 if (value === '') {
                     isEmpty = true;
                 } else {
-                    userAnswer = parseInt(value);
+                    // Handle string answers (fractions like "3/4", remainders like "12 R3")
+                    if (typeof correctAnswer === 'string') {
+                        userAnswer = value; // Keep as string for comparison
+                    } else {
+                        userAnswer = parseInt(value);
+                    }
                 }
             }
 
@@ -2198,11 +2178,13 @@ async function submitWorksheet() {
                 feedbackElement.textContent = '⚠️ Empty';
                 feedbackElement.style.color = '#999';
                 answerElement.style.borderColor = '#999';
-            } else if (userAnswer === null || isNaN(userAnswer)) {
+            } else if (userAnswer === null || (typeof correctAnswer !== 'string' && isNaN(userAnswer))) {
                 feedbackElement.textContent = `Answer: ${correctAnswer}`;
                 feedbackElement.style.color = '#ff9800';
                 answerElement.style.borderColor = '#ff9800';
-            } else if (userAnswer === correctAnswer) {
+            } else if (typeof correctAnswer === 'string'
+                ? String(userAnswer).replace(/\s+/g, '').toLowerCase() === String(correctAnswer).replace(/\s+/g, '').toLowerCase()
+                : userAnswer === correctAnswer) {
                 correctCount++;
                 feedbackElement.textContent = '✓ Correct!';
                 feedbackElement.style.color = '#4caf50';
@@ -2269,6 +2251,11 @@ async function submitWorksheet() {
     };
 
     await savePageCompletion('math', identifier, completionData);
+
+    // Update weekly assignment progress
+    if (typeof onMathPageCompleted === 'function') {
+        onMathPageCompleted(operation, currentAbsolutePage, score, isCompleted);
+    }
 
     // Clear unsaved changes flag
     hasUnsavedChanges = false;

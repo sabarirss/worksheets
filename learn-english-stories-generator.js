@@ -6,29 +6,7 @@ let currentAge = null;
 let currentDifficulty = null;
 let currentStory = null;
 
-// Demo version limiting
-function isDemoMode() {
-    const user = getCurrentUser();
-    if (!user) return true; // Default to demo if no user
-
-    // Check for admin demo preview mode
-    if (user.role === 'admin') {
-        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
-        return adminDemoPreview; // Admin can toggle demo preview
-    }
-
-    // Get selected child and check their version
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return true; // Default to demo if no child selected
-
-    // Check child's version (default to demo for backward compatibility)
-    const version = child.version || 'demo';
-    return version === 'demo';
-}
-
-function getDemoLimit(defaultCount) {
-    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
-}
+// isDemoMode() and getDemoLimit() provided by app-constants.js
 
 // Navigation functions
 function selectAge(age) {

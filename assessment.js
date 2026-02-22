@@ -41,24 +41,47 @@ function getAssessmentData(childId) {
 }
 
 /**
- * Save assessment result
+ * Save assessment result to both localStorage and Firestore
  * @param {string} childId - Child's unique identifier
  * @param {string} subject - Subject/operation name (e.g., 'addition', 'english')
  * @param {number} score - Score percentage (0-100)
  * @param {number} assignedLevel - Level assigned based on score (1-12)
  */
-function saveAssessmentResult(childId, subject, score, assignedLevel) {
-    const data = getAssessmentData(childId);
-
-    data.assessments[subject] = {
+async function saveAssessmentResult(childId, subject, score, assignedLevel) {
+    const assessmentEntry = {
         level: assignedLevel,
         score: score,
         date: new Date().toISOString(),
         taken: true
     };
 
+    // Save to localStorage (immediate, offline-capable)
+    const data = getAssessmentData(childId);
+    data.assessments[subject] = assessmentEntry;
     const key = `assessment_${childId}`;
     localStorage.setItem(key, JSON.stringify(data));
+
+    // Save to Firestore (persistent, cross-device)
+    try {
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+            if (child && child.id) {
+                await firebase.firestore().collection('children').doc(child.id).update({
+                    [`assessmentData.${subject}`]: {
+                        level: assignedLevel,
+                        score: score,
+                        date: firebase.firestore.FieldValue.serverTimestamp(),
+                        taken: true
+                    },
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log(`Assessment saved to Firestore: ${subject} - Level ${assignedLevel}`);
+            }
+        }
+    } catch (error) {
+        console.error('Failed to save assessment to Firestore:', error);
+        // localStorage save still succeeded, so assessment is not lost
+    }
 
     console.log(`Assessment saved: ${subject} - Level ${assignedLevel} (Score: ${score}%)`);
 }
@@ -82,7 +105,8 @@ function hasCompletedAssessment(childId, subject) {
  */
 function getAssignedLevel(childId, subject) {
     const data = getAssessmentData(childId);
-    return data.assessments[subject]?.level || null;
+    const level = data.assessments[subject]?.level;
+    return level !== undefined && level !== null ? level : null;
 }
 
 /**
@@ -231,6 +255,63 @@ function determineLevelFromScore(score, ageGroup) {
 }
 
 /**
+ * Generate 10 assessment questions for English
+ * 5 from one year younger, 5 from age-appropriate
+ * @param {string} ageGroup - Child's age group
+ * @returns {Array} Array of 10 questions with answers
+ */
+function generateEnglishAssessmentQuestions(ageGroup) {
+    const questions = [];
+    const youngerAge = getYoungerAgeGroup(ageGroup);
+
+    // Get config access function from english-generator.js
+    if (typeof getConfigByAge === 'undefined') {
+        console.error('getConfigByAge not available - ensure english-generator.js is loaded');
+        return [];
+    }
+
+    // Get 5 questions from younger age (easy difficulty)
+    const youngerConfig = getConfigByAge(youngerAge, 'easy');
+    if (youngerConfig && youngerConfig.generator) {
+        for (let i = 0; i < 5; i++) {
+            const problem = youngerConfig.generator();
+            questions.push({
+                ...problem,
+                sourceAge: youngerAge,
+                sourceDifficulty: 'easy'
+            });
+        }
+        console.log(`Generated 5 English questions from age ${youngerAge} (easy)`);
+    } else {
+        console.warn(`No generator found for English age ${youngerAge} (easy)`);
+    }
+
+    // Get 5 questions from current age (medium difficulty)
+    const currentConfig = getConfigByAge(ageGroup, 'medium');
+    if (currentConfig && currentConfig.generator) {
+        for (let i = 0; i < 5; i++) {
+            const problem = currentConfig.generator();
+            questions.push({
+                ...problem,
+                sourceAge: ageGroup,
+                sourceDifficulty: 'medium'
+            });
+        }
+        console.log(`Generated 5 English questions from age ${ageGroup} (medium)`);
+    } else {
+        console.warn(`No generator found for English age ${ageGroup} (medium)`);
+    }
+
+    // Shuffle questions so they're mixed
+    for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+
+    return questions.slice(0, 10); // Ensure exactly 10 questions
+}
+
+/**
  * Start a new assessment
  * @param {string} subject - Subject/operation name
  * @param {string} operation - Operation for math (addition, subtraction, etc.)
@@ -246,8 +327,12 @@ function startAssessment(subject, operation, ageGroup) {
         return;
     }
 
-    // Generate questions
-    assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+    // Generate questions based on subject
+    if (subject === 'english') {
+        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup);
+    } else {
+        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+    }
 
     if (!assessmentQuestions || assessmentQuestions.length === 0) {
         console.error('Failed to generate assessment questions');
@@ -308,34 +393,44 @@ function renderAssessmentUI() {
     const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
 
     // Generate question UI
+    const isEnglish = currentAssessment.subject === 'english';
+
     assessmentQuestions.forEach((question, index) => {
-        // Create answer input based on mode
+        // Create answer input based on mode and subject
         let answerInput;
         if (usePencil) {
             // Pencil mode: Canvas for handwriting
             answerInput = `
                 <canvas id="assessment-answer-${index}"
-                        class="answer-canvas"
-                        width="120"
-                        height="80"></canvas>
+                        class="answer-canvas handwriting-input"
+                        data-width="400"
+                        data-height="80"
+                        width="400"
+                        height="80"
+                        style="touch-action: none;"></canvas>
                 <button class="clear-btn" onclick="clearAssessmentCanvas(${index})">Clear</button>
             `;
         } else {
             // Keyboard mode: Text input
+            const inputType = isEnglish ? 'text' : 'number';
+            const inputMode = isEnglish ? 'text' : 'numeric';
             answerInput = `
-                <input type="number"
+                <input type="${inputType}"
                        id="assessment-answer-${index}"
                        class="answer-input"
                        placeholder=""
-                       inputmode="numeric">
+                       inputmode="${inputMode}">
             `;
         }
+
+        // Determine question display text
+        const questionText = question.problem || question.prompt || '';
 
         html += `
             <div class="assessment-question">
                 <div class="question-number">${index + 1}.</div>
                 <div class="question-content">
-                    <div class="math-problem">${question.problem}</div>
+                    <div class="math-problem">${questionText}</div>
                     <div class="answer-section">
                         ${answerInput}
                     </div>
@@ -500,6 +595,8 @@ async function submitAssessment() {
     const results = [];
 
     // Check each answer
+    const isEnglish = currentAssessment.subject === 'english';
+
     for (let i = 0; i < assessmentQuestions.length; i++) {
         const answerElement = document.getElementById(`assessment-answer-${i}`);
         const feedback = document.getElementById(`assessment-feedback-${i}`);
@@ -511,14 +608,35 @@ async function submitAssessment() {
 
             if (usePencil) {
                 // Pencil mode: Use handwriting recognition
-                const result = await recognizeDigit(answerElement);
+                if (isEnglish) {
+                    // For English, try to recognize text (or just compare by showing answer)
+                    // For now, treat handwritten English as manual check needed
+                    const canvas = answerElement;
+                    const ctx = canvas.getContext('2d');
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const hasContent = Array.from(imageData.data).some((value, index) => {
+                        // Check alpha channel (every 4th value)
+                        return index % 4 === 3 && value > 0;
+                    });
 
-                if (result.isEmpty) {
-                    isEmpty = true;
-                } else if (result.error) {
-                    userAnswer = null;
+                    if (!hasContent) {
+                        isEmpty = true;
+                    } else {
+                        // Has content but we can't recognize English handwriting reliably
+                        // Count as "attempted" for now
+                        userAnswer = 'handwritten';
+                    }
                 } else {
-                    userAnswer = result.digit;
+                    // Math: Use digit recognition
+                    const result = await recognizeDigit(answerElement);
+
+                    if (result.isEmpty) {
+                        isEmpty = true;
+                    } else if (result.error) {
+                        userAnswer = null;
+                    } else {
+                        userAnswer = result.digit;
+                    }
                 }
             } else {
                 // Keyboard mode: Get value from input field
@@ -526,7 +644,11 @@ async function submitAssessment() {
                 if (inputValue === '') {
                     isEmpty = true;
                 } else {
-                    userAnswer = parseInt(inputValue);
+                    if (isEnglish) {
+                        userAnswer = inputValue; // Keep as string for English
+                    } else {
+                        userAnswer = parseInt(inputValue); // Parse as number for Math
+                    }
                 }
             }
 
@@ -535,12 +657,31 @@ async function submitAssessment() {
                 feedback.textContent = '⚠️ Empty';
                 feedback.style.color = '#999';
                 results.push({ question: i + 1, correct: false, isEmpty: true });
-            } else if (userAnswer === null || isNaN(userAnswer)) {
+            } else if (userAnswer === null || (!isEnglish && isNaN(userAnswer))) {
                 feedback.textContent = `❓ Unclear (answer: ${correctAnswer})`;
                 feedback.style.color = '#ff9800';
                 results.push({ question: i + 1, correct: false, error: true });
             } else {
-                const isCorrect = userAnswer === correctAnswer;
+                let isCorrect;
+
+                if (isEnglish) {
+                    if (userAnswer === 'handwritten') {
+                        // For handwritten English, compare canvas content against expected answer
+                        // Since we can't reliably recognize letters yet, show the expected answer
+                        // and don't count it as correct (avoids inflating scores)
+                        isCorrect = false;
+                        feedback.textContent = `📝 Handwritten (answer: ${correctAnswer})`;
+                        feedback.style.color = '#2196f3';
+                        results.push({ question: i + 1, correct: false, handwritten: true, expected: correctAnswer });
+                        continue;
+                    } else {
+                        // Case-insensitive string comparison for typed English answers
+                        isCorrect = userAnswer.toLowerCase() === String(correctAnswer).toLowerCase();
+                    }
+                } else {
+                    // Number comparison for Math
+                    isCorrect = userAnswer === correctAnswer;
+                }
 
                 if (isCorrect) {
                     correct++;
@@ -666,11 +807,21 @@ function startLearningAtLevel(operation, level) {
         container.innerHTML = '';
     }
 
-    // Load worksheet at assigned level
-    if (typeof loadWorksheet === 'function') {
-        loadWorksheet(operation, ageGroup, difficulty, 1);
+    // Load worksheet based on subject
+    if (operation === 'english') {
+        // English: Show type selection with assigned level active
+        const typeSelection = document.getElementById('type-selection');
+        if (typeSelection) {
+            typeSelection.style.display = 'block';
+        }
+        console.log('English assessment complete - showing worksheet types');
     } else {
-        alert('Error: Worksheet loader not available. Please refresh the page.');
+        // Math: Load worksheet at assigned level
+        if (typeof loadWorksheet === 'function') {
+            loadWorksheet(operation, ageGroup, difficulty, 1);
+        } else {
+            alert('Error: Worksheet loader not available. Please refresh the page.');
+        }
     }
 }
 
@@ -722,9 +873,13 @@ function retakeAssessment() {
         cancelBtn.style.display = 'inline-block';
     }
 
-    // Generate new questions
-    assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
-    assessmentAnswers = [];
+    // Generate new questions based on subject type
+    if (currentAssessment.subject === 'english') {
+        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup);
+    } else {
+        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+    }
+    assessmentAnswers = new Array(10).fill(null);
 
     // Re-render assessment UI with new questions
     renderAssessmentUI();
@@ -748,10 +903,19 @@ function cancelAssessment() {
             container.innerHTML = '';
         }
 
-        // Show operations selection
-        const mathOps = document.getElementById('math-operations');
-        if (mathOps) {
-            mathOps.style.display = 'block';
+        // Show appropriate selection based on subject
+        if (currentAssessment && currentAssessment.subject === 'english') {
+            // Show English type selection
+            const typeSelection = document.getElementById('type-selection');
+            if (typeSelection) {
+                typeSelection.style.display = 'block';
+            }
+        } else {
+            // Show Math operations selection
+            const mathOps = document.getElementById('math-operations');
+            if (mathOps) {
+                mathOps.style.display = 'block';
+            }
         }
 
         // Clear assessment state

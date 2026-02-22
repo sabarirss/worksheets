@@ -541,5 +541,15 @@ function checkPasswordStrength(password) {
     };
 }
 
-// Initialize on load
-initializeAuth();
+// Initialize admin only if not already created (check localStorage flag to avoid repeated Firestore queries)
+if (!localStorage.getItem('adminInitialized')) {
+    initializeAuth().then(() => {
+        localStorage.setItem('adminInitialized', 'true');
+    }).catch(err => {
+        console.warn('Admin init skipped:', err.message);
+        // If it fails due to existing admin, still mark as initialized
+        if (err.code === 'auth/email-already-in-use') {
+            localStorage.setItem('adminInitialized', 'true');
+        }
+    });
+}

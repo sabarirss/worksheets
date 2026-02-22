@@ -708,6 +708,16 @@
 
                     // Initialize UI with user data
                     initializeUserInterface(userData);
+
+                    // Load weekly assignment progress (non-admin only)
+                    if (userData.role !== 'admin' && typeof renderWeeklyProgress === 'function') {
+                        renderWeeklyProgress(document.getElementById('weekly-progress-container'));
+                    }
+
+                    // Show level test buttons if eligible (non-admin only)
+                    if (userData.role !== 'admin' && typeof renderLevelTestButtons === 'function') {
+                        renderLevelTestButtons(document.getElementById('level-test-buttons'));
+                    }
                 } else {
                     console.error('INDEX.HTML: User document not found in Firestore for email:', firebaseUser.email);
                 }
@@ -984,6 +994,9 @@
                         <div onclick="window.location.href='settings.html'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
                             ⚙️ Account Settings
                         </div>
+                        <div onclick="openFeedbackModal()" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            💬 Give Feedback
+                        </div>
                         <div onclick="logout()" style="padding: 12px 20px; cursor: pointer; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
                             🚪 Logout
                         </div>
@@ -1064,6 +1077,15 @@
             <div id="app-branding"></div>
         </header>
 
+        <!-- Weekly Assignment Progress -->
+        <div id="weekly-progress-container" style="display: none;"></div>
+
+        <!-- Level Test Buttons -->
+        <div id="level-test-buttons" style="display: none;"></div>
+
+        <!-- Level Test Area -->
+        <div id="level-test-area" style="display: none;"></div>
+
         <div class="subject-selection">
             <h2>Choose Subject</h2>
             <div class="subject-grid">
@@ -1143,6 +1165,10 @@
     <script src="math-handwriting-ml5.js"></script>
     <script src="assessment.js"></script>
     <script src="parent-mode.js"></script>
+    <script src="app-constants.js"></script>
+    <script src="weekly-assignments.js"></script>
+    <script src="level-test.js"></script>
+    <script src="feedback-system.js"></script>
     <script src="worksheet-generator.js"></script>
     <script src="branding.js"></script>
     <script>

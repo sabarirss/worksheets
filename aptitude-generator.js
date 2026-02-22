@@ -12,29 +12,7 @@ let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
 
-// Demo version limiting
-function isDemoMode() {
-    const user = getCurrentUser();
-    if (!user) return true; // Default to demo if no user
-
-    // Check for admin demo preview mode
-    if (user.role === 'admin') {
-        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
-        return adminDemoPreview; // Admin can toggle demo preview
-    }
-
-    // Get selected child and check their version
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return true; // Default to demo if no child selected
-
-    // Check child's version (default to demo for backward compatibility)
-    const version = child.version || 'demo';
-    return version === 'demo';
-}
-
-function getDemoLimit(defaultCount) {
-    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
-}
+// isDemoMode() and getDemoLimit() provided by app-constants.js
 
 // Utility: Shuffle array (Fisher-Yates algorithm)
 function shuffleArray(array) {
@@ -468,7 +446,7 @@ function renderWorksheet() {
                         </div>
                         <div style="margin-top: 20px; text-align: center;">
                             <label style="font-size: 1.1em;">
-                                <input type="checkbox" id="answer-${index}" data-answer="completed" style="width: 25px; height: 25px; margin-right: 10px; vertical-align: middle;">
+                                <input type="checkbox" id="answer-${index}" style="width: 25px; height: 25px; margin-right: 10px; vertical-align: middle;">
                                 <strong>I found the path! ✓</strong>
                             </label>
                             <span class="answer-feedback" id="feedback-${index}"></span>
@@ -494,7 +472,7 @@ function renderWorksheet() {
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
-                    <input type="hidden" id="answer-${index}" data-answer="${problem.answer}">
+                    <input type="hidden" id="answer-${index}">
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
@@ -514,7 +492,6 @@ function renderWorksheet() {
                                 class="handwriting-input"
                                 data-width="120"
                                 data-height="70"
-                                data-answer="${problem.answer}"
                                 style="touch-action: none;">
                             </canvas>
                             <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>
@@ -541,7 +518,7 @@ function renderWorksheet() {
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
-                    <input type="hidden" id="answer-${index}" data-answer="${problem.answer}">
+                    <input type="hidden" id="answer-${index}">
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
@@ -563,7 +540,7 @@ function renderWorksheet() {
                             <button class="option-btn" data-question="${index}" data-answer="${opt.replace(/"/g, '&quot;')}" onclick="selectOption(this)">${opt}</button>
                         `).join('')}
                     </div>
-                    <input type="hidden" id="answer-${index}" data-answer="${problem.answer}">
+                    <input type="hidden" id="answer-${index}">
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
@@ -579,7 +556,7 @@ function renderWorksheet() {
                             <button class="oddone-btn" data-question="${index}" data-answer="${item.replace(/"/g, '&quot;')}" onclick="selectOdd(this)">${item}</button>
                         `).join('')}
                     </div>
-                    <input type="hidden" id="answer-${index}" data-answer="${problem.answer}">
+                    <input type="hidden" id="answer-${index}">
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
@@ -599,7 +576,7 @@ function renderWorksheet() {
                             <span style="font-size: 2.5em;">${problem.item2}</span>
                         </button>
                     </div>
-                    <input type="hidden" id="answer-${index}" data-answer="${problem.answer}">
+                    <input type="hidden" id="answer-${index}">
                     <span class="answer-feedback" id="feedback-${index}"></span>
                 </div>
             `;
@@ -617,7 +594,6 @@ function renderWorksheet() {
                                 class="handwriting-input"
                                 data-width="200"
                                 data-height="80"
-                                data-answer="${problem.answer}"
                                 style="touch-action: none;">
                             </canvas>
                             <button class="eraser-btn" onclick="clearHandwritingInput('answer-${index}')" title="Clear this answer">✕</button>

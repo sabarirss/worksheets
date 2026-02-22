@@ -5,29 +5,7 @@ let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 
-// Demo version limiting
-function isDemoMode() {
-    const user = getCurrentUser();
-    if (!user) return true; // Default to demo if no user
-
-    // Check for admin demo preview mode
-    if (user.role === 'admin') {
-        const adminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
-        return adminDemoPreview; // Admin can toggle demo preview
-    }
-
-    // Get selected child and check their version (though German B1 is admin-only)
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return true; // Default to demo if no child selected
-
-    // Check child's version (default to demo for backward compatibility)
-    const version = child.version || 'demo';
-    return version === 'demo';
-}
-
-function getDemoLimit(defaultCount) {
-    return isDemoMode() ? Math.min(2, defaultCount) : defaultCount;
-}
+// isDemoMode() and getDemoLimit() provided by app-constants.js
 
 // German vocabulary and exercise banks
 const germanContent = {
@@ -492,7 +470,6 @@ function renderWorksheet() {
                             type="text"
                             class="answer-input"
                             id="answer-${index}"
-                            data-answer="${problem.answer}"
                             style="width: 100%; max-width: 400px;"
                             onkeypress="handleEnter(event, ${index})"
                         >

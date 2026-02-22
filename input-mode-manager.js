@@ -48,7 +48,6 @@ async function initializeInputMode() {
     }
 
     console.log('Input mode initialized:', window.inputMode);
-    // updateInputModeUI(); // Removed - no header toggle
 }
 
 /**
@@ -80,8 +79,7 @@ async function initializeAdminInputMode() {
         window.childVersion = 'full'; // Admins always have full access
 
         console.log('Admin input mode initialized:', window.inputMode);
-        // updateInputModeUI(); // Removed - no header toggle
-    } catch (error) {
+        } catch (error) {
         console.error('Error initializing admin input mode:', error);
         window.inputMode = 'keyboard';
     }
@@ -139,8 +137,7 @@ async function setInputMode(mode) {
             window.childVersion = 'full'; // Admins always have full access
             console.log('Admin input mode changed to:', mode);
 
-            // updateInputModeUI(); // Removed - no header toggle
-            return true;
+                    return true;
         } catch (error) {
             console.error('Error saving admin input mode:', error);
             return false;
@@ -182,8 +179,7 @@ async function setInputMode(mode) {
         window.childVersion = childVersion;
         console.log('Input mode changed to:', mode, 'for child:', child.name);
 
-        // updateInputModeUI(); // Removed - no header toggle
-        return true;
+            return true;
     } catch (error) {
         console.error('Error saving input mode:', error);
         alert('Failed to save input mode preference');
@@ -217,23 +213,6 @@ function isPencilModeAvailable() {
 }
 
 /**
- * Update UI to reflect current input mode - REMOVED
- * Header toggle removed, UI managed in settings page only
- */
-// function updateInputModeUI() {
-//     // REMOVED - No longer needed as header toggle is removed
-// }
-
-/**
- * Create input mode toggle UI - REMOVED
- * Input mode is now managed only in Child Profile Settings page
- */
-// function createInputModeToggle() {
-//     // REMOVED - Input mode toggle removed from header
-//     // Use Child Profile Settings page instead
-// }
-
-/**
  * Set child version (called when child is selected)
  */
 async function setUserVersion(version) {
@@ -258,7 +237,6 @@ async function setUserVersion(version) {
         }
     }
 
-    // updateInputModeUI(); // Removed - no header toggle
 }
 
 // Initialize on page load
