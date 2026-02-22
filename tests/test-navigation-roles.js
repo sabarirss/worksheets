@@ -1292,6 +1292,36 @@ test('No generator uses document.body.innerHTML to render worksheets', () => {
 });
 
 // ============================================================================
+// BUG-026: Timer must stop on submit
+// ============================================================================
+console.log('\n--- BUG-026: Timer Stops on Submit ---');
+
+test('submitWorksheet calls stopTimer()', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('async function submitWorksheet()');
+    assert.ok(fnIdx >= 0, 'Missing submitWorksheet function');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}\n', fnIdx + 500) + 3);
+    assert.ok(fnBody.includes('stopTimer()'),
+        'submitWorksheet must call stopTimer() to stop the running timer');
+});
+
+test('submitWorksheet calls updateTimerDisplay() after stopping', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('async function submitWorksheet()');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}\n', fnIdx + 500) + 3);
+    assert.ok(fnBody.includes('updateTimerDisplay()'),
+        'submitWorksheet must call updateTimerDisplay() to show final elapsed time');
+});
+
+test('submitWorksheet unchecks timer toggle', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('async function submitWorksheet()');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}\n', fnIdx + 500) + 3);
+    assert.ok(fnBody.includes('timer-toggle-input'),
+        'submitWorksheet must uncheck the timer toggle checkbox');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 

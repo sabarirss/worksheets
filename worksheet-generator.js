@@ -2284,6 +2284,12 @@ async function submitWorksheet() {
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ Evaluating...';
 
+    // Stop the timer and update elapsed time display
+    stopTimer();
+    updateTimerDisplay();
+    const timerToggle = document.getElementById('timer-toggle-input');
+    if (timerToggle) timerToggle.checked = false;
+
     // Check if using pencil mode
     const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
 
