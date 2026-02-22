@@ -1054,6 +1054,104 @@ test('Firestore worksheets rule allows any authenticated user (no resource.data 
 });
 
 // ============================================================================
+// BUG-021: Firestore Composite Indexes
+// ============================================================================
+console.log('\n--- BUG-021: Firestore Composite Indexes ---');
+
+test('firestore.indexes.json exists', () => {
+    assert.ok(fileExists('firestore.indexes.json'), 'Missing firestore.indexes.json');
+});
+
+test('firebase.json references firestore.indexes.json', () => {
+    const json = readFile('firebase.json');
+    const config = JSON.parse(json);
+    assert.ok(config.firestore && config.firestore.indexes === 'firestore.indexes.json',
+        'firebase.json must reference firestore.indexes.json');
+});
+
+test('Index exists: weekly_assignments (childId + createdAt DESC)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'weekly_assignments' &&
+        i.fields.length === 2 &&
+        i.fields[0].fieldPath === 'childId' &&
+        i.fields[1].fieldPath === 'createdAt' && i.fields[1].order === 'DESCENDING'
+    );
+    assert.ok(idx, 'Missing weekly_assignments composite index (childId + createdAt DESC)');
+});
+
+test('Index exists: weekly_assignments (childId + status + createdAt DESC)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'weekly_assignments' &&
+        i.fields.length === 3 &&
+        i.fields.some(f => f.fieldPath === 'childId') &&
+        i.fields.some(f => f.fieldPath === 'status') &&
+        i.fields.some(f => f.fieldPath === 'createdAt')
+    );
+    assert.ok(idx, 'Missing weekly_assignments composite index (childId + status + createdAt DESC)');
+});
+
+test('Index exists: notifications (childId + dismissed + createdAt DESC)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'notifications' &&
+        i.fields.some(f => f.fieldPath === 'childId') &&
+        i.fields.some(f => f.fieldPath === 'dismissed') &&
+        i.fields.some(f => f.fieldPath === 'createdAt')
+    );
+    assert.ok(idx, 'Missing notifications composite index (childId + dismissed + createdAt DESC)');
+});
+
+test('Index exists: level_tests (childId + module + week)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'level_tests' &&
+        i.fields.some(f => f.fieldPath === 'childId') &&
+        i.fields.some(f => f.fieldPath === 'module') &&
+        i.fields.some(f => f.fieldPath === 'week')
+    );
+    assert.ok(idx, 'Missing level_tests composite index (childId + module + week)');
+});
+
+test('Index exists: completions (childEmail + module)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'completions' &&
+        i.fields.some(f => f.fieldPath === 'childEmail') &&
+        i.fields.some(f => f.fieldPath === 'module')
+    );
+    assert.ok(idx, 'Missing completions composite index (childEmail + module)');
+});
+
+test('Index exists: worksheets (username + subject + completed)', () => {
+    const json = JSON.parse(readFile('firestore.indexes.json'));
+    const idx = json.indexes.find(i =>
+        i.collectionGroup === 'worksheets' &&
+        i.fields.some(f => f.fieldPath === 'username') &&
+        i.fields.some(f => f.fieldPath === 'subject') &&
+        i.fields.some(f => f.fieldPath === 'completed')
+    );
+    assert.ok(idx, 'Missing worksheets composite index (username + subject + completed)');
+});
+
+test('All queries in level-test.js use indexed fields', () => {
+    const js = readFile('level-test.js');
+    // Query 1: weekly_assignments where childId + orderBy createdAt
+    assert.ok(js.includes(".where('childId'") && js.includes(".orderBy('createdAt'"),
+        'level-test.js must query weekly_assignments with childId + createdAt');
+    // Query 2: level_tests where childId + module + week
+    assert.ok(js.includes(".where('module'") && js.includes(".where('week'"),
+        'level-test.js must query level_tests with childId + module + week');
+});
+
+test('All queries in notification-system.js use indexed fields', () => {
+    const js = readFile('notification-system.js');
+    assert.ok(js.includes(".where('childId'") && js.includes(".where('dismissed'") && js.includes(".orderBy('createdAt'"),
+        'notification-system.js must query notifications with childId + dismissed + createdAt');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
