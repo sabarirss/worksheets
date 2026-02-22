@@ -494,13 +494,17 @@
                     .orderBy('created_at', 'desc')
                     .get();
 
+                const progressBtn = document.querySelector('.view-progress-btn');
+
                 if (snapshot.empty) {
                     childrenList.innerHTML = '';
                     emptyState.style.display = 'block';
+                    if (progressBtn) progressBtn.style.display = 'none';
                     return;
                 }
 
                 emptyState.style.display = 'none';
+                if (progressBtn) progressBtn.style.display = '';
                 childrenList.innerHTML = '';
 
                 snapshot.forEach(doc => {

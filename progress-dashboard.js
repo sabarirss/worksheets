@@ -60,9 +60,18 @@ firebase.auth().onAuthStateChanged(async function(user) {
 // Load all children for the parent
 async function loadChildren() {
     try {
-        const childrenSnapshot = await firebase.firestore().collection('children')
-            .where('parentEmail', '==', currentParentEmail)
+        // Query by parent_uid (primary) since parentEmail may not exist on child docs
+        const user = firebase.auth().currentUser;
+        let childrenSnapshot = await firebase.firestore().collection('children')
+            .where('parent_uid', '==', user.uid)
             .get();
+
+        // Fallback to parentEmail query if parent_uid returns empty
+        if (childrenSnapshot.empty) {
+            childrenSnapshot = await firebase.firestore().collection('children')
+                .where('parentEmail', '==', currentParentEmail)
+                .get();
+        }
 
         allChildren = childrenSnapshot.docs.map(doc => ({
             id: doc.id,
