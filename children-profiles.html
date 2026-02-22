@@ -379,27 +379,27 @@
                         <!-- Other modules: Request buttons -->
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>📝 English</span>
-                            <button type="button" class="module-request-btn" data-module="english" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="english" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🧩 Aptitude</span>
-                            <button type="button" class="module-request-btn" data-module="aptitude" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="aptitude" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>📚 Stories</span>
-                            <button type="button" class="module-request-btn" data-module="stories" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="stories" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>❤️ EQ</span>
-                            <button type="button" class="module-request-btn" data-module="emotional-quotient" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="emotional-quotient" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🎨 Drawing</span>
-                            <button type="button" class="module-request-btn" data-module="drawing" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="drawing" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                         <div class="module-request-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                             <span>🇩🇪 German Kids</span>
-                            <button type="button" class="module-request-btn" data-module="german-kids" onclick="toggleModuleRequest(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Request</button>
+                            <button type="button" class="module-request-btn" data-module="german-kids" onclick="showBuyModal(this)" style="padding: 4px 12px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 15px; cursor: pointer; font-size: 0.85em; font-weight: bold; transition: all 0.2s;">Buy</button>
                         </div>
                     </div>
                     <!-- Approved modules shown when editing -->
@@ -600,7 +600,7 @@
             // Reset module request states
             Object.keys(moduleRequests).forEach(k => moduleRequests[k] = false);
             document.querySelectorAll('.module-request-btn').forEach(btn => {
-                btn.textContent = 'Request';
+                btn.textContent = 'Buy';
                 btn.style.background = 'white';
                 btn.style.color = '#667eea';
                 btn.style.borderColor = '#667eea';
@@ -660,7 +660,7 @@
                         return names[k] || k;
                     });
                 if (pendingList.length > 0) {
-                    pendingInfo.innerHTML = '<strong>Pending requests:</strong> ' + pendingList.join(', ') + ' (awaiting admin approval)';
+                    pendingInfo.innerHTML = '<strong>Pending orders:</strong> ' + pendingList.join(', ') + ' (awaiting approval)';
                     pendingInfo.style.display = 'block';
                 } else {
                     pendingInfo.style.display = 'none';
@@ -688,8 +688,8 @@
                         btn.parentElement.style.borderColor = '#ffc107';
                         btn.parentElement.style.background = '#fff8e1';
                     } else {
-                        // Available to request
-                        btn.textContent = 'Request';
+                        // Available to buy
+                        btn.textContent = 'Buy';
                         btn.style.background = 'white';
                         btn.style.color = '#667eea';
                         btn.style.borderColor = '#667eea';
@@ -712,27 +712,76 @@
         // Track which modules parent has requested
         const moduleRequests = {};
 
-        function toggleModuleRequest(btn) {
-            const moduleKey = btn.getAttribute('data-module');
-            const isRequested = moduleRequests[moduleKey];
+        // Module name map for display
+        const moduleDisplayNames = {
+            english: 'English',
+            aptitude: 'Aptitude',
+            stories: 'Stories',
+            'emotional-quotient': 'Emotional Quotient',
+            drawing: 'Drawing',
+            'german-kids': 'German Kids'
+        };
 
-            if (isRequested) {
-                // Un-request
-                moduleRequests[moduleKey] = false;
-                btn.textContent = 'Request';
-                btn.style.background = 'white';
-                btn.style.color = '#667eea';
-                btn.parentElement.style.borderColor = '#ddd';
-                btn.parentElement.style.background = '#f8f9fa';
-            } else {
-                // Mark as requested
-                moduleRequests[moduleKey] = true;
-                btn.textContent = 'Requested';
-                btn.style.background = '#667eea';
-                btn.style.color = 'white';
-                btn.parentElement.style.borderColor = '#667eea';
-                btn.parentElement.style.background = '#f0f4ff';
+        function showBuyModal(btn) {
+            const moduleKey = btn.getAttribute('data-module');
+            const moduleName = moduleDisplayNames[moduleKey] || moduleKey;
+
+            // Remove existing buy modal if any
+            const existing = document.getElementById('buy-modal-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'buy-modal-overlay';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:20px;max-width:440px;width:100%;padding:35px 30px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.2);position:relative;">
+                    <div style="font-size:3em;margin-bottom:10px;">&#128722;</div>
+                    <h2 style="margin:0 0 8px;color:#333;font-size:1.4em;">Buy ${moduleName} Module</h2>
+                    <div style="background:#f0f4ff;border-radius:12px;padding:15px;margin:15px 0;">
+                        <div style="font-size:1.8em;font-weight:bold;color:#667eea;">&#8377; 99 <span style="font-size:0.5em;color:#999;font-weight:normal;">/ month</span></div>
+                    </div>
+                    <div style="background:#fff3cd;border-radius:10px;padding:15px;margin:15px 0;text-align:left;">
+                        <p style="margin:0;color:#856404;font-size:0.92em;line-height:1.6;">
+                            <strong>&#9888;&#65039; Beta Version Notice:</strong><br>
+                            The beta version of the app does not support buying yet. Instead, we will send your request to the GleeGrow team. Look for the response as a notification.
+                        </p>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:20px;">
+                        <button onclick="confirmBuyRequest('${moduleKey}')" style="flex:1;padding:14px;font-size:1.05em;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;cursor:pointer;font-weight:bold;box-shadow:0 4px 15px rgba(102,126,234,0.3);transition:all 0.3s;">
+                            Send Request
+                        </button>
+                        <button onclick="document.getElementById('buy-modal-overlay').remove()" style="flex:1;padding:14px;font-size:1.05em;background:#f5f5f5;color:#666;border:none;border-radius:12px;cursor:pointer;font-weight:bold;transition:all 0.3s;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // Close on overlay click (outside modal)
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.remove();
+            });
+        }
+
+        function confirmBuyRequest(moduleKey) {
+            // Mark as requested (same backend behavior)
+            moduleRequests[moduleKey] = true;
+
+            // Update the button to show "Pending"
+            const btn = document.querySelector(`.module-request-btn[data-module="${moduleKey}"]`);
+            if (btn) {
+                btn.textContent = 'Pending';
+                btn.style.background = '#ffc107';
+                btn.style.color = '#333';
+                btn.style.borderColor = '#ffc107';
+                btn.parentElement.style.borderColor = '#ffc107';
+                btn.parentElement.style.background = '#fff8e1';
             }
+
+            // Close the buy modal
+            const overlay = document.getElementById('buy-modal-overlay');
+            if (overlay) overlay.remove();
         }
 
         function closeModal() {

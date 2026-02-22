@@ -912,9 +912,8 @@
         }
 
         async function approveChildUpgradeRequest(childId, childName) {
-            if (!confirm(`Approve full version upgrade for ${childName}?`)) {
-                return;
-            }
+            const adminMessage = prompt(`Approve full version upgrade for ${childName}?\n\nOptional message to parent (or leave blank):`, '');
+            if (adminMessage === null) return; // Cancelled
 
             try {
                 // Get the child's parent UID before updating
@@ -930,15 +929,18 @@
 
                 // Create notification for the parent/child about full version access
                 if (parentUid) {
-                    const weekStr = getWeekString ? getWeekString(new Date()) : new Date().toISOString().slice(0, 10);
+                    const weekStr = typeof getWeekString === 'function' ? getWeekString(new Date()) : new Date().toISOString().slice(0, 10);
                     const dedupId = `${childId}_full_version_${weekStr}`;
+                    const notifMessage = adminMessage
+                        ? `${childName} now has full access to all worksheets and weekly assignments! Note from admin: "${adminMessage}"`
+                        : `${childName} now has full access to all worksheets and weekly assignments.`;
                     try {
                         await firebase.firestore().collection('notifications').doc(dedupId).set({
                             childId: childId,
                             parentUid: parentUid,
                             type: 'new_sheets',
                             title: 'Full Version Activated!',
-                            message: `${childName} now has full access to all worksheets and weekly assignments.`,
+                            message: notifMessage,
                             actionUrl: 'index',
                             actionData: { source: 'version_upgrade' },
                             read: false,
@@ -963,20 +965,41 @@
         }
 
         async function denyChildUpgradeRequest(childId, childName) {
-            if (!confirm(`Deny full version upgrade request for ${childName}?`)) {
-                return;
-            }
+            const adminMessage = prompt(`Deny full version upgrade for ${childName}?\n\nReason or message to parent (or leave blank):`, '');
+            if (adminMessage === null) return; // Cancelled
 
             try {
+                const childDoc = await firebase.firestore().collection('children').doc(childId).get();
+                const parentUid = childDoc.exists ? childDoc.data().parent_uid : null;
+
                 await firebase.firestore().collection('children').doc(childId).update({
                     versionUpgradeRequested: false,
                     upgradeDeniedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    upgradeDeniedBy: firebase.auth().currentUser.email
+                    upgradeDeniedBy: firebase.auth().currentUser.email,
+                    upgradeDeniedMessage: adminMessage || ''
                 });
 
-                alert(`Request denied for ${childName}.`);
+                // Create notification for parent
+                if (parentUid) {
+                    const notifMessage = adminMessage
+                        ? `Full version request for ${childName} was not approved. Reason: "${adminMessage}"`
+                        : `Full version request for ${childName} was not approved at this time.`;
+                    const dedupId = `${childId}_upgrade_denied_${new Date().toISOString().slice(0, 10)}`;
+                    try {
+                        await firebase.firestore().collection('notifications').doc(dedupId).set({
+                            childId, parentUid, type: 'reminder',
+                            title: 'Upgrade Request Update',
+                            message: notifMessage,
+                            actionUrl: 'children-profiles',
+                            actionData: { source: 'upgrade_denial' },
+                            read: false, dismissed: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+                        });
+                    } catch (e) { console.warn('Notification failed:', e.message); }
+                }
 
-                // Reload upgrade requests to refresh the list
+                alert(`Request denied for ${childName}.`);
                 await loadUpgradeRequests();
             } catch (error) {
                 console.error('Error denying upgrade:', error);
@@ -1068,11 +1091,13 @@
         }
 
         async function approveModuleRequest(childId, moduleKey, childName) {
-            if (!confirm(`Approve ${moduleKey} access for ${childName}?`)) return;
+            const adminMessage = prompt(`Approve ${moduleKey} for ${childName}?\n\nOptional message to parent (or leave blank):`, '');
+            if (adminMessage === null) return; // Cancelled
 
             try {
                 const childDoc = await firebase.firestore().collection('children').doc(childId).get();
                 const child = childDoc.data();
+                const parentUid = child.parent_uid;
 
                 // Update assignedModules to include this module
                 const assignedModules = child.assignedModules || child.modules || { math: true };
@@ -1088,6 +1113,7 @@
                     moduleRequests[moduleKey].status = 'approved';
                     moduleRequests[moduleKey].approvedAt = new Date().toISOString();
                     moduleRequests[moduleKey].approvedBy = firebase.auth().currentUser.email;
+                    if (adminMessage) moduleRequests[moduleKey].adminMessage = adminMessage;
                 }
 
                 await firebase.firestore().collection('children').doc(childId).update({
@@ -1097,6 +1123,28 @@
                     moduleRequests: moduleRequests,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+                // Create notification for parent
+                if (parentUid) {
+                    const moduleNames = { english: 'English', aptitude: 'Aptitude', stories: 'Stories', 'emotional-quotient': 'EQ', drawing: 'Drawing', 'german-kids': 'German Kids' };
+                    const displayName = moduleNames[moduleKey] || moduleKey;
+                    const notifMessage = adminMessage
+                        ? `${displayName} module approved for ${childName}! Admin note: "${adminMessage}"`
+                        : `${displayName} module approved for ${childName}! It's now available in the app.`;
+                    const dedupId = `${childId}_module_approved_${moduleKey}_${new Date().toISOString().slice(0, 10)}`;
+                    try {
+                        await firebase.firestore().collection('notifications').doc(dedupId).set({
+                            childId, parentUid, type: 'new_sheets',
+                            title: `${displayName} Module Approved!`,
+                            message: notifMessage,
+                            actionUrl: 'index',
+                            actionData: { source: 'module_approval', module: moduleKey },
+                            read: false, dismissed: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+                        });
+                    } catch (e) { console.warn('Notification failed:', e.message); }
+                }
 
                 alert(`${moduleKey} approved for ${childName}!`);
                 await loadModuleRequests();
@@ -1108,23 +1156,48 @@
         }
 
         async function denyModuleRequest(childId, moduleKey, childName) {
-            if (!confirm(`Deny ${moduleKey} request for ${childName}?`)) return;
+            const adminMessage = prompt(`Deny ${moduleKey} for ${childName}?\n\nReason or message to parent (or leave blank):`, '');
+            if (adminMessage === null) return; // Cancelled
 
             try {
                 const childDoc = await firebase.firestore().collection('children').doc(childId).get();
                 const child = childDoc.data();
+                const parentUid = child.parent_uid;
 
                 const moduleRequests = child.moduleRequests || {};
                 if (moduleRequests[moduleKey]) {
                     moduleRequests[moduleKey].status = 'rejected';
                     moduleRequests[moduleKey].rejectedAt = new Date().toISOString();
                     moduleRequests[moduleKey].rejectedBy = firebase.auth().currentUser.email;
+                    if (adminMessage) moduleRequests[moduleKey].adminMessage = adminMessage;
                 }
 
                 await firebase.firestore().collection('children').doc(childId).update({
                     moduleRequests: moduleRequests,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+                // Create notification for parent
+                if (parentUid) {
+                    const moduleNames = { english: 'English', aptitude: 'Aptitude', stories: 'Stories', 'emotional-quotient': 'EQ', drawing: 'Drawing', 'german-kids': 'German Kids' };
+                    const displayName = moduleNames[moduleKey] || moduleKey;
+                    const notifMessage = adminMessage
+                        ? `${displayName} module request for ${childName} was not approved. Reason: "${adminMessage}"`
+                        : `${displayName} module request for ${childName} was not approved at this time.`;
+                    const dedupId = `${childId}_module_denied_${moduleKey}_${new Date().toISOString().slice(0, 10)}`;
+                    try {
+                        await firebase.firestore().collection('notifications').doc(dedupId).set({
+                            childId, parentUid, type: 'reminder',
+                            title: `${displayName} Module Request Update`,
+                            message: notifMessage,
+                            actionUrl: 'children-profiles',
+                            actionData: { source: 'module_denial', module: moduleKey },
+                            read: false, dismissed: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+                        });
+                    } catch (e) { console.warn('Notification failed:', e.message); }
+                }
 
                 alert(`${moduleKey} request denied for ${childName}.`);
                 await loadModuleRequests();

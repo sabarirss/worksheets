@@ -43,11 +43,19 @@ function showSubjects() {
     const ageGroups = document.getElementById('math-age-groups');
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
+    const worksheetContent = document.getElementById('worksheet-content');
 
     if (subjectSelection) subjectSelection.style.display = 'block';
     if (ageGroups) ageGroups.style.display = 'none';
     if (operations) operations.style.display = 'none';
     if (difficulties) difficulties.style.display = 'none';
+    if (worksheetContent) worksheetContent.style.display = 'none';
+
+    // Restore header and footer
+    const pageHeader = document.querySelector('.container > header');
+    const pageFooter = document.querySelector('.container > footer');
+    if (pageHeader) pageHeader.style.display = '';
+    if (pageFooter) pageFooter.style.display = '';
 }
 
 function showMathLevels() {
@@ -395,6 +403,12 @@ function backToWorksheetSelection() {
 
     const operations = document.getElementById('math-operations');
     if (operations) operations.style.display = 'block';
+
+    // Restore header and footer
+    const pageHeader = document.querySelector('.container > header');
+    const pageFooter = document.querySelector('.container > footer');
+    if (pageHeader) pageHeader.style.display = '';
+    if (pageFooter) pageFooter.style.display = '';
 }
 
 let currentWorksheet = null;
@@ -1452,23 +1466,37 @@ function renderWorksheet() {
         </div>
     `;
 
-    // Hide navigation and show worksheet in container
+    // Hide navigation, header, footer and show worksheet in container
     const ageGroups = document.getElementById('math-age-groups');
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
     const subjectSelection = document.querySelector('.subject-selection');
+    const pageHeader = document.querySelector('.container > header');
+    const pageFooter = document.querySelector('.container > footer');
+    const weeklyProgress = document.getElementById('weekly-progress-container');
+    const levelTestButtons = document.getElementById('level-test-buttons');
 
     if (ageGroups) ageGroups.style.display = 'none';
     if (operations) operations.style.display = 'none';
     if (difficulties) difficulties.style.display = 'none';
     if (subjectSelection) subjectSelection.style.display = 'none';
+    if (pageHeader) pageHeader.style.display = 'none';
+    if (pageFooter) pageFooter.style.display = 'none';
+    if (weeklyProgress) weeklyProgress.style.display = 'none';
+    if (levelTestButtons) levelTestButtons.style.display = 'none';
 
-    // Get or create worksheet container
+    // Get or create worksheet container inside .container (not document.body)
     let worksheetContainer = document.getElementById('worksheet-content');
     if (!worksheetContainer) {
         worksheetContainer = document.createElement('div');
         worksheetContainer.id = 'worksheet-content';
-        document.body.appendChild(worksheetContainer);
+        const container = document.querySelector('.container');
+        if (container) {
+            // Insert before footer so it stays inside the layout
+            container.appendChild(worksheetContainer);
+        } else {
+            document.body.appendChild(worksheetContainer);
+        }
     }
 
     worksheetContainer.innerHTML = html;
@@ -1838,46 +1866,81 @@ function savePDF() {
     const operationName = currentWorksheet.operation.charAt(0).toUpperCase() + currentWorksheet.operation.slice(1);
     const filename = `${operationName}_${childName}_${currentWorksheet.ageGroup}_${currentWorksheet.difficulty}_Page${currentPage}_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
 
-    // Hide elements that shouldn't be in PDF
-    const controls = document.querySelector('.controls');
-    const results = document.getElementById('results-summary');
-    const navigation = document.querySelector('.navigation');
-    const answerKey = document.getElementById('answer-key');
-
-    const controlsDisplay = controls ? controls.style.display : '';
-    const resultsDisplay = results ? results.style.display : '';
-    const navigationDisplay = navigation ? navigation.style.display : '';
-    const answerKeyDisplay = answerKey ? answerKey.style.display : '';
-
-    if (controls) controls.style.display = 'none';
-    if (results) results.style.display = 'none';
-    if (navigation) navigation.style.display = 'none';
-    if (answerKey) answerKey.style.display = 'none';
-
-    // Configure PDF options with better settings to prevent clipping
     const element = document.querySelector('.worksheet-container');
+    if (!element) {
+        alert('No worksheet to export');
+        return;
+    }
+
+    // Hide all non-printable elements inside the worksheet
+    const hideSelectors = [
+        '.controls',                    // Timer, save, clear, PDF buttons
+        '#results-summary',             // Submission results
+        '#answer-key',                  // Answer key toggle
+        '.worksheet-actions',           // Submit/Clear buttons
+        '.page-navigation',             // Page prev/next navigation
+        '.answer-toggle-container',     // Show answers toggle
+    ];
+    // Also hide ALL .navigation divs inside the worksheet (back buttons)
+    const allNavigations = element.querySelectorAll('.navigation');
+
+    const savedDisplays = [];
+
+    // Hide specific elements
+    hideSelectors.forEach(sel => {
+        const el = element.querySelector(sel);
+        if (el) {
+            savedDisplays.push({ el, display: el.style.display });
+            el.style.display = 'none';
+        }
+    });
+
+    // Hide all .navigation divs
+    allNavigations.forEach(nav => {
+        savedDisplays.push({ el: nav, display: nav.style.display });
+        nav.style.display = 'none';
+    });
+
+    // Temporarily set a fixed width for consistent PDF rendering
+    const origWidth = element.style.width;
+    const origMaxWidth = element.style.maxWidth;
+    element.style.width = '700px';
+    element.style.maxWidth = '700px';
+
+    // Configure PDF options
     const opt = {
-        margin: [0.6, 0.4, 0.6, 0.4], // top, right, bottom, left margins
+        margin: [0.5, 0.5, 0.5, 0.5],
         filename: filename,
-        image: { type: 'jpeg', quality: 0.92 },
+        image: { type: 'jpeg', quality: 0.95 },
         html2canvas: {
-            scale: 1.2, // Further reduced to prevent clipping
+            scale: 2,
             useCORS: true,
             letterRendering: true,
             logging: false,
-            width: element.scrollWidth,
-            windowWidth: element.scrollWidth
+            width: 700,
+            windowWidth: 700
         },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
     // Generate and save PDF
     html2pdf().set(opt).from(element).save().then(() => {
-        // Restore hidden elements
-        if (controls) controls.style.display = controlsDisplay;
-        if (results) results.style.display = resultsDisplay;
-        if (navigation) navigation.style.display = navigationDisplay;
-        if (answerKey) answerKey.style.display = answerKeyDisplay;
+        // Restore all hidden elements
+        savedDisplays.forEach(({ el, display }) => {
+            el.style.display = display;
+        });
+        // Restore width
+        element.style.width = origWidth;
+        element.style.maxWidth = origMaxWidth;
+    }).catch(err => {
+        console.error('PDF generation failed:', err);
+        // Restore on error too
+        savedDisplays.forEach(({ el, display }) => {
+            el.style.display = display;
+        });
+        element.style.width = origWidth;
+        element.style.maxWidth = origMaxWidth;
+        alert('Failed to generate PDF. Please try again.');
     });
 }
 
