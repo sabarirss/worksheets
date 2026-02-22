@@ -714,6 +714,15 @@
                         renderWeeklyProgress(document.getElementById('weekly-progress-container'));
                     }
 
+                    // Initialize notification system (non-admin only)
+                    if (userData.role !== 'admin' && typeof initializeNotifications === 'function') {
+                        const child = getSelectedChild();
+                        if (child) {
+                            initializeNotifications(child.id, firebaseUser.uid);
+                        }
+                        renderNotificationBell(document.getElementById('notification-bell-container'));
+                    }
+
                     // Show level test buttons if eligible (non-admin only)
                     if (userData.role !== 'admin' && typeof renderLevelTestButtons === 'function') {
                         renderLevelTestButtons(document.getElementById('level-test-buttons'));
@@ -977,10 +986,11 @@
                 <div id="profile-selector-container"></div>
             </div>
 
-            <!-- Right side: Version badge, Admin, Settings -->
+            <!-- Right side: Version badge, Notifications, Admin, Settings -->
             <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
                 <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings.html'" title="Click to upgrade">
                 </div>
+                <div id="notification-bell-container"></div>
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
                     👤 Admin Panel
                 </button>
@@ -1169,6 +1179,7 @@
     <script src="weekly-assignments.js"></script>
     <script src="level-test.js"></script>
     <script src="feedback-system.js"></script>
+    <script src="notification-system.js"></script>
     <script src="worksheet-generator.js"></script>
     <script src="branding.js"></script>
     <script>

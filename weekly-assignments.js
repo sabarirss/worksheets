@@ -21,6 +21,11 @@ const WEEKLY_CONFIG = {
     ENGLISH_PAGES_PER_WEEK: 7,
     // Week starts on Monday (ISO standard)
     WEEK_START_DAY: 1, // 0=Sunday, 1=Monday
+    // New assignments unlock Monday at 4pm local time
+    GENERATION_HOUR: 16, // 4pm
+    GENERATION_DAY: 1,   // Monday
+    // Consecutive incomplete weeks before lockout
+    LOCKOUT_THRESHOLD: 2,
 };
 
 // ============================================================================
@@ -65,6 +70,83 @@ function getWeekEnd(date) {
     end.setDate(end.getDate() + 6);
     end.setHours(23, 59, 59, 999);
     return end;
+}
+
+// ============================================================================
+// GENERATION GATE & LOCKOUT
+// ============================================================================
+
+/**
+ * Check if new assignment generation is allowed.
+ * Returns true only if current time is past Monday 4pm local time for the current week.
+ * @returns {boolean}
+ */
+function isAssignmentGenerationAllowed() {
+    const now = new Date();
+    const weekStart = getWeekStart(now); // Monday 00:00
+
+    // Generation unlocks at Monday GENERATION_HOUR (4pm)
+    const unlockTime = new Date(weekStart);
+    unlockTime.setHours(WEEKLY_CONFIG.GENERATION_HOUR, 0, 0, 0);
+
+    return now >= unlockTime;
+}
+
+/**
+ * Check if a child is locked out due to consecutive incomplete weeks.
+ * @param {string} childId
+ * @returns {Promise<{locked: boolean, consecutiveWeeks: number}>}
+ */
+async function checkLockoutStatus(childId) {
+    try {
+        const snapshot = await firebase.firestore()
+            .collection('weekly_assignments')
+            .where('childId', '==', childId)
+            .orderBy('createdAt', 'desc')
+            .limit(WEEKLY_CONFIG.LOCKOUT_THRESHOLD)
+            .get();
+
+        if (snapshot.size < WEEKLY_CONFIG.LOCKOUT_THRESHOLD) {
+            return { locked: false, consecutiveWeeks: 0 };
+        }
+
+        const docs = snapshot.docs.map(d => d.data());
+        // Check that the most recent N assignments are all incomplete
+        const allIncomplete = docs.every(a => a.status !== 'completed');
+
+        return {
+            locked: allIncomplete,
+            consecutiveWeeks: allIncomplete ? WEEKLY_CONFIG.LOCKOUT_THRESHOLD : 0
+        };
+    } catch (error) {
+        console.warn('Error checking lockout status:', error.message);
+        return { locked: false, consecutiveWeeks: 0 };
+    }
+}
+
+/**
+ * Load the most recent incomplete (active) assignment for carryover.
+ * @param {string} childId
+ * @returns {Promise<object|null>} Assignment with isCarryover flag, or null
+ */
+async function loadPreviousIncompleteAssignment(childId) {
+    try {
+        const snapshot = await firebase.firestore()
+            .collection('weekly_assignments')
+            .where('childId', '==', childId)
+            .where('status', '==', 'active')
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) return null;
+
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data(), isCarryover: true };
+    } catch (error) {
+        console.warn('Error loading previous incomplete assignment:', error.message);
+        return null;
+    }
 }
 
 // ============================================================================
@@ -158,39 +240,105 @@ function getChildEnglishPosition(child) {
 
 /**
  * Generate weekly assignment pages for a child.
- * Picks 7 consecutive pages starting from the child's last completed page.
+ * Picks 7 consecutive pages starting from where the previous week left off.
+ * Ensures no page is repeated across weeks (progressive curriculum).
+ *
  * @param {object} child - Selected child object
  * @param {string} weekStr - Week identifier (e.g., "2026-W08")
+ * @param {object|null} previousAssignment - Previous week's assignment (if any)
  * @returns {object} Assignment data
  */
-function generateWeeklyAssignment(child, weekStr) {
+function generateWeeklyAssignment(child, weekStr, previousAssignment) {
     const mathPos = getChildMathPosition(child);
     const englishPos = getChildEnglishPosition(child);
+
+    const MAX_MATH_PAGES = 150;
+    const MAX_ENGLISH_PAGES = 50;
+
+    // Determine math start page: continue from where previous week ended
+    let mathStartPage = mathPos.startPage;
+    let mathOperation = mathPos.operation;
+    let mathDifficulty = mathPos.difficulty;
+
+    if (previousAssignment && previousAssignment.math && previousAssignment.math.pages.length > 0) {
+        const prevMathPages = previousAssignment.math.pages;
+        const lastAssignedPage = Math.max(...prevMathPages.map(p => p.absolutePage));
+        mathStartPage = lastAssignedPage + 1;
+        // Carry forward operation and difficulty from previous week
+        mathOperation = previousAssignment.math.operation || mathPos.operation;
+        mathDifficulty = previousAssignment.math.difficulty || mathPos.difficulty;
+
+        // If we've gone past max pages, wrap around with next difficulty
+        if (mathStartPage > MAX_MATH_PAGES) {
+            if (mathDifficulty === 'easy') {
+                mathDifficulty = 'medium';
+                mathStartPage = 51;
+            } else if (mathDifficulty === 'medium') {
+                mathDifficulty = 'hard';
+                mathStartPage = 101;
+            } else {
+                // Completed all difficulties - cycle back to easy page 1
+                mathDifficulty = 'easy';
+                mathStartPage = 1;
+            }
+        }
+    }
 
     // Generate math page list (7 consecutive pages)
     const mathPages = [];
     for (let i = 0; i < WEEKLY_CONFIG.MATH_PAGES_PER_WEEK; i++) {
-        const page = mathPos.startPage + i;
-        if (page <= 150) { // Max pages
+        const page = mathStartPage + i;
+        if (page <= MAX_MATH_PAGES) {
             mathPages.push({
                 absolutePage: page,
-                operation: mathPos.operation,
+                operation: mathOperation,
                 completed: false,
                 score: 0
             });
         }
     }
 
+    // Determine english start page: continue from where previous week ended
+    let englishStartPage = englishPos.startPage;
+    let englishDifficulty = englishPos.difficulty;
+    let englishAgeGroup = englishPos.ageGroup;
+
+    if (previousAssignment && previousAssignment.english && previousAssignment.english.pages.length > 0) {
+        const prevEngPages = previousAssignment.english.pages;
+        const lastAssignedPage = Math.max(...prevEngPages.map(p => p.pageIndex));
+        englishStartPage = lastAssignedPage + 1;
+        englishDifficulty = previousAssignment.english.difficulty || englishPos.difficulty;
+        englishAgeGroup = previousAssignment.english.ageGroup || englishPos.ageGroup;
+
+        // If we've gone past max english pages, advance difficulty
+        if (englishStartPage > MAX_ENGLISH_PAGES) {
+            if (englishDifficulty === 'easy') {
+                englishDifficulty = 'medium';
+                englishStartPage = 1;
+            } else if (englishDifficulty === 'medium') {
+                englishDifficulty = 'hard';
+                englishStartPage = 1;
+            } else {
+                // Completed all - cycle back
+                englishDifficulty = 'easy';
+                englishStartPage = 1;
+            }
+        }
+    }
+
     // Generate english page list (7 pages)
     const englishPages = [];
     for (let i = 0; i < WEEKLY_CONFIG.ENGLISH_PAGES_PER_WEEK; i++) {
-        englishPages.push({
-            pageIndex: englishPos.startPage + i,
-            ageGroup: englishPos.ageGroup,
-            difficulty: englishPos.difficulty,
-            completed: false,
-            score: 0
-        });
+        const pageIndex = englishStartPage + i;
+        if (pageIndex <= MAX_ENGLISH_PAGES) {
+            englishPages.push({
+                pageIndex: pageIndex,
+                ageGroup: englishAgeGroup,
+                difficulty: englishDifficulty,
+                completed: false,
+                score: 0
+            });
+        }
     }
 
     return {
@@ -200,16 +348,16 @@ function generateWeeklyAssignment(child, weekStr) {
         weekStart: getWeekStart(new Date()).toISOString(),
         weekEnd: getWeekEnd(new Date()).toISOString(),
         math: {
-            operation: mathPos.operation,
-            difficulty: mathPos.difficulty,
+            operation: mathOperation,
+            difficulty: mathDifficulty,
             ageGroup: mathPos.ageGroup,
             pages: mathPages,
             completedCount: 0,
             totalPages: mathPages.length
         },
         english: {
-            ageGroup: englishPos.ageGroup,
-            difficulty: englishPos.difficulty,
+            ageGroup: englishAgeGroup,
+            difficulty: englishDifficulty,
             pages: englishPages,
             completedCount: 0,
             totalPages: englishPages.length
@@ -236,6 +384,7 @@ async function loadWeeklyAssignment(childId) {
     const docId = `${childId}_${weekStr}`;
 
     try {
+        // Check if this week's assignment already exists
         const doc = await firebase.firestore()
             .collection('weekly_assignments')
             .doc(docId)
@@ -245,17 +394,93 @@ async function loadWeeklyAssignment(childId) {
             return { id: docId, ...doc.data() };
         }
 
-        // No assignment exists for this week - generate one
+        // No assignment for this week yet
+
+        // 1. Check generation gate: before Monday 4pm, show previous incomplete
+        if (!isAssignmentGenerationAllowed()) {
+            console.log('Before Monday 4pm — no new assignment generation');
+            const carryover = await loadPreviousIncompleteAssignment(childId);
+            if (carryover) return carryover;
+            // No previous incomplete either — nothing to show
+            return null;
+        }
+
+        // 2. Check lockout: 2+ consecutive incomplete weeks
+        const lockout = await checkLockoutStatus(childId);
+        if (lockout.locked) {
+            console.log(`Child ${childId} locked out: ${lockout.consecutiveWeeks} consecutive incomplete weeks`);
+
+            // Create lockout notification
+            const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+            const parentUid = firebase.auth().currentUser?.uid;
+            if (child && parentUid && typeof createNotification === 'function') {
+                createNotification(
+                    childId, parentUid,
+                    'lockout',
+                    'Worksheets Paused',
+                    `Complete previous weeks\' worksheets before new ones unlock.`,
+                    '', {}
+                );
+            }
+
+            // Return null to trigger lockout UI
+            return null;
+        }
+
+        // 3. Generate new assignment
         const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
         if (!child || child.id !== childId) return null;
 
-        const assignment = generateWeeklyAssignment(child, weekStr);
+        // Look up the most recent previous assignment to continue from where it left off
+        let previousAssignment = null;
+        try {
+            const prevDocs = await firebase.firestore()
+                .collection('weekly_assignments')
+                .where('childId', '==', childId)
+                .orderBy('createdAt', 'desc')
+                .limit(1)
+                .get();
+
+            if (!prevDocs.empty) {
+                previousAssignment = prevDocs.docs[0].data();
+                console.log('Found previous assignment from', previousAssignment.week);
+            }
+        } catch (prevError) {
+            console.warn('Could not load previous assignment:', prevError.message);
+        }
+
+        const assignment = generateWeeklyAssignment(child, weekStr, previousAssignment);
+        assignment.generatedBy = 'client';
+        assignment.notificationSent = false;
+
         await firebase.firestore()
             .collection('weekly_assignments')
             .doc(docId)
             .set(assignment);
 
-        console.log('Generated new weekly assignment for', child.name, weekStr);
+        console.log('Generated new weekly assignment for', child.name, weekStr,
+            '- Math pages:', assignment.math.pages.map(p => p.absolutePage).join(','),
+            '- English pages:', assignment.english.pages.map(p => p.pageIndex).join(','));
+
+        // 4. Create new_sheets notification
+        const parentUid = firebase.auth().currentUser?.uid;
+        if (parentUid && typeof createNotification === 'function') {
+            createNotification(
+                childId, parentUid,
+                'new_sheets',
+                'New Worksheets Ready!',
+                `${child.name} has ${assignment.math.totalPages} Math and ${assignment.english.totalPages} English pages for this week.`,
+                'index.html',
+                { weekStr }
+            );
+
+            // Mark notification as sent
+            await firebase.firestore()
+                .collection('weekly_assignments')
+                .doc(docId)
+                .update({ notificationSent: true });
+        }
+
         return { id: docId, ...assignment };
 
     } catch (error) {
@@ -352,10 +577,40 @@ async function renderWeeklyProgress(container) {
     }
 
     const assignment = await loadWeeklyAssignment(child.id);
+
+    // Handle lockout state (assignment is null + lockout active)
     if (!assignment) {
+        const lockout = await checkLockoutStatus(child.id);
+        if (lockout.locked) {
+            container.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 20px 24px;
+                    margin: 15px 0;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                    border-left: 5px solid #dc3545;
+                ">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                        <span style="font-size: 1.5em;">&#128274;</span>
+                        <h3 style="margin: 0; font-size: 1.1em; color: #dc3545;">Worksheets Paused</h3>
+                    </div>
+                    <p style="color: #666; margin: 0; font-size: 0.95em; line-height: 1.5;">
+                        ${child.name} has ${lockout.consecutiveWeeks}+ weeks of incomplete worksheets.
+                        Please complete previous weeks' assignments before new ones unlock.
+                    </p>
+                </div>
+            `;
+            container.style.display = 'block';
+            return;
+        }
+
         container.style.display = 'none';
         return;
     }
+
+    // Handle carryover state (showing last week's incomplete assignment)
+    const isCarryover = assignment.isCarryover === true;
 
     const mathDone = assignment.math.completedCount || 0;
     const mathTotal = assignment.math.totalPages || WEEKLY_CONFIG.MATH_PAGES_PER_WEEK;
@@ -371,7 +626,10 @@ async function renderWeeklyProgress(container) {
 
     let statusText = '';
     let statusColor = '#667eea';
-    if (assignment.status === 'completed') {
+    if (isCarryover) {
+        statusText = 'From Last Week';
+        statusColor = '#ff9800';
+    } else if (assignment.status === 'completed') {
         statusText = 'All Done!';
         statusColor = '#28a745';
     } else if (daysLeft <= 1) {
@@ -379,6 +637,15 @@ async function renderWeeklyProgress(container) {
         statusColor = '#dc3545';
     } else {
         statusText = `${daysLeft} days left`;
+    }
+
+    let carryoverBanner = '';
+    if (isCarryover) {
+        carryoverBanner = `
+            <div style="text-align: center; margin-bottom: 12px; padding: 10px; background: #fff3e0; border-radius: 8px; color: #e65100; font-weight: 600; font-size: 0.9em;">
+                &#9888;&#65039; Complete last week's sheets before new ones unlock (Monday 4pm)
+            </div>
+        `;
     }
 
     container.innerHTML = `
@@ -391,9 +658,11 @@ async function renderWeeklyProgress(container) {
             border-left: 5px solid ${statusColor};
         ">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 1.1em; color: #333;">This Week's Practice</h3>
+                <h3 style="margin: 0; font-size: 1.1em; color: #333;">${isCarryover ? 'Incomplete Practice' : "This Week's Practice"}</h3>
                 <span style="font-size: 0.85em; color: ${statusColor}; font-weight: bold;">${statusText}</span>
             </div>
+
+            ${carryoverBanner}
 
             <div style="background: #f0f0f0; border-radius: 10px; height: 12px; margin-bottom: 15px; overflow: hidden;">
                 <div style="

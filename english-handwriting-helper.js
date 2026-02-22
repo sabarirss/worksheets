@@ -1,35 +1,33 @@
-// English Handwriting Recognition Helper using ml5.js
-// Provides kid-friendly handwriting recognition for English worksheets
-
-let handwritingClassifier = null;
-let isModelLoaded = false;
+// English Handwriting Recognition Helper
+// Uses EMNIST model (via handwriting-recognition.js) for real letter recognition
+// Falls back gracefully when EMNIST model is not available
 
 /**
- * Initialize ml5.js handwriting recognition
- * Note: This uses ml5.js image classifier. For production, train a custom model
- * or use a pre-trained handwriting recognition model.
+ * Initialize English handwriting recognition.
+ * Attempts to load the EMNIST model for letter recognition.
  */
 async function initializeHandwritingRecognition() {
-    if (typeof ml5 === 'undefined') {
-        console.warn('ml5.js not loaded. Handwriting recognition disabled.');
+    // Requires TF.js and handwriting-recognition.js to be loaded
+    if (typeof tf === 'undefined') {
+        console.warn('TensorFlow.js not loaded. Handwriting recognition disabled.');
+        return false;
+    }
+
+    if (typeof loadEmnistModel !== 'function') {
+        console.warn('handwriting-recognition.js not loaded. EMNIST unavailable.');
         return false;
     }
 
     try {
-        console.log('Initializing handwriting recognition with ml5.js...');
-
-        // Wait for TensorFlow.js if available
-        if (typeof tf !== 'undefined') {
-            await tf.ready();
+        console.log('Initializing English handwriting recognition...');
+        const model = await loadEmnistModel();
+        if (model) {
+            console.log('EMNIST model ready for English handwriting recognition');
+            return true;
+        } else {
+            console.warn('EMNIST model not available - run train-emnist-model.py first');
+            return false;
         }
-
-        // For now, we'll use a simple approach
-        // In production, you would load a custom-trained model for handwriting
-        // Example: handwritingClassifier = await ml5.imageClassifier('path/to/model.json');
-
-        isModelLoaded = true;
-        console.log('Handwriting recognition initialized');
-        return true;
     } catch (error) {
         console.error('Error initializing handwriting recognition:', error);
         return false;
@@ -37,10 +35,39 @@ async function initializeHandwritingRecognition() {
 }
 
 /**
- * Recognize text from a canvas element
+ * Check if a canvas has any drawn content (local check for English helper).
+ * @param {HTMLCanvasElement} canvas - The canvas to check
+ * @returns {boolean} True if canvas is empty
+ */
+function _isCanvasEmptyEnglish(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+
+    let nonWhitePixels = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i];
+        const g = pixels[i + 1];
+        const b = pixels[i + 2];
+        // Count pixels that aren't white
+        if (r < 250 || g < 250 || b < 250) {
+            nonWhitePixels++;
+        }
+    }
+
+    // Less than 0.3% of pixels are non-white = empty
+    const threshold = (canvas.width * canvas.height) * 0.003;
+    return nonWhitePixels < threshold;
+}
+
+/**
+ * Recognize text from a canvas element using EMNIST model.
+ * Compatible return shape with the previous fake implementation.
+ *
  * @param {HTMLCanvasElement} canvas - The canvas with handwriting
- * @param {string} expectedAnswer - The expected answer for validation
- * @returns {Promise<Object>} - Recognition result
+ * @param {string} expectedAnswer - The expected answer for validation/prior boost
+ * @returns {Promise<Object>} Recognition result:
+ *   { success, recognized, confidence, isEmpty, modelMissing }
  */
 async function recognizeHandwriting(canvas, expectedAnswer = '') {
     if (!canvas || !canvas.getContext) {
@@ -52,12 +79,8 @@ async function recognizeHandwriting(canvas, expectedAnswer = '') {
         };
     }
 
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Check if canvas is empty
-    const isEmpty = isCanvasEmpty(imageData);
-    if (isEmpty) {
+    // Check if canvas is empty using local check
+    if (_isCanvasEmptyEnglish(canvas)) {
         return {
             success: false,
             error: 'Canvas is empty',
@@ -67,17 +90,111 @@ async function recognizeHandwriting(canvas, expectedAnswer = '') {
         };
     }
 
-    try {
-        // Simple character matching approach for now
-        // This can be enhanced with actual ml5.js classification
-        const recognizedText = await performSimpleRecognition(canvas, expectedAnswer);
+    // Check if recognizeCharacter is available (from handwriting-recognition.js)
+    if (typeof recognizeCharacter !== 'function') {
+        return {
+            success: false,
+            error: 'Recognition engine not loaded',
+            recognized: '',
+            confidence: 0,
+            modelMissing: true
+        };
+    }
 
+    try {
+        // Determine expected type from the answer
+        const expectedType = _getExpectedType(expectedAnswer);
+
+        // For single characters, recognize directly
+        if (!expectedAnswer || expectedAnswer.length <= 1) {
+            const result = await recognizeCharacter(canvas, {
+                expectedAnswer: expectedAnswer,
+                expectedType: expectedType
+            });
+
+            if (result.isEmpty) {
+                return {
+                    success: false,
+                    error: 'Canvas is empty',
+                    recognized: '',
+                    confidence: 0,
+                    isEmpty: true
+                };
+            }
+
+            if (result.modelMissing) {
+                return {
+                    success: false,
+                    error: 'EMNIST model not loaded',
+                    recognized: '',
+                    confidence: 0,
+                    modelMissing: true
+                };
+            }
+
+            if (result.error) {
+                return {
+                    success: false,
+                    error: result.error,
+                    recognized: '',
+                    confidence: 0
+                };
+            }
+
+            return {
+                success: true,
+                recognized: result.character || '',
+                confidence: result.confidence || 0,
+                isEmpty: false
+            };
+        }
+
+        // For multi-character answers (words), recognize first character
+        // and use it as a representative with reduced confidence
+        const firstChar = expectedAnswer.charAt(0);
+        const result = await recognizeCharacter(canvas, {
+            expectedAnswer: firstChar,
+            expectedType: expectedType
+        });
+
+        if (result.isEmpty) {
+            return {
+                success: false,
+                error: 'Canvas is empty',
+                recognized: '',
+                confidence: 0,
+                isEmpty: true
+            };
+        }
+
+        if (result.modelMissing) {
+            return {
+                success: false,
+                error: 'EMNIST model not loaded',
+                recognized: '',
+                confidence: 0,
+                modelMissing: true
+            };
+        }
+
+        if (result.error) {
+            return {
+                success: false,
+                error: result.error,
+                recognized: '',
+                confidence: 0
+            };
+        }
+
+        // For words: we can only recognize single chars from a canvas,
+        // so return the recognized character with reduced confidence
         return {
             success: true,
-            recognized: recognizedText,
-            confidence: 0.85, // Simulated confidence
+            recognized: result.character || '',
+            confidence: Math.max(0, (result.confidence || 0) * 0.6),
             isEmpty: false
         };
+
     } catch (error) {
         console.error('Handwriting recognition error:', error);
         return {
@@ -90,78 +207,23 @@ async function recognizeHandwriting(canvas, expectedAnswer = '') {
 }
 
 /**
- * Simple recognition approach
- * For production: Replace with actual ml5.js model inference
+ * Determine expected type from the answer string.
+ * @param {string} answer
+ * @returns {string} 'digit', 'letter', or 'any'
  */
-async function performSimpleRecognition(canvas, expectedAnswer) {
-    // This is a placeholder for actual recognition
-    // In production, you would:
-    // 1. Preprocess the canvas image
-    // 2. Pass it to ml5.js imageClassifier with a trained model
-    // 3. Return the classified character/word
-
-    // For now, return a helpful response
-    if (expectedAnswer) {
-        // Visual similarity check (very basic)
-        const hasContent = !isCanvasEmpty(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height));
-        if (hasContent) {
-            // Return expected answer with disclaimer
-            return expectedAnswer + ' (detected)';
-        }
-    }
-
-    return 'Unable to recognize';
+function _getExpectedType(answer) {
+    if (!answer) return 'any';
+    if (/^\d+$/.test(answer)) return 'digit';
+    if (/^[a-zA-Z]+$/.test(answer)) return 'letter';
+    return 'any';
 }
 
 /**
- * Check if canvas is empty
- */
-function isCanvasEmpty(imageData) {
-    const pixels = imageData.data;
-    for (let i = 3; i < pixels.length; i += 4) {
-        if (pixels[i] > 0) return false; // Found a non-transparent pixel
-    }
-    return true;
-}
-
-/**
- * Preprocess canvas for recognition
- * - Center the drawing
- * - Normalize size
- * - Convert to grayscale
- */
-function preprocessCanvas(canvas) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Find bounding box of drawn content
-    let minX = canvas.width, minY = canvas.height;
-    let maxX = 0, maxY = 0;
-
-    const pixels = imageData.data;
-    for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-            const alpha = pixels[(y * canvas.width + x) * 4 + 3];
-            if (alpha > 0) {
-                minX = Math.min(minX, x);
-                minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x);
-                maxY = Math.max(maxY, y);
-            }
-        }
-    }
-
-    return {
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY
-    };
-}
-
-/**
- * Validate handwriting against expected answer
- * Uses fuzzy matching for kid-friendly validation
+ * Validate handwriting against expected answer.
+ * Uses fuzzy matching for kid-friendly validation.
+ * @param {string} recognized - Recognized text
+ * @param {string} expected - Expected answer
+ * @returns {boolean} True if close enough match
  */
 function validateHandwriting(recognized, expected) {
     if (!recognized || !expected) return false;
@@ -180,6 +242,9 @@ function validateHandwriting(recognized, expected) {
 
 /**
  * Calculate string similarity (Levenshtein distance based)
+ * @param {string} str1
+ * @param {string} str2
+ * @returns {number} Similarity score between 0 and 1
  */
 function calculateSimilarity(str1, str2) {
     const len1 = str1.length;
@@ -196,6 +261,9 @@ function calculateSimilarity(str1, str2) {
 
 /**
  * Levenshtein distance calculation
+ * @param {string} str1
+ * @param {string} str2
+ * @returns {number} Edit distance
  */
 function levenshteinDistance(str1, str2) {
     const matrix = [];
@@ -232,4 +300,4 @@ if (document.readyState === 'loading') {
     initializeHandwritingRecognition();
 }
 
-console.log('English handwriting helper loaded with ml5.js support');
+console.log('English handwriting helper loaded with EMNIST support');

@@ -80,5 +80,32 @@ service cloud.firestore {
       // Auto-delete old sessions (handled by client-side cleanup)
       allow delete: if isAuthenticated();
     }
+
+    // Weekly assignments collection - parents can read/write their children's assignments
+    match /weekly_assignments/{assignmentId} {
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Level tests collection - stores level advancement test results
+    match /level_tests/{testId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Feedback collection - parent feedback per module
+    match /feedback/{feedbackId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Notifications collection - in-app notifications for children
+    match /notifications/{notificationId} {
+      allow read, create, update, delete: if isAuthenticated();
+    }
+
+    // Email log collection - dedup records for email reminders
+    match /email_log/{logId} {
+      allow read, create: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
   }
 }

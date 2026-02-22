@@ -576,11 +576,15 @@ async function submitAssessment() {
     // Check if using pencil mode
     const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
 
-    // Ensure handwriting model is loaded only for pencil mode
+    // Ensure handwriting models are loaded for pencil mode
     if (usePencil) {
         try {
             if (typeof loadHandwritingModel !== 'undefined') {
                 await loadHandwritingModel();
+            }
+            // Also load EMNIST for English letter recognition
+            if (isEnglish && typeof loadEmnistModel !== 'undefined') {
+                await loadEmnistModel();
             }
         } catch (error) {
             console.error('Failed to load handwriting model:', error);
@@ -609,22 +613,37 @@ async function submitAssessment() {
             if (usePencil) {
                 // Pencil mode: Use handwriting recognition
                 if (isEnglish) {
-                    // For English, try to recognize text (or just compare by showing answer)
-                    // For now, treat handwritten English as manual check needed
-                    const canvas = answerElement;
-                    const ctx = canvas.getContext('2d');
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const hasContent = Array.from(imageData.data).some((value, index) => {
-                        // Check alpha channel (every 4th value)
-                        return index % 4 === 3 && value > 0;
-                    });
+                    // Try EMNIST character recognition if available
+                    if (typeof recognizeCharacter === 'function') {
+                        const charResult = await recognizeCharacter(answerElement, {
+                            expectedAnswer: String(correctAnswer).charAt(0),
+                            expectedType: 'letter'
+                        });
 
-                    if (!hasContent) {
-                        isEmpty = true;
+                        if (charResult.isEmpty) {
+                            isEmpty = true;
+                        } else if (charResult.modelMissing) {
+                            // EMNIST not loaded - mark as handwritten (can't score)
+                            userAnswer = 'handwritten';
+                        } else if (charResult.error) {
+                            userAnswer = null;
+                        } else {
+                            userAnswer = charResult.character || 'handwritten';
+                        }
                     } else {
-                        // Has content but we can't recognize English handwriting reliably
-                        // Count as "attempted" for now
-                        userAnswer = 'handwritten';
+                        // No recognition engine - check for canvas content
+                        const canvas = answerElement;
+                        const ctx = canvas.getContext('2d');
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const hasContent = Array.from(imageData.data).some((value, index) => {
+                            return index % 4 === 3 && value > 0;
+                        });
+
+                        if (!hasContent) {
+                            isEmpty = true;
+                        } else {
+                            userAnswer = 'handwritten';
+                        }
                     }
                 } else {
                     // Math: Use digit recognition
@@ -661,23 +680,21 @@ async function submitAssessment() {
                 feedback.textContent = `❓ Unclear (answer: ${correctAnswer})`;
                 feedback.style.color = '#ff9800';
                 results.push({ question: i + 1, correct: false, error: true });
+            } else if (isEnglish && userAnswer === 'handwritten') {
+                // Handwritten but no recognition available -
+                // show answer, mark incorrect (don't inflate scores)
+                feedback.textContent = `📝 Handwritten (answer: ${correctAnswer})`;
+                feedback.style.color = '#2196f3';
+                if (usePencil) {
+                    answerElement.style.border = '2px solid #2196f3';
+                }
+                results.push({ question: i + 1, correct: false, handwritten: true, expected: correctAnswer });
             } else {
                 let isCorrect;
 
                 if (isEnglish) {
-                    if (userAnswer === 'handwritten') {
-                        // For handwritten English, compare canvas content against expected answer
-                        // Since we can't reliably recognize letters yet, show the expected answer
-                        // and don't count it as correct (avoids inflating scores)
-                        isCorrect = false;
-                        feedback.textContent = `📝 Handwritten (answer: ${correctAnswer})`;
-                        feedback.style.color = '#2196f3';
-                        results.push({ question: i + 1, correct: false, handwritten: true, expected: correctAnswer });
-                        continue;
-                    } else {
-                        // Case-insensitive string comparison for typed English answers
-                        isCorrect = userAnswer.toLowerCase() === String(correctAnswer).toLowerCase();
-                    }
+                    // Case-insensitive string comparison for English answers
+                    isCorrect = userAnswer.toLowerCase() === String(correctAnswer).toLowerCase();
                 } else {
                     // Number comparison for Math
                     isCorrect = userAnswer === correctAnswer;

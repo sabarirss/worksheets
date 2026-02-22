@@ -488,11 +488,22 @@
             const emptyState = document.getElementById('empty-state');
 
             try {
-                const snapshot = await firebase.firestore()
-                    .collection('children')
-                    .where('parent_uid', '==', parentUid)
-                    .orderBy('created_at', 'desc')
-                    .get();
+                let snapshot;
+                try {
+                    // Try with ordering (requires composite index)
+                    snapshot = await firebase.firestore()
+                        .collection('children')
+                        .where('parent_uid', '==', parentUid)
+                        .orderBy('created_at', 'desc')
+                        .get();
+                } catch (indexError) {
+                    // Fallback without orderBy if composite index is missing
+                    console.warn('Composite index not available, loading without ordering:', indexError.message);
+                    snapshot = await firebase.firestore()
+                        .collection('children')
+                        .where('parent_uid', '==', parentUid)
+                        .get();
+                }
 
                 const progressBtn = document.querySelector('.view-progress-btn');
 
@@ -515,7 +526,7 @@
 
             } catch (error) {
                 console.error('Error loading children:', error);
-                alert('Error loading children profiles');
+                alert('Error loading children profiles: ' + error.message);
             }
         }
 
@@ -852,7 +863,7 @@
                 loadChildren();
             } catch (error) {
                 console.error('Error saving child:', error);
-                alert('Error saving child profile');
+                alert('Error saving child profile: ' + error.message);
             }
         });
 
