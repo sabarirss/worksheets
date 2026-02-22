@@ -1152,6 +1152,51 @@ test('All queries in notification-system.js use indexed fields', () => {
 });
 
 // ============================================================================
+// BUG-023: Cloud Functions SDK + Auto-Save on Submit/Navigate
+// ============================================================================
+console.log('\n--- BUG-023: Cloud Functions SDK & Auto-Save ---');
+
+test('index.html loads Firebase Functions SDK', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('firebase-functions-compat.js'),
+        'index.html must load firebase-functions-compat.js for Cloud Functions');
+});
+
+test('index.html loads storage-manager.js', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('storage-manager.js'),
+        'index.html must load storage-manager.js for localStorage save/load');
+});
+
+test('submitWorksheet calls autoSavePage after grading', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('async function submitWorksheet()');
+    assert.ok(fnIdx >= 0, 'Missing submitWorksheet function');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}\n', fnIdx + 500) + 3);
+    assert.ok(fnBody.includes('autoSavePage()'),
+        'submitWorksheet must call autoSavePage() to persist answers');
+});
+
+test('navigateAbsolutePage calls autoSavePage before navigating', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('async function navigateAbsolutePage');
+    assert.ok(fnIdx >= 0, 'Missing navigateAbsolutePage function');
+    const fnBody = js.slice(fnIdx, js.indexOf('\n}\n', fnIdx + 200) + 3);
+    assert.ok(fnBody.includes('autoSavePage()'),
+        'navigateAbsolutePage must call autoSavePage() before switching pages');
+});
+
+test('autoSavePage is defined and saves to localStorage', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function autoSavePage()');
+    assert.ok(fnIdx >= 0, 'Missing autoSavePage function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 100);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('saveWorksheetToStorage'),
+        'autoSavePage must use saveWorksheetToStorage (localStorage)');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
