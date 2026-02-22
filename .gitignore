@@ -1,1 +1,20 @@
 *.swp
+
+# Dependencies
+node_modules/
+functions/node_modules/
+
+# Firebase cache
+.firebase/
+
+# Lock files
+package-lock.json
+functions/package-lock.json
+
+# Local/temp files
+get-docker.sh
+models/
+train-emnist-model.py
+
+# Claude Code local settings
+.claude/settings.local.json
