@@ -455,18 +455,25 @@ function showStories(difficulty) {
 
     limitedList.forEach((story, index) => {
         const card = document.createElement('div');
-        card.className = 'story-card';
+        const categoryClass = currentCategory ? `story-card--${currentCategory}` : '';
+        card.className = `story-card ${categoryClass}`;
         card.onclick = () => readStory(index);
 
-        // Handle both unique stories (with 'image') and generated stories (with 'illustration')
-        const cardIconHTML = story.image
-            ? `<img src="${story.image}" alt="${story.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;">`
-            : `<div style="font-size: 3em;">${story.illustration || '📖'}</div>`;
-
-        card.innerHTML = `
-            <div class="story-card-icon">${cardIconHTML}</div>
-            <div class="story-card-title">${story.title}</div>
-        `;
+        // Cards with images: low-opacity background image + centered title
+        // Cards with emoji: pastel gradient (via category class) + emoji + title
+        if (story.image) {
+            card.innerHTML = `
+                <div class="story-card-bg" style="background-image: url('${story.image}');"></div>
+                <div class="story-card-title">${story.title}</div>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="story-card-title">
+                    <div class="story-card-emoji">${story.illustration || '📖'}</div>
+                    ${story.title}
+                </div>
+            `;
+        }
         container.appendChild(card);
     });
 

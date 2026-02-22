@@ -7,7 +7,8 @@
 
 body {
     font-family: 'Arial', 'Helvetica', sans-serif;
-    background-color: #ffffff;
+    background: linear-gradient(180deg, #f0f4ff 0%, #fef6ff 50%, #fff8f0 100%);
+    background-attachment: fixed;
     color: #000000;
     line-height: 1.6;
     padding: 20px;
@@ -23,6 +24,48 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
+    position: relative;
+}
+
+/* Decorative side blobs — tablet+ only */
+@media (min-width: 769px) {
+    .container::before,
+    .container::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+    }
+    .container::before {
+        width: 260px;
+        height: 260px;
+        top: 10%;
+        left: -80px;
+        background: radial-gradient(circle, rgba(102,126,234,0.12) 0%, transparent 70%);
+    }
+    .container::after {
+        width: 200px;
+        height: 200px;
+        bottom: 15%;
+        right: -60px;
+        background: radial-gradient(circle, rgba(240,147,251,0.12) 0%, transparent 70%);
+    }
+}
+/* Extra dot on large screens */
+@media (min-width: 1025px) {
+    body::before {
+        content: '';
+        position: fixed;
+        width: 180px;
+        height: 180px;
+        top: 55%;
+        left: 30px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(76,175,80,0.1) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: -1;
+    }
 }
 
 /* Header Styles */
@@ -30,7 +73,8 @@ header {
     text-align: center;
     margin-bottom: 40px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #000;
+    border-bottom: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 header h1 {
@@ -65,7 +109,8 @@ header h1 {
 
 .subject-btn {
     background: #ffffff;
-    border: 3px solid #000;
+    border: 2px solid #e0e0e0;
+    border-left: 5px solid #667eea;
     padding: 40px 30px;
     cursor: pointer;
     transition: all 0.3s;
@@ -73,12 +118,15 @@ header h1 {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .subject-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: #f8f9ff;
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+    border-left-color: #764ba2;
 }
 
 .subject-name {
@@ -112,7 +160,7 @@ header h1 {
 
 .level-btn {
     background: #ffffff;
-    border: 2px solid #000;
+    border: 2px solid #e0e0e0;
     padding: 20px;
     cursor: pointer;
     transition: all 0.3s;
@@ -121,12 +169,14 @@ header h1 {
     align-items: flex-start;
     text-align: left;
     position: relative;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .level-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: #f8f9ff;
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 6px 16px rgba(102,126,234,0.18);
 }
 
 /* Completion Badge */
@@ -173,7 +223,7 @@ header h1 {
     align-items: flex-start;
     margin-bottom: 30px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid #e0e0e0;
     flex-wrap: wrap;
     gap: 15px;
 }
@@ -204,7 +254,7 @@ header h1 {
 
 .info-row input {
     border: none;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #b0b0b0;
     width: 150px;
     padding: 2px 5px;
     font-size: 0.95em;
@@ -235,7 +285,7 @@ header h1 {
 
 .control-buttons button {
     padding: 12px 20px;
-    border: 3px solid #333;
+    border: 2px solid rgba(102,126,234,0.3);
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     cursor: pointer;
@@ -243,8 +293,8 @@ header h1 {
     font-weight: bold;
     transition: all 0.3s;
     white-space: nowrap;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(102,126,234,0.2);
 }
 
 .control-buttons button:hover {
@@ -300,12 +350,13 @@ header h1 {
 
 .answer-input {
     border: none;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid #b0b0b0;
     width: 80px;
     padding: 5px;
     font-size: 1em;
     font-family: 'Courier New', monospace;
     text-align: center;
+    border-radius: 0;
 }
 
 .answer-input:focus {
@@ -325,8 +376,9 @@ header h1 {
 .answer-key {
     margin-top: 40px;
     padding: 20px;
-    background: #f0f0f0;
-    border: 2px solid #000;
+    background: #f5f5f5;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
     display: none;
 }
 
@@ -366,9 +418,10 @@ footer {
 
 .aptitude-problem {
     background: #ffffff;
-    border: 2px solid #000;
+    border: 2px solid #e0e0e0;
     padding: 30px;
-    border-radius: 8px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .problem-header {
@@ -468,11 +521,12 @@ footer {
 .option-btn {
     font-size: 2.5em;
     padding: 15px 30px;
-    border: 3px solid #000;
+    border: 3px solid #e0e0e0;
     background: #fff;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 14px;
     transition: all 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .option-btn:hover {
@@ -522,11 +576,12 @@ footer {
 .oddone-btn {
     font-size: 3em;
     padding: 20px 30px;
-    border: 3px solid #000;
+    border: 3px solid #e0e0e0;
     background: #fff;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 14px;
     transition: all 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .oddone-btn:hover {
@@ -561,12 +616,13 @@ footer {
 
 .compare-btn {
     padding: 30px;
-    border: 3px solid #000;
+    border: 3px solid #e0e0e0;
     background: #fff;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 14px;
     transition: all 0.3s;
     min-width: 150px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .compare-btn:hover {
@@ -738,9 +794,11 @@ footer {
     margin: 20px 0;
     padding: 20px;
     background: #e8f4f8;
-    border: 2px solid #0066cc;
+    border: 2px solid #b3d9ea;
+    border-radius: 14px;
     text-align: center;
     display: none;
+    box-shadow: 0 2px 8px rgba(0,102,204,0.1);
 }
 
 .results-summary h3 {
@@ -762,23 +820,24 @@ footer {
     flex-direction: column;
     gap: 15px;
     align-items: center;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 3px solid #e0e0e0;
+    background: rgba(248,249,250,0.8);
+    border-radius: 16px;
+    border: 2px solid #e8e8e8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .navigation button {
     padding: 15px 35px;
     margin: 0;
-    border: 3px solid #333;
+    border: 2px solid rgba(102,126,234,0.3);
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     cursor: pointer;
     font-size: 1.2em;
     font-weight: bold;
     transition: all 0.3s;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(102,126,234,0.2);
     min-width: 200px;
 }
 
@@ -795,10 +854,11 @@ footer {
 /* Writing Practice Styles */
 .writing-problem {
     background: white;
-    border: 3px solid #000;
+    border: 2px solid #e0e0e0;
     padding: 25px;
     margin: 25px 0;
-    border-radius: 10px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .writing-example {
@@ -1184,9 +1244,9 @@ footer {
     gap: 10px;
     padding: 10px 15px;
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    border: 3px solid #333;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .answer-toggle-label,
@@ -1219,7 +1279,7 @@ footer {
     background-color: #e0e0e0;
     transition: 0.4s;
     border-radius: 32px;
-    border: 3px solid #333;
+    border: 2px solid #ccc;
 }
 
 .toggle-slider:before {
@@ -1264,8 +1324,8 @@ footer {
     padding: 12px 25px;
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     border-radius: 25px;
-    border: 3px solid #333;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 2px solid rgba(240,147,251,0.3);
+    box-shadow: 0 4px 8px rgba(240,147,251,0.2);
 }
 
 .page-navigation button {
@@ -1273,8 +1333,8 @@ footer {
     font-size: 1.1em;
     font-weight: bold;
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    border: 3px solid #333;
-    border-radius: 10px;
+    border: 2px solid rgba(79,172,254,0.3);
+    border-radius: 12px;
     color: white;
     min-width: 140px;
 }
