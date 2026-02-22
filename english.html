@@ -304,7 +304,7 @@
         // Wait for Firebase auth to initialize
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -330,7 +330,7 @@
                 const child = getSelectedChild();
                 if (!child || !child.age) {
                     alert('Please select a child profile first');
-                    window.location.href = 'children-profiles.html';
+                    window.location.href = 'children-profiles';
                     return;
                 }
                 childAge = child.age.toString();
@@ -365,7 +365,7 @@
         <div class="level-selection" id="type-selection">
             <h2>Select Activity Type</h2>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+                <button onclick="window.location.href='index'">← Back to Subjects</button>
             </div>
             <div class="level-grid">
                 <button onclick="loadWorksheetNew('easy')" class="level-btn">

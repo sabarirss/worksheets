@@ -126,7 +126,7 @@ function showAdminLevelIndicator(module, container) {
         `;
         banner.innerHTML = `
             📊 Admin Mode: Viewing ${getLevelDisplayName(access.level)}
-            <a href="admin.html" style="color: #ffd93d; text-decoration: underline; margin-left: 15px; font-weight: normal;">Change Level</a>
+            <a href="admin" style="color: #ffd93d; text-decoration: underline; margin-left: 15px; font-weight: normal;">Change Level</a>
         `;
 
         container.insertBefore(banner, container.firstChild);

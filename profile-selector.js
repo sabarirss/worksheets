@@ -117,7 +117,7 @@ function renderEmptyState(container) {
     container.innerHTML = `
         <div class="profile-selector-empty">
             <span class="empty-icon">👶</span>
-            <button class="add-child-link" onclick="window.location.href='children-profiles.html'">
+            <button class="add-child-link" onclick="window.location.href='children-profiles'">
                 ➕ Add Child Profile
             </button>
         </div>
@@ -148,7 +148,7 @@ function renderProfileSelector(container, children, selectedChildId) {
             <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
                 ${children.map(child => renderChildOption(child, selectedChildId)).join('')}
                 <div class="profile-dropdown-divider"></div>
-                <div class="profile-dropdown-item add-child-item" onclick="window.location.href='children-profiles.html'">
+                <div class="profile-dropdown-item add-child-item" onclick="window.location.href='children-profiles'">
                     ➕ Manage Profiles
                 </div>
             </div>

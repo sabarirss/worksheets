@@ -297,7 +297,7 @@
         // Wait for Firebase auth to initialize
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -323,7 +323,7 @@
                 const child = getSelectedChild();
                 if (!child || !child.age) {
                     alert('Please select a child profile first');
-                    window.location.href = 'children-profiles.html';
+                    window.location.href = 'children-profiles';
                     return;
                 }
                 childAge = child.age.toString();
@@ -357,7 +357,7 @@
 
         <div id="tutorial-selection">
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+                <button onclick="window.location.href='index'">← Back to Subjects</button>
             </div>
             <h2 id="tutorial-list-title">Choose a Tutorial</h2>
             <div class="tutorial-list" id="tutorial-list"></div>

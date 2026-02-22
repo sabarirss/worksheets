@@ -428,7 +428,7 @@
             <h1>Parent & Children Management</h1>
             <p>Manage parent accounts, children profiles, and per-child module allocations</p>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                <button class="btn btn-secondary" onclick="window.location.href='index'">
                     Back to Home
                 </button>
                 <button class="btn btn-secondary" onclick="loadParentsAndChildren()">
@@ -465,6 +465,45 @@
                 Parents have requested access to additional modules for their children. Approve or deny each request.
             </p>
             <div id="module-requests-list" style="display: grid; gap: 15px;">
+            </div>
+        </div>
+
+        <!-- Feedback Viewer Section -->
+        <div id="feedback-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #ff9800; padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #2c3e50;">
+                    💬 Parent Feedback
+                </h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="feedback-filter-module" onchange="filterFeedback()" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9em; cursor: pointer;">
+                        <option value="all">All Modules</option>
+                        <option value="general">Overall Platform</option>
+                        <option value="math">Math</option>
+                        <option value="english">English</option>
+                        <option value="aptitude">Aptitude</option>
+                        <option value="stories">Stories</option>
+                        <option value="drawing">Drawing</option>
+                        <option value="eq">EQ</option>
+                        <option value="german">German</option>
+                    </select>
+                    <button class="btn btn-small btn-secondary" onclick="loadFeedback()" title="Refresh feedback">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div id="feedback-summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
+            </div>
+
+            <!-- Feedback List -->
+            <div id="feedback-list" style="display: grid; gap: 15px;">
+                <div style="text-align: center; padding: 40px; color: #999;">
+                    Loading feedback...
+                </div>
+            </div>
+
+            <div id="feedback-empty" style="display: none; text-align: center; padding: 40px; color: #999;">
+                <div style="font-size: 3em; margin-bottom: 10px;">📭</div>
+                <p>No feedback received yet</p>
             </div>
         </div>
 
@@ -705,7 +744,7 @@
         // Wait for Firebase auth and check admin access
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -738,7 +777,7 @@
                 if (userDocByEmail.empty) {
                     console.error('No user document found for:', user.email);
                     alert('Access denied. User profile not found.');
-                    window.location.href = 'index.html';
+                    window.location.href = 'index';
                     return;
                 }
 
@@ -748,7 +787,7 @@
                 if (userData.role !== 'admin') {
                     console.error('User is not admin. Role:', userData.role);
                     alert('Access denied. Admin privileges required.');
-                    window.location.href = 'index.html';
+                    window.location.href = 'index';
                     return;
                 }
 
@@ -765,7 +804,7 @@
             } catch (error) {
                 console.error('Error checking admin access:', error);
                 alert('Error verifying admin access: ' + error.message);
-                window.location.href = 'index.html';
+                window.location.href = 'index';
             }
         });
 
@@ -774,6 +813,7 @@
             loadParentsAndChildren();
             loadUpgradeRequests();
             loadModuleRequests();
+            loadFeedback();
         });
 
         // ===== Version Upgrade Request Functions =====
@@ -1491,6 +1531,214 @@ Would you like to view their children profiles?
                 console.error('Error updating child version:', error);
                 alert('Failed to update version: ' + error.message);
             }
+        }
+
+        // ============================================================================
+        // FEEDBACK VIEWER
+        // ============================================================================
+
+        let allFeedback = [];
+
+        const MODULE_ICONS = {
+            general: '🏠', math: '📐', english: '📚', aptitude: '🧩',
+            stories: '📖', drawing: '🎨', eq: '❤️', german: '🇩🇪'
+        };
+
+        const MODULE_NAMES = {
+            general: 'Overall Platform', math: 'Mathematics', english: 'English',
+            aptitude: 'Aptitude', stories: 'Stories', drawing: 'Drawing',
+            eq: 'Emotional Quotient', german: 'German'
+        };
+
+        async function loadFeedback() {
+            const listEl = document.getElementById('feedback-list');
+            const emptyEl = document.getElementById('feedback-empty');
+            const summaryEl = document.getElementById('feedback-summary');
+
+            listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Loading feedback...</div>';
+            emptyEl.style.display = 'none';
+
+            try {
+                const snapshot = await firebase.firestore()
+                    .collection('feedback')
+                    .orderBy('timestamp', 'desc')
+                    .limit(100)
+                    .get();
+
+                allFeedback = [];
+                snapshot.forEach(doc => {
+                    allFeedback.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderFeedbackSummary(allFeedback, summaryEl);
+                filterFeedback();
+
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: #e53935;">Failed to load feedback: ' + error.message + '</div>';
+            }
+        }
+
+        function renderFeedbackSummary(feedbackList, container) {
+            if (feedbackList.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            // Compute per-module average ratings
+            const moduleStats = {};
+            let totalRatings = 0;
+            let ratingSum = 0;
+
+            feedbackList.forEach(fb => {
+                if (!fb.modules) return;
+                Object.entries(fb.modules).forEach(([mod, data]) => {
+                    if (data.rating && data.rating > 0) {
+                        if (!moduleStats[mod]) moduleStats[mod] = { sum: 0, count: 0 };
+                        moduleStats[mod].sum += data.rating;
+                        moduleStats[mod].count++;
+                        totalRatings++;
+                        ratingSum += data.rating;
+                    }
+                });
+            });
+
+            const overallAvg = totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '-';
+
+            let html = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2.5em; font-weight: bold;">${feedbackList.length}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">Total Responses</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2.5em; font-weight: bold;">${overallAvg}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">Avg Rating / 5</div>
+                </div>
+            `;
+
+            // Top-rated and lowest-rated modules
+            const sortedMods = Object.entries(moduleStats)
+                .map(([mod, s]) => ({ mod, avg: s.sum / s.count, count: s.count }))
+                .sort((a, b) => b.avg - a.avg);
+
+            if (sortedMods.length > 0) {
+                const best = sortedMods[0];
+                html += `
+                    <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 2.5em; font-weight: bold;">${MODULE_ICONS[best.mod] || ''} ${best.avg.toFixed(1)}</div>
+                        <div style="font-size: 0.9em; opacity: 0.9;">Best: ${MODULE_NAMES[best.mod] || best.mod}</div>
+                    </div>
+                `;
+                if (sortedMods.length > 1) {
+                    const worst = sortedMods[sortedMods.length - 1];
+                    html += `
+                        <div style="background: linear-gradient(135deg, #e53935 0%, #c62828 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 2.5em; font-weight: bold;">${MODULE_ICONS[worst.mod] || ''} ${worst.avg.toFixed(1)}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Needs Work: ${MODULE_NAMES[worst.mod] || worst.mod}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            container.innerHTML = html;
+        }
+
+        function filterFeedback() {
+            const filterMod = document.getElementById('feedback-filter-module').value;
+            const listEl = document.getElementById('feedback-list');
+            const emptyEl = document.getElementById('feedback-empty');
+
+            let filtered = allFeedback;
+
+            if (filterMod !== 'all') {
+                filtered = allFeedback.filter(fb =>
+                    fb.modules && fb.modules[filterMod] &&
+                    (fb.modules[filterMod].rating > 0 || fb.modules[filterMod].good || fb.modules[filterMod].improve)
+                );
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.style.display = 'block';
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            listEl.innerHTML = filtered.map(fb => renderFeedbackCard(fb, filterMod)).join('');
+        }
+
+        function renderFeedbackCard(fb, filterMod) {
+            const date = fb.timestamp ? new Date(fb.timestamp.seconds * 1000) : new Date();
+            const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            // Find parent name from feedback data or loaded parents
+            const parent = parentsData.find(p => p.id === fb.userId);
+            const parentName = fb.userName || (parent ? (parent.name || parent.username || parent.email) : (fb.userEmail || 'Unknown'));
+            const childName = fb.childName ? ` (child: ${escapeHtmlFb(fb.childName)})` : '';
+
+            // Build module feedback cards
+            let modulesHtml = '';
+            if (fb.modules) {
+                const modulesToShow = filterMod !== 'all'
+                    ? [[filterMod, fb.modules[filterMod]]]
+                    : Object.entries(fb.modules);
+
+                modulesToShow.forEach(([mod, data]) => {
+                    if (!data || (!data.rating && !data.good && !data.improve)) return;
+
+                    const stars = data.rating ? renderStars(data.rating) : '<span style="color: #999;">No rating</span>';
+                    const goodText = data.good ? `<div style="margin-top: 8px;"><strong style="color: #4caf50;">Good:</strong> ${escapeHtmlFb(data.good)}</div>` : '';
+                    const improveText = data.improve ? `<div style="margin-top: 5px;"><strong style="color: #ff9800;">Improve:</strong> ${escapeHtmlFb(data.improve)}</div>` : '';
+
+                    modulesHtml += `
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-weight: bold; color: #333;">${MODULE_ICONS[mod] || ''} ${MODULE_NAMES[mod] || mod}</span>
+                                <span>${stars}</span>
+                            </div>
+                            ${goodText}
+                            ${improveText}
+                        </div>
+                    `;
+                });
+            }
+
+            if (!modulesHtml) {
+                modulesHtml = '<div style="color: #999; padding: 10px;">No detailed feedback provided</div>';
+            }
+
+            return `
+                <div style="border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; transition: all 0.2s;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <div>
+                            <span style="font-weight: bold; color: #2c3e50; font-size: 1.05em;">👤 ${escapeHtmlFb(parentName)}</span>
+                            <span style="color: #999; font-size: 0.85em;">${childName}</span>
+                        </div>
+                        <div style="color: #999; font-size: 0.85em;">
+                            ${dateStr} at ${timeStr}
+                        </div>
+                    </div>
+                    ${modulesHtml}
+                </div>
+            `;
+        }
+
+        function renderStars(rating) {
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                html += i <= rating
+                    ? '<span style="color: #ffc107; font-size: 1.1em;">&#9733;</span>'
+                    : '<span style="color: #ddd; font-size: 1.1em;">&#9733;</span>';
+            }
+            return html;
+        }
+
+        function escapeHtmlFb(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         // Call on page load

@@ -38,7 +38,7 @@
         // Wait for Firebase auth to initialize
         firebase.auth().onAuthStateChanged(function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -141,7 +141,7 @@
                 </button>
             </div>
             <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index.html'">← Back to Subjects</button>
+                <button onclick="window.location.href='index'">← Back to Subjects</button>
             </div>
         </div>
 
@@ -171,7 +171,7 @@
 
             <div id="a1-story-selection" style="display: none;">
                 <div class="navigation" style="margin-bottom: 20px;">
-                    <button onclick="window.location.href='index.html'">← Back to Home</button>
+                    <button onclick="window.location.href='index'">← Back to Home</button>
                 </div>
                 <h2 id="a1-story-list-title">Choose a Story</h2>
                 <div id="a1-story-list" class="level-grid"></div>

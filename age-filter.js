@@ -138,21 +138,21 @@ function filterSubjectButtons() {
     console.log(`Filtering subjects for age ${userAge}`);
 
     // German B1 is only for ages 10+
-    const germanButton = document.querySelector('.subject-btn[onclick*="german.html"]');
+    const germanButton = document.querySelector('.subject-btn[onclick*="german"]');
     if (germanButton && userAge < 10) {
         germanButton.style.display = 'none';
         console.log('Hiding German B1 for young child');
     }
 
     // German Kids is for ages 6+ (suitable for early learners)
-    const germanKidsButton = document.querySelector('.subject-btn[onclick*="german-kids.html"]');
+    const germanKidsButton = document.querySelector('.subject-btn[onclick*="german-kids"]');
     if (germanKidsButton && userAge < 6) {
         germanKidsButton.style.display = 'none';
         console.log('Hiding German Kids for child under 6');
     }
 
     // Emotional Quotient is for ages 7+ (requires emotional understanding)
-    const eqButton = document.querySelector('.subject-btn[onclick*="emotional-quotient.html"]');
+    const eqButton = document.querySelector('.subject-btn[onclick*="emotional-quotient"]');
     if (eqButton && userAge < 7) {
         eqButton.style.display = 'none';
         console.log('Hiding Emotional Quotient for young child');
@@ -642,23 +642,23 @@ function checkPageAccess() {
     const currentPage = window.location.pathname.split('/').pop();
 
     // Block German B1 for children under 10
-    if (currentPage === 'german.html' && userAge < 10) {
+    if (currentPage === 'german' && userAge < 10) {
         alert('This module is for ages 10 and above. Please ask a parent to update your age settings if you are ready for this content.');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 
     // Block German Kids for children under 6
-    if (currentPage === 'german-kids.html' && userAge < 6) {
+    if (currentPage === 'german-kids' && userAge < 6) {
         alert('This module is for ages 6 and above. Please ask a parent to update your age settings when you are ready.');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 
     // Block Emotional Quotient for children under 7
-    if (currentPage === 'emotional-quotient.html' && userAge < 7) {
+    if (currentPage === 'emotional-quotient' && userAge < 7) {
         alert('This module is for ages 7 and above. Please ask a parent to update your age settings when you are ready.');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 }

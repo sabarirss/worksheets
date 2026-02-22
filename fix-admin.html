@@ -95,7 +95,7 @@
 
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                showStatus('error', 'Not logged in. Please <a href="login.html">login as admin</a> first.');
+                showStatus('error', 'Not logged in. Please <a href="login">login as admin</a> first.');
                 return;
             }
 
@@ -220,7 +220,7 @@
                 }
 
                 actionsDiv.innerHTML = `
-                    <button onclick="window.location.href='admin.html'">Go to Admin Panel</button>
+                    <button onclick="window.location.href='admin'">Go to Admin Panel</button>
                     <button onclick="window.location.reload()">Check Again</button>
                 `;
 

@@ -141,8 +141,8 @@ protectedPages.forEach(page => {
     test(`${page} has login redirect or uses firebase-auth.js`, () => {
         const content = readFile(page);
         assert.ok(
-            content.includes("login.html") || content.includes('firebase-auth.js'),
-            `${page} missing redirect to login.html or auth handler`
+            content.includes("login") || content.includes('firebase-auth.js'),
+            `${page} missing redirect to login or auth handler`
         );
     });
 });
@@ -152,16 +152,16 @@ console.log('\n=== Back Button Navigation ===');
 // ============================================================================
 
 const backButtonChecks = [
-    { page: 'settings.html', target: 'index.html', desc: 'Settings -> Home' },
-    { page: 'admin.html', target: 'index.html', desc: 'Admin -> Home' },
-    { page: 'children-profiles.html', target: 'index.html', desc: 'Children Profiles -> Home' },
-    { page: 'english.html', target: 'index.html', desc: 'English -> Home' },
-    { page: 'drawing.html', target: 'index.html', desc: 'Drawing -> Home' },
-    { page: 'german.html', target: 'index.html', desc: 'German -> Home' },
-    { page: 'german-kids.html', target: 'index.html', desc: 'German Kids -> Home' },
-    { page: 'learn-english-stories.html', target: 'index.html', desc: 'Learn English Stories -> Home' },
-    { page: 'privacy-policy.html', target: 'index.html', desc: 'Privacy Policy -> Home' },
-    { page: 'terms.html', target: 'index.html', desc: 'Terms -> Home' },
+    { page: 'settings.html', target: 'index', desc: 'Settings -> Home' },
+    { page: 'admin.html', target: 'index', desc: 'Admin -> Home' },
+    { page: 'children-profiles.html', target: 'index', desc: 'Children Profiles -> Home' },
+    { page: 'english.html', target: 'index', desc: 'English -> Home' },
+    { page: 'drawing.html', target: 'index', desc: 'Drawing -> Home' },
+    { page: 'german.html', target: 'index', desc: 'German -> Home' },
+    { page: 'german-kids.html', target: 'index', desc: 'German Kids -> Home' },
+    { page: 'learn-english-stories.html', target: 'index', desc: 'Learn English Stories -> Home' },
+    { page: 'privacy-policy.html', target: 'index', desc: 'Privacy Policy -> Home' },
+    { page: 'terms.html', target: 'index', desc: 'Terms -> Home' },
 ];
 
 backButtonChecks.forEach(({ page, target, desc }) => {
@@ -185,13 +185,13 @@ const indexContent = readFile('index.html');
 
 const moduleButtons = [
     { module: 'math', trigger: 'showMathLevels()', desc: 'Math button calls showMathLevels()' },
-    { module: 'english', trigger: 'english.html', desc: 'English button navigates to english.html' },
-    { module: 'aptitude', trigger: 'aptitude.html', desc: 'Aptitude button navigates to aptitude.html' },
-    { module: 'stories', trigger: 'stories.html', desc: 'Stories button navigates to stories.html' },
-    { module: 'eq', trigger: 'emotional-quotient.html', desc: 'EQ button navigates to emotional-quotient.html' },
-    { module: 'german', trigger: 'german.html', desc: 'German B1 button navigates to german.html' },
-    { module: 'drawing', trigger: 'drawing.html', desc: 'Drawing button navigates to drawing.html' },
-    { module: 'german-kids', trigger: 'german-kids.html', desc: 'German Kids button navigates to german-kids.html' },
+    { module: 'english', trigger: "href='english'", desc: 'English button navigates to english' },
+    { module: 'aptitude', trigger: "href='aptitude'", desc: 'Aptitude button navigates to aptitude' },
+    { module: 'stories', trigger: "href='stories'", desc: 'Stories button navigates to stories' },
+    { module: 'eq', trigger: "href='emotional-quotient'", desc: 'EQ button navigates to emotional-quotient' },
+    { module: 'german', trigger: "href='german'", desc: 'German B1 button navigates to german' },
+    { module: 'drawing', trigger: "href='drawing'", desc: 'Drawing button navigates to drawing' },
+    { module: 'german-kids', trigger: "href='german-kids'", desc: 'German Kids button navigates to german-kids' },
 ];
 
 moduleButtons.forEach(({ trigger, desc }) => {
@@ -205,7 +205,7 @@ console.log('\n=== Role-Based Visibility in index.html ===');
 // ============================================================================
 
 test('index.html has admin button', () => {
-    assert.ok(indexContent.includes('admin-btn') || indexContent.includes('admin.html'));
+    assert.ok(indexContent.includes('admin-btn') || indexContent.includes("href='admin'"));
 });
 
 test('index.html has profile selector container', () => {
@@ -245,8 +245,8 @@ test('index.html implements two-tier module system (assignedModules + enabledMod
 });
 
 test('German B1 is admin-only', () => {
-    // Should have a check that hides german.html for non-admin
-    assert.ok(indexContent.includes("german.html") && indexContent.includes('admin'),
+    // Should have a check that hides german for non-admin
+    assert.ok(indexContent.includes("german") && indexContent.includes('admin'),
         'German B1 visibility not tied to admin role');
 });
 
@@ -264,7 +264,20 @@ test('admin.html checks for admin role', () => {
 
 test('admin.html has back to home navigation', () => {
     const content = readFile('admin.html');
-    assert.ok(content.includes('index.html'), 'admin.html missing home link');
+    assert.ok(content.includes("href='index'") || content.includes("href=\"index\""), 'admin.html missing home link');
+});
+
+test('admin.html has feedback viewer section', () => {
+    const content = readFile('admin.html');
+    assert.ok(content.includes('feedback-section'), 'admin.html missing feedback section');
+    assert.ok(content.includes('loadFeedback'), 'admin.html missing loadFeedback function');
+    assert.ok(content.includes('feedback-filter-module'), 'admin.html missing feedback module filter');
+    assert.ok(content.includes('feedback-summary'), 'admin.html missing feedback summary stats');
+});
+
+test('admin.html loads feedback on page init', () => {
+    const content = readFile('admin.html');
+    assert.ok(content.includes('loadFeedback()'), 'admin.html does not call loadFeedback on init');
 });
 
 // ============================================================================
@@ -426,25 +439,25 @@ console.log('\n=== Navigation Flow Integrity ===');
 
 test('login.html has link/redirect to signup', () => {
     const content = readFile('login.html');
-    assert.ok(content.includes('signup.html'), 'login.html missing link to signup');
+    assert.ok(content.includes('signup'), 'login.html missing link to signup');
 });
 
 test('signup.html has link/redirect to login', () => {
     const content = readFile('signup.html');
-    assert.ok(content.includes('login.html'), 'signup.html missing link to login');
+    assert.ok(content.includes('login'), 'signup.html missing link to login');
 });
 
 test('index.html has link to settings', () => {
-    assert.ok(indexContent.includes('settings.html'));
+    assert.ok(indexContent.includes("href='settings'") || indexContent.includes("settings"));
 });
 
 test('index.html has link to admin panel (for admin role)', () => {
-    assert.ok(indexContent.includes('admin.html'));
+    assert.ok(indexContent.includes("href='admin'"));
 });
 
 test('children-profiles.html has link to progress', () => {
     const content = readFile('children-profiles.html');
-    assert.ok(content.includes('progress.html'), 'Missing link to progress page');
+    assert.ok(content.includes("href='progress'") || content.includes('progress'), 'Missing link to progress page');
 });
 
 test('settings.html has logout functionality', () => {
@@ -676,6 +689,129 @@ test('assessment.js has question generation', () => {
     const content = readFile('assessment.js');
     assert.ok(content.includes('assessment') || content.includes('Assessment'),
         'Missing assessment logic');
+});
+
+// ============================================================================
+// BUG-016: Footer Positioning Tests
+// ============================================================================
+console.log('\n--- BUG-016: Footer Positioning ---');
+
+test('styles.css body has flex column layout', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('min-height: 100vh'), 'body missing min-height: 100vh');
+    assert.ok(css.includes('display: flex'), 'body missing display: flex');
+    assert.ok(css.includes('flex-direction: column'), 'body missing flex-direction: column');
+});
+
+test('styles.css container has flex: 1', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('flex: 1'), 'container missing flex: 1');
+});
+
+test('styles.css footer uses margin-top: auto', () => {
+    const css = readFile('styles.css');
+    // Check footer section has margin-top: auto
+    const footerMatch = css.match(/footer\s*\{[^}]*margin-top:\s*auto/);
+    assert.ok(footerMatch, 'footer missing margin-top: auto');
+});
+
+test('index.html footer uses margin-top: auto (not 60px)', () => {
+    const html = readFile('index.html');
+    const footerMatch = html.match(/<footer[^>]*style="[^"]*margin-top:\s*auto/);
+    assert.ok(footerMatch, 'index.html inline footer should use margin-top: auto');
+    assert.ok(!html.match(/<footer[^>]*style="[^"]*margin-top:\s*60px/),
+        'index.html footer should NOT have margin-top: 60px');
+});
+
+const pagesWithFooters = [
+    'stories.html', 'aptitude.html', 'german.html', 'drawing.html',
+    'learn-english-stories.html', 'german-kids.html', 'emotional-quotient.html'
+];
+
+pagesWithFooters.forEach(page => {
+    test(`${page} has footer tag inside container`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('<footer>'), `${page} missing <footer> tag`);
+        // Footer should be inside a container div
+        const containerIdx = html.indexOf('class="container"');
+        const footerIdx = html.indexOf('<footer>');
+        assert.ok(containerIdx < footerIdx, `${page}: footer should be inside container`);
+    });
+});
+
+// ============================================================================
+// BUG-017: Assessment Gate for Demo Mode Tests
+// ============================================================================
+console.log('\n--- BUG-017: Assessment Required for Demo Mode ---');
+
+test('worksheet-generator.js checks assessment BEFORE demo mode split', () => {
+    const js = readFile('worksheet-generator.js');
+    const assessmentCheckIdx = js.indexOf('hasCompletedAssessment(child.id, operation)');
+    const demoCheckIdx = js.indexOf("isDemoMode()");
+    // Find the demo check that's inside loadOperationWorksheet (not the import)
+    const loadOpIdx = js.indexOf('async function loadOperationWorksheet');
+    const assessmentInLoadOp = js.indexOf('hasCompletedAssessment(child.id, operation)', loadOpIdx);
+    const demoInLoadOp = js.indexOf('isDemoMode()', loadOpIdx);
+    assert.ok(assessmentInLoadOp > 0, 'Missing hasCompletedAssessment check in loadOperationWorksheet');
+    assert.ok(demoInLoadOp > 0, 'Missing isDemoMode check in loadOperationWorksheet');
+    assert.ok(assessmentInLoadOp < demoInLoadOp,
+        'Assessment check must come BEFORE demo mode check in loadOperationWorksheet');
+});
+
+test('worksheet-generator.js requires child profile before assessment', () => {
+    const js = readFile('worksheet-generator.js');
+    const loadOpIdx = js.indexOf('async function loadOperationWorksheet');
+    const childCheckIdx = js.indexOf("'Please select a child profile first'", loadOpIdx);
+    const assessmentIdx = js.indexOf('hasCompletedAssessment', loadOpIdx);
+    assert.ok(childCheckIdx > 0, 'Missing child profile check');
+    assert.ok(childCheckIdx < assessmentIdx,
+        'Child profile check must come before assessment check');
+});
+
+test('worksheet-generator.js refreshes age from selected child', () => {
+    const js = readFile('worksheet-generator.js');
+    const loadOpIdx = js.indexOf('async function loadOperationWorksheet');
+    const ageRefresh = js.indexOf('child.age', loadOpIdx);
+    assert.ok(ageRefresh > 0 && ageRefresh < loadOpIdx + 1000,
+        'Should refresh age group from selected child in loadOperationWorksheet');
+});
+
+test('english-generator.js checks assessment BEFORE demo mode split', () => {
+    const js = readFile('english-generator.js');
+    const loadNewIdx = js.indexOf('async function loadWorksheetNew');
+    const assessmentIdx = js.indexOf('hasCompletedAssessment', loadNewIdx);
+    const demoIdx = js.indexOf('isDemoMode()', loadNewIdx);
+    assert.ok(assessmentIdx > 0, 'Missing hasCompletedAssessment in English loadWorksheetNew');
+    assert.ok(demoIdx > 0, 'Missing isDemoMode in English loadWorksheetNew');
+    assert.ok(assessmentIdx < demoIdx,
+        'English: assessment check must come BEFORE demo mode check');
+});
+
+test('english-generator.js requires child profile before assessment', () => {
+    const js = readFile('english-generator.js');
+    const loadNewIdx = js.indexOf('async function loadWorksheetNew');
+    const childCheckIdx = js.indexOf("'Please select a child profile first'", loadNewIdx);
+    const assessmentIdx = js.indexOf('hasCompletedAssessment', loadNewIdx);
+    assert.ok(childCheckIdx > 0 && childCheckIdx < assessmentIdx,
+        'English: child profile check must come before assessment check');
+});
+
+test('worksheet-generator.js showAssessmentGate exists and creates gate HTML', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('function showAssessmentGate'), 'Missing showAssessmentGate function');
+    assert.ok(js.includes('assessment-gate'), 'showAssessmentGate must create assessment-gate element');
+    assert.ok(js.includes('Take Assessment'), 'Assessment gate must have Take Assessment button');
+});
+
+test('assessment.js has startAssessment function', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('function startAssessment'), 'Missing startAssessment function');
+});
+
+test('assessment.js saves results to both localStorage and Firestore', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('localStorage.setItem'), 'Assessment must save to localStorage');
+    assert.ok(js.includes('firestore()'), 'Assessment must save to Firestore');
 });
 
 // ============================================================================

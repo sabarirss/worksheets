@@ -320,7 +320,7 @@ exports.scheduledWeeklyGeneration = onSchedule(
                     type: 'new_sheets',
                     title: 'New Worksheets Ready!',
                     message: `${child.name} has ${MATH_PAGES_PER_WEEK} Math and ${ENGLISH_PAGES_PER_WEEK} English pages for this week.`,
-                    actionUrl: 'index.html',
+                    actionUrl: 'index',
                     actionData: { weekStr },
                     read: false,
                     dismissed: false,
@@ -457,7 +457,7 @@ exports.scheduledEmailReminder = onSchedule(
                             type: 'reminder',
                             title: 'Daily Reminder',
                             message: `${child.name} has ${mathMissing} Math and ${englishMissing} English pages remaining this week.`,
-                            actionUrl: 'index.html',
+                            actionUrl: 'index',
                             actionData: { weekStr },
                             read: false,
                             dismissed: false,
@@ -504,7 +504,6 @@ async function sendReminderEmail(sgMail, fromEmail, appUrl, toEmail, parentName,
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px 16px 0 0; padding: 30px; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 28px;">GleeGrow</h1>
-            <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">Happy Learning!</p>
         </div>
 
         <!-- Body -->

@@ -144,7 +144,7 @@
 </head>
 <body>
     <div class="signup-container">
-        <div class="signup-logo">📚</div>
+        <img src="gleegrow.png" alt="GleeGrow" style="width: 180px; height: auto; margin: 0 auto 15px; display: block;">
         <h1 class="signup-title">Parent Sign Up</h1>
         <p class="signup-subtitle">Create your parent account to manage your children's learning</p>
 
@@ -237,7 +237,7 @@
                     >
                     <span style="font-size: 0.95em; line-height: 1.6;">
                         I have read and agree to the
-                        <a href="terms.html" target="_blank" style="color: #667eea; text-decoration: underline;">Terms and Conditions</a>.
+                        <a href="terms" target="_blank" style="color: #667eea; text-decoration: underline;">Terms and Conditions</a>.
                         <strong>(Required)</strong><br>
                         <span style="color: #666; font-size: 0.9em;">
                             ⚠️ If creating an account for a child under 16, you confirm you are the parent/guardian and consent to their use of this service.
@@ -268,7 +268,7 @@
         </button>
 
         <div class="login-link">
-            Already have an account? <a href="login.html">Sign In</a>
+            Already have an account? <a href="login">Sign In</a>
         </div>
     </div>
 
@@ -398,7 +398,7 @@
 
                 // Redirect to login after 5 seconds
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'login';
                 }, 5000);
 
             } catch (error) {
@@ -499,7 +499,7 @@
 
                     // Redirect to children profiles page after 2 seconds
                     setTimeout(() => {
-                        window.location.href = 'children-profiles.html';
+                        window.location.href = 'children-profiles';
                     }, 2000);
                 } else {
                     // Existing user - redirect to home
@@ -511,7 +511,7 @@
                     successMsg.style.display = 'block';
 
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = 'index';
                     }, 1500);
                 }
 

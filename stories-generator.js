@@ -305,7 +305,7 @@ function selectAge(age) {
 
 function backToAges() {
     // Redirect to home page since there's no age selection in stories.html
-    window.location.href = 'index.html';
+    window.location.href = 'index';
 }
 
 // Get ALL stories for a category (all difficulties combined)

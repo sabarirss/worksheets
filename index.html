@@ -641,7 +641,7 @@
                     return;
                 }
                 console.log('INDEX.HTML: No user, redirecting to login');
-                window.location.href = 'login.html';
+                window.location.href = 'login';
             } else {
                 console.log('INDEX.HTML: User authenticated:', firebaseUser.email);
 
@@ -677,7 +677,7 @@
                             }
                             console.log('No children found - redirecting to profile creation');
                             sessionStorage.setItem('firstTimeSetup', 'true');
-                            window.location.href = 'children-profiles.html';
+                            window.location.href = 'children-profiles';
                             return;
                         }
                     } else {
@@ -833,7 +833,7 @@
                 versionBadge.style.cursor = 'pointer';
                 versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 193, 7, 1)'; };
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
-                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+                versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else {
                 versionBadge.textContent = '👑 Admin - Full Access';
                 versionBadge.style.display = 'block';
@@ -847,25 +847,25 @@
             const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
             if (mathBtn) mathBtn.style.display = 'flex';
 
-            const englishBtn = document.querySelector('button[onclick*="english.html"]');
+            const englishBtn = document.querySelector('button[onclick*="english"]');
             if (englishBtn) englishBtn.style.display = 'flex';
 
-            const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+            const aptitudeBtn = document.querySelector('button[onclick*="aptitude"]');
             if (aptitudeBtn) aptitudeBtn.style.display = 'flex';
 
-            const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+            const storiesBtn = document.querySelector('button[onclick*="stories"]');
             if (storiesBtn) storiesBtn.style.display = 'flex';
 
-            const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+            const eqBtn = document.querySelector('button[onclick*="emotional-quotient"]');
             if (eqBtn) eqBtn.style.display = 'flex';
 
-            const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
+            const drawingBtn = document.querySelector('button[onclick*="drawing"]');
             if (drawingBtn) drawingBtn.style.display = 'flex';
 
-            const germanBtn = document.querySelector('button[onclick*="german.html"]');
+            const germanBtn = document.querySelector('button[onclick*="german"]');
             if (germanBtn) germanBtn.style.display = 'flex';
 
-            const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
+            const germanKidsBtn = document.querySelector('button[onclick*="german-kids"]');
             if (germanKidsBtn) germanKidsBtn.style.display = 'flex';
         }
 
@@ -922,7 +922,7 @@
                 versionBadge.style.cursor = 'pointer';
                 versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 193, 7, 1)'; };
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
-                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+                versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else if (version === 'demo') {
                 versionBadge.textContent = '📦 Demo Version (2 pages per activity)';
                 versionBadge.style.display = 'block';
@@ -931,7 +931,7 @@
                 versionBadge.style.animation = 'none';
                 versionBadge.onmouseover = function() { this.style.background = 'rgba(255, 152, 0, 1)'; };
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 152, 0, 0.9)'; };
-                versionBadge.onclick = function() { window.location.href = 'settings.html'; };
+                versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else if (version === 'full') {
                 versionBadge.textContent = '⭐ Full Version';
                 versionBadge.style.display = 'block';
@@ -947,26 +947,26 @@
             const mathBtn = document.querySelector('button[onclick="showMathLevels()"]');
             if (mathBtn) mathBtn.style.display = (assignedModules.math && enabledModules.math) ? 'flex' : 'none';
 
-            const englishBtn = document.querySelector('button[onclick*="english.html"]');
+            const englishBtn = document.querySelector('button[onclick*="english"]');
             if (englishBtn) englishBtn.style.display = (assignedModules.english && enabledModules.english) ? 'flex' : 'none';
 
-            const aptitudeBtn = document.querySelector('button[onclick*="aptitude.html"]');
+            const aptitudeBtn = document.querySelector('button[onclick*="aptitude"]');
             if (aptitudeBtn) aptitudeBtn.style.display = (assignedModules.aptitude && enabledModules.aptitude) ? 'flex' : 'none';
 
-            const storiesBtn = document.querySelector('button[onclick*="stories.html"]');
+            const storiesBtn = document.querySelector('button[onclick*="stories"]');
             if (storiesBtn) storiesBtn.style.display = (assignedModules.stories && enabledModules.stories) ? 'flex' : 'none';
 
-            const eqBtn = document.querySelector('button[onclick*="emotional-quotient.html"]');
+            const eqBtn = document.querySelector('button[onclick*="emotional-quotient"]');
             if (eqBtn) eqBtn.style.display = (assignedModules['emotional-quotient'] && enabledModules['emotional-quotient']) ? 'flex' : 'none';
 
-            const drawingBtn = document.querySelector('button[onclick*="drawing.html"]');
+            const drawingBtn = document.querySelector('button[onclick*="drawing"]');
             if (drawingBtn) drawingBtn.style.display = (assignedModules.drawing && enabledModules.drawing) ? 'flex' : 'none';
 
-            const germanKidsBtn = document.querySelector('button[onclick*="german-kids.html"]');
+            const germanKidsBtn = document.querySelector('button[onclick*="german-kids"]');
             if (germanKidsBtn) germanKidsBtn.style.display = (assignedModules['german-kids'] && enabledModules['german-kids']) ? 'flex' : 'none';
 
             // German B1 is admin-only - only show for admin users
-            const germanBtn = document.querySelector('button[onclick*="german.html"]');
+            const germanBtn = document.querySelector('button[onclick*="german"]');
             if (germanBtn) {
                 if (user && user.role === 'admin') {
                     germanBtn.style.display = 'flex';
@@ -988,10 +988,10 @@
 
             <!-- Right side: Version badge, Notifications, Admin, Settings -->
             <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
-                <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings.html'" title="Click to upgrade">
+                <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings'" title="Click to upgrade">
                 </div>
                 <div id="notification-bell-container"></div>
-                <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin.html'">
+                <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin'">
                     👤 Admin Panel
                 </button>
 
@@ -1001,7 +1001,7 @@
                         ⚙️
                     </button>
                     <div id="parent-settings-dropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); min-width: 200px; z-index: 1000;">
-                        <div onclick="window.location.href='settings.html'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                        <div onclick="window.location.href='settings'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
                             ⚙️ Account Settings
                         </div>
                         <div onclick="openFeedbackModal()" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
@@ -1103,31 +1103,31 @@
                     <span class="subject-name">📐 Mathematics</span>
                     <span class="subject-desc">Addition, Subtraction, Multiplication, Division</span>
                 </button>
-                <button onclick="window.location.href='english.html'" class="subject-btn">
+                <button onclick="window.location.href='english'" class="subject-btn">
                     <span class="subject-name">📚 English</span>
                     <span class="subject-desc">Reading, Vocabulary, Grammar, Writing</span>
                 </button>
-                <button onclick="window.location.href='aptitude.html'" class="subject-btn">
+                <button onclick="window.location.href='aptitude'" class="subject-btn">
                     <span class="subject-name">🧩 Aptitude</span>
                     <span class="subject-desc">Puzzles, Mazes, Patterns, Logic Games</span>
                 </button>
-                <button onclick="window.location.href='stories.html'" class="subject-btn">
+                <button onclick="window.location.href='stories'" class="subject-btn">
                     <span class="subject-name">📖 Story Time</span>
                     <span class="subject-desc">Quality Hand-Written Stories with Real Photos (Ages 4-12)</span>
                 </button>
-                <button onclick="window.location.href='emotional-quotient.html'" class="subject-btn">
+                <button onclick="window.location.href='emotional-quotient'" class="subject-btn">
                     <span class="subject-name">❤️ Emotional Quotient</span>
                     <span class="subject-desc">Understanding Feelings & Social Skills (Age 6)</span>
                 </button>
-                <button onclick="window.location.href='german.html'" class="subject-btn">
+                <button onclick="window.location.href='german'" class="subject-btn">
                     <span class="subject-name">🇩🇪 German (B1)</span>
                     <span class="subject-desc">DTZ Preparation - Grammar, Reading, Writing</span>
                 </button>
-                <button onclick="window.location.href='drawing.html'" class="subject-btn">
+                <button onclick="window.location.href='drawing'" class="subject-btn">
                     <span class="subject-name">🎨 Drawing</span>
                     <span class="subject-desc">Step-by-Step Art Tutorials with Canvas</span>
                 </button>
-                <button onclick="window.location.href='german-kids.html'" class="subject-btn">
+                <button onclick="window.location.href='german-kids'" class="subject-btn">
                     <span class="subject-name">🇩🇪 German Kids</span>
                     <span class="subject-desc">Simple Stories for Ages 6-8</span>
                 </button>
@@ -1165,11 +1165,11 @@
         <div id="assessment-container" style="display: none;"></div>
 
         <!-- Footer -->
-        <footer style="margin-top: 60px; padding: 30px 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #888; font-size: 0.85em; line-height: 1.8;">
+        <footer style="margin-top: auto; padding: 30px 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #888; font-size: 0.85em; line-height: 1.8;">
             <div style="margin-bottom: 12px;">
-                <a href="privacy-policy.html" style="color: #667eea; text-decoration: none; margin: 0 12px;">Privacy Policy</a>
+                <a href="privacy-policy" style="color: #667eea; text-decoration: none; margin: 0 12px;">Privacy Policy</a>
                 <span style="color: #ccc;">|</span>
-                <a href="terms.html" style="color: #667eea; text-decoration: none; margin: 0 12px;">Terms &amp; Conditions</a>
+                <a href="terms" style="color: #667eea; text-decoration: none; margin: 0 12px;">Terms &amp; Conditions</a>
                 <span style="color: #ccc;">|</span>
                 <a href="mailto:contact@gleegrow.com" style="color: #667eea; text-decoration: none; margin: 0 12px;">Contact Us</a>
             </div>

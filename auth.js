@@ -300,14 +300,14 @@ async function login(username, password) {
 
 function logout() {
     localStorage.removeItem('currentSession');
-    window.location.href = 'login.html';
+    window.location.href = 'login';
 }
 
 function requireAuth() {
     const user = getCurrentUser();
 
     if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = 'login';
         return null;
     }
 
@@ -321,7 +321,7 @@ function requireAdmin() {
 
     if (user.role !== 'admin') {
         alert('Access denied. Admin privileges required.');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return null;
     }
 

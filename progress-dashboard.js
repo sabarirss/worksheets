@@ -26,7 +26,7 @@ function isFullVersion() {
 // Initialize on page load
 firebase.auth().onAuthStateChanged(async function(user) {
     if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = 'login';
         return;
     }
 
@@ -40,7 +40,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
 
     if (userDoc.empty) {
         alert('User not found');
-        window.location.href = 'login.html';
+        window.location.href = 'login';
         return;
     }
 
@@ -49,7 +49,7 @@ firebase.auth().onAuthStateChanged(async function(user) {
     // Only parents and admins can access progress dashboard
     if (userData.role !== 'parent' && userData.role !== 'admin') {
         alert('This feature is only available for parents and admins');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 
@@ -79,7 +79,7 @@ async function loadChildren() {
         }));
 
         if (allChildren.length === 0) {
-            document.getElementById('loading').innerHTML = '<div class="no-data"><div class="no-data-icon">👶</div><p>No children profiles found</p><p style="margin-top: 10px;"><a href="children-profiles.html">Add a child profile</a></p></div>';
+            document.getElementById('loading').innerHTML = '<div class="no-data"><div class="no-data-icon">👶</div><p>No children profiles found</p><p style="margin-top: 10px;"><a href="children-profiles">Add a child profile</a></p></div>';
             return;
         }
 

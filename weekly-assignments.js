@@ -470,7 +470,7 @@ async function loadWeeklyAssignment(childId) {
                 'new_sheets',
                 'New Worksheets Ready!',
                 `${child.name} has ${assignment.math.totalPages} Math and ${assignment.english.totalPages} English pages for this week.`,
-                'index.html',
+                'index',
                 { weekStr }
             );
 

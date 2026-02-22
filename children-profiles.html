@@ -292,7 +292,7 @@
 </head>
 <body>
     <div class="profiles-container">
-        <a href="index.html" class="back-link">← Back to Home</a>
+        <a href="index" class="back-link">← Back to Home</a>
 
         <div class="header">
             <h1>👨‍👩‍👧‍👦 Manage Children Profiles</h1>
@@ -303,7 +303,7 @@
             <button class="add-child-btn" onclick="showAddChildModal()">
                 ➕ Add New Child Profile
             </button>
-            <button class="view-progress-btn" onclick="window.location.href='progress.html'">
+            <button class="view-progress-btn" onclick="window.location.href='progress'">
                 📊 View Progress Dashboard
             </button>
         </div>
@@ -429,7 +429,7 @@
         // Check authentication
         firebase.auth().onAuthStateChanged(function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
             } else {
                 parentUid = user.uid;
                 loadChildren();

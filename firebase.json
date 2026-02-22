@@ -5,16 +5,52 @@
   "functions": {
     "source": "functions"
   },
-  "hosting": {
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      "**/functions/**",
-      "**/node_modules/**",
-      "**/.claude/**",
-      "**/models/**",
-      "**/*.py",
-      "**/*.md"
-    ]
-  }
+  "hosting": [
+    {
+      "target": "gleegrow",
+      "public": ".",
+      "cleanUrls": true,
+      "trailingSlash": false,
+      "ignore": [
+        "firebase.json",
+        ".firebaserc",
+        "**/functions/**",
+        "**/node_modules/**",
+        "**/.claude/**",
+        "**/models/**",
+        "**/*.py",
+        "**/*.md",
+        "**/tests/**",
+        "**/.git/**",
+        "**/.firebase/**",
+        "**/get-docker.sh",
+        "**/package.json",
+        "**/package-lock.json",
+        "**/train-emnist-model.py"
+      ]
+    },
+    {
+      "site": "worksheets-app-76ee9",
+      "public": ".",
+      "cleanUrls": true,
+      "trailingSlash": false,
+      "ignore": [
+        "firebase.json",
+        ".firebaserc",
+        "**/functions/**",
+        "**/node_modules/**",
+        "**/.claude/**",
+        "**/models/**",
+        "**/*.py",
+        "**/*.md",
+        "**/tests/**",
+        "**/.git/**",
+        "**/.firebase/**",
+        "**/get-docker.sh",
+        "**/package.json",
+        "**/package-lock.json",
+        "**/train-emnist-model.py"
+      ]
+    }
+  ]
 }

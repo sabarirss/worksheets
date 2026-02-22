@@ -250,7 +250,23 @@ async function loadWorksheetNew(difficulty) {
         return;
     }
 
-    // === Demo path ===
+    // === Require child profile for both demo and full ===
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+
+    if (!child) {
+        alert('Please select a child profile first');
+        return;
+    }
+
+    // === Assessment required for both demo and full modes ===
+    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, 'english');
+
+    if (!hasAssessment) {
+        showEnglishAssessmentGate(child);
+        return;
+    }
+
+    // === Demo path — limited pages at assessed level ===
     if (typeof isDemoMode === 'function' && isDemoMode()) {
         englishAccessMode = 'demo';
         const demoCount = typeof APP_CONFIG !== 'undefined' ? APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT : 2;
@@ -260,31 +276,14 @@ async function loadWorksheetNew(difficulty) {
         englishAccessibleMaxPage = demoCount;
         englishTotalAccessiblePages = demoCount;
 
-        // Auto-detect age group for demo
-        const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-        if (child && child.age) {
+        // Use assessed age group
+        if (child.age) {
             selectedAgeGroup = getAgeGroup(child.age);
         } else {
             selectedAgeGroup = selectedAgeGroup || '6';
         }
         selectedDifficulty = difficulty;
         loadWorksheet(selectedAgeGroup, selectedDifficulty, 1);
-        return;
-    }
-
-    // === Full version path ===
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-
-    if (!child) {
-        alert('Please select a child profile first');
-        return;
-    }
-
-    // Check assessment status for English
-    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, 'english');
-
-    if (!hasAssessment) {
-        showEnglishAssessmentGate(child);
         return;
     }
 

@@ -114,7 +114,7 @@ function monitorChildSession(childId, sessionId) {
                 }
 
                 // Redirect to home
-                window.location.href = 'index.html';
+                window.location.href = 'index';
             }
         }, (error) => {
             console.error('Error monitoring session:', error);

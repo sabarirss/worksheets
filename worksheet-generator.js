@@ -109,23 +109,25 @@ async function loadOperationWorksheet(operation) {
         selectedAgeGroup
     });
 
-    // Ensure age group is set
-    if (!selectedAgeGroup) {
-        console.warn('selectedAgeGroup not set, auto-detecting...');
-        let childAge = window.detectedChildAge || '6';
-        const ageMap = {
-            '4': '4-5', '5': '4-5', '6': '6', '7': '7', '8': '8',
-            '9': '9+', '10': '10+', '11': '10+', '12': '10+', '13': '10+'
-        };
-        selectedAgeGroup = ageMap[childAge] || '6';
-        console.log('Auto-set age group to:', selectedAgeGroup);
-    }
-
     // Check if user is admin
     const isAdmin = window.currentUserRole === 'admin';
 
-    // Check if assessment has been completed for this operation
+    // Get currently selected child and always refresh age group from child's DOB
     const child = getSelectedChild();
+    const ageMap = {
+        '4': '4-5', '5': '4-5', '6': '6', '7': '7', '8': '8',
+        '9': '9+', '10': '10+', '11': '10+', '12': '10+', '13': '10+'
+    };
+
+    if (child && child.age) {
+        selectedAgeGroup = ageMap[child.age.toString()] || '6';
+        console.log('Age group from selected child:', selectedAgeGroup, '(age:', child.age, ')');
+    } else if (!selectedAgeGroup) {
+        // Fallback: use detectedChildAge or default
+        const childAge = window.detectedChildAge || '6';
+        selectedAgeGroup = ageMap[childAge] || '6';
+        console.log('Fallback age group:', selectedAgeGroup);
+    }
 
     // === PATH 1: Admin — unrestricted access ===
     if (isAdmin) {
@@ -153,11 +155,27 @@ async function loadOperationWorksheet(operation) {
         return;
     }
 
-    // === PATH 2: Demo — fixed 2 pages, no assessment required ===
+    // === Require child profile for both demo and full ===
+    if (!child) {
+        alert('Please select a child profile first');
+        return;
+    }
+
+    // === Assessment required for both demo and full modes ===
+    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, operation);
+
+    if (!hasAssessment) {
+        showAssessmentGate(operation);
+        return;
+    }
+
+    // === PATH 2: Demo — limited pages at assessed level ===
     if (typeof isDemoMode === 'function' && isDemoMode()) {
-        console.log('Demo mode - loading limited pages');
+        console.log('Demo mode - loading limited pages at assessed level');
         currentAccessMode = 'demo';
         const demoCount = APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT;
+
+        // Start at page 1 (easy difficulty, age-appropriate via selectedAgeGroup)
         accessiblePages = [];
         for (let i = 1; i <= demoCount; i++) accessiblePages.push(i);
         accessibleMinPage = 1;
@@ -165,20 +183,6 @@ async function loadOperationWorksheet(operation) {
         totalAccessiblePages = demoCount;
 
         loadWorksheetByPage(operation, 1);
-        return;
-    }
-
-    // === PATH 3: Full version — weekly assigned pages only ===
-    if (!child) {
-        alert('Please select a child profile first');
-        return;
-    }
-
-    // Check assessment status
-    const hasAssessment = hasCompletedAssessment(child.id, operation);
-
-    if (!hasAssessment) {
-        showAssessmentGate(operation);
         return;
     }
 
@@ -2619,7 +2623,7 @@ function showDemoUpgradePrompt() {
             <p style="color:#666;line-height:1.6;margin-bottom:25px;">
                 You've completed the demo worksheets! Unlock the full version to access weekly progressive worksheets tailored to your child's level.
             </p>
-            <button onclick="window.location.href='children-profiles.html'" style="
+            <button onclick="window.location.href='children-profiles'" style="
                 padding:14px 32px;font-size:1.1em;background:linear-gradient(135deg,#667eea,#764ba2);
                 color:white;border:none;border-radius:12px;cursor:pointer;font-weight:bold;
                 box-shadow:0 4px 15px rgba(102,126,234,0.4);margin-bottom:12px;display:block;width:100%;

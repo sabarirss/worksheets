@@ -150,12 +150,12 @@ function toggleParentMode() {
 function showAllModules() {
     const allModuleButtons = [
         'button[onclick*="showMathLevels()"]',
-        'button[onclick*="english.html"]',
-        'button[onclick*="aptitude.html"]',
-        'button[onclick*="stories.html"]',
-        'button[onclick*="emotional-quotient.html"]',
-        'button[onclick*="drawing.html"]',
-        'button[onclick*="german-kids.html"]'
+        'button[onclick*="english"]',
+        'button[onclick*="aptitude"]',
+        'button[onclick*="stories"]',
+        'button[onclick*="emotional-quotient"]',
+        'button[onclick*="drawing"]',
+        'button[onclick*="german-kids"]'
         // German B1 module intentionally excluded - admin-only
     ];
 
@@ -165,7 +165,7 @@ function showAllModules() {
     });
 
     // Keep German module visibility based on user's actual permission
-    const germanBtn = document.querySelector('button[onclick*="german.html"]');
+    const germanBtn = document.querySelector('button[onclick*="german"]');
     if (germanBtn && !currentUser.modules.german) {
         germanBtn.style.display = 'none';
     }

@@ -2,6 +2,14 @@
   "projects": {
     "worksheet": "worksheets-app-76ee9"
   },
-  "targets": {},
+  "targets": {
+    "worksheets-app-76ee9": {
+      "hosting": {
+        "gleegrow": [
+          "gleegrow"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

@@ -18,7 +18,7 @@ function selectAge(age) {
 
 function backToAges() {
     // Redirect to home page since there's no age selection in drawing.html
-    window.location.href = 'index.html';
+    window.location.href = 'index';
 }
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js

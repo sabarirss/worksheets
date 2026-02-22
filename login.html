@@ -151,9 +151,8 @@
 </head>
 <body>
     <div class="login-container">
-        <div class="login-logo">📚</div>
+        <img src="gleegrow.png" alt="GleeGrow" style="width: 180px; height: auto; margin: 0 auto 15px; display: block;">
         <h1 class="login-title" style="color: #28a745;">GleeGrow</h1>
-        <p class="login-subtitle" style="font-style: italic; color: #999; margin-top: -5px;">Happy Learning!</p>
         <p style="color: #666; margin-bottom: 40px; font-size: 1.1em;">Sign in to continue</p>
 
         <div class="error-message" id="error-message"></div>
@@ -209,7 +208,7 @@
         </div>
 
         <div id="signup-link" style="margin-top: 10px; text-align: center; color: #666; font-size: 0.95em;">
-            Don't have an account? <a href="signup.html" style="color: #667eea; text-decoration: none; font-weight: bold;">Sign Up</a>
+            Don't have an account? <a href="signup" style="color: #667eea; text-decoration: none; font-weight: bold;">Sign Up</a>
         </div>
 
         <div class="loading" id="loading">
@@ -237,7 +236,7 @@
                 const user = getCurrentUser();
                 if (user) {
                     // Already logged in, redirect to home
-                    window.location.href = 'index.html';
+                    window.location.href = 'index';
                 }
             }, 500);
         });
@@ -315,7 +314,7 @@
                     }
 
                     // Redirect to home
-                    window.location.href = 'index.html';
+                    window.location.href = 'index';
                 } else {
                     // Failed login
                     console.error('Login failed:', result.error);
@@ -452,11 +451,11 @@
                     });
 
                     // Redirect to children profiles
-                    window.location.href = 'children-profiles.html';
+                    window.location.href = 'children-profiles';
                 } else {
                     // Existing user - proceed to home
                     console.log('Existing user, redirecting to home');
-                    window.location.href = 'index.html';
+                    window.location.href = 'index';
                 }
 
             } catch (error) {

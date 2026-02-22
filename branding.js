@@ -6,19 +6,30 @@
 
 const APP_BRANDING = {
     name: 'GleeGrow',
-    tagline: 'Happy Learning!',
-    color: '#28a745',  // Brand name color (green)
-    taglineColor: '#999',  // Tagline color (light grey)
-    fontSize: '0.9em',   // Brand name font size
-    taglineFontSize: '0.7em'  // Tagline font size
+    logo: 'gleegrow.png',
+    color: '#28a745',
+    fontSize: '0.9em'
 };
 
 // Automatically inject branding into the page header when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Find the branding placeholder div
     const brandingContainer = document.getElementById('app-branding');
 
     if (brandingContainer) {
+        // Create wrapper for logo + text
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'flex-end';
+        wrapper.style.gap = '8px';
+
+        // Create logo image
+        const logo = document.createElement('img');
+        logo.src = APP_BRANDING.logo;
+        logo.alt = APP_BRANDING.name;
+        logo.style.height = '36px';
+        logo.style.width = 'auto';
+
         // Create brand name element
         const brandName = document.createElement('div');
         brandName.textContent = APP_BRANDING.name;
@@ -27,21 +38,11 @@ document.addEventListener('DOMContentLoaded', function() {
         brandName.style.fontWeight = 'bold';
         brandName.style.lineHeight = '1.2';
 
-        // Create tagline element
-        const tagline = document.createElement('div');
-        tagline.textContent = APP_BRANDING.tagline;
-        tagline.style.fontSize = APP_BRANDING.taglineFontSize;
-        tagline.style.color = APP_BRANDING.taglineColor;
-        tagline.style.fontWeight = 'normal';
-        tagline.style.fontStyle = 'italic';
-        tagline.style.marginTop = '2px';
+        wrapper.appendChild(logo);
+        wrapper.appendChild(brandName);
 
-        // Clear container and add elements
         brandingContainer.innerHTML = '';
-        brandingContainer.appendChild(brandName);
-        brandingContainer.appendChild(tagline);
-
-        // Center align the branding
+        brandingContainer.appendChild(wrapper);
         brandingContainer.style.textAlign = 'right';
     }
 });

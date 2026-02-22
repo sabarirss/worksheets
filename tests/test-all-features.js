@@ -38,7 +38,7 @@ function test(name, fn) {
 
 const APP_CONFIG = {
     BRAND_NAME: 'GleeGrow',
-    TAGLINE: 'Happy Learning!',
+    TAGLINE: '',  // Tagline deferred for future
     PRIMARY_COLOR: '#28a745',
     TAGLINE_COLOR: '#999',
     GRADIENT_START: '#667eea',

@@ -19,7 +19,7 @@ function selectAge(age) {
 
 function backToAges() {
     // Redirect to home page since there's no age/difficulty selection in german-kids.html
-    window.location.href = 'index.html';
+    window.location.href = 'index';
 }
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js

@@ -28,12 +28,12 @@ function selectAge(age) {
 
 function backToAges() {
     document.getElementById('worksheet-area').innerHTML = '';
-    window.location.href = 'index.html';
+    window.location.href = 'index';
 }
 
 function backToWorksheetSelection() {
     // Go back to subjects instead of difficulty selection
-    window.location.href = 'index.html';
+    window.location.href = 'index';
 }
 
 // Activity Generators

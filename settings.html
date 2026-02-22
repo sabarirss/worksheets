@@ -264,7 +264,7 @@
 <body>
     <div class="settings-container">
         <div class="settings-header">
-            <button class="close-btn" onclick="window.location.href='index.html'" title="Close Settings">✕</button>
+            <button class="close-btn" onclick="window.location.href='index'" title="Close Settings">✕</button>
             <h1>⚙️ Settings</h1>
             <p>Manage your profile and preferences</p>
         </div>
@@ -373,7 +373,7 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+            <button class="btn btn-secondary" onclick="window.location.href='index'">
                 ← Back to Home
             </button>
             <button class="btn btn-primary" onclick="saveProfile()">
@@ -640,7 +640,7 @@
         // Wait for Firebase auth
         firebase.auth().onAuthStateChanged(async function(user) {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -1353,7 +1353,7 @@
 
             // Redirect to home page after short delay
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'index';
             }, 1500);
         }
 
@@ -1444,7 +1444,7 @@
                 // Sign out after 2 seconds to require new login
                 setTimeout(() => {
                     firebase.auth().signOut().then(() => {
-                        window.location.href = 'login.html';
+                        window.location.href = 'login';
                     });
                 }, 2000);
             } catch (error) {
