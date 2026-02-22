@@ -173,20 +173,38 @@
 /* story-card-icon removed — cards now use .story-card-bg + .story-card-emoji */
 
 .story-text {
-    font-size: 1.4em;
-    line-height: 1.8;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.15em;
+    line-height: 1.9;
     text-align: left;
-    color: #2c3e50;
+    color: #3b3b3b;
     margin: 30px 0;
-    padding: 20px;
-    background: #f8f9fa;
-    border-left: 5px solid #667eea;
-    border-radius: 5px;
+    padding: 30px 28px;
+    background: linear-gradient(135deg, #fffef5 0%, #fdf8ee 100%);
+    border: none;
+    border-radius: 12px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.04);
+    word-spacing: normal;
+    letter-spacing: 0.01em;
 }
 
 .story-text p {
-    margin-bottom: 1.2em;
+    margin-bottom: 1em;
+    text-indent: 1.5em;
+}
+
+.story-text p:first-child {
     text-indent: 0;
+}
+
+/* Drop cap on the first letter of the story */
+.story-text p:first-child::first-letter {
+    font-size: 2.8em;
+    font-weight: bold;
+    float: left;
+    line-height: 0.85;
+    margin: 0.05em 0.1em 0 0;
+    color: #667eea;
 }
 
 .story-text p:last-child {
@@ -290,8 +308,12 @@
 
     .story-text {
         font-size: 1em;
-        line-height: 1.7;
-        padding: 15px;
+        line-height: 1.8;
+        padding: 18px 16px;
+    }
+
+    .story-text p:first-child::first-letter {
+        font-size: 2.4em;
     }
 
     .story-content {
@@ -327,8 +349,9 @@
     }
 
     .story-text {
-        font-size: 1.2em;
-        line-height: 1.8;
+        font-size: 1.1em;
+        line-height: 1.85;
+        padding: 24px 22px;
     }
 
     .story-title {

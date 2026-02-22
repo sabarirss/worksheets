@@ -7,7 +7,9 @@
 
 body {
     font-family: 'Arial', 'Helvetica', sans-serif;
-    background: linear-gradient(180deg, #f0f4ff 0%, #fef6ff 50%, #fff8f0 100%);
+    background-color: #f5f0ff;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cg opacity='0.1' fill='none' stroke='%23667eea' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M25 18l3 30 1 4h-8l1-4z'/%3E%3Cpath d='M25 18l-3 2 6 0z' fill='%23667eea'/%3E%3Cpath d='M22 40h6'/%3E%3Crect x='90' y='25' width='32' height='20' rx='2'/%3E%3Cpath d='M90 45h32'/%3E%3Cpath d='M96 45v3h20v-3'/%3E%3Cpath d='M96 33h20M96 37h14'/%3E%3Crect x='195' y='18' width='20' height='28' rx='3'/%3E%3Ccircle cx='205' cy='42' r='1.5'/%3E%3Cpath d='M199 22h12'/%3E%3Cpath d='M290 40c0-12 10-22 18-22'/%3E%3Cpath d='M308 18c8 0 18 10 18 22'/%3E%3Ccircle cx='308' cy='40' r='5'/%3E%3Cpath d='M303 45v5h10v-5'/%3E%3Cpath d='M304 50h8M306 50v3'/%3E%3Cpath d='M390 18v28'/%3E%3Cpath d='M390 18c12 0 20 6 20 14s-8 14-20 14'/%3E%3Cpath d='M386 22h4M386 32h4M386 42h4'/%3E%3Cpath d='M460 22l-4 24 1 2h6l1-2z'/%3E%3Cpath d='M460 22l-2 1 4 0z' fill='%23667eea'/%3E%3Crect x='25' y='115' width='24' height='30' rx='2'/%3E%3Cpath d='M31 115v-5l12 0v5'/%3E%3Cpath d='M37 110v-6'/%3E%3Cpath d='M31 125h12M31 130h12M31 135h8'/%3E%3Cpath d='M110 105l8 16 8-16 8 16 8-16' stroke='%23f093fb'/%3E%3Cpath d='M200 125l15-20 15 20z'/%3E%3Cpath d='M215 105v-8'/%3E%3Cpath d='M210 97h10'/%3E%3Cpath d='M213 97l2-4 2 4'/%3E%3Cpath d='M295 110c0 0-10 15-10 22 0 5 4 9 10 9s10-4 10-9c0-7-10-22-10-22z'/%3E%3Cpath d='M290 128l10-8'/%3E%3Cpath d='M380 110v30M395 110v30'/%3E%3Cpath d='M380 110c0-8 15-8 15 0'/%3E%3Cpath d='M380 125h15'/%3E%3Cpath d='M450 110c-8 0-14 7-14 15s6 15 14 15c8 0 14-7 14-15s-6-15-14-15z' stroke='%23f093fb'/%3E%3Cpath d='M25 210c8-12 16 0 24-8'/%3E%3Cpath d='M20 220h34'/%3E%3Cpath d='M25 220v-3M37 220v-3M49 220v-3'/%3E%3Crect x='105' y='200' width='28' height='18' rx='2'/%3E%3Cpath d='M105 218l-3 5h34l-3-5'/%3E%3Cpath d='M112 207h14M112 211h10'/%3E%3Cpath d='M198 198l12 5-12 5zM218 198l12 5-12 5z' fill='%23667eea' opacity='0.5'/%3E%3Cpath d='M300 195l5 15 5-10 5 10 5-15' stroke='%23f093fb'/%3E%3Cpath d='M380 215a12 12 0 0 1 24 0'/%3E%3Cpath d='M384 215v-10h16v10'/%3E%3Cpath d='M387 205v-4M393 205v-6M399 205v-3'/%3E%3Cpath d='M450 195l8 12-5 0 7 13' stroke='%23f093fb'/%3E%3Cpath d='M30 300c0-6 5-10 10-10h12c5 0 10 4 10 10v16H30z'/%3E%3Cpath d='M30 316h32'/%3E%3Cpath d='M40 290v-4M47 292v-4'/%3E%3Cpath d='M115 290l10 25M135 290l-10 25'/%3E%3Cpath d='M118 305h14'/%3E%3Crect x='200' y='290' width='22' height='28' rx='3'/%3E%3Cpath d='M200 290l11-8 11 8'/%3E%3Cpath d='M208 306h6v12h-6z'/%3E%3Cpath d='M295 305c0-10 8-16 15-16s15 6 15 16'/%3E%3Cpath d='M302 305h16M310 305v10'/%3E%3Cpath d='M384 288a8 8 0 0 1 8 8v4a8 8 0 0 1-16 0v-4a8 8 0 0 1 8-8z'/%3E%3Cpath d='M378 310l-4 8h20l-4-8'/%3E%3Cpath d='M450 300c0-5 4-10 10-10s10 5 10 10c0 8-10 18-10 18s-10-10-10-18z' stroke='%23f093fb'/%3E%3Cpath d='M35 395l20-10v25l-20-10z' fill='%23667eea' opacity='0.3'/%3E%3Cpath d='M110 385l5 4-2 0 5 5-2 0 5 6'/%3E%3Cpath d='M108 395h5v8'/%3E%3Cpath d='M200 380h20M200 390h20M200 400h14' stroke='%23f093fb'/%3E%3Cpath d='M295 385l4-12 4 12-11-8h14z'/%3E%3Cpath d='M295 405l4-12 4 12-11-8h14z' stroke='%23f093fb'/%3E%3Cpath d='M385 385c5-5 15-5 20 0s5 15 0 20-15 5-20 0'/%3E%3Cpath d='M395 395l-8 15'/%3E%3Cpath d='M455 385h20l-10 20z' stroke='%23f093fb'/%3E%3C/g%3E%3C/svg%3E");
     background-attachment: fixed;
     color: #000000;
     line-height: 1.6;
@@ -27,44 +29,11 @@ body {
     position: relative;
 }
 
-/* Decorative side blobs — tablet+ only */
-@media (min-width: 769px) {
-    .container::before,
-    .container::after {
-        content: '';
-        position: fixed;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: -1;
-    }
-    .container::before {
-        width: 260px;
-        height: 260px;
-        top: 10%;
-        left: -80px;
-        background: radial-gradient(circle, rgba(102,126,234,0.12) 0%, transparent 70%);
-    }
-    .container::after {
-        width: 200px;
-        height: 200px;
-        bottom: 15%;
-        right: -60px;
-        background: radial-gradient(circle, rgba(240,147,251,0.12) 0%, transparent 70%);
-    }
-}
-/* Extra dot on large screens */
+/* Darker doodles on desktop */
 @media (min-width: 1025px) {
-    body::before {
-        content: '';
-        position: fixed;
-        width: 180px;
-        height: 180px;
-        top: 55%;
-        left: 30px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(76,175,80,0.1) 0%, transparent 70%);
-        pointer-events: none;
-        z-index: -1;
+    body {
+        background-image:
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cg opacity='0.16' fill='none' stroke='%23667eea' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M25 18l3 30 1 4h-8l1-4z'/%3E%3Cpath d='M25 18l-3 2 6 0z' fill='%23667eea'/%3E%3Cpath d='M22 40h6'/%3E%3Crect x='90' y='25' width='32' height='20' rx='2'/%3E%3Cpath d='M90 45h32'/%3E%3Cpath d='M96 45v3h20v-3'/%3E%3Cpath d='M96 33h20M96 37h14'/%3E%3Crect x='195' y='18' width='20' height='28' rx='3'/%3E%3Ccircle cx='205' cy='42' r='1.5'/%3E%3Cpath d='M199 22h12'/%3E%3Cpath d='M290 40c0-12 10-22 18-22'/%3E%3Cpath d='M308 18c8 0 18 10 18 22'/%3E%3Ccircle cx='308' cy='40' r='5'/%3E%3Cpath d='M303 45v5h10v-5'/%3E%3Cpath d='M304 50h8M306 50v3'/%3E%3Cpath d='M390 18v28'/%3E%3Cpath d='M390 18c12 0 20 6 20 14s-8 14-20 14'/%3E%3Cpath d='M386 22h4M386 32h4M386 42h4'/%3E%3Cpath d='M460 22l-4 24 1 2h6l1-2z'/%3E%3Cpath d='M460 22l-2 1 4 0z' fill='%23667eea'/%3E%3Crect x='25' y='115' width='24' height='30' rx='2'/%3E%3Cpath d='M31 115v-5l12 0v5'/%3E%3Cpath d='M37 110v-6'/%3E%3Cpath d='M31 125h12M31 130h12M31 135h8'/%3E%3Cpath d='M110 105l8 16 8-16 8 16 8-16' stroke='%23f093fb'/%3E%3Cpath d='M200 125l15-20 15 20z'/%3E%3Cpath d='M215 105v-8'/%3E%3Cpath d='M210 97h10'/%3E%3Cpath d='M213 97l2-4 2 4'/%3E%3Cpath d='M295 110c0 0-10 15-10 22 0 5 4 9 10 9s10-4 10-9c0-7-10-22-10-22z'/%3E%3Cpath d='M290 128l10-8'/%3E%3Cpath d='M380 110v30M395 110v30'/%3E%3Cpath d='M380 110c0-8 15-8 15 0'/%3E%3Cpath d='M380 125h15'/%3E%3Cpath d='M450 110c-8 0-14 7-14 15s6 15 14 15c8 0 14-7 14-15s-6-15-14-15z' stroke='%23f093fb'/%3E%3Cpath d='M25 210c8-12 16 0 24-8'/%3E%3Cpath d='M20 220h34'/%3E%3Cpath d='M25 220v-3M37 220v-3M49 220v-3'/%3E%3Crect x='105' y='200' width='28' height='18' rx='2'/%3E%3Cpath d='M105 218l-3 5h34l-3-5'/%3E%3Cpath d='M112 207h14M112 211h10'/%3E%3Cpath d='M198 198l12 5-12 5zM218 198l12 5-12 5z' fill='%23667eea' opacity='0.5'/%3E%3Cpath d='M300 195l5 15 5-10 5 10 5-15' stroke='%23f093fb'/%3E%3Cpath d='M380 215a12 12 0 0 1 24 0'/%3E%3Cpath d='M384 215v-10h16v10'/%3E%3Cpath d='M387 205v-4M393 205v-6M399 205v-3'/%3E%3Cpath d='M450 195l8 12-5 0 7 13' stroke='%23f093fb'/%3E%3Cpath d='M30 300c0-6 5-10 10-10h12c5 0 10 4 10 10v16H30z'/%3E%3Cpath d='M30 316h32'/%3E%3Cpath d='M40 290v-4M47 292v-4'/%3E%3Cpath d='M115 290l10 25M135 290l-10 25'/%3E%3Cpath d='M118 305h14'/%3E%3Crect x='200' y='290' width='22' height='28' rx='3'/%3E%3Cpath d='M200 290l11-8 11 8'/%3E%3Cpath d='M208 306h6v12h-6z'/%3E%3Cpath d='M295 305c0-10 8-16 15-16s15 6 15 16'/%3E%3Cpath d='M302 305h16M310 305v10'/%3E%3Cpath d='M384 288a8 8 0 0 1 8 8v4a8 8 0 0 1-16 0v-4a8 8 0 0 1 8-8z'/%3E%3Cpath d='M378 310l-4 8h20l-4-8'/%3E%3Cpath d='M450 300c0-5 4-10 10-10s10 5 10 10c0 8-10 18-10 18s-10-10-10-18z' stroke='%23f093fb'/%3E%3Cpath d='M35 395l20-10v25l-20-10z' fill='%23667eea' opacity='0.3'/%3E%3Cpath d='M110 385l5 4-2 0 5 5-2 0 5 6'/%3E%3Cpath d='M108 395h5v8'/%3E%3Cpath d='M200 380h20M200 390h20M200 400h14' stroke='%23f093fb'/%3E%3Cpath d='M295 385l4-12 4 12-11-8h14z'/%3E%3Cpath d='M295 405l4-12 4 12-11-8h14z' stroke='%23f093fb'/%3E%3Cpath d='M385 385c5-5 15-5 20 0s5 15 0 20-15 5-20 0'/%3E%3Cpath d='M395 395l-8 15'/%3E%3Cpath d='M455 385h20l-10 20z' stroke='%23f093fb'/%3E%3C/g%3E%3C/svg%3E");
     }
 }
 
@@ -702,6 +671,8 @@ footer {
     body {
         padding: 0;
         margin: 0;
+        background: white !important;
+        background-image: none !important;
     }
 
     .worksheet-container {

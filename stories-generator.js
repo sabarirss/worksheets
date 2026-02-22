@@ -294,6 +294,33 @@ function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// Split raw story text into <p>-wrapped paragraphs
+function formatStoryText(text) {
+    if (!text) return '';
+    // If already contains <p> tags, return as-is
+    if (text.includes('<p>') || text.includes('<p ')) return text;
+    // If text has explicit paragraph breaks (unique stories), use those
+    if (text.includes('\n\n')) {
+        return text.split(/\n\n+/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0)
+            .map(p => `<p>${p}</p>`)
+            .join('\n');
+    }
+    // Generated stories: split every 2-3 sentences
+    const sentences = text.match(/[^.!?]*[.!?]+(\s|$)/g);
+    if (!sentences || sentences.length <= 3) {
+        return `<p>${text.trim()}</p>`;
+    }
+    const paragraphs = [];
+    const sentencesPerPara = sentences.length <= 6 ? 2 : 3;
+    for (let i = 0; i < sentences.length; i += sentencesPerPara) {
+        const chunk = sentences.slice(i, i + sentencesPerPara).join('').trim();
+        if (chunk) paragraphs.push(`<p>${chunk}</p>`);
+    }
+    return paragraphs.join('\n');
+}
+
 // Navigation
 function selectAge(age) {
     currentAge = age;
@@ -527,7 +554,7 @@ function readStory(index) {
                 ${illustrationHTML}
             </div>
         </div>
-        <div class="story-text">${storyText}</div>
+        <div class="story-text">${formatStoryText(storyText)}</div>
         <div class="story-moral">
             <h3>✨ Lesson ✨</h3>
             <p>${story.moral}</p>

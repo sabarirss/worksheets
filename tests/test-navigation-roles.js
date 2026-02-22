@@ -1833,6 +1833,129 @@ test('stories nextStory checks currentList.length', () => {
 });
 
 // ============================================================================
+// STORY TEXT FORMATTING & CARD LAYOUT
+// ============================================================================
+
+console.log('\n--- Story Text Formatting & Storybook Design ---');
+
+test('stories-generator defines formatStoryText function', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('function formatStoryText('),
+        'stories-generator must define formatStoryText()');
+});
+
+test('formatStoryText handles text with \\n\\n paragraph breaks (unique stories)', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes("text.includes('\\n\\n')"),
+        'formatStoryText must detect double-newline paragraph breaks');
+    assert.ok(js.includes('split(/\\n\\n+/)'),
+        'formatStoryText must split on double newlines');
+});
+
+test('formatStoryText wraps paragraphs in <p> tags', () => {
+    const js = readFile('stories-generator.js');
+    // Must produce <p>...</p> wrapped output
+    assert.ok(js.includes('`<p>${') && js.includes('}</p>`'),
+        'formatStoryText must wrap text chunks in <p> tags');
+});
+
+test('formatStoryText splits generated stories by sentences', () => {
+    const js = readFile('stories-generator.js');
+    // Sentence-based splitting for generated stories (no \n\n)
+    assert.ok(js.includes("text.match(/[^.!?]*[.!?]+(\\s|$)/g)"),
+        'formatStoryText must split by sentence boundaries for generated text');
+});
+
+test('readStory calls formatStoryText before rendering', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('formatStoryText(storyText)'),
+        'readStory must call formatStoryText to wrap text in paragraphs');
+});
+
+test('story-text CSS uses serif font for storybook feel', () => {
+    const css = readFile('stories.css');
+    assert.ok(css.includes("font-family: 'Georgia'") || css.includes('font-family: Georgia'),
+        '.story-text must use Georgia/serif font for storybook feel');
+});
+
+test('story-text CSS does not use text-align: justify (prevents word spacing)', () => {
+    const css = readFile('stories.css');
+    // Extract the .story-text block (between .story-text { and next })
+    const storyTextMatch = css.match(/\.story-text\s*\{[^}]+\}/);
+    assert.ok(storyTextMatch, '.story-text CSS block must exist');
+    assert.ok(!storyTextMatch[0].includes('text-align: justify'),
+        '.story-text must NOT use text-align: justify (causes excessive word spacing)');
+});
+
+test('story-text CSS has word-spacing: normal (prevents excessive gaps)', () => {
+    const css = readFile('stories.css');
+    const storyTextMatch = css.match(/\.story-text\s*\{[^}]+\}/);
+    assert.ok(storyTextMatch[0].includes('word-spacing: normal'),
+        '.story-text must have word-spacing: normal to prevent gaps');
+});
+
+test('story-text CSS uses reasonable font-size (not over 1.3em)', () => {
+    const css = readFile('stories.css');
+    const storyTextMatch = css.match(/\.story-text\s*\{[^}]+\}/);
+    const fontMatch = storyTextMatch[0].match(/font-size:\s*([\d.]+)em/);
+    assert.ok(fontMatch, '.story-text must declare font-size');
+    const size = parseFloat(fontMatch[1]);
+    assert.ok(size <= 1.3, `.story-text font-size ${size}em is too large (max 1.3em for readability)`);
+});
+
+test('story-text p has text-indent for paragraph indentation', () => {
+    const css = readFile('stories.css');
+    assert.ok(css.includes('.story-text p') && css.includes('text-indent'),
+        '.story-text p must have text-indent for storybook paragraphs');
+});
+
+test('story-text first paragraph has drop cap styling', () => {
+    const css = readFile('stories.css');
+    assert.ok(css.includes('.story-text p:first-child::first-letter'),
+        '.story-text must have drop cap on first paragraph first-letter');
+});
+
+test('story cards use story-card-bg for image backgrounds (no inline img)', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('story-card-bg'),
+        'story cards with images must use .story-card-bg div for background');
+    // Must NOT have inline <img> in card generation
+    const cardSection = js.substring(js.indexOf('limitedList.forEach'), js.indexOf('container.appendChild'));
+    assert.ok(!cardSection.includes('<img src='),
+        'story card generation must not use inline <img> tags (use background-image instead)');
+});
+
+test('story cards apply category-specific CSS classes', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('story-card--${currentCategory}'),
+        'story cards must apply category class like story-card--animals');
+});
+
+test('stories.css has category gradient classes for all 6 categories', () => {
+    const css = readFile('stories.css');
+    const categories = ['animals', 'nature', 'family', 'adventures', 'learning', 'bedtime'];
+    categories.forEach(cat => {
+        assert.ok(css.includes(`.story-card--${cat}`),
+            `stories.css must have .story-card--${cat} gradient class`);
+    });
+});
+
+test('story cards have no harsh #000 borders', () => {
+    const css = readFile('stories.css');
+    const cardMatch = css.match(/\.story-card\s*\{[^}]+\}/);
+    assert.ok(cardMatch, '.story-card CSS block must exist');
+    assert.ok(!cardMatch[0].includes('solid #000') && !cardMatch[0].includes('solid black'),
+        '.story-card must not have black borders');
+});
+
+test('stories.html has no emoji font-family override on body', () => {
+    const html = readFile('stories.html');
+    // The old inline style set body font-family to emoji fonts which broke story text
+    assert.ok(!html.includes('Segoe UI Emoji'),
+        'stories.html must not override body font-family with emoji fonts');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
