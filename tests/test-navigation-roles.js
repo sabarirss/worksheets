@@ -808,9 +808,10 @@ test('assessment.js has startAssessment function', () => {
     assert.ok(js.includes('function startAssessment'), 'Missing startAssessment function');
 });
 
-test('assessment.js saves results to both localStorage and Firestore', () => {
+test('assessment.js saves results to Firestore only (no localStorage)', () => {
     const js = readFile('assessment.js');
-    assert.ok(js.includes('localStorage.setItem'), 'Assessment must save to localStorage');
+    assert.ok(!js.includes('localStorage.setItem'), 'Assessment must NOT write to localStorage');
+    assert.ok(!js.includes('localStorage.getItem'), 'Assessment must NOT read from localStorage');
     assert.ok(js.includes('firestore()'), 'Assessment must save to Firestore');
 });
 
@@ -1784,10 +1785,10 @@ test('assessment determineLevelFromScore uses correct thresholds', () => {
         'Must have too-easy threshold');
 });
 
-test('assessment saveAssessmentResult writes to both localStorage and Firestore', () => {
+test('assessment saveAssessmentResult writes to Firestore only', () => {
     const js = readFile('assessment.js');
-    assert.ok(js.includes('localStorage'),
-        'Must save assessment to localStorage');
+    assert.ok(!js.includes('localStorage'),
+        'Must NOT use localStorage anywhere in assessment.js');
     assert.ok(js.includes('assessmentData') && (js.includes('update(') || js.includes('set(')),
         'Must save assessment to Firestore children doc');
 });
@@ -1953,6 +1954,124 @@ test('stories.html has no emoji font-family override on body', () => {
     // The old inline style set body font-family to emoji fonts which broke story text
     assert.ok(!html.includes('Segoe UI Emoji'),
         'stories.html must not override body font-family with emoji fonts');
+});
+
+// ============================================================================
+// BUG-030: Assessment Data — Firestore-Only (No localStorage)
+// ============================================================================
+
+console.log('\n--- BUG-030: Assessment Firestore-Only Storage ---');
+
+test('assessment.js has no localStorage references at all', () => {
+    const js = readFile('assessment.js');
+    assert.ok(!js.includes('localStorage'),
+        'assessment.js must have zero localStorage references');
+});
+
+test('assessment.js getAssessmentData is async and reads from Firestore', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('async function getAssessmentData('),
+        'getAssessmentData must be async');
+    assert.ok(js.includes("collection('children')") && js.includes('.doc(childId).get()'),
+        'getAssessmentData must read from Firestore children collection');
+});
+
+test('assessment.js hasCompletedAssessment is async', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('async function hasCompletedAssessment('),
+        'hasCompletedAssessment must be async');
+    assert.ok(js.includes('await getAssessmentData('),
+        'hasCompletedAssessment must await getAssessmentData');
+});
+
+test('assessment.js getAssignedLevel is async', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('async function getAssignedLevel('),
+        'getAssignedLevel must be async');
+    assert.ok(js.includes('await getAssessmentData('),
+        'getAssignedLevel must await getAssessmentData');
+});
+
+test('assessment.js saveAssessmentResult updates Firestore directly', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes("collection('children').doc(childId).update("),
+        'saveAssessmentResult must update Firestore children doc using childId directly');
+});
+
+test('assessment.js has in-memory cache (_assessmentCache)', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('_assessmentCache'),
+        'Must have _assessmentCache for in-memory caching');
+    assert.ok(js.includes('_assessmentCache[childId]'),
+        'Must cache by childId');
+});
+
+test('assessment.js saveAssessmentResult updates cache after save', () => {
+    const js = readFile('assessment.js');
+    const saveFunc = js.substring(js.indexOf('async function saveAssessmentResult'));
+    const cacheUpdate = saveFunc.includes('_assessmentCache[childId]');
+    assert.ok(cacheUpdate,
+        'saveAssessmentResult must update _assessmentCache after Firestore write');
+});
+
+test('worksheet-generator.js awaits hasCompletedAssessment', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('await hasCompletedAssessment(child.id, operation)'),
+        'worksheet-generator must await hasCompletedAssessment');
+});
+
+test('worksheet-generator.js awaits getAssignedLevel', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('await getAssignedLevel(child.id, operation)'),
+        'worksheet-generator must await getAssignedLevel');
+});
+
+test('english-generator.js awaits hasCompletedAssessment', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("await hasCompletedAssessment(child.id, 'english')"),
+        'english-generator must await hasCompletedAssessment');
+});
+
+test('english-generator.js awaits getAssignedLevel', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("await getAssignedLevel(child.id, 'english')"),
+        'english-generator must await getAssignedLevel');
+});
+
+test('weekly-assignments.js getChildMathPosition is async and awaits getAssignedLevel', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes('async function getChildMathPosition('),
+        'getChildMathPosition must be async');
+    assert.ok(js.includes("await getAssignedLevel(child.id, 'math')"),
+        'getChildMathPosition must await getAssignedLevel');
+});
+
+test('weekly-assignments.js getChildEnglishPosition is async and awaits getAssignedLevel', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes('async function getChildEnglishPosition('),
+        'getChildEnglishPosition must be async');
+    assert.ok(js.includes("await getAssignedLevel(child.id, 'english')"),
+        'getChildEnglishPosition must await getAssignedLevel');
+});
+
+test('weekly-assignments.js generateWeeklyAssignment awaits position functions', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes('await getChildMathPosition(child)'),
+        'generateWeeklyAssignment must await getChildMathPosition');
+    assert.ok(js.includes('await getChildEnglishPosition(child)'),
+        'generateWeeklyAssignment must await getChildEnglishPosition');
+});
+
+test('level-test.js awaits getAssignedLevel', () => {
+    const js = readFile('level-test.js');
+    assert.ok(js.includes('await getAssignedLevel(child.id,'),
+        'level-test must await getAssignedLevel');
+});
+
+test('assessment.js submitAssessment awaits saveAssessmentResult in fallback path', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('await saveAssessmentResult(child.id,'),
+        'submitAssessment must await saveAssessmentResult');
 });
 
 // ============================================================================

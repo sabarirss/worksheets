@@ -259,7 +259,7 @@ async function loadWorksheetNew(difficulty) {
     }
 
     // === Assessment required for both demo and full modes ===
-    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, 'english');
+    const hasAssessment = typeof hasCompletedAssessment === 'function' && await hasCompletedAssessment(child.id, 'english');
 
     if (!hasAssessment) {
         showEnglishAssessmentGate(child);
@@ -288,7 +288,7 @@ async function loadWorksheetNew(difficulty) {
     }
 
     // Assessment completed - get assigned level and load appropriate content
-    const assignedLevel = typeof getAssignedLevel === 'function' ? getAssignedLevel(child.id, 'english') : null;
+    const assignedLevel = typeof getAssignedLevel === 'function' ? await getAssignedLevel(child.id, 'english') : null;
 
     if (assignedLevel) {
         const levelDetails = getLevelDetails(assignedLevel);

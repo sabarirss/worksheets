@@ -9,39 +9,64 @@ let currentAssessment = null;
 let assessmentQuestions = [];
 let assessmentAnswers = [];
 
-/**
- * Get or initialize assessment data for a child
- * @param {string} childId - Child's unique identifier
- * @returns {Object} Assessment data structure
- */
-function getAssessmentData(childId) {
-    const key = `assessment_${childId}`;
-    const stored = localStorage.getItem(key);
+// In-memory cache for assessment data (avoids repeated Firestore reads per session)
+const _assessmentCache = {};
 
-    if (stored) {
-        return JSON.parse(stored);
+/**
+ * Get assessment data for a child from Firestore (with in-memory cache)
+ * @param {string} childId - Child's unique identifier
+ * @returns {Promise<Object>} Assessment data structure
+ */
+async function getAssessmentData(childId) {
+    // Return cached data if available
+    if (_assessmentCache[childId]) {
+        return _assessmentCache[childId];
     }
 
-    // Initialize new assessment data
-    const data = {
+    // Default structure
+    const defaultData = {
         childId: childId,
         assessments: {
-            // Math operations
             addition: { level: null, score: null, date: null, taken: false },
             subtraction: { level: null, score: null, date: null, taken: false },
             multiplication: { level: null, score: null, date: null, taken: false },
             division: { level: null, score: null, date: null, taken: false },
-            // English
             english: { level: null, score: null, date: null, taken: false }
         }
     };
 
-    localStorage.setItem(key, JSON.stringify(data));
-    return data;
+    // Read from Firestore
+    try {
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            const doc = await firebase.firestore().collection('children').doc(childId).get();
+            if (doc.exists) {
+                const firestoreData = doc.data().assessmentData;
+                if (firestoreData) {
+                    // Merge Firestore data into default structure
+                    for (const subject of Object.keys(defaultData.assessments)) {
+                        if (firestoreData[subject]) {
+                            defaultData.assessments[subject] = {
+                                level: firestoreData[subject].level ?? null,
+                                score: firestoreData[subject].score ?? null,
+                                date: firestoreData[subject].date ?? null,
+                                taken: firestoreData[subject].taken ?? false
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to read assessment from Firestore:', error);
+    }
+
+    // Cache and return
+    _assessmentCache[childId] = defaultData;
+    return defaultData;
 }
 
 /**
- * Save assessment result to both localStorage and Firestore
+ * Save assessment result to Firestore
  * @param {string} childId - Child's unique identifier
  * @param {string} subject - Subject/operation name (e.g., 'addition', 'english')
  * @param {number} score - Score percentage (0-100)
@@ -55,32 +80,28 @@ async function saveAssessmentResult(childId, subject, score, assignedLevel) {
         taken: true
     };
 
-    // Save to localStorage (immediate, offline-capable)
-    const data = getAssessmentData(childId);
-    data.assessments[subject] = assessmentEntry;
-    const key = `assessment_${childId}`;
-    localStorage.setItem(key, JSON.stringify(data));
-
     // Save to Firestore (persistent, cross-device)
     try {
         if (typeof firebase !== 'undefined' && firebase.firestore) {
-            const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-            if (child && child.id) {
-                await firebase.firestore().collection('children').doc(child.id).update({
-                    [`assessmentData.${subject}`]: {
-                        level: assignedLevel,
-                        score: score,
-                        date: firebase.firestore.FieldValue.serverTimestamp(),
-                        taken: true
-                    },
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log(`Assessment saved to Firestore: ${subject} - Level ${assignedLevel}`);
-            }
+            await firebase.firestore().collection('children').doc(childId).update({
+                [`assessmentData.${subject}`]: {
+                    level: assignedLevel,
+                    score: score,
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
+                    taken: true
+                },
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log(`Assessment saved to Firestore: ${subject} - Level ${assignedLevel}`);
         }
     } catch (error) {
         console.error('Failed to save assessment to Firestore:', error);
-        // localStorage save still succeeded, so assessment is not lost
+        throw error;
+    }
+
+    // Update in-memory cache
+    if (_assessmentCache[childId]) {
+        _assessmentCache[childId].assessments[subject] = assessmentEntry;
     }
 
     console.log(`Assessment saved: ${subject} - Level ${assignedLevel} (Score: ${score}%)`);
@@ -90,10 +111,10 @@ async function saveAssessmentResult(childId, subject, score, assignedLevel) {
  * Check if child has taken assessment for a subject
  * @param {string} childId - Child's unique identifier
  * @param {string} subject - Subject/operation name
- * @returns {boolean} True if assessment taken
+ * @returns {Promise<boolean>} True if assessment taken
  */
-function hasCompletedAssessment(childId, subject) {
-    const data = getAssessmentData(childId);
+async function hasCompletedAssessment(childId, subject) {
+    const data = await getAssessmentData(childId);
     return data.assessments[subject]?.taken || false;
 }
 
@@ -101,10 +122,10 @@ function hasCompletedAssessment(childId, subject) {
  * Get assigned level for a subject
  * @param {string} childId - Child's unique identifier
  * @param {string} subject - Subject/operation name
- * @returns {number|null} Assigned level or null if not assessed
+ * @returns {Promise<number|null>} Assigned level or null if not assessed
  */
-function getAssignedLevel(childId, subject) {
-    const data = getAssessmentData(childId);
+async function getAssignedLevel(childId, subject) {
+    const data = await getAssessmentData(childId);
     const level = data.assessments[subject]?.level;
     return level !== undefined && level !== null ? level : null;
 }
@@ -686,7 +707,7 @@ async function submitAssessment() {
 
         // Save via client fallback
         if (child) {
-            saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
+            await saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
         }
     }
 

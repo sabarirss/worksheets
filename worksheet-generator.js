@@ -181,7 +181,7 @@ async function loadOperationWorksheet(operation) {
     }
 
     // === Assessment required for both demo and full modes ===
-    const hasAssessment = typeof hasCompletedAssessment === 'function' && hasCompletedAssessment(child.id, operation);
+    const hasAssessment = typeof hasCompletedAssessment === 'function' && await hasCompletedAssessment(child.id, operation);
 
     if (!hasAssessment) {
         showAssessmentGate(operation);
@@ -191,7 +191,7 @@ async function loadOperationWorksheet(operation) {
     // === Override selectedAgeGroup from assessment-assigned level ===
     // The child's DOB age was set above, but the assessment may assign a different level.
     // e.g., a 10-year-old scoring low gets Level 4 (age 6, medium), not Level 11 (age 10+, easy).
-    const assignedLevel = typeof getAssignedLevel === 'function' ? getAssignedLevel(child.id, operation) : null;
+    const assignedLevel = typeof getAssignedLevel === 'function' ? await getAssignedLevel(child.id, operation) : null;
     if (assignedLevel) {
         const assessedAgeGroup = typeof levelToAgeGroup === 'function' ? levelToAgeGroup(assignedLevel) : null;
         if (assessedAgeGroup) {
@@ -243,7 +243,7 @@ async function loadOperationWorksheet(operation) {
         loadWorksheetByPage(operation, accessibleMinPage);
     } else {
         // Fallback if weekly-assignments.js not loaded
-        const assignedLevel = getAssignedLevel(child.id, operation);
+        const assignedLevel = await getAssignedLevel(child.id, operation);
         console.log(`Assessment completed - Level ${assignedLevel} assigned (no weekly system)`);
         const startPage = Math.max(1, Math.floor((assignedLevel - 1) * 12.5) + 1);
         accessiblePages = [];

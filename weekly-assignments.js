@@ -159,7 +159,7 @@ async function loadPreviousIncompleteAssignment(childId) {
  * @param {object} child - Selected child object
  * @returns {object} { operation, startPage, ageGroup, difficulty }
  */
-function getChildMathPosition(child) {
+async function getChildMathPosition(child) {
     const age = child.age || 6;
     const ageGroup = typeof getAgeGroupFromAge === 'function'
         ? getAgeGroupFromAge(age)
@@ -168,7 +168,7 @@ function getChildMathPosition(child) {
     // Try to get assigned level from assessment
     let assignedLevel = null;
     if (typeof getAssignedLevel === 'function') {
-        assignedLevel = getAssignedLevel(child.id, 'math');
+        assignedLevel = await getAssignedLevel(child.id, 'math');
     }
 
     // Determine starting page from level or default to page 1
@@ -211,7 +211,7 @@ function getChildMathPosition(child) {
  * @param {object} child - Selected child object
  * @returns {object} { ageGroup, difficulty, startPage }
  */
-function getChildEnglishPosition(child) {
+async function getChildEnglishPosition(child) {
     const age = child.age || 6;
     const ageGroup = typeof getAgeGroupFromAge === 'function'
         ? getAgeGroupFromAge(age)
@@ -219,7 +219,7 @@ function getChildEnglishPosition(child) {
 
     let assignedLevel = null;
     if (typeof getAssignedLevel === 'function') {
-        assignedLevel = getAssignedLevel(child.id, 'english');
+        assignedLevel = await getAssignedLevel(child.id, 'english');
     }
 
     let difficulty = 'easy';
@@ -248,9 +248,9 @@ function getChildEnglishPosition(child) {
  * @param {object|null} previousAssignment - Previous week's assignment (if any)
  * @returns {object} Assignment data
  */
-function generateWeeklyAssignment(child, weekStr, previousAssignment) {
-    const mathPos = getChildMathPosition(child);
-    const englishPos = getChildEnglishPosition(child);
+async function generateWeeklyAssignment(child, weekStr, previousAssignment) {
+    const mathPos = await getChildMathPosition(child);
+    const englishPos = await getChildEnglishPosition(child);
 
     const MAX_MATH_PAGES = 150;
     const MAX_ENGLISH_PAGES = 50;
@@ -449,7 +449,7 @@ async function loadWeeklyAssignment(childId) {
             console.warn('Could not load previous assignment:', prevError.message);
         }
 
-        const assignment = generateWeeklyAssignment(child, weekStr, previousAssignment);
+        const assignment = await generateWeeklyAssignment(child, weekStr, previousAssignment);
         assignment.generatedBy = 'client';
         assignment.notificationSent = false;
 
@@ -515,7 +515,7 @@ async function generateFirstWeeklyAssignment(child) {
         }
 
         // Generate assignment (no gate check — this is triggered by assessment completion)
-        const assignment = generateWeeklyAssignment(child, weekStr, null);
+        const assignment = await generateWeeklyAssignment(child, weekStr, null);
         assignment.generatedBy = 'assessment_completion';
         assignment.notificationSent = false;
 

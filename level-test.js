@@ -83,7 +83,7 @@ async function checkLevelTestEligibility(childId, module) {
         if (typeof getAssignedLevel === 'function') {
             const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
             if (child) {
-                const level = getAssignedLevel(child.id, module === 'math' ? 'addition' : 'english');
+                const level = await getAssignedLevel(child.id, module === 'math' ? 'addition' : 'english');
                 if (level) currentLevel = level;
             }
         }
@@ -608,7 +608,7 @@ async function submitLevelTest() {
  */
 async function advanceChildLevel(childId, module, newLevel) {
     try {
-        // Update assessment data in localStorage
+        // Update assessment data in Firestore
         const subject = module === 'math' ? 'addition' : 'english';
         if (typeof saveAssessmentResult === 'function') {
             await saveAssessmentResult(childId, subject, 100, newLevel);
