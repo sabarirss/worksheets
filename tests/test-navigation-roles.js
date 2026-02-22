@@ -911,6 +911,149 @@ test('worksheet-generator.js demo mode sets totalAccessiblePages to DEMO_PAGE_CO
 });
 
 // ============================================================================
+// BUG-019: Worksheet Save/Load Storage Mismatch + Keyboard Support
+// ============================================================================
+console.log('\n--- BUG-019: Worksheet Save/Load Storage & Input Mode Support ---');
+
+test('saveCurrentWorksheet uses saveWorksheetToStorage (localStorage, not Firestore)', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function saveCurrentWorksheet()');
+    assert.ok(fnIdx >= 0, 'Missing saveCurrentWorksheet function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('saveWorksheetToStorage'),
+        'saveCurrentWorksheet must use saveWorksheetToStorage (localStorage)');
+    assert.ok(!fnBody.includes('saveWorksheet(') || fnBody.includes('saveWorksheetToStorage'),
+        'Must not use Firestore saveWorksheet');
+});
+
+test('loadSavedWorksheet uses loadWorksheetFromStorage (localStorage, not Firestore)', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function loadSavedWorksheet()');
+    assert.ok(fnIdx >= 0, 'Missing loadSavedWorksheet function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('loadWorksheetFromStorage'),
+        'loadSavedWorksheet must use loadWorksheetFromStorage (localStorage)');
+    assert.ok(!fnBody.includes('loadWorksheetFromFirestore'),
+        'Must NOT use loadWorksheetFromFirestore (mismatched backend)');
+});
+
+test('saveCurrentWorksheet collects keyboardAnswers for keyboard mode', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function saveCurrentWorksheet()');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('keyboardAnswers'),
+        'saveCurrentWorksheet must collect keyboardAnswers');
+    assert.ok(fnBody.includes('isPencilMode'),
+        'Must check isPencilMode to determine input type');
+});
+
+test('loadSavedWorksheet restores keyboardAnswers for keyboard mode', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function loadSavedWorksheet()');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('keyboardAnswers'),
+        'loadSavedWorksheet must restore keyboardAnswers');
+    assert.ok(fnBody.includes('input.value = answer.value') || fnBody.includes('.value = answer.value'),
+        'Must set input.value from saved keyboard answers');
+});
+
+test('autoSavePage collects both canvas and keyboard answers', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function autoSavePage()');
+    assert.ok(fnIdx >= 0, 'Missing autoSavePage function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('keyboardAnswers'),
+        'autoSavePage must collect keyboardAnswers');
+    assert.ok(fnBody.includes('canvasAnswers'),
+        'autoSavePage must collect canvasAnswers');
+    assert.ok(fnBody.includes('isPencilMode'),
+        'autoSavePage must check isPencilMode');
+});
+
+test('loadSavedWorksheet restores canvasAnswers for pencil mode', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function loadSavedWorksheet()');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('canvasAnswers') && fnBody.includes('drawImage'),
+        'loadSavedWorksheet must restore canvas images');
+});
+
+test('storage-manager.js saveWorksheetToStorage stores keyboardAnswers if provided', () => {
+    const js = readFile('storage-manager.js');
+    const fnIdx = js.indexOf('function saveWorksheetToStorage');
+    const fnEnd = js.indexOf('\n}', fnIdx + 200);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('canvasAnswers'),
+        'saveWorksheetToStorage must include canvasAnswers in saved data');
+});
+
+// ============================================================================
+// BUG-020: Footer Visibility in Worksheet View
+// ============================================================================
+console.log('\n--- BUG-020: Footer Visibility in Worksheet View ---');
+
+test('renderWorksheet does NOT hide footer (footer stays at bottom)', () => {
+    const js = readFile('worksheet-generator.js');
+    const renderIdx = js.indexOf('worksheetContainer.innerHTML = html');
+    assert.ok(renderIdx >= 0, 'renderWorksheet must set worksheetContainer.innerHTML');
+    // Check the 500 chars before the innerHTML assignment for footer hiding
+    const setupCode = js.slice(Math.max(0, renderIdx - 800), renderIdx);
+    assert.ok(!setupCode.includes("pageFooter.style.display = 'none'") &&
+              !setupCode.includes('pageFooter.style.display = "none"'),
+        'renderWorksheet must NOT hide the page footer');
+});
+
+test('renderWorksheet hides header during worksheet display', () => {
+    const js = readFile('worksheet-generator.js');
+    const renderIdx = js.indexOf('worksheetContainer.innerHTML = html');
+    const setupCode = js.slice(Math.max(0, renderIdx - 800), renderIdx);
+    assert.ok(setupCode.includes("pageHeader.style.display = 'none'") ||
+              setupCode.includes('pageHeader.style.display = "none"'),
+        'renderWorksheet must hide the page header');
+});
+
+test('backToWorksheetSelection restores header and footer', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function backToWorksheetSelection()');
+    assert.ok(fnIdx >= 0, 'Missing backToWorksheetSelection function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 100);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('pageHeader') && fnBody.includes("display = ''"),
+        'backToWorksheetSelection must restore header');
+    assert.ok(fnBody.includes('pageFooter') && fnBody.includes("display = ''"),
+        'backToWorksheetSelection must restore footer');
+});
+
+test('showSubjects restores header and footer', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnIdx = js.indexOf('function showSubjects()');
+    assert.ok(fnIdx >= 0, 'Missing showSubjects function');
+    const fnEnd = js.indexOf('\n}', fnIdx + 100);
+    const fnBody = js.slice(fnIdx, fnEnd + 2);
+    assert.ok(fnBody.includes('pageHeader') && fnBody.includes("display = ''"),
+        'showSubjects must restore header');
+    assert.ok(fnBody.includes('pageFooter') && fnBody.includes("display = ''"),
+        'showSubjects must restore footer');
+});
+
+test('Firestore worksheets rule allows any authenticated user (no resource.data check)', () => {
+    const rules = readFile('firestore.rules');
+    const worksheetIdx = rules.indexOf('match /worksheets/{worksheetId}');
+    assert.ok(worksheetIdx >= 0, 'Missing worksheets rule');
+    const ruleBlock = rules.slice(worksheetIdx, rules.indexOf('}', worksheetIdx + 50) + 1);
+    assert.ok(ruleBlock.includes('isAuthenticated()'),
+        'Worksheets rule must require authentication');
+    assert.ok(!ruleBlock.includes('resource.data.username'),
+        'Worksheets rule must NOT check resource.data.username (fails for non-existent docs)');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 
