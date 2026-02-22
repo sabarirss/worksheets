@@ -1368,7 +1368,7 @@ async function submitWorksheet() {
     const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
     try {
-        const validateAptitude = firebase.functions().httpsCallable('validateAptitudeSubmission');
+        const validateAptitude = firebase.app().functions('europe-west1').httpsCallable('validateAptitudeSubmission');
         const serverResult = await validateAptitude({
             childId: child ? child.id : null,
             problemType: currentWorksheet.type,

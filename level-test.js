@@ -469,7 +469,7 @@ async function submitLevelTest() {
 
     // Try Cloud Function validation first, fall back to local
     try {
-        const submitLevelTestCF = firebase.functions().httpsCallable('submitLevelTest');
+        const submitLevelTestCF = firebase.app().functions('europe-west1').httpsCallable('submitLevelTest');
         const result = await submitLevelTestCF({
             childId: childId,
             module: module,

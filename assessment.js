@@ -642,7 +642,7 @@ async function submitAssessment() {
 
     // Try Cloud Function validation first, fall back to local
     try {
-        const submitAssessmentCF = firebase.functions().httpsCallable('submitAssessment');
+        const submitAssessmentCF = firebase.app().functions('europe-west1').httpsCallable('submitAssessment');
         const result = await submitAssessmentCF({
             childId: child ? child.id : null,
             subject: currentAssessment.subject,

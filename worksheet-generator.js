@@ -2337,7 +2337,7 @@ async function submitWorksheet() {
 
     // Try Cloud Function validation first, fall back to local
     try {
-        const validateMath = firebase.functions().httpsCallable('validateMathSubmission');
+        const validateMath = firebase.app().functions('europe-west1').httpsCallable('validateMathSubmission');
         const result = await validateMath({
             childId: child ? child.id : null,
             operation: operation,

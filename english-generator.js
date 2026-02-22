@@ -4257,7 +4257,7 @@ async function markEnglishWorksheetComplete() {
 
         // Try Cloud Function validation first, fall back to local
         try {
-            const validateEnglish = firebase.functions().httpsCallable('validateEnglishSubmission');
+            const validateEnglish = firebase.app().functions('europe-west1').httpsCallable('validateEnglishSubmission');
             await validateEnglish({
                 childId: child ? child.id : null,
                 pageIndex: currentPage,
