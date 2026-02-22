@@ -144,15 +144,17 @@ function getOlderAgeGroup(currentAgeGroup) {
 }
 
 /**
- * Generate 10 assessment questions for Math
- * 5 from one year younger, 5 from age-appropriate
+ * Generate 20 assessment questions for Math
+ * 4 tiers: younger-easy, current-easy, current-medium, older-easy (stretch)
+ * This spread properly differentiates skill levels across a wide range.
  * @param {string} operation - Math operation (addition, subtraction, etc.)
  * @param {string} ageGroup - Child's age group
- * @returns {Array} Array of 10 questions with answers
+ * @returns {Array} Array of 20 questions with answers
  */
 function generateMathAssessmentQuestions(operation, ageGroup) {
     const questions = [];
     const youngerAge = getYoungerAgeGroup(ageGroup);
+    const olderAge = getOlderAgeGroup(ageGroup);
 
     // Get config access functions from worksheet-generator.js
     if (typeof getConfigByAge === 'undefined') {
@@ -160,8 +162,6 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
         return [];
     }
 
-    // Get 5 questions from younger age (easy difficulty)
-    // Get operation symbol
     const opSymbol = {
         'addition': '+',
         'subtraction': '−',
@@ -169,50 +169,46 @@ function generateMathAssessmentQuestions(operation, ageGroup) {
         'division': '÷'
     }[operation] || '+';
 
-    const youngerConfig = getConfigByAge(operation, youngerAge, 'easy');
-    if (youngerConfig && youngerConfig.generator) {
-        // Call generator 5 times to get 5 problems
-        for (let i = 0; i < 5; i++) {
-            const problem = youngerConfig.generator();
+    // Helper to generate N questions from a config
+    function generateFromConfig(age, difficulty, count) {
+        const config = getConfigByAge(operation, age, difficulty);
+        if (!config || !config.generator) {
+            console.warn(`No generator found for ${operation} age ${age} (${difficulty})`);
+            return;
+        }
+        for (let i = 0; i < count; i++) {
+            const problem = config.generator();
             questions.push({
                 ...problem,
                 operation: operation,
                 problem: `${problem.a} ${opSymbol} ${problem.b} =`,
-                sourceAge: youngerAge,
-                sourceDifficulty: 'easy'
+                sourceAge: age,
+                sourceDifficulty: difficulty,
+                tier: `${age}-${difficulty}`
             });
         }
-        console.log(`Generated 5 questions from age ${youngerAge} (easy)`);
-    } else {
-        console.warn(`No generator found for ${operation} age ${youngerAge} (easy)`);
+        console.log(`Generated ${count} questions from age ${age} (${difficulty})`);
     }
 
-    // Get 5 questions from current age (medium difficulty)
-    const currentConfig = getConfigByAge(operation, ageGroup, 'medium');
-    if (currentConfig && currentConfig.generator) {
-        // Call generator 5 times to get 5 problems
-        for (let i = 0; i < 5; i++) {
-            const problem = currentConfig.generator();
-            questions.push({
-                ...problem,
-                operation: operation,
-                problem: `${problem.a} ${opSymbol} ${problem.b} =`,
-                sourceAge: ageGroup,
-                sourceDifficulty: 'medium'
-            });
-        }
-        console.log(`Generated 5 questions from age ${ageGroup} (medium)`);
-    } else {
-        console.warn(`No generator found for ${operation} age ${ageGroup} (medium)`);
-    }
+    // Tier 1: 5 from younger age (easy) — baseline, should be easy for the child
+    generateFromConfig(youngerAge, 'easy', 5);
 
-    // Shuffle questions so they're mixed
+    // Tier 2: 5 from current age (easy) — at-level warmup
+    generateFromConfig(ageGroup, 'easy', 5);
+
+    // Tier 3: 5 from current age (medium) — challenging for current level
+    generateFromConfig(ageGroup, 'medium', 5);
+
+    // Tier 4: 5 from older age (easy) — stretch to detect advanced ability
+    generateFromConfig(olderAge, 'easy', 5);
+
+    // Shuffle questions so they're mixed (not grouped by difficulty)
     for (let i = questions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [questions[i], questions[j]] = [questions[j], questions[i]];
     }
 
-    return questions.slice(0, 10); // Ensure exactly 10 questions
+    return questions.slice(0, 20);
 }
 
 /**
@@ -255,14 +251,15 @@ function determineLevelFromScore(score, ageGroup) {
 }
 
 /**
- * Generate 10 assessment questions for English
- * 5 from one year younger, 5 from age-appropriate
+ * Generate 20 assessment questions for English
+ * 4 tiers: younger-easy, current-easy, current-medium, older-easy (stretch)
  * @param {string} ageGroup - Child's age group
- * @returns {Array} Array of 10 questions with answers
+ * @returns {Array} Array of 20 questions with answers
  */
 function generateEnglishAssessmentQuestions(ageGroup) {
     const questions = [];
     const youngerAge = getYoungerAgeGroup(ageGroup);
+    const olderAge = getOlderAgeGroup(ageGroup);
 
     // Get config access function from english-generator.js
     if (typeof getConfigByAge === 'undefined') {
@@ -270,37 +267,36 @@ function generateEnglishAssessmentQuestions(ageGroup) {
         return [];
     }
 
-    // Get 5 questions from younger age (easy difficulty)
-    const youngerConfig = getConfigByAge(youngerAge, 'easy');
-    if (youngerConfig && youngerConfig.generator) {
-        for (let i = 0; i < 5; i++) {
-            const problem = youngerConfig.generator();
+    // Helper to generate N questions from a config
+    function generateFromConfig(age, difficulty, count) {
+        const config = getConfigByAge(age, difficulty);
+        if (!config || !config.generator) {
+            console.warn(`No generator found for English age ${age} (${difficulty})`);
+            return;
+        }
+        for (let i = 0; i < count; i++) {
+            const problem = config.generator();
             questions.push({
                 ...problem,
-                sourceAge: youngerAge,
-                sourceDifficulty: 'easy'
+                sourceAge: age,
+                sourceDifficulty: difficulty,
+                tier: `${age}-${difficulty}`
             });
         }
-        console.log(`Generated 5 English questions from age ${youngerAge} (easy)`);
-    } else {
-        console.warn(`No generator found for English age ${youngerAge} (easy)`);
+        console.log(`Generated ${count} English questions from age ${age} (${difficulty})`);
     }
 
-    // Get 5 questions from current age (medium difficulty)
-    const currentConfig = getConfigByAge(ageGroup, 'medium');
-    if (currentConfig && currentConfig.generator) {
-        for (let i = 0; i < 5; i++) {
-            const problem = currentConfig.generator();
-            questions.push({
-                ...problem,
-                sourceAge: ageGroup,
-                sourceDifficulty: 'medium'
-            });
-        }
-        console.log(`Generated 5 English questions from age ${ageGroup} (medium)`);
-    } else {
-        console.warn(`No generator found for English age ${ageGroup} (medium)`);
-    }
+    // Tier 1: 5 from younger age (easy) — baseline
+    generateFromConfig(youngerAge, 'easy', 5);
+
+    // Tier 2: 5 from current age (easy) — at-level warmup
+    generateFromConfig(ageGroup, 'easy', 5);
+
+    // Tier 3: 5 from current age (medium) — challenging
+    generateFromConfig(ageGroup, 'medium', 5);
+
+    // Tier 4: 5 from older age (easy) — stretch
+    generateFromConfig(olderAge, 'easy', 5);
 
     // Shuffle questions so they're mixed
     for (let i = questions.length - 1; i > 0; i--) {
@@ -308,7 +304,7 @@ function generateEnglishAssessmentQuestions(ageGroup) {
         [questions[i], questions[j]] = [questions[j], questions[i]];
     }
 
-    return questions.slice(0, 10); // Ensure exactly 10 questions
+    return questions.slice(0, 20);
 }
 
 /**
@@ -342,7 +338,7 @@ function startAssessment(subject, operation, ageGroup) {
 
     console.log(`Generated ${assessmentQuestions.length} questions for ${operation}`);
 
-    assessmentAnswers = new Array(10).fill(null);
+    assessmentAnswers = new Array(APP_CONFIG.ASSESSMENT.QUESTION_COUNT).fill(null);
 
     currentAssessment = {
         subject: subject,
@@ -885,7 +881,7 @@ function retakeAssessment() {
     } else {
         assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
     }
-    assessmentAnswers = new Array(10).fill(null);
+    assessmentAnswers = new Array(APP_CONFIG.ASSESSMENT.QUESTION_COUNT).fill(null);
 
     // Re-render assessment UI with new questions
     renderAssessmentUI();

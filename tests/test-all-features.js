@@ -58,9 +58,11 @@ const APP_CONFIG = {
         WEEKLY_PAGE_COUNT: 7,
     },
     ASSESSMENT: {
-        QUESTION_COUNT: 10,
+        QUESTION_COUNT: 20,
         YOUNGER_QUESTIONS: 5,
-        CURRENT_QUESTIONS: 5,
+        CURRENT_EASY_QUESTIONS: 5,
+        CURRENT_MED_QUESTIONS: 5,
+        STRETCH_QUESTIONS: 5,
         SCORE_TOO_HARD: 30,
         SCORE_TOO_EASY: 75,
     },
@@ -269,12 +271,19 @@ test('weekly page count is 7', () => {
     assert.strictEqual(APP_CONFIG.PAGE_ACCESS.WEEKLY_PAGE_COUNT, 7);
 });
 
-test('assessment has 10 questions total', () => {
-    assert.strictEqual(APP_CONFIG.ASSESSMENT.QUESTION_COUNT, 10);
+test('assessment has 20 questions in 4 tiers', () => {
+    assert.strictEqual(APP_CONFIG.ASSESSMENT.QUESTION_COUNT, 20);
     assert.strictEqual(
-        APP_CONFIG.ASSESSMENT.YOUNGER_QUESTIONS + APP_CONFIG.ASSESSMENT.CURRENT_QUESTIONS,
+        APP_CONFIG.ASSESSMENT.YOUNGER_QUESTIONS +
+        APP_CONFIG.ASSESSMENT.CURRENT_EASY_QUESTIONS +
+        APP_CONFIG.ASSESSMENT.CURRENT_MED_QUESTIONS +
+        APP_CONFIG.ASSESSMENT.STRETCH_QUESTIONS,
         APP_CONFIG.ASSESSMENT.QUESTION_COUNT
     );
+    assert.strictEqual(APP_CONFIG.ASSESSMENT.YOUNGER_QUESTIONS, 5);
+    assert.strictEqual(APP_CONFIG.ASSESSMENT.CURRENT_EASY_QUESTIONS, 5);
+    assert.strictEqual(APP_CONFIG.ASSESSMENT.CURRENT_MED_QUESTIONS, 5);
+    assert.strictEqual(APP_CONFIG.ASSESSMENT.STRETCH_QUESTIONS, 5);
 });
 
 test('assessment thresholds: too_hard < too_easy', () => {

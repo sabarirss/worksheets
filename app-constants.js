@@ -45,11 +45,13 @@ const APP_CONFIG = {
 
     // Assessment
     ASSESSMENT: {
-        QUESTION_COUNT: 10,
-        YOUNGER_QUESTIONS: 5,
-        CURRENT_QUESTIONS: 5,
-        SCORE_TOO_HARD: 30,     // Below this: assign easier content
-        SCORE_TOO_EASY: 75,     // Above this: assign harder content
+        QUESTION_COUNT: 20,
+        YOUNGER_QUESTIONS: 5,      // 5 from younger age (easy) — baseline
+        CURRENT_EASY_QUESTIONS: 5, // 5 from current age (easy) — at level
+        CURRENT_MED_QUESTIONS: 5,  // 5 from current age (medium) — challenging
+        STRETCH_QUESTIONS: 5,      // 5 from older age (easy) — stretch
+        SCORE_TOO_HARD: 30,        // Below this: assign easier content
+        SCORE_TOO_EASY: 75,        // Above this: assign harder content
     },
 
     // Completion

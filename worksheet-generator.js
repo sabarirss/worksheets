@@ -188,20 +188,38 @@ async function loadOperationWorksheet(operation) {
         return;
     }
 
+    // === Override selectedAgeGroup from assessment-assigned level ===
+    // The child's DOB age was set above, but the assessment may assign a different level.
+    // e.g., a 10-year-old scoring low gets Level 4 (age 6, medium), not Level 11 (age 10+, easy).
+    const assignedLevel = typeof getAssignedLevel === 'function' ? getAssignedLevel(child.id, operation) : null;
+    if (assignedLevel) {
+        const assessedAgeGroup = typeof levelToAgeGroup === 'function' ? levelToAgeGroup(assignedLevel) : null;
+        if (assessedAgeGroup) {
+            selectedAgeGroup = assessedAgeGroup;
+            console.log(`Assessment level ${assignedLevel} → selectedAgeGroup: ${selectedAgeGroup}`);
+        }
+    }
+
     // === PATH 2: Demo — limited pages at assessed level ===
     if (typeof isDemoMode === 'function' && isDemoMode()) {
         console.log('Demo mode - loading limited pages at assessed level');
         currentAccessMode = 'demo';
         const demoCount = APP_CONFIG.PAGE_ACCESS.DEMO_PAGE_COUNT;
 
-        // Start at page 1 (easy difficulty, age-appropriate via selectedAgeGroup)
+        // Start at the correct difficulty for the assessed level
+        const assessedDifficulty = assignedLevel && typeof levelToDifficulty === 'function'
+            ? levelToDifficulty(assignedLevel) : 'easy';
+        const difficultyStartPages = { 'easy': 1, 'medium': 51, 'hard': 101 };
+        const startPage = difficultyStartPages[assessedDifficulty] || 1;
+
         accessiblePages = [];
-        for (let i = 1; i <= demoCount; i++) accessiblePages.push(i);
-        accessibleMinPage = 1;
-        accessibleMaxPage = demoCount;
+        for (let i = startPage; i < startPage + demoCount; i++) accessiblePages.push(i);
+        accessibleMinPage = startPage;
+        accessibleMaxPage = startPage + demoCount - 1;
         totalAccessiblePages = demoCount;
 
-        loadWorksheetByPage(operation, 1);
+        console.log(`Demo: Level ${assignedLevel}, difficulty=${assessedDifficulty}, pages ${accessibleMinPage}-${accessibleMaxPage}`);
+        loadWorksheetByPage(operation, startPage);
         return;
     }
 
@@ -278,13 +296,13 @@ function showAssessmentGate(operation) {
                     Before starting ${operation} practice, we need to find the right level for you!
                 </p>
                 <p class="gate-description">
-                    You'll solve 10 simple problems, and we'll recommend the best starting level.
+                    You'll solve 20 questions across different difficulty levels, and we'll recommend the best starting level.
                     This helps ensure you're challenged but not frustrated.
                 </p>
                 <div class="gate-info">
                     <div class="info-item">
                         <span class="info-icon">📝</span>
-                        <span>10 Questions</span>
+                        <span>20 Questions</span>
                     </div>
                     <div class="info-item">
                         <span class="info-icon">⏱️</span>

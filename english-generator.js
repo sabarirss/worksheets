@@ -361,7 +361,7 @@ function showEnglishAssessmentGate(child) {
                     Before starting English practice, we need to find the right level for ${child.name}!
                 </p>
                 <p class="gate-details">
-                    The assessment has 10 questions and will take about 5-10 minutes.<br>
+                    The assessment has 20 questions and will take about 5-10 minutes.<br>
                     Based on the results, we'll assign the perfect level for ${child.name}'s learning journey.
                 </p>
                 <div class="gate-actions">

@@ -905,7 +905,7 @@ test('worksheet-generator.js demo mode sets totalAccessiblePages to DEMO_PAGE_CO
     const demoSection = js.indexOf('DEMO_PAGE_COUNT', loadOpIdx);
     assert.ok(demoSection > 0, 'Demo path must use DEMO_PAGE_COUNT');
     // Check a wider range since the variable assignment may be several lines after DEMO_PAGE_COUNT
-    const nearbyCode = js.slice(demoSection, demoSection + 400);
+    const nearbyCode = js.slice(demoSection, demoSection + 800);
     assert.ok(nearbyCode.includes('totalAccessiblePages = demoCount'),
         'Demo mode must set totalAccessiblePages to demoCount');
 });
@@ -1713,6 +1713,123 @@ test('Math admin path does NOT rely on window.detectedChildAge for content', () 
     // Should NOT reference detectedChildAge in admin block
     assert.ok(!adminBlock.includes('detectedChildAge'),
         'Admin path must not use detectedChildAge (should use getLevelDetails)');
+});
+
+// ============================================================================
+// BUG-028: Assessment Level Not Applied to Worksheets
+// ============================================================================
+
+console.log('\n--- BUG-028: Assessment Level Applied to Worksheets ---');
+
+test('worksheet-generator reads assessment level via getAssignedLevel', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('getAssignedLevel'),
+        'worksheet-generator must call getAssignedLevel to read assessment-assigned level');
+});
+
+test('worksheet-generator overrides selectedAgeGroup from assessed level', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('levelToAgeGroup'),
+        'worksheet-generator must use levelToAgeGroup to convert assessed level to age group');
+});
+
+test('worksheet-generator demo mode uses assessed difficulty for start page', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('levelToDifficulty'),
+        'worksheet-generator must use levelToDifficulty for demo mode start page');
+});
+
+test('assessment.js uses APP_CONFIG.ASSESSMENT.QUESTION_COUNT for answer array', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('new Array(APP_CONFIG.ASSESSMENT.QUESTION_COUNT).fill(null)'),
+        'assessmentAnswers must be sized from APP_CONFIG, not hardcoded');
+    assert.ok(!js.includes('new Array(10).fill(null)'),
+        'No hardcoded Array(10) should remain in assessment.js');
+});
+
+test('assessment gate shows 20 Questions in math worksheet page', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('20 Questions'),
+        'Math assessment gate must say 20 Questions');
+    assert.ok(!js.includes('10 Questions'),
+        'No reference to 10 Questions should remain in math gate');
+});
+
+test('assessment gate shows 20 questions in english generator page', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('20 questions'),
+        'English assessment gate must say 20 questions');
+    assert.ok(!js.includes('10 questions'),
+        'No reference to 10 questions should remain in english gate');
+});
+
+test('assessment generates 4 tiers of questions (younger + current-easy + current-med + stretch)', () => {
+    const js = readFile('assessment.js');
+    // Check for 4-tier generation in math assessment
+    assert.ok(js.includes('YOUNGER_QUESTIONS') || js.includes('younger'),
+        'Must have younger tier');
+    assert.ok(js.includes('CURRENT_EASY_QUESTIONS') || js.includes('current age (easy)'),
+        'Must have current-easy tier');
+    assert.ok(js.includes('CURRENT_MED_QUESTIONS') || js.includes('current age (medium)'),
+        'Must have current-medium tier');
+    assert.ok(js.includes('STRETCH_QUESTIONS') || js.includes('older age'),
+        'Must have stretch tier');
+});
+
+test('assessment determineLevelFromScore uses correct thresholds', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('SCORE_TOO_HARD') || js.includes('30'),
+        'Must have too-hard threshold');
+    assert.ok(js.includes('SCORE_TOO_EASY') || js.includes('75'),
+        'Must have too-easy threshold');
+});
+
+test('assessment saveAssessmentResult writes to both localStorage and Firestore', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('localStorage'),
+        'Must save assessment to localStorage');
+    assert.ok(js.includes('assessmentData') && (js.includes('update(') || js.includes('set(')),
+        'Must save assessment to Firestore children doc');
+});
+
+test('worksheet-generator assessment level override comes after child profile check', () => {
+    const js = readFile('worksheet-generator.js');
+    const childCheck = js.indexOf("if (!child)");
+    const assessmentOverride = js.indexOf('getAssignedLevel');
+    assert.ok(childCheck >= 0, 'Must have child profile check');
+    assert.ok(assessmentOverride >= 0, 'Must have assessment level override');
+    assert.ok(assessmentOverride > childCheck,
+        'Assessment level override must come after child profile check');
+});
+
+// ============================================================================
+// BUG-029: Stories currentList Undefined
+// ============================================================================
+
+console.log('\n--- BUG-029: Stories currentList Fix ---');
+
+test('stories-generator declares currentList at module level', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('let currentList'),
+        'stories-generator must declare currentList at module level');
+});
+
+test('stories-generator assigns limitedList to currentList before rendering cards', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('currentList = limitedList'),
+        'stories-generator must assign limitedList to currentList');
+});
+
+test('stories readStory uses currentList[index] to access story', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('currentList[index]'),
+        'readStory must access story via currentList[index]');
+});
+
+test('stories nextStory checks currentList.length', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('currentList.length'),
+        'nextStory must check currentList.length for boundary');
 });
 
 // ============================================================================

@@ -7,6 +7,7 @@ let currentCategory = null;
 let currentDifficulty = null;
 let currentStoryIndex = 0;
 let currentStories = [];
+let currentList = [];
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js
 
@@ -426,6 +427,9 @@ function showStories(difficulty) {
         limitedList = getAllStoriesForCategory(currentCategory);
         console.log('Loaded', limitedList.length, 'total stories');
     }
+
+    // Store in module-level variable so readStory() can access it
+    currentList = limitedList;
 
     const storyList = document.getElementById('story-list');
     if (storyList) storyList.style.display = 'block';
