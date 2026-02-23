@@ -381,9 +381,9 @@ function getAgeAppropriateStories(category, count) {
     const childAge = parseInt(currentAge) || 6;
     let targetAgeGroup = '4-6'; // Default
 
-    // Map child age to age group
+    // Map child age to age group (matches ageGroup values in stories database)
     if (childAge >= 10) {
-        targetAgeGroup = '10+';
+        targetAgeGroup = '10-12';
     } else if (childAge >= 7) {
         targetAgeGroup = '7-9';
     } else {

@@ -29,7 +29,7 @@ const APP_CONFIG = {
     // Module Page Counts
     PAGES: {
         MATH_PER_OPERATION: 150,
-        APTITUDE_PER_TYPE: 50,
+        APTITUDE_PER_TYPE: 15, // Max pages per type (counting=15, others=3-5 based on content pool)
         ENGLISH_WRITING: 20,
         STORIES_DEMO: 2,
     },

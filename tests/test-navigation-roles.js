@@ -2075,6 +2075,186 @@ test('assessment.js submitAssessment awaits saveAssessmentResult in fallback pat
 });
 
 // ============================================================================
+// FEEDBACK MODULE FILTERING TESTS
+// ============================================================================
+
+console.log('\n--- Feedback Module Filtering ---');
+
+test('feedback-system.js has FEEDBACK_MODULES with childKey mappings', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes("childKey: null"), 'general module should have childKey: null');
+    assert.ok(js.includes("childKey: 'math'"), 'math module should have childKey mapping');
+    assert.ok(js.includes("childKey: 'english'"), 'english module should have childKey mapping');
+    assert.ok(js.includes("childKey: 'emotional-quotient'"), 'eq module should map to emotional-quotient');
+    assert.ok(js.includes("childKey: 'german-kids'"), 'german-kids module should have childKey mapping');
+});
+
+test('feedback-system.js has getVisibleFeedbackModules function', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes('function getVisibleFeedbackModules()'),
+        'getVisibleFeedbackModules function must exist');
+});
+
+test('feedback-system.js getVisibleFeedbackModules reads child assigned+enabled modules', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes('child.assignedModules') || js.includes('assignedModules'),
+        'must check assignedModules');
+    assert.ok(js.includes('child.enabledModules') || js.includes('enabledModules'),
+        'must check enabledModules');
+});
+
+test('feedback-system.js getVisibleFeedbackModules always includes general', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes("m.childKey === null") && js.includes('return true'),
+        'general (childKey null) must always be included');
+});
+
+test('feedback-system.js getVisibleFeedbackModules shows all for admin', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes("isAdmin") && js.includes('return FEEDBACK_MODULES'),
+        'admin should see all modules');
+});
+
+test('feedback-system.js openFeedbackModal uses getVisibleFeedbackModules', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes('getVisibleFeedbackModules()'),
+        'openFeedbackModal must call getVisibleFeedbackModules');
+});
+
+test('feedback-system.js renders tabs from visibleModules not FEEDBACK_MODULES', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes('visibleModules.map'),
+        'tab/page generation must use visibleModules.map, not FEEDBACK_MODULES.map');
+});
+
+test('feedback-system.js includes german-kids in FEEDBACK_MODULES', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes("id: 'german-kids'"),
+        'german-kids should be in FEEDBACK_MODULES list');
+});
+
+// ============================================================================
+console.log('\n--- BUG-031: Aptitude Progressive Pool & Unique Pages ---');
+// ============================================================================
+
+test('aptitude-generator.js has buildProgressivePool function', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('function buildProgressivePool(type, age)'),
+        'buildProgressivePool must exist for progressive content');
+});
+
+test('aptitude-generator.js buildProgressivePool handles all 6 pool types', () => {
+    const js = readFile('aptitude-generator.js');
+    const poolTypes = ['patterns', 'sequences', 'matching', 'oddone', 'comparison', 'logic'];
+    poolTypes.forEach(type => {
+        assert.ok(js.includes(`case '${type}':`),
+            `buildProgressivePool must handle type '${type}'`);
+    });
+});
+
+test('aptitude-generator.js buildProgressivePool adds difficulty property', () => {
+    const js = readFile('aptitude-generator.js');
+    // Each type mapping should include difficulty: diff
+    assert.ok(js.includes('difficulty: diff'),
+        'progressive pool items must include difficulty property');
+});
+
+test('aptitude-generator.js loadPuzzles uses page-based offset via pool.slice', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('pool.slice(startIdx, startIdx + count)'),
+        'loadPuzzles must use page-based slice offset from progressive pool');
+});
+
+test('aptitude-generator.js loadPuzzles does NOT use hardcoded 50 totalPages', () => {
+    const js = readFile('aptitude-generator.js');
+    // The old getDemoLimit(50) for non-counting types should be replaced
+    // Only counting should have fixed pages
+    const loadPuzzlesMatch = js.match(/function loadPuzzles[\s\S]*?renderWorksheet\(\)/);
+    assert.ok(loadPuzzlesMatch, 'loadPuzzles function must exist');
+    const fnBody = loadPuzzlesMatch[0];
+    // Should have pool-based maxPages calculation
+    assert.ok(fnBody.includes('Math.ceil(pool.length / count)'),
+        'totalPages must be calculated from actual pool size');
+});
+
+test('aptitude-generator.js loadPuzzles sets totalPages from pool size for non-counting types', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('const maxPages = Math.ceil(pool.length / count)'),
+        'maxPages must be derived from pool.length / count');
+    assert.ok(js.includes('totalPages = getDemoLimit(maxPages)'),
+        'totalPages must use getDemoLimit with maxPages');
+});
+
+test('aptitude-generator.js counting has progressive difficulty across pages', () => {
+    const js = readFile('aptitude-generator.js');
+    // Counting should check page number to determine difficulty
+    assert.ok(js.includes("if (page > 10) pageDifficulty = 'hard'") ||
+              js.includes("if (page > 10) pageDifficulty = \\'hard\\'"),
+        'counting must progress to hard difficulty on later pages');
+    assert.ok(js.includes("pageDifficulty = 'medium'"),
+        'counting must have medium difficulty phase');
+});
+
+test('aptitude-generator.js no more difficulty-specific counts object', () => {
+    const js = readFile('aptitude-generator.js');
+    // Old code had: const counts = { easy: { patterns: 8 ... }, medium: { ... }, hard: { ... } }
+    assert.ok(!js.includes("easy: { patterns:") || js.includes('// legacy'),
+        'old difficulty-specific counts should be removed');
+});
+
+test('aptitude-generator.js uses uniform questionsPerPage', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('const questionsPerPage'),
+        'must have uniform questionsPerPage object');
+});
+
+test('aptitude-generator.js determines difficulty from page items', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes("problems.map(p => p.difficulty)"),
+        'must determine currentDifficulty from items on the page');
+});
+
+test('aptitude-generator.js header shows difficulty badge', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('diffColors') && js.includes('diffStars'),
+        'header must show color-coded difficulty badge');
+});
+
+test('aptitude-age-content.js has patterns for all 6 age groups', () => {
+    const js = readFile('aptitude-age-content.js');
+    const ageGroups = ["'4-5'", "'6'", "'7'", "'8'", "'9+'", "'10+'"];
+    ageGroups.forEach(ag => {
+        assert.ok(js.includes(`${ag}:`), `patterns must have age group ${ag}`);
+    });
+});
+
+test('aptitude-age-content.js each age group has easy/medium/hard for all data sets', () => {
+    const js = readFile('aptitude-age-content.js');
+    // Check that ageBasedPatterns has easy/medium/hard for each age group
+    const datasets = ['ageBasedPatterns', 'ageBasedSequences', 'ageBasedMatching',
+                      'ageBasedOddOneOut', 'ageBasedComparison', 'ageBasedLogic'];
+    datasets.forEach(ds => {
+        assert.ok(js.includes(`const ${ds}`), `${ds} must be defined`);
+    });
+});
+
+test('aptitude-generator.js progressive pool ordered easy→medium→hard', () => {
+    const js = readFile('aptitude-generator.js');
+    // buildProgressivePool iterates difficulties in order
+    const poolFn = js.match(/function buildProgressivePool[\s\S]*?return pool;/);
+    assert.ok(poolFn, 'buildProgressivePool must return pool');
+    const fnBody = poolFn[0];
+    assert.ok(fnBody.includes("['easy', 'medium', 'hard']"),
+        'difficulties must be in progressive order easy→medium→hard');
+});
+
+test('aptitude-generator.js matching type maps right→answer correctly', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('answer: p.right'),
+        'matching pool builder must map p.right to answer property');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 

@@ -11,14 +11,15 @@
  */
 
 const FEEDBACK_MODULES = [
-    { id: 'general', name: 'Overall Platform', icon: '🏠' },
-    { id: 'math', name: 'Mathematics', icon: '📐' },
-    { id: 'english', name: 'English', icon: '📚' },
-    { id: 'aptitude', name: 'Aptitude', icon: '🧩' },
-    { id: 'stories', name: 'Stories', icon: '📖' },
-    { id: 'drawing', name: 'Drawing', icon: '🎨' },
-    { id: 'eq', name: 'Emotional Quotient', icon: '❤️' },
-    { id: 'german', name: 'German', icon: '🇩🇪' },
+    { id: 'general', name: 'Overall Platform', icon: '🏠', childKey: null },
+    { id: 'math', name: 'Mathematics', icon: '📐', childKey: 'math' },
+    { id: 'english', name: 'English', icon: '📚', childKey: 'english' },
+    { id: 'aptitude', name: 'Aptitude', icon: '🧩', childKey: 'aptitude' },
+    { id: 'stories', name: 'Stories', icon: '📖', childKey: 'stories' },
+    { id: 'drawing', name: 'Drawing', icon: '🎨', childKey: 'drawing' },
+    { id: 'eq', name: 'Emotional Quotient', icon: '❤️', childKey: 'emotional-quotient' },
+    { id: 'german', name: 'German (B1)', icon: '🇩🇪', childKey: 'german' },
+    { id: 'german-kids', name: 'German Kids', icon: '🇩🇪', childKey: 'german-kids' },
 ];
 
 // ============================================================================
@@ -28,6 +29,27 @@ const FEEDBACK_MODULES = [
 /**
  * Open the feedback modal for parents.
  */
+function getVisibleFeedbackModules() {
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    const isAdmin = window.currentUserRole === 'admin';
+
+    // Admin sees all modules
+    if (isAdmin) return FEEDBACK_MODULES;
+
+    // No child selected — show only general
+    if (!child) return FEEDBACK_MODULES.filter(m => m.childKey === null);
+
+    const assigned = child.assignedModules || child.modules || { math: true };
+    const enabled = child.enabledModules || { math: true };
+
+    return FEEDBACK_MODULES.filter(m => {
+        // General is always visible
+        if (m.childKey === null) return true;
+        // Module must be both assigned AND enabled
+        return assigned[m.childKey] && enabled[m.childKey];
+    });
+}
+
 function openFeedbackModal() {
     // Remove existing modal if any
     const existing = document.getElementById('feedback-modal');
@@ -36,7 +58,9 @@ function openFeedbackModal() {
     const modal = document.createElement('div');
     modal.id = 'feedback-modal';
 
-    const moduleTabs = FEEDBACK_MODULES.map((m, idx) => `
+    const visibleModules = getVisibleFeedbackModules();
+
+    const moduleTabs = visibleModules.map((m, idx) => `
         <button class="feedback-tab ${idx === 0 ? 'active' : ''}"
                 onclick="switchFeedbackTab('${m.id}')"
                 id="feedback-tab-${m.id}"
@@ -55,7 +79,7 @@ function openFeedbackModal() {
         </button>
     `).join('');
 
-    const modulePages = FEEDBACK_MODULES.map((m, idx) => `
+    const modulePages = visibleModules.map((m, idx) => `
         <div class="feedback-page" id="feedback-page-${m.id}" style="display: ${idx === 0 ? 'block' : 'none'};">
             <h3 style="margin: 0 0 15px 0; color: #333;">${m.icon} ${m.name} Feedback</h3>
 

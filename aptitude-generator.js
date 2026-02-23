@@ -14,6 +14,103 @@ let answersVisible = false;
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js
 
+/**
+ * Build a progressive pool of ALL questions for a given type (easy → medium → hard).
+ * Returns problems in render-ready format with .difficulty property.
+ * Used to paginate unique content per page instead of repeating the same questions.
+ */
+function buildProgressivePool(type, age) {
+    const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
+    const difficulties = ['easy', 'medium', 'hard'];
+    const pool = [];
+
+    for (const diff of difficulties) {
+        let items = [];
+
+        switch (type) {
+            case 'patterns': {
+                const raw = (typeof getPatternsByAge !== 'undefined') ? getPatternsByAge(ageGroup, diff) : [];
+                items = (raw || []).map(p => ({
+                    type: 'pattern',
+                    pattern: p.pattern,
+                    answer: p.answer,
+                    options: p.options,
+                    reason: p.reason || 'Pattern repeats',
+                    difficulty: diff
+                }));
+                break;
+            }
+            case 'sequences': {
+                const raw = (typeof ageBasedSequences !== 'undefined') ?
+                    (ageBasedSequences[ageGroup]?.[diff] || ageBasedSequences['6']?.[diff] || []) : [];
+                items = raw.map(s => ({
+                    type: 'sequence',
+                    sequence: s.sequence,
+                    answer: s.answer,
+                    options: s.options,
+                    reason: s.reason,
+                    difficulty: diff
+                }));
+                break;
+            }
+            case 'matching': {
+                const raw = (typeof ageBasedMatching !== 'undefined') ?
+                    (ageBasedMatching[ageGroup]?.[diff] || ageBasedMatching['6']?.[diff] || []) : [];
+                items = raw.map(p => ({
+                    type: 'matching',
+                    left: p.left,
+                    answer: p.right,
+                    options: p.options,
+                    reason: p.reason,
+                    difficulty: diff
+                }));
+                break;
+            }
+            case 'oddone': {
+                const raw = (typeof ageBasedOddOneOut !== 'undefined') ?
+                    (ageBasedOddOneOut[ageGroup]?.[diff] || ageBasedOddOneOut['6']?.[diff] || []) : [];
+                items = raw.map(s => ({
+                    type: 'oddone',
+                    items: s.items,
+                    answer: s.answer,
+                    reason: s.reason,
+                    difficulty: diff
+                }));
+                break;
+            }
+            case 'comparison': {
+                const raw = (typeof ageBasedComparison !== 'undefined') ?
+                    (ageBasedComparison[ageGroup]?.[diff] || ageBasedComparison['6']?.[diff] || []) : [];
+                items = raw.map(c => ({
+                    type: 'comparison',
+                    item1: c.item1,
+                    item2: c.item2,
+                    question: c.question,
+                    answer: c.answer,
+                    reason: c.reason || c.question,
+                    difficulty: diff
+                }));
+                break;
+            }
+            case 'logic': {
+                const raw = (typeof ageBasedLogic !== 'undefined') ?
+                    (ageBasedLogic[ageGroup]?.[diff] || ageBasedLogic['6']?.[diff] || []) : [];
+                items = raw.map(p => ({
+                    type: 'logic',
+                    question: p.question,
+                    answer: p.answer,
+                    difficulty: diff
+                }));
+                break;
+            }
+        }
+
+        pool.push(...items);
+    }
+
+    return pool;
+}
+
 // Utility: Shuffle array (Fisher-Yates algorithm)
 function shuffleArray(array) {
     const shuffled = [...array]; // Create a copy to avoid mutating original
@@ -343,7 +440,7 @@ function generateLogicPuzzles(count, difficulty, age) {
     }));
 }
 
-// Load Puzzles
+// Load Puzzles — Progressive pool: unique content per page, easy → medium → hard
 function loadPuzzles(difficulty, page = 1) {
     // Check for admin level override
     if (window.currentUserRole === 'admin') {
@@ -357,35 +454,68 @@ function loadPuzzles(difficulty, page = 1) {
         }
     }
 
-    currentDifficulty = difficulty;
     currentPage = page;
 
-    // Set page limit for demo mode (2 pages) vs full mode (50 pages)
-    totalPages = getDemoLimit(50);
-
-    const counts = {
-        easy: { patterns: 8, counting: 8, sequences: 6, matching: 6, oddone: 6, comparison: 6, logic: 6 },
-        medium: { patterns: 10, counting: 10, sequences: 8, matching: 8, oddone: 8, comparison: 8, logic: 8 },
-        hard: { patterns: 12, counting: 10, sequences: 10, matching: 10, oddone: 10, comparison: 10, logic: 10 }
+    // Questions per page for each type (uniform across difficulties)
+    const questionsPerPage = {
+        patterns: 6, counting: 8, sequences: 4, matching: 6,
+        oddone: 5, comparison: 6, logic: 6
     };
-
-    let count = counts[difficulty][currentType];
+    const count = questionsPerPage[currentType] || 6;
     let problems = [];
 
-    // NOW USING AGE! Pass currentAge to generators for age-appropriate content
-    switch(currentType) {
-        case 'patterns': problems = generatePatternPuzzles(count, difficulty, currentAge); break;
-        case 'counting': problems = generateCountingPuzzles(count, difficulty, currentAge); break;
-        case 'sequences': problems = generateSequencePuzzles(count, difficulty, currentAge); break;
-        case 'matching': problems = generateMatchingPuzzles(count, difficulty, currentAge); break;
-        case 'oddone': problems = generateOddOnePuzzles(count, difficulty, currentAge); break;
-        case 'comparison': problems = generateComparisonPuzzles(count, difficulty, currentAge); break;
-        case 'logic': problems = generateLogicPuzzles(count, difficulty, currentAge); break;
+    if (currentType === 'counting') {
+        // Counting uses procedural generation — naturally unique per page via Math.random()
+        // Progressive difficulty: pages 1-5 easy, 6-10 medium, 11-15 hard
+        totalPages = getDemoLimit(15);
+        let pageDifficulty = 'easy';
+        if (page > 10) pageDifficulty = 'hard';
+        else if (page > 5) pageDifficulty = 'medium';
+        currentDifficulty = pageDifficulty;
+
+        problems = generateCountingPuzzles(count, pageDifficulty, currentAge);
+    } else {
+        // All other types: progressive pool (easy → medium → hard), unique content per page
+        const pool = buildProgressivePool(currentType, currentAge);
+
+        if (pool.length === 0) {
+            // Fallback: use old generator for 1 page
+            currentDifficulty = difficulty;
+            totalPages = getDemoLimit(1);
+            switch (currentType) {
+                case 'patterns': problems = generatePatternPuzzles(count, difficulty, currentAge); break;
+                case 'sequences': problems = generateSequencePuzzles(count, difficulty, currentAge); break;
+                case 'matching': problems = generateMatchingPuzzles(count, difficulty, currentAge); break;
+                case 'oddone': problems = generateOddOnePuzzles(count, difficulty, currentAge); break;
+                case 'comparison': problems = generateComparisonPuzzles(count, difficulty, currentAge); break;
+                case 'logic': problems = generateLogicPuzzles(count, difficulty, currentAge); break;
+            }
+        } else {
+            const startIdx = (page - 1) * count;
+            problems = pool.slice(startIdx, startIdx + count);
+
+            if (problems.length === 0 && page > 1) {
+                // Past end of pool — don't navigate
+                return;
+            }
+
+            // Set totalPages based on actual pool size
+            const maxPages = Math.ceil(pool.length / count);
+            totalPages = getDemoLimit(maxPages);
+
+            // Determine current difficulty from items on this page
+            if (problems.length > 0) {
+                const pageDiffs = [...new Set(problems.map(p => p.difficulty))];
+                currentDifficulty = pageDiffs[pageDiffs.length - 1];
+            } else {
+                currentDifficulty = 'easy';
+            }
+        }
     }
 
     currentWorksheet = {
         type: currentType,
-        difficulty,
+        difficulty: currentDifficulty,
         age: currentAge,
         page: currentPage,
         problems
@@ -613,10 +743,15 @@ function renderWorksheet() {
 
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
                 📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, difficulty) : 'N/A'}
+                ${(() => {
+                    const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336' };
+                    const diffStars = { easy: '⭐', medium: '⭐⭐', hard: '⭐⭐⭐' };
+                    return `<span style="margin-left: 15px; background: ${diffColors[difficulty]}; padding: 4px 12px; border-radius: 20px; font-size: 0.85em;">${diffStars[difficulty]} ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>`;
+                })()}
             </div>
             <div class="worksheet-header">
                 <div class="worksheet-info">
-                    <h2>${typeNames[type]} - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</h2>
+                    <h2>${typeNames[type]}</h2>
                     <p>${problems.length} puzzles to solve!</p>
                 </div>
                 <div class="student-info">
