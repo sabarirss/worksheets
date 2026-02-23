@@ -13,7 +13,7 @@ functions/package-lock.json
 
 # Local/temp files
 get-docker.sh
-models/
+models/.gitkeep
 train-emnist-model.py
 
 # Claude Code local settings

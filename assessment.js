@@ -657,7 +657,7 @@ async function submitAssessment() {
 
     let correct, scorePercentage, levelResult, serverFeedback;
 
-    // Try Cloud Function validation first, fall back to local
+    // Cloud Function validation (server-authoritative, no local fallback)
     try {
         const submitAssessmentCF = firebase.app().functions('europe-west1').httpsCallable('submitAssessment');
         const result = await submitAssessmentCF({
@@ -679,39 +679,17 @@ async function submitAssessment() {
 
         console.log('Assessment validated by server:', result.data);
     } catch (cfError) {
-        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
-
-        // === FALLBACK: Local validation ===
-        correct = 0;
-        serverFeedback = [];
-
-        for (let i = 0; i < assessmentQuestions.length; i++) {
-            const correctAnswer = assessmentQuestions[i].answer;
-            const userAnswer = answers[i];
-            let isCorrect = false;
-
-            if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
-                if (isEnglish) {
-                    isCorrect = String(userAnswer).toLowerCase() === String(correctAnswer).toLowerCase();
-                } else {
-                    isCorrect = Number(userAnswer) === Number(correctAnswer);
-                }
-            }
-
-            if (isCorrect) correct++;
-            serverFeedback.push({ correct: isCorrect, expected: correctAnswer });
+        console.error('Cloud Function validation failed:', cfError.message);
+        alert('Could not reach the evaluation server. Please check your internet connection and try again.');
+        const submitBtn = document.querySelector('.submit-assessment-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Assessment';
         }
-
-        scorePercentage = Math.round((correct / assessmentQuestions.length) * 100);
-        levelResult = determineLevelFromScore(scorePercentage, currentAssessment.ageGroup);
-
-        // Save via client fallback
-        if (child) {
-            await saveAssessmentResult(child.id, currentAssessment.operation, scorePercentage, levelResult.level);
-        }
+        return;
     }
 
-    // Render feedback from server (or local fallback)
+    // Render feedback from server
     for (let i = 0; i < assessmentQuestions.length; i++) {
         const answerElement = document.getElementById(`assessment-answer-${i}`);
         const feedback = document.getElementById(`assessment-feedback-${i}`);

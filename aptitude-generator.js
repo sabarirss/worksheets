@@ -1505,7 +1505,7 @@ async function submitWorksheet() {
     const completionResult = isPageCompleted('aptitude', score, false);
     const isCompleted = completionResult.completed;
 
-    // Save completion — try Cloud Function first, fall back to local
+    // Cloud Function validation (server-authoritative, no local fallback)
     const identifier = `${currentWorksheet.type}-${currentWorksheet.difficulty}`;
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
     const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
@@ -1535,19 +1535,14 @@ async function submitWorksheet() {
         });
         console.log('Aptitude submission validated by server:', serverResult.data);
     } catch (cfError) {
-        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
-
-        const completionData = {
-            score: score,
-            correctCount: correctCount,
-            totalProblems: evaluatedProblems,
-            completed: isCompleted,
-            manuallyMarked: false,
-            elapsedTime: elapsedTime,
-            attempts: 1
-        };
-
-        await savePageCompletion('aptitude', identifier, completionData);
+        console.error('Cloud Function validation failed:', cfError.message);
+        alert('Could not reach the evaluation server. Please check your internet connection and try again.');
+        const submitBtn = document.querySelector('.submit-worksheet-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✓ Submit for Evaluation';
+        }
+        return;
     }
 
     // Show submission status with 95% threshold messaging

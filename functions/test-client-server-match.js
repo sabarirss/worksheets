@@ -270,6 +270,44 @@ test('server grades fraction answers correctly', () => {
 });
 
 // ============================================================================
+// BUG-032 Regression: Server must use assessed level, not DOB age
+// ============================================================================
+
+console.log('\n=== BUG-032: Assessment Level → ageGroup Regression ===');
+
+const { levelToAgeGroup } = require('./shared/math-engine');
+
+test('levelToAgeGroup correctly maps assessed levels for server validation', () => {
+    // If a child is age 8 (DOB) but assessment assigned Level 4 (age 6, medium),
+    // the server must generate problems for age 6, not age 8.
+    assert.strictEqual(levelToAgeGroup(4), '6', 'Level 4 should map to age group 6');
+    assert.strictEqual(levelToAgeGroup(5), '7', 'Level 5 should map to age group 7');
+    assert.strictEqual(levelToAgeGroup(11), '10+', 'Level 11 should map to age group 10+');
+});
+
+test('server generates different problems for DOB age vs assessed level age', () => {
+    // This proves that using DOB age instead of assessed level would generate wrong problems
+    const dobAge8Problems = generateAbsolutePageProblems('addition', '8', 1);
+    const assessedLevel4Problems = generateAbsolutePageProblems('addition', '6', 1);
+
+    // Problems for age 8 vs age 6 should be different (different number ranges)
+    const differentProblems = dobAge8Problems.problems.some((p, i) =>
+        p.a !== assessedLevel4Problems.problems[i].a ||
+        p.b !== assessedLevel4Problems.problems[i].b
+    );
+    assert.ok(differentProblems, 'Age 8 and age 6 problems should differ (BUG-032: using wrong age would grade wrong)');
+});
+
+test('validators.js uses levelToAgeGroup from assessment data', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const validatorsCode = fs.readFileSync(path.join(__dirname, 'validators.js'), 'utf8');
+    assert.ok(validatorsCode.includes('levelToAgeGroup'), 'validators.js should import levelToAgeGroup');
+    assert.ok(validatorsCode.includes('assessedLevel'), 'validators.js should read assessed level from assessment data');
+    assert.ok(!validatorsCode.includes('assessmentData?.[operation]?.ageGroup'), 'validators.js should NOT look for non-existent ageGroup field');
+});
+
+// ============================================================================
 // SUMMARY
 // ============================================================================
 

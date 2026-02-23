@@ -101,6 +101,8 @@ const allJsFiles = [
     'feedback-system.js',
     'notification-system.js',
     'branding.js',
+    'progress-map.js',
+    'progress-map.css',
 ];
 
 allJsFiles.forEach(file => {
@@ -574,16 +576,19 @@ test('functions/index.js exports level functions', () => {
     assert.ok(content.includes('checkLevelTestEligibility'), 'Missing checkLevelTestEligibility export');
 });
 
-test('worksheet-generator.js has Cloud Function fallback pattern', () => {
+test('worksheet-generator.js uses Cloud Function validation (no local fallback)', () => {
     const content = readFile('worksheet-generator.js');
     assert.ok(
         content.includes('httpsCallable') || content.includes('validateMathSubmission'),
         'worksheet-generator.js missing Cloud Function call'
     );
     assert.ok(
-        content.includes('catch') && content.includes('fallback') ||
-        content.includes('catch') && content.includes('local validation'),
-        'worksheet-generator.js missing fallback on Cloud Function failure'
+        !content.includes('FALLBACK: Local validation'),
+        'worksheet-generator.js should NOT have local validation fallback'
+    );
+    assert.ok(
+        content.includes('server-authoritative'),
+        'worksheet-generator.js should use server-authoritative validation'
     );
 });
 
@@ -2068,10 +2073,99 @@ test('level-test.js awaits getAssignedLevel', () => {
         'level-test must await getAssignedLevel');
 });
 
-test('assessment.js submitAssessment awaits saveAssessmentResult in fallback path', () => {
+test('assessment.js uses Cloud Function validation (no local fallback)', () => {
     const js = readFile('assessment.js');
-    assert.ok(js.includes('await saveAssessmentResult(child.id,'),
-        'submitAssessment must await saveAssessmentResult');
+    assert.ok(js.includes('server-authoritative, no local fallback'),
+        'assessment.js must use server-authoritative Cloud Function');
+    assert.ok(!js.includes('FALLBACK: Local validation'),
+        'assessment.js must NOT have local validation fallback');
+});
+
+// ============================================================================
+// ANSWER DATA PROTECTION TESTS (no answers exposed in browser DOM/client data)
+// ============================================================================
+
+console.log('\n--- Answer Data Protection ---');
+
+test('Math: answer-key div is NOT pre-rendered with answers', () => {
+    const js = readFile('worksheet-generator.js');
+    // The old pattern had ${problem.answer} in the answer-key div template
+    assert.ok(!js.includes('${problem.answer}</strong>'),
+        'answer-key must NOT contain ${problem.answer} template');
+    assert.ok(js.includes('Answer key populated from server feedback after submission') ||
+              js.includes('Answer key built dynamically'),
+        'answer-key div must have comment indicating dynamic population');
+});
+
+test('Math: problems stored without .answer field (answers stripped)', () => {
+    const js = readFile('worksheet-generator.js');
+    // Check that problems are mapped to strip answers
+    assert.ok(js.includes('problems: problems.map(p => ({ a: p.a, b: p.b, display: p.display, type: p.type })'),
+        'Problems must be stored with answer stripped');
+});
+
+test('Math: mathServerFeedback variable exists for server-side answers', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('let mathServerFeedback = null'),
+        'mathServerFeedback variable must be declared');
+    assert.ok(js.includes('mathServerFeedback = feedback'),
+        'mathServerFeedback must be set from server response');
+});
+
+test('Math: toggleMathAnswers builds answer key from server feedback', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('mathServerFeedback[index]?.expected'),
+        'toggleMathAnswers must use mathServerFeedback.expected for answer values');
+});
+
+test('Math: validateShowAnswersToggle requires server validation', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('Submit worksheet first to see answers'),
+        'Toggle must show "submit first" message when no server feedback');
+});
+
+test('Math: checkAnswers/checkAnswersManual functions removed (no local answer comparison)', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(!js.includes('function checkAnswers()'),
+        'checkAnswers() must be removed (used local answer data)');
+    assert.ok(!js.includes('function checkAnswersManual()'),
+        'checkAnswersManual() must be removed (used local answer data)');
+});
+
+test('Math: Enter key submits to server, not local check', () => {
+    const js = readFile('worksheet-generator.js');
+    // handleEnter should call submitWorksheet, not checkAnswers
+    assert.ok(js.includes('submitWorksheet()') && !js.includes('checkAnswers();\n'),
+        'Enter key must trigger submitWorksheet(), not checkAnswers()');
+});
+
+test('English: answer-key div is NOT pre-rendered with answers in HTML template', () => {
+    const js = readFile('english-generator.js');
+    // The answer-key div in the main HTML template must be empty (no pre-rendered answers)
+    assert.ok(js.includes('Answer key built dynamically after validation, not pre-rendered'),
+        'English answer-key div must have dynamic-build comment');
+    // The showAnswerKey function must build answers dynamically (has local answerKeyHTML)
+    assert.ok(js.includes('function showAnswerKey()'),
+        'showAnswerKey must exist to build answers on demand');
+});
+
+test('German: answer-key div is NOT pre-rendered with answers in HTML template', () => {
+    const js = readFile('german-generator.js');
+    // The answer-key div in the main HTML template must be empty (no pre-rendered answers)
+    assert.ok(js.includes('Answer key built dynamically when requested, not pre-rendered'),
+        'German answer-key div must have dynamic-build comment');
+    assert.ok(js.includes('function showAnswerKey()'),
+        'showAnswerKey must exist to build answers on demand');
+});
+
+test('Math: submitWorksheet sends raw values (no client-side answer type check)', () => {
+    const js = readFile('worksheet-generator.js');
+    // Old pattern: typeof correctAnswer === 'string'
+    // New pattern: Server handles type comparison
+    assert.ok(!js.includes("typeof correctAnswer === 'string'"),
+        'submitWorksheet must NOT use correctAnswer type for parsing');
+    assert.ok(js.includes('server handles type comparison'),
+        'Must indicate server handles type comparison');
 });
 
 // ============================================================================
@@ -2252,6 +2346,315 @@ test('aptitude-generator.js matching type maps right→answer correctly', () => 
     const js = readFile('aptitude-generator.js');
     assert.ok(js.includes('answer: p.right'),
         'matching pool builder must map p.right to answer property');
+});
+
+// ============================================================================
+console.log('\n=== Progress Map Feature (Gamified Learning Journey) ===');
+// ============================================================================
+
+test('progress-map.js exists', () => {
+    assert.ok(fileExists('progress-map.js'), 'progress-map.js not found');
+});
+
+test('progress-map.css exists', () => {
+    assert.ok(fileExists('progress-map.css'), 'progress-map.css not found');
+});
+
+// --- Integration: index.html ---
+test('index.html loads progress-map.css', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('progress-map.css'), 'index.html should link progress-map.css');
+});
+
+test('index.html loads progress-map.js', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('progress-map.js'), 'index.html should load progress-map.js');
+});
+
+test('index.html has progress-map-container div', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('id="progress-map-container"'), 'index.html should have progress-map-container');
+});
+
+test('index.html operation buttons call showProgressMap (math)', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes("showProgressMap('math','addition')"), 'Addition button should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('math','subtraction')"), 'Subtraction button should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('math','multiplication')"), 'Multiplication button should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('math','division')"), 'Division button should call showProgressMap');
+});
+
+test('index.html does NOT directly call loadOperationWorksheet from operation buttons', () => {
+    const html = readFile('index.html');
+    // The old pattern was onclick="loadOperationWorksheet('addition')" on the level-btn
+    // It should no longer appear in the operation buttons (but may still exist in JS functions)
+    const operationSection = html.split('id="math-operations"')[1];
+    if (operationSection) {
+        const sectionEnd = operationSection.split('</div>')[2] || operationSection.substring(0, 600);
+        assert.ok(!sectionEnd.includes('onclick="loadOperationWorksheet'),
+            'Operation buttons should use showProgressMap, not loadOperationWorksheet directly');
+    }
+});
+
+// --- Integration: english.html ---
+test('english.html loads progress-map.css', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('progress-map.css'), 'english.html should link progress-map.css');
+});
+
+test('english.html loads progress-map.js', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('progress-map.js'), 'english.html should load progress-map.js');
+});
+
+test('english.html has progress-map-container div', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('id="progress-map-container"'), 'english.html should have progress-map-container');
+});
+
+test('english.html vocab/writing buttons call showProgressMap (english)', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes("showProgressMap('english','easy')"), 'Vocab Easy should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('english','medium')"), 'Vocab Medium should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('english','hard')"), 'Vocab Hard should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('english','writing')"), 'Writing should call showProgressMap');
+});
+
+test('english.html Reading Stories still uses loadAllStories (not progress map)', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes("onclick=\"loadAllStories()\""), 'Reading Stories should still call loadAllStories');
+});
+
+// --- progress-map.js structure ---
+test('progress-map.js defines PROGRESS_CONFIG with math and english', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('PROGRESS_CONFIG'), 'Should define PROGRESS_CONFIG');
+    assert.ok(js.includes("math:"), 'PROGRESS_CONFIG should have math config');
+    assert.ok(js.includes("english:"), 'PROGRESS_CONFIG should have english config');
+});
+
+test('progress-map.js defines all 4 math subtypes', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes("'addition'"), 'Should include addition');
+    assert.ok(js.includes("'subtraction'"), 'Should include subtraction');
+    assert.ok(js.includes("'multiplication'"), 'Should include multiplication');
+    assert.ok(js.includes("'division'"), 'Should include division');
+});
+
+test('progress-map.js defines plant growth stages', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('PLANT_STAGES'), 'Should define PLANT_STAGES');
+    assert.ok(js.includes('seed'), 'Should have seed stage');
+    assert.ok(js.includes('sprout'), 'Should have sprout stage');
+    assert.ok(js.includes('flowering'), 'Should have flowering stage');
+});
+
+test('progress-map.js has 7 plant SVG designs', () => {
+    const js = readFile('progress-map.js');
+    const svgStages = ['seed', 'sprout', 'seedling', 'young', 'small-tree', 'big-tree', 'flowering'];
+    svgStages.forEach(stage => {
+        assert.ok(js.includes(`'${stage}':`), `Should have SVG for ${stage} stage`);
+    });
+});
+
+test('progress-map.js defines showProgressMap function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('async function showProgressMap'), 'Should define showProgressMap');
+});
+
+test('progress-map.js defines hideProgressMap function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function hideProgressMap'), 'Should define hideProgressMap');
+});
+
+test('progress-map.js defines handleNodeClick function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function handleNodeClick'), 'Should define handleNodeClick');
+});
+
+test('progress-map.js defines switchProgressTab function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function switchProgressTab'), 'Should define switchProgressTab');
+});
+
+test('progress-map.js defines showLockedToast function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function showLockedToast'), 'Should define showLockedToast');
+});
+
+test('progress-map.js defines calculateStreak function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function calculateStreak'), 'Should define calculateStreak');
+});
+
+test('progress-map.js defines calculateStats function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function calculateStats'), 'Should define calculateStats');
+});
+
+test('progress-map.js defines getCompletionsForModule function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('async function getCompletionsForModule'), 'Should define getCompletionsForModule');
+});
+
+test('progress-map.js defines buildNodeTree function', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function buildNodeTree'), 'Should define buildNodeTree');
+});
+
+test('progress-map.js renders stats bar with streak, stars, solved, accuracy', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('day streak'), 'Stats bar should show streak');
+    assert.ok(js.includes('stars'), 'Stats bar should show stars');
+    assert.ok(js.includes('solved'), 'Stats bar should show problems solved');
+    assert.ok(js.includes('accuracy'), 'Stats bar should show accuracy');
+});
+
+test('progress-map.js renders weekly ring', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('pm-weekly-ring'), 'Should render weekly ring');
+    assert.ok(js.includes('stroke-dashoffset'), 'Weekly ring should use SVG stroke');
+});
+
+test('progress-map.js handles node states: completed, current, locked', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes("state = 'completed'") || js.includes("state: 'completed'"), 'Should handle completed state');
+    assert.ok(js.includes("state = 'current'") || js.includes("state: 'current'"), 'Should handle current state');
+    assert.ok(js.includes("state = 'locked'") || js.includes("state: 'locked'"), 'Should handle locked state');
+});
+
+test('progress-map.js has demo upgrade prompt', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('pm-upgrade-prompt'), 'Should have upgrade prompt for demo users');
+    assert.ok(js.includes('Unlock all pages'), 'Upgrade prompt should mention unlocking');
+});
+
+test('progress-map.js navigates to existing worksheet loaders on node click', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('loadOperationWorksheet'), 'Should call loadOperationWorksheet for math');
+    assert.ok(js.includes('loadWorksheetNew'), 'Should call loadWorksheetNew for english');
+});
+
+test('progress-map.js handles assessment node click', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('handleAssessmentClick'), 'Should define handleAssessmentClick');
+    assert.ok(js.includes('showAssessmentGate'), 'Should call showAssessmentGate for math');
+    assert.ok(js.includes('showEnglishAssessmentGate'), 'Should call showEnglishAssessmentGate for english');
+});
+
+// --- progress-map.css structure ---
+test('progress-map.css has node state styles', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('.pm-node.completed'), 'CSS should style completed nodes');
+    assert.ok(css.includes('.pm-node.current'), 'CSS should style current nodes');
+    assert.ok(css.includes('.pm-node.locked'), 'CSS should style locked nodes');
+});
+
+test('progress-map.css has pulse animation for current node', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('pm-pulse'), 'CSS should have pulse animation');
+    assert.ok(css.includes('@keyframes pm-pulse'), 'CSS should define pm-pulse keyframes');
+});
+
+test('progress-map.css has sway animation for plant SVG', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('pm-sway'), 'CSS should have sway animation');
+    assert.ok(css.includes('@keyframes pm-sway'), 'CSS should define pm-sway keyframes');
+});
+
+test('progress-map.css is mobile responsive', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('@media (max-width: 480px)'), 'CSS should have mobile breakpoint');
+    assert.ok(css.includes('grid-template-columns: repeat(2, 1fr)'), 'Stats should wrap to 2x2 on mobile');
+});
+
+test('progress-map.css has toast notification style', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('.pm-toast'), 'CSS should style toast notification');
+});
+
+test('progress-map.css has upgrade prompt style', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('.pm-upgrade-prompt'), 'CSS should style upgrade prompt');
+});
+
+// --- worksheet-generator.js hides progress map ---
+test('worksheet-generator.js showSubjects() hides progress map', () => {
+    const js = readFile('worksheet-generator.js');
+    // Check within the showSubjects function
+    const showSubjectsMatch = js.match(/function showSubjects\(\)[\s\S]*?^}/m);
+    if (showSubjectsMatch) {
+        assert.ok(showSubjectsMatch[0].includes('progress-map-container'),
+            'showSubjects should hide progress-map-container');
+    }
+});
+
+test('worksheet-generator.js showMathLevels() hides progress map', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnMatch = js.match(/function showMathLevels\(\)[\s\S]*?Age-based filtering removed/);
+    if (fnMatch) {
+        assert.ok(fnMatch[0].includes('progress-map-container'),
+            'showMathLevels should hide progress-map-container');
+    }
+});
+
+// --- Pure logic tests (no DOM/Firebase needed) ---
+test('calculateStats has correct star logic (95+ = 3, 85+ = 2, else = 1)', () => {
+    const js = readFile('progress-map.js');
+    // Verify the star thresholds are present in calculateStats
+    assert.ok(js.includes('score >= 95') && js.includes('totalStars += 3'), '95%+ should give 3 stars');
+    assert.ok(js.includes('score >= 85') && js.includes('totalStars += 2'), '85%+ should give 2 stars');
+    assert.ok(js.includes('totalStars += 1'), 'Below 85% completion should give 1 star');
+});
+
+test('calculateStats computes accuracy from correctCount/totalProblems', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('totalCorrect / totalProblems'), 'Accuracy should be correctCount/totalProblems ratio');
+    assert.ok(js.includes('Math.round'), 'Accuracy should be rounded');
+});
+
+test('calculateStreak handles empty completions array', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('if (completions.length === 0) return 0'), 'Should return 0 for empty array');
+});
+
+test('getPlantStage returns correct stages at boundary values', () => {
+    const js = readFile('progress-map.js');
+
+    // Extract PLANT_STAGES and getPlantStage
+    const stagesMatch = js.match(/const PLANT_STAGES = \[[\s\S]*?\];/);
+    const fnMatch = js.match(/function getPlantStage\(fraction\)\s*\{[\s\S]*?\n\}/);
+    assert.ok(stagesMatch && fnMatch, 'PLANT_STAGES and getPlantStage should be extractable');
+
+    const evalCode = stagesMatch[0] + '\n' + fnMatch[0] + '\nreturn getPlantStage;';
+    const getPlantStageFn = new Function(evalCode)();
+
+    assert.strictEqual(getPlantStageFn(0), 'seed', '0% should be seed');
+    assert.strictEqual(getPlantStageFn(0.05), 'seed', '5% should still be seed');
+    assert.strictEqual(getPlantStageFn(0.10), 'sprout', '10% should be sprout');
+    assert.strictEqual(getPlantStageFn(0.25), 'seedling', '25% should be seedling');
+    assert.strictEqual(getPlantStageFn(0.50), 'young', '50% should be young plant');
+    assert.strictEqual(getPlantStageFn(0.70), 'small-tree', '70% should be small tree');
+    assert.strictEqual(getPlantStageFn(0.90), 'big-tree', '90% should be big tree');
+    assert.strictEqual(getPlantStageFn(1.0), 'flowering', '100% should be flowering');
+});
+
+test('progress-map.js script loads before worksheet-generator.js in index.html', () => {
+    const html = readFile('index.html');
+    const pmIdx = html.indexOf('progress-map.js');
+    const wgIdx = html.indexOf('worksheet-generator.js');
+    assert.ok(pmIdx > -1, 'progress-map.js should be referenced in index.html');
+    assert.ok(wgIdx > -1, 'worksheet-generator.js should be referenced in index.html');
+    assert.ok(pmIdx < wgIdx, 'progress-map.js should load before worksheet-generator.js');
+});
+
+test('progress-map.js script loads before english-generator.js in english.html', () => {
+    const html = readFile('english.html');
+    const pmIdx = html.indexOf('<script src="progress-map.js">');
+    const egIdx = html.indexOf('<script src="english-generator.js');
+    assert.ok(pmIdx > -1, 'progress-map.js should be loaded via script tag in english.html');
+    assert.ok(egIdx > -1, 'english-generator.js should be loaded via script tag in english.html');
+    assert.ok(pmIdx < egIdx, 'progress-map.js script tag should appear before english-generator.js');
 });
 
 // ============================================================================

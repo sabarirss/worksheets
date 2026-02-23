@@ -44,12 +44,14 @@ function showSubjects() {
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
     const worksheetContent = document.getElementById('worksheet-content');
+    const progressMap = document.getElementById('progress-map-container');
 
     if (subjectSelection) subjectSelection.style.display = 'block';
     if (ageGroups) ageGroups.style.display = 'none';
     if (operations) operations.style.display = 'none';
     if (difficulties) difficulties.style.display = 'none';
     if (worksheetContent) worksheetContent.style.display = 'none';
+    if (progressMap) progressMap.style.display = 'none';
 
     // Restore header and footer
     const pageHeader = document.querySelector('.container > header');
@@ -83,10 +85,12 @@ function showMathLevels() {
     const subjectSelection = document.querySelector('.subject-selection');
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
+    const progressMap = document.getElementById('progress-map-container');
 
     if (subjectSelection) subjectSelection.style.display = 'none';
     if (operations) operations.style.display = 'block';
     if (difficulties) difficulties.style.display = 'none';
+    if (progressMap) progressMap.style.display = 'none';
 
     // Age-based filtering removed - all children can access all difficulty levels
 }
@@ -442,6 +446,7 @@ function backToWorksheetSelection() {
 
 let currentWorksheet = null;
 let currentOperation = null;
+let mathServerFeedback = null; // Stores server validation feedback (answers never in client)
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js
 let currentPage = 1;
@@ -1321,9 +1326,11 @@ function loadWorksheet(operation, ageGroup, difficulty, page = 1) {
         difficulty,
         page,
         config,
-        problems,
+        // Strip answers from client-side data (server-authoritative validation only)
+        problems: problems.map(p => ({ a: p.a, b: p.b, display: p.display, type: p.type })),
         answers: new Array(config.problemCount).fill('')
     };
+    mathServerFeedback = null; // Reset server feedback for new worksheet
 
     renderWorksheet();
 }
@@ -1452,14 +1459,7 @@ function renderWorksheet() {
             </div>
 
             <div class="answer-key" id="answer-key" style="display: none;">
-                <h3>Answer Key</h3>
-                <div class="answer-key-grid">
-                    ${problems.map((problem, index) => `
-                        <div class="answer-item">
-                            ${index + 1}. ${problem.a} ${symbol} ${problem.b} = <strong>${problem.answer}</strong>
-                        </div>
-                    `).join('')}
-                </div>
+                <!-- Answer key populated from server feedback after submission -->
             </div>
 
             <!-- Submit and Clear Buttons -->
@@ -1707,177 +1707,15 @@ function handleEnter(event, index) {
         if (nextInput) {
             nextInput.focus();
         } else {
-            // Last question, check answers
-            checkAnswers();
+            // Last question, submit for server evaluation
+            submitWorksheet();
         }
     }
 }
 
-// Check answers
-async function checkAnswers() {
-    stopTimer();
-
-    const total = currentWorksheet.problems.length;
-    let correct = 0;
-    let checked = 0;
-
-    // Show loading indicator
-    const resultsDiv = document.getElementById('results-summary');
-    resultsDiv.innerHTML = `
-        <h3>🤖 Checking Answers with AI...</h3>
-        <p>Recognizing your handwriting, please wait...</p>
-    `;
-    resultsDiv.style.display = 'block';
-
-    // Ensure handwriting model is loaded
-    try {
-        if (typeof loadHandwritingModel !== 'undefined') {
-            await loadHandwritingModel();
-        } else {
-            console.warn('Handwriting recognition not available - showing answers only');
-            checkAnswersManual();
-            return;
-        }
-    } catch (error) {
-        console.error('Failed to load handwriting model:', error);
-        checkAnswersManual();
-        return;
-    }
-
-    // Check each answer
-    for (let index = 0; index < currentWorksheet.problems.length; index++) {
-        const problem = currentWorksheet.problems[index];
-        const canvas = document.getElementById(`answer-${index}`);
-        const feedback = document.getElementById(`feedback-${index}`);
-        const correctAnswer = problem.answer;
-
-        if (!canvas || !feedback) continue;
-
-        try {
-            // Recognize handwritten digit
-            const result = await recognizeDigit(canvas);
-
-            if (result.isEmpty) {
-                // Canvas is empty - show as unanswered
-                feedback.textContent = `? (empty)`;
-                feedback.style.color = '#999';
-                feedback.style.fontSize = '1.2em';
-                feedback.style.fontWeight = 'bold';
-                feedback.style.display = 'inline';
-
-                // Add empty indicator to canvas
-                canvas.style.border = '2px dashed #999';
-            } else if (result.error) {
-                // Error recognizing
-                feedback.textContent = `✓ ${correctAnswer} (recognition failed)`;
-                feedback.style.color = '#ff9800';
-                feedback.style.fontSize = '1.2em';
-                feedback.style.fontWeight = 'bold';
-                feedback.style.display = 'inline';
-            } else {
-                // Successfully recognized
-                checked++;
-                const recognizedDigit = result.digit;
-                const isCorrect = recognizedDigit === correctAnswer;
-
-                if (isCorrect) {
-                    correct++;
-                    feedback.textContent = `✓ Correct! (${recognizedDigit})`;
-                    feedback.style.color = '#4caf50';
-                    canvas.style.border = '3px solid #4caf50';
-                    canvas.style.backgroundColor = '#e8f5e9';
-                } else {
-                    feedback.textContent = `✗ Wrong (saw ${recognizedDigit}, answer is ${correctAnswer})`;
-                    feedback.style.color = '#f44336';
-                    canvas.style.border = '3px solid #f44336';
-                    canvas.style.backgroundColor = '#ffebee';
-                }
-
-                feedback.style.fontSize = '1.2em';
-                feedback.style.fontWeight = 'bold';
-                feedback.style.display = 'inline';
-
-                // Log confidence for debugging
-                console.log(`Problem ${index + 1}: Recognized ${recognizedDigit}, Correct ${correctAnswer}, Confidence ${(result.confidence * 100).toFixed(1)}%`);
-            }
-        } catch (error) {
-            console.error(`Error checking answer ${index}:`, error);
-            feedback.textContent = `✓ ${correctAnswer} (error)`;
-            feedback.style.color = '#ff9800';
-            feedback.style.fontSize = '1.2em';
-            feedback.style.fontWeight = 'bold';
-            feedback.style.display = 'inline';
-        }
-    }
-
-    // Show results
-    const percentage = checked > 0 ? Math.round((correct / checked) * 100) : 0;
-    const timeText = document.getElementById('elapsed-time').textContent;
-
-    let resultMessage = '';
-    if (checked === 0) {
-        resultMessage = `<p style="font-size: 1.2em; color: #999;">No answers to check. Please write your answers on the canvas.</p>`;
-    } else if (percentage === 100) {
-        resultMessage = `<p style="font-size: 1.4em; color: #4caf50;">🎉 Perfect Score! All ${correct} correct!</p>`;
-    } else if (percentage >= 80) {
-        resultMessage = `<p style="font-size: 1.2em; color: #4caf50;">Great job! ${correct} out of ${checked} correct (${percentage}%)</p>`;
-    } else if (percentage >= 60) {
-        resultMessage = `<p style="font-size: 1.2em; color: #ff9800;">Good effort! ${correct} out of ${checked} correct (${percentage}%)</p>`;
-    } else {
-        resultMessage = `<p style="font-size: 1.2em; color: #f44336;">Keep practicing! ${correct} out of ${checked} correct (${percentage}%)</p>`;
-    }
-
-    resultsDiv.innerHTML = `
-        <h3>✅ Results</h3>
-        ${resultMessage}
-        <p style="font-size: 0.9em; color: #666;">Time: ${timeText}</p>
-        <p style="font-size: 0.8em; color: #999; margin-top: 10px;">
-            ℹ️ Handwriting recognized by AI. If results seem incorrect, try writing more clearly.
-        </p>
-    `;
-    resultsDiv.style.display = 'block';
-}
-
-// Fallback function if handwriting recognition is not available
-function checkAnswersManual() {
-    stopTimer();
-
-    const total = currentWorksheet.problems.length;
-
-    currentWorksheet.problems.forEach((problem, index) => {
-        const canvas = document.getElementById(`answer-${index}`);
-        const feedback = document.getElementById(`feedback-${index}`);
-        const correctAnswer = String(problem.answer);
-
-        // Update feedback (RIGHT of canvas, NOT on canvas) - just the value, no "Answer:" prefix
-        feedback.textContent = correctAnswer;
-        feedback.style.color = '#4caf50';
-        feedback.style.fontSize = '1.5em';
-        feedback.style.fontWeight = 'bold';
-        feedback.style.display = 'inline';
-    });
-
-    // Show results
-    const resultsDiv = document.getElementById('results-summary');
-
-    resultsDiv.innerHTML = `
-        <h3>Answers Shown</h3>
-        <p style="font-size: 1.1em; color: #0066cc;">Correct answers are displayed in green to the right of each problem.</p>
-        <p style="font-size: 1em; color: #666;">Compare your handwritten answers with the correct ones.</p>
-        <p>Time: ${document.getElementById('elapsed-time').textContent}</p>
-    `;
-    resultsDiv.style.display = 'block';
-}
-
-// Show answer key
-function showAnswerKey() {
-    const answerKey = document.getElementById('answer-key');
-    if (answerKey.style.display === 'none' || answerKey.style.display === '') {
-        answerKey.style.display = 'block';
-    } else {
-        answerKey.style.display = 'none';
-    }
-}
+// Note: checkAnswers(), checkAnswersManual(), showAnswerKey() removed.
+// All answer validation is now server-authoritative via submitWorksheet() -> Cloud Function.
+// Answers are never stored client-side. Answer key is built from server feedback after submission.
 
 // Save worksheet as PDF
 function savePDF() {
@@ -2358,12 +2196,9 @@ async function submitWorksheet() {
             if (value === '') {
                 answers.push(null);
             } else {
-                const correctAnswer = currentWorksheet.problems[i].answer;
-                if (typeof correctAnswer === 'string') {
-                    answers.push(value);
-                } else {
-                    answers.push(parseInt(value));
-                }
+                // Send raw value - server handles type comparison
+                const numVal = Number(value);
+                answers.push(isNaN(numVal) ? value : numVal);
             }
         }
     }
@@ -2374,7 +2209,7 @@ async function submitWorksheet() {
 
     let score, correctCount, isCompleted, completionResult, feedback;
 
-    // Try Cloud Function validation first, fall back to local
+    // Cloud Function validation (server-authoritative, no local fallback)
     try {
         const validateMath = firebase.app().functions('europe-west1').httpsCallable('validateMathSubmission');
         const result = await validateMath({
@@ -2391,49 +2226,26 @@ async function submitWorksheet() {
         feedback = result.data.feedback;
         completionResult = { completed: isCompleted, reason: isCompleted ? '' : `Score ${score}% is below 95% threshold. Try again!` };
 
+        // Store server feedback for answer key (answers never in client until server returns them)
+        mathServerFeedback = feedback;
         console.log('Server-validated submission:', result.data);
     } catch (error) {
-        console.warn('Cloud Function unavailable, using local validation:', error.message);
+        console.error('Cloud Function validation failed:', error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Submit for Evaluation';
 
-        // === FALLBACK: Local validation (existing logic) ===
-        correctCount = 0;
-        feedback = [];
-
-        for (let i = 0; i < totalProblems; i++) {
-            const correctAnswer = currentWorksheet.problems[i].answer;
-            const userAnswer = answers[i];
-            let isCorrect = false;
-
-            if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
-                if (typeof correctAnswer === 'string') {
-                    isCorrect = String(userAnswer).replace(/\s+/g, '').toLowerCase() === String(correctAnswer).replace(/\s+/g, '').toLowerCase();
-                } else {
-                    isCorrect = Number(userAnswer) === Number(correctAnswer);
-                }
-            }
-
-            if (isCorrect) correctCount++;
-            feedback.push({ correct: isCorrect, expected: correctAnswer });
+        const resultsDiv = document.getElementById('results-summary');
+        if (resultsDiv) {
+            resultsDiv.innerHTML = `
+                <h3 style="color: #f44336;">Evaluation Error</h3>
+                <p>Could not reach the evaluation server. Please check your internet connection and try again.</p>
+            `;
+            resultsDiv.style.display = 'block';
         }
-
-        score = Math.round((correctCount / totalProblems) * 100);
-        completionResult = isPageCompleted('math', score, false);
-        isCompleted = completionResult.completed;
-
-        // Save completion to Firestore via client (fallback)
-        const identifier = `${operation}-level${Math.ceil(currentAbsolutePage / 10)}-page${((currentAbsolutePage - 1) % 10) + 1}`;
-        await savePageCompletion('math', identifier, {
-            score, correctCount, totalProblems, completed: isCompleted,
-            manuallyMarked: false, elapsedTime, attempts: 1
-        });
-
-        // Update weekly assignment progress via client (fallback)
-        if (typeof onMathPageCompleted === 'function') {
-            onMathPageCompleted(operation, currentAbsolutePage, score, isCompleted);
-        }
+        return;
     }
 
-    // Render feedback from server (or local fallback)
+    // Render feedback from server
     for (let i = 0; i < totalProblems; i++) {
         const answerElement = document.getElementById(`answer-${i}`);
         const feedbackElement = document.getElementById(`feedback-${i}`);
@@ -2463,6 +2275,9 @@ async function submitWorksheet() {
         feedbackElement.style.display = 'inline-block';
         feedbackElement.style.marginLeft = '10px';
     }
+
+    // Enable Show Answers toggle now that server feedback is available
+    validateShowAnswersToggle();
 
     // Mark page as submitted (local UI state)
     if (!pageSubmissions[operation]) {
@@ -2567,6 +2382,14 @@ function clearWorksheet() {
         answerElement.style.borderWidth = '2px';
     }
 
+    // Reset server feedback and answer key
+    mathServerFeedback = null;
+    const answerKey = document.getElementById('answer-key');
+    if (answerKey) {
+        answerKey.innerHTML = '';
+        answerKey.style.display = 'none';
+    }
+
     // Clear submission status for this page
     const operation = currentWorksheet.operation;
     if (pageSubmissions[operation] && pageSubmissions[operation][currentAbsolutePage]) {
@@ -2608,7 +2431,19 @@ function toggleMathAnswers(event) {
     const answerKey = document.getElementById('answer-key');
     if (!answerKey) return;
 
-    if (event && event.target && event.target.checked) {
+    if (event && event.target && event.target.checked && mathServerFeedback) {
+        // Build answer key from server feedback (answers never pre-rendered in DOM)
+        const symbol = getOperationSymbol(currentWorksheet.operation);
+        answerKey.innerHTML = `
+            <h3>Answer Key</h3>
+            <div class="answer-key-grid">
+                ${currentWorksheet.problems.map((problem, index) => `
+                    <div class="answer-item">
+                        ${index + 1}. ${problem.a} ${symbol} ${problem.b} = <strong>${mathServerFeedback[index]?.expected ?? '?'}</strong>
+                    </div>
+                `).join('')}
+            </div>
+        `;
         answerKey.style.display = 'block';
         answersVisible = true;
     } else {
@@ -2618,7 +2453,8 @@ function toggleMathAnswers(event) {
 }
 
 /**
- * Validate if all inputs are filled and enable/disable Show Answers toggle
+ * Enable/disable Show Answers toggle — requires server validation (submit) first.
+ * Answers are never available client-side until the server returns them.
  */
 function validateShowAnswersToggle() {
     const toggleInput = document.getElementById('answer-toggle-input');
@@ -2626,36 +2462,8 @@ function validateShowAnswersToggle() {
 
     if (!toggleInput || !toggleContainer) return;
 
-    const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
-    let allFieldsFilled = true;
-
-    // Check all answer inputs
-    if (currentWorksheet && currentWorksheet.problems) {
-        for (let i = 0; i < currentWorksheet.problems.length; i++) {
-            const answerElement = document.getElementById(`answer-${i}`);
-            if (!answerElement) continue;
-
-            if (usePencil) {
-                // Check if canvas has content (using handwriting input system)
-                if (typeof handwritingInputs !== 'undefined' && handwritingInputs.length > 0) {
-                    const input = handwritingInputs.find(input => input.canvas.id === `answer-${i}`);
-                    if (input && input.isEmpty()) {
-                        allFieldsFilled = false;
-                        break;
-                    }
-                }
-            } else {
-                // Check if text input has value
-                if (!answerElement.value || answerElement.value.trim() === '') {
-                    allFieldsFilled = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    // Enable/disable toggle based on whether all fields are filled
-    if (allFieldsFilled) {
+    // Enable only after server validation has returned feedback
+    if (mathServerFeedback) {
         toggleInput.disabled = false;
         toggleContainer.style.opacity = '1';
         toggleContainer.style.cursor = 'pointer';
@@ -2665,7 +2473,7 @@ function validateShowAnswersToggle() {
         toggleInput.checked = false;
         toggleContainer.style.opacity = '0.5';
         toggleContainer.style.cursor = 'not-allowed';
-        toggleContainer.title = 'Please complete all problems to show answers';
+        toggleContainer.title = 'Submit worksheet first to see answers';
 
         // Hide answers if they were visible
         if (answersVisible) {

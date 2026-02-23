@@ -481,16 +481,8 @@ function renderWorksheet() {
         }
     });
 
-    const answerKeyHTML = problems
-        .filter(p => p.type !== 'passage' && p.type !== 'writing')
-        .map((problem, index) => {
-            const qNum = problems.slice(0, index).filter(p => p.type !== 'passage' && p.type !== 'writing').length + 1;
-            return `
-                <div class="answer-item">
-                    ${qNum}. <strong>${problem.answer}</strong>
-                </div>
-            `;
-        }).join('');
+    // Answer key is NOT pre-rendered in DOM (security: prevent Inspect Element cheating)
+    // Built dynamically when Show Answer Key button is clicked
 
     const html = `
         <div class="worksheet-container">
@@ -539,10 +531,7 @@ function renderWorksheet() {
             </div>
 
             <div class="answer-key" id="answer-key">
-                <h3>Lösungen (Answer Key)</h3>
-                <div class="answer-key-grid">
-                    ${answerKeyHTML}
-                </div>
+                <!-- Answer key built dynamically when requested, not pre-rendered -->
             </div>
         </div>
     `;
@@ -785,6 +774,18 @@ function checkAnswers() {
 function showAnswerKey() {
     const answerKey = document.getElementById('answer-key');
     if (answerKey.style.display === 'none' || answerKey.style.display === '') {
+        // Build answer key dynamically (not pre-rendered in DOM for security)
+        if (currentWorksheet && currentWorksheet.problems) {
+            const answerKeyHTML = currentWorksheet.problems
+                .filter(p => p.type !== 'passage' && p.type !== 'writing')
+                .map((problem, index) => {
+                    const qNum = currentWorksheet.problems
+                        .slice(0, currentWorksheet.problems.indexOf(problem))
+                        .filter(p => p.type !== 'passage' && p.type !== 'writing').length + 1;
+                    return `<div class="answer-item">${qNum}. <strong>${problem.answer}</strong></div>`;
+                }).join('');
+            answerKey.innerHTML = `<h3>Lösungen (Answer Key)</h3><div class="answer-key-grid">${answerKeyHTML}</div>`;
+        }
         answerKey.style.display = 'block';
     } else {
         answerKey.style.display = 'none';

@@ -467,7 +467,7 @@ async function submitLevelTest() {
 
     let correct, score, passed, newLevel, serverFeedback;
 
-    // Try Cloud Function validation first, fall back to local
+    // Cloud Function validation (server-authoritative, no local fallback)
     try {
         const submitLevelTestCF = firebase.app().functions('europe-west1').httpsCallable('submitLevelTest');
         const result = await submitLevelTestCF({
@@ -484,51 +484,12 @@ async function submitLevelTest() {
 
         console.log('Level test validated by server:', result.data);
     } catch (cfError) {
-        console.warn('Cloud Function unavailable, using local validation:', cfError.message);
-
-        // === FALLBACK: Local validation ===
-        correct = 0;
-        serverFeedback = [];
-
-        questions.forEach((q, idx) => {
-            const userAnswer = answers[idx];
-            let isCorrect = false;
-
-            if (module === 'math') {
-                isCorrect = parseInt(userAnswer) === q.answer;
-            } else {
-                isCorrect = userAnswer.toLowerCase() === String(q.answer).toLowerCase();
-            }
-
-            if (isCorrect) correct++;
-            serverFeedback.push({ correct: isCorrect, expected: q.answer, difficulty: q.difficulty });
-        });
-
-        score = Math.round((correct / questions.length) * 100);
-        passed = score >= LEVEL_TEST_CONFIG.PASS_SCORE;
-        newLevel = passed ? currentLevel + 1 : currentLevel;
-
-        // Fallback: save via client
-        const weekStr = typeof getWeekString === 'function' ? getWeekString(new Date()) : '';
-        try {
-            await firebase.firestore().collection('level_tests').add({
-                childId, module, week: weekStr, currentLevel, newLevel,
-                score, correct, total: questions.length, passed,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                questions: questions.map((q, idx) => ({
-                    difficulty: q.difficulty, answer: q.answer, userAnswer: answers[idx]
-                }))
-            });
-
-            if (passed) {
-                await advanceChildLevel(childId, module, newLevel);
-            }
-        } catch (error) {
-            console.error('Error saving level test result:', error);
-        }
+        console.error('Cloud Function validation failed:', cfError.message);
+        alert('Could not reach the evaluation server. Please check your internet connection and try again.');
+        return;
     }
 
-    // Render feedback from server (or local fallback)
+    // Render feedback from server
     questions.forEach((q, idx) => {
         const input = document.getElementById(`level-test-${idx}`);
         const feedback = document.getElementById(`level-test-feedback-${idx}`);

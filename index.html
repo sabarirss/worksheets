@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Practice Math Worksheets</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="progress-map.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Firebase SDK -->
@@ -1137,25 +1138,28 @@
                 <button onclick="showSubjects()">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="loadOperationWorksheet('addition')" class="level-btn">
+                <button onclick="showProgressMap('math','addition')" class="level-btn">
                     <span class="level-name">➕ Addition</span>
                     <span class="level-desc">Basic addition skills</span>
                 </button>
-                <button onclick="loadOperationWorksheet('subtraction')" class="level-btn">
+                <button onclick="showProgressMap('math','subtraction')" class="level-btn">
                     <span class="level-name">➖ Subtraction</span>
                     <span class="level-desc">Basic subtraction skills</span>
                 </button>
-                <button onclick="loadOperationWorksheet('multiplication')" class="level-btn">
+                <button onclick="showProgressMap('math','multiplication')" class="level-btn">
                     <span class="level-name">✖️ Multiplication</span>
                     <span class="level-desc">Times tables and more</span>
                 </button>
-                <button onclick="loadOperationWorksheet('division')" class="level-btn">
+                <button onclick="showProgressMap('math','division')" class="level-btn">
                     <span class="level-name">➗ Division</span>
                     <span class="level-desc">Division skills</span>
                 </button>
             </div>
         </div>
 
+
+        <!-- Progress Map Container -->
+        <div id="progress-map-container" style="display: none;"></div>
 
         <!-- Assessment Container -->
         <div id="assessment-container" style="display: none;"></div>
@@ -1188,6 +1192,7 @@
     <script src="level-test.js"></script>
     <script src="feedback-system.js"></script>
     <script src="notification-system.js"></script>
+    <script src="progress-map.js"></script>
     <script src="worksheet-generator.js"></script>
     <script src="branding.js"></script>
     <script>

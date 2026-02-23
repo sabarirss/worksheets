@@ -13,7 +13,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
-const { generateAbsolutePageProblems, compareAnswers, getAgeGroupFromAge } = require('./shared/math-engine');
+const { generateAbsolutePageProblems, compareAnswers, getAgeGroupFromAge, levelToAgeGroup } = require('./shared/math-engine');
 
 const COMPLETION_THRESHOLD = 95; // 95% to pass
 
@@ -71,9 +71,13 @@ const validateMathSubmission = onCall(
         // Verify access
         const { childData } = await verifyChildAccess(db, callerUid, childId);
 
-        // Determine ageGroup from child's assessment or DOB
-        const ageGroup = childData.assessmentData?.[operation]?.ageGroup
-            || getAgeGroupFromAge(childData.age || 6);
+        // Determine ageGroup from child's assessment-assigned level, NOT DOB
+        // The client uses the assessed level to generate problems, so the server must match.
+        // Assessment stores: { level: N, score: X, date: D, taken: true }
+        const assessedLevel = childData.assessmentData?.[operation]?.level;
+        const ageGroup = assessedLevel
+            ? levelToAgeGroup(assessedLevel)
+            : getAgeGroupFromAge(childData.age || 6);
 
         // Regenerate the SAME problems server-side (deterministic!)
         const { problems } = generateAbsolutePageProblems(operation, ageGroup, absolutePage);

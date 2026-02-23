@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Practice Worksheets</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="progress-map.css">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Patrick+Hand&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -369,19 +370,19 @@
                 <button onclick="window.location.href='index'">← Back to Subjects</button>
             </div>
             <div class="level-grid">
-                <button onclick="loadWorksheetNew('easy')" class="level-btn">
+                <button onclick="showProgressMap('english','easy')" class="level-btn">
                     <span class="level-name">📝 Vocabulary Easy</span>
                     <span class="level-desc" id="writing-easy-desc">Picture words and sight words</span>
                 </button>
-                <button onclick="loadWorksheetNew('medium')" class="level-btn">
+                <button onclick="showProgressMap('english','medium')" class="level-btn">
                     <span class="level-name">📝 Vocabulary Medium</span>
                     <span class="level-desc" id="writing-medium-desc">Sentence completion and grammar</span>
                 </button>
-                <button onclick="loadWorksheetNew('hard')" class="level-btn">
+                <button onclick="showProgressMap('english','hard')" class="level-btn">
                     <span class="level-name">📝 Vocabulary Hard</span>
                     <span class="level-desc" id="writing-hard-desc">Advanced grammar and comprehension</span>
                 </button>
-                <button onclick="loadWorksheetNew('writing')" class="level-btn" id="writing-practice-btn">
+                <button onclick="showProgressMap('english','writing')" class="level-btn" id="writing-practice-btn">
                     <span class="level-name">✍️ Writing Practice</span>
                     <span class="level-desc">Handwriting with ruled lines (50 pages)</span>
                 </button>
@@ -391,6 +392,9 @@
                 </button>
             </div>
         </div>
+
+        <!-- Progress Map Container -->
+        <div id="progress-map-container" style="display: none;"></div>
 
         <!-- Story Selection -->
         <div class="level-selection" id="story-selection" style="display: none;">
@@ -411,6 +415,7 @@
     <script src="english-handwriting-helper.js"></script>
     <script src="app-constants.js"></script>
     <script src="weekly-assignments.js"></script>
+    <script src="progress-map.js"></script>
     <script src="english-generator.js?v=2.0"></script>
     <script src="branding.js"></script>
     <script>

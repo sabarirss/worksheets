@@ -3681,16 +3681,8 @@ function renderWorksheet() {
         }
     });
 
-    const answerKeyHTML = problems
-        .filter(p => p.type !== 'passage')
-        .map((problem, index) => {
-            const qNum = problems.slice(0, index).filter(p => p.type !== 'passage').length + 1;
-            return `
-                <div class="answer-item">
-                    ${qNum}. <strong>${problem.answer}</strong>
-                </div>
-            `;
-        }).join('');
+    // Answer key is NOT pre-rendered in DOM (security: prevent Inspect Element cheating)
+    // Built dynamically from problem data when Show Answers toggle is activated after validation
 
     const html = `
         <div class="worksheet-container">
@@ -3747,10 +3739,7 @@ function renderWorksheet() {
             </div>
 
             <div class="answer-key" id="answer-key">
-                <h3>Answer Key</h3>
-                <div class="answer-key-grid">
-                    ${answerKeyHTML}
-                </div>
+                <!-- Answer key built dynamically after validation, not pre-rendered -->
             </div>
 
             <!-- Manual Completion and Recognition Buttons -->
@@ -3951,6 +3940,18 @@ function checkAnswers() {
 function showAnswerKey() {
     const answerKey = document.getElementById('answer-key');
     if (answerKey.style.display === 'none' || answerKey.style.display === '') {
+        // Build answer key dynamically (not pre-rendered in DOM for security)
+        if (currentWorksheet && currentWorksheet.problems) {
+            const answerKeyHTML = currentWorksheet.problems
+                .filter(p => p.type !== 'passage')
+                .map((problem, index) => {
+                    const qNum = currentWorksheet.problems
+                        .slice(0, currentWorksheet.problems.indexOf(problem))
+                        .filter(p => p.type !== 'passage').length + 1;
+                    return `<div class="answer-item">${qNum}. <strong>${problem.answer}</strong></div>`;
+                }).join('');
+            answerKey.innerHTML = `<h3>Answer Key</h3><div class="answer-key-grid">${answerKeyHTML}</div>`;
+        }
         answerKey.style.display = 'block';
     } else {
         answerKey.style.display = 'none';
@@ -4265,38 +4266,17 @@ async function markEnglishWorksheetComplete() {
         const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
         const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
-        // Try Cloud Function validation first, fall back to local
-        try {
-            const validateEnglish = firebase.app().functions('europe-west1').httpsCallable('validateEnglishSubmission');
-            await validateEnglish({
-                childId: child ? child.id : null,
-                pageIndex: currentPage,
-                ageGroup: currentWorksheet.ageGroup,
-                difficulty: currentWorksheet.difficulty,
-                manuallyMarked: true,
-                elapsedTime: elapsedTime
-            });
-            console.log('English submission validated by server');
-        } catch (cfError) {
-            console.warn('Cloud Function unavailable, using local validation:', cfError.message);
-
-            // Fallback: save via client
-            const completionData = {
-                score: 100,
-                correctCount: 0,
-                totalProblems: 0,
-                completed: true,
-                manuallyMarked: true,
-                elapsedTime: elapsedTime,
-                attempts: 1
-            };
-
-            await savePageCompletion('english', identifier, completionData);
-
-            if (typeof onEnglishPageCompleted === 'function') {
-                onEnglishPageCompleted(currentPage, 100, true);
-            }
-        }
+        // Cloud Function validation (server-authoritative, no local fallback)
+        const validateEnglish = firebase.app().functions('europe-west1').httpsCallable('validateEnglishSubmission');
+        await validateEnglish({
+            childId: child ? child.id : null,
+            pageIndex: currentPage,
+            ageGroup: currentWorksheet.ageGroup,
+            difficulty: currentWorksheet.difficulty,
+            manuallyMarked: true,
+            elapsedTime: elapsedTime
+        });
+        console.log('English submission validated by server');
 
         // Show success status
         const statusDiv = document.getElementById('completion-status');
