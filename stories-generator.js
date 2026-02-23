@@ -363,6 +363,19 @@ function getAllStoriesForCategory(category) {
         }
     });
 
+    // Get stories from expanded database arrays (stories-db-*.js)
+    const dbArrayMap = {
+        animals: typeof storiesAnimals !== 'undefined' ? storiesAnimals : [],
+        nature: typeof storiesNature !== 'undefined' ? storiesNature : [],
+        family: typeof storiesFamily !== 'undefined' ? storiesFamily : [],
+        adventures: typeof storiesAdventures !== 'undefined' ? storiesAdventures : [],
+        learning: typeof storiesLearning !== 'undefined' ? storiesLearning : [],
+        bedtime: typeof storiesBedtime !== 'undefined' ? storiesBedtime : []
+    };
+    if (dbArrayMap[category]) {
+        allStories.push(...dbArrayMap[category]);
+    }
+
     // Remove duplicates based on title
     const uniqueByTitle = [];
     const seenTitles = new Set();
