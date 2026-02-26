@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emotional Quotient Activities</title>
+    <title>Emotional Quotient - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -259,12 +266,14 @@
     </script>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
-                <h1>❤️ Emotional Quotient Activities</h1>
-                <p class="subtitle">Building emotional intelligence and empathy!</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="app-branding"></div>
+                <div>
+                    <h1>❤️ Emotional Quotient Activities</h1>
+                    <p class="subtitle">Building emotional intelligence and empathy!</p>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div id="app-branding"></div>
                 <div id="profile-selector-container"></div>
             </div>
         </header>
@@ -284,5 +293,13 @@
     <script src="eq-generator.js"></script>
     <script src="branding.js"></script>
     <!-- Activities loaded from onAuthStateChanged callback after age is set -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
 </body>
 </html>

@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aptitude & Logic Puzzles for Kids</title>
+    <title>Aptitude & Logic - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
 
     <!-- Firebase SDK -->
@@ -26,6 +33,7 @@
 
     <!-- TensorFlow.js for handwriting recognition -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <style>
         /* Hide content initially to prevent flash of inappropriate content */
         .container {
@@ -93,12 +101,14 @@
     </script>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
-                <h1>🧩 Aptitude & Logic Puzzles</h1>
-                <p class="subtitle">Fun brain exercises with difficulty levels!</p>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="app-branding"></div>
+                <div>
+                    <h1>🧩 Aptitude & Logic Puzzles</h1>
+                    <p class="subtitle">Fun brain exercises with difficulty levels!</p>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div id="app-branding"></div>
                 <div id="profile-selector-container"></div>
             </div>
         </header>
@@ -207,5 +217,13 @@
             }, 100);
         };
     </script>
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
 </body>
 </html>

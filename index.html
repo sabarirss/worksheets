@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Math Worksheets</title>
+    <title>Math - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="progress-map.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1082,7 +1090,7 @@
             </div>
         </div>
 
-        <header style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; border-bottom: none; box-shadow: none; margin-bottom: 10px; padding-bottom: 10px;">
+        <header style="display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; border-bottom: none; box-shadow: none; margin-bottom: 10px; padding-bottom: 10px;">
             <div id="app-branding"></div>
         </header>
 
@@ -1094,6 +1102,8 @@
 
         <!-- Level Test Area -->
         <div id="level-test-area" style="display: none;"></div>
+
+        <div id="greeting-banner" style="display: none;"></div>
 
         <div class="subject-selection">
             <div class="subject-grid">
@@ -1217,6 +1227,60 @@
             });
         }
     </script>
+    <script>
+        // Greeting banner - shows time-of-day greeting with child name
+        function updateGreeting() {
+            const banner = document.getElementById('greeting-banner');
+            if (!banner) return;
+            const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+            if (!child || !child.name) { banner.style.display = 'none'; return; }
+
+            const hour = new Date().getHours();
+            let greeting = 'Hello';
+            if (hour < 12) greeting = 'Good morning';
+            else if (hour < 17) greeting = 'Good afternoon';
+            else greeting = 'Good evening';
+
+            banner.textContent = `${greeting}, ${child.name}!`;
+            banner.style.display = 'block';
+        }
+
+        // Age-adaptive theme
+        function applyAgeTheme() {
+            const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+            if (!child) return;
+            const age = child.age || 0;
+            if (age > 0 && age <= 7) {
+                document.body.classList.add('theme-young');
+            } else {
+                document.body.classList.remove('theme-young');
+            }
+        }
+
+        // Run after profile loads
+        const _origSelectChild = typeof selectChild === 'function' ? selectChild : null;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check periodically until child data is available
+            const greetInterval = setInterval(function() {
+                const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+                if (child) {
+                    updateGreeting();
+                    applyAgeTheme();
+                    clearInterval(greetInterval);
+                }
+            }, 500);
+            // Stop checking after 10 seconds
+            setTimeout(function() { clearInterval(greetInterval); }, 10000);
+        });
+    </script>
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
 </body>
 </html>
 <!-- So 15. Feb 18:38:30 CET 2026 -->

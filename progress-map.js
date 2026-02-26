@@ -584,13 +584,9 @@ function renderProgressMap(container, data, nodes) {
 
     let html = '';
 
-    // Back button
+    // Back button — goes directly to subject selection (no intermediate operations page)
     html += '<div class="pm-back-row">';
-    if (module === 'math') {
-        html += '<button class="pm-back-btn" onclick="hideProgressMap(\'math\')">&#8592; Back to Operations</button>';
-    } else {
-        html += '<button class="pm-back-btn" onclick="hideProgressMap(\'english\')">&#8592; Back to Activities</button>';
-    }
+    html += '<button class="pm-back-btn" onclick="hideProgressMap(\'' + module + '\')">&#8592; Back to Subjects</button>';
     html += '</div>';
 
     // Tabs
@@ -804,20 +800,19 @@ function switchProgressTab(module, subtype) {
 }
 
 /**
- * Hide progress map, return to previous screen.
+ * Hide progress map, return to subject selection.
  */
 function hideProgressMap(module) {
     const container = document.getElementById('progress-map-container');
     if (container) container.style.display = 'none';
 
-    if (module === 'math') {
-        // Show operations again
-        const operations = document.getElementById('math-operations');
-        if (operations) operations.style.display = 'block';
-    } else if (module === 'english') {
-        // Show type selection again
-        const typeSelection = document.getElementById('type-selection');
-        if (typeSelection) typeSelection.style.display = 'block';
+    // Return to subject selection for both Math and English
+    if (typeof showSubjects === 'function') {
+        showSubjects();
+    } else {
+        // Fallback: show subject selection directly
+        const subjectSelection = document.querySelector('.subject-selection');
+        if (subjectSelection) subjectSelection.style.display = 'block';
     }
 }
 

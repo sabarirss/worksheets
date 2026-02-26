@@ -1952,11 +1952,15 @@ function checkAllStoryAnswers() {
         if (feedback) {
             feedback.style.display = 'block';
             if (isCorrect) {
-                feedback.textContent = '✓ Correct!';
+                feedback.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
                 feedback.style.color = '#4caf50';
+                feedback.classList.add('feedback-correct');
+                if (typeof playSound === 'function') playSound('correct');
             } else {
-                feedback.textContent = `✗ Incorrect. The correct answer is ${String.fromCharCode(65 + correctAnswer)}.`;
+                feedback.textContent = '✗ ' + (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!') + ` The correct answer is ${String.fromCharCode(65 + correctAnswer)}.`;
                 feedback.style.color = '#f44336';
+                feedback.classList.add('feedback-incorrect');
+                if (typeof playSound === 'function') playSound('incorrect');
             }
         }
     });
@@ -1971,6 +1975,8 @@ function checkAllStoryAnswers() {
         if (percentage === 100) {
             emoji = '🌟';
             message = 'Perfect score! Excellent!';
+            if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            if (typeof playSound === 'function') playSound('complete');
         } else if (percentage >= 80) {
             emoji = '😊';
             message = 'Great work!';
@@ -4202,12 +4208,14 @@ async function checkHandwriting() {
 
                     if (isCorrect) {
                         checkedCount++;
-                        feedbackElement.textContent = '✓ Great!';
+                        feedbackElement.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Great!');
                         feedbackElement.style.color = '#4caf50';
                         feedbackElement.style.fontWeight = 'bold';
+                        if (typeof playSound === 'function') playSound('correct');
                     } else {
-                        feedbackElement.textContent = `Keep trying! (Expected: ${expectedAnswer})`;
+                        feedbackElement.textContent = (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Keep trying!') + ` (Expected: ${expectedAnswer})`;
                         feedbackElement.style.color = '#ff9800';
+                        if (typeof playSound === 'function') playSound('incorrect');
                     }
                     totalChecked++;
                 } else {

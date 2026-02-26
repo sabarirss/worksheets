@@ -13,7 +13,8 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
-const { generateAbsolutePageProblems, compareAnswers, getAgeGroupFromAge, levelToAgeGroup } = require('./shared/math-engine');
+const { generateAbsolutePageProblems, compareAnswers, getAgeGroupFromAge, levelToAgeGroup, classifyProblem } = require('./shared/math-engine');
+const { logErrors, updateSkillProfile } = require('./error-tracker');
 
 const COMPLETION_THRESHOLD = 95; // 95% to pass
 
@@ -130,7 +131,128 @@ const validateMathSubmission = onCall(
         // Update weekly assignment progress if applicable
         await updateWeeklyAssignmentProgress(db, childId, 'math', absolutePage, score, completed);
 
+        // Adaptive Learning: Log errors and update skill profile
+        try {
+            await logErrors(db, childId, operation, absolutePage, ageGroup, problems, feedback);
+            await updateSkillProfile(db, childId, operation, problems, feedback);
+        } catch (trackingError) {
+            logger.warn('Error tracking failed (non-fatal):', trackingError.message);
+        }
+
         logger.info(`Math submission validated: ${childId} p${absolutePage} = ${score}% (${correctCount}/${totalProblems})`);
+
+        return { score, correctCount, totalProblems, completed, feedback };
+    }
+);
+
+// ============================================================================
+// FUNCTION: validateAdaptiveSubmission
+// Validates answers against stored adaptive worksheet problems (not seed-generated)
+// ============================================================================
+
+const validateAdaptiveSubmission = onCall(
+    { region: 'europe-west1', memory: '256MiB' },
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be logged in');
+        }
+
+        const { childId, operation, pageNumber, answers, elapsedTime } = request.data;
+
+        if (!childId || !operation || !pageNumber || !Array.isArray(answers)) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: childId, operation, pageNumber, answers');
+        }
+
+        const db = admin.firestore();
+        const callerUid = request.auth.uid;
+
+        const { childData } = await verifyChildAccess(db, callerUid, childId);
+
+        // Find the current week's adaptive assignment
+        const now = new Date();
+        const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+        const weekStr = `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+
+        const docId = `${childId}_${weekStr}`;
+        const assignmentDoc = await db.collection('weekly_assignments').doc(docId).get();
+
+        if (!assignmentDoc.exists) {
+            throw new HttpsError('not-found', 'No weekly assignment found');
+        }
+
+        const assignment = assignmentDoc.data();
+        if (!assignment.math || !assignment.math.adaptive) {
+            throw new HttpsError('failed-precondition', 'Assignment is not adaptive');
+        }
+
+        // Find the page with stored problems
+        const pageData = assignment.math.pages.find(p => p.pageNumber === pageNumber);
+        if (!pageData || !pageData.problems) {
+            throw new HttpsError('not-found', `Adaptive page ${pageNumber} not found`);
+        }
+
+        const problems = pageData.problems;
+
+        // Grade answers against stored problems
+        let correctCount = 0;
+        const feedback = [];
+        const totalProblems = problems.length;
+
+        for (let i = 0; i < totalProblems; i++) {
+            const correctAnswer = problems[i].answer;
+            const userAnswer = i < answers.length ? answers[i] : null;
+            const isCorrect = compareAnswers(userAnswer, correctAnswer);
+
+            if (isCorrect) correctCount++;
+            feedback.push({
+                correct: isCorrect,
+                expected: correctAnswer,
+                userAnswer: userAnswer
+            });
+        }
+
+        const score = Math.round((correctCount / totalProblems) * 100);
+        const completed = score >= COMPLETION_THRESHOLD;
+
+        // Build completion identifier for adaptive worksheets
+        const identifier = `adaptive-${operation}-${weekStr}-page${pageNumber}`;
+        const childEmail = childData.email || `${childData.name}@child`;
+
+        const completionId = `${childEmail}_math_${identifier}`;
+        await db.collection('completions').doc(completionId).set({
+            completionId,
+            childId,
+            childEmail,
+            module: 'math',
+            identifier,
+            score,
+            correctCount,
+            totalProblems,
+            completed,
+            manuallyMarked: false,
+            elapsedTime: elapsedTime || '00:00',
+            attempts: admin.firestore.FieldValue.increment(1),
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            validatedBy: 'server',
+            adaptive: true
+        }, { merge: true });
+
+        // Update weekly assignment progress
+        await updateWeeklyAssignmentProgress(db, childId, 'math', pageNumber, score, completed);
+
+        // Adaptive Learning: Log errors and update skill profile
+        const ageGroup = assignment.math.ageGroup || getAgeGroupFromAge(childData.age || 6);
+        try {
+            await logErrors(db, childId, operation, pageNumber, ageGroup, problems, feedback);
+            await updateSkillProfile(db, childId, operation, problems, feedback);
+        } catch (trackingError) {
+            logger.warn('Adaptive error tracking failed (non-fatal):', trackingError.message);
+        }
+
+        logger.info(`Adaptive submission validated: ${childId} ${operation} page${pageNumber} = ${score}% (${correctCount}/${totalProblems})`);
 
         return { score, correctCount, totalProblems, completed, feedback };
     }
@@ -303,8 +425,9 @@ async function updateWeeklyAssignmentProgress(db, childId, module, pageNumber, s
 
         // Find and update the matching page
         let updated = false;
+        const isAdaptive = moduleData.adaptive === true;
         const updatedPages = moduleData.pages.map(page => {
-            const pageKey = module === 'math' ? 'absolutePage' : 'pageIndex';
+            const pageKey = isAdaptive ? 'pageNumber' : (module === 'math' ? 'absolutePage' : 'pageIndex');
             if (page[pageKey] === pageNumber && completed && !page.completed) {
                 updated = true;
                 return { ...page, completed: true, score };
@@ -332,6 +455,7 @@ async function updateWeeklyAssignmentProgress(db, childId, module, pageNumber, s
 
 module.exports = {
     validateMathSubmission,
+    validateAdaptiveSubmission,
     validateEnglishSubmission,
     validateAptitudeSubmission
 };

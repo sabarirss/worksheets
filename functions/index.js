@@ -2,13 +2,15 @@
  * GleeGrow Cloud Functions (2nd gen / v2 API)
  *
  * Scheduled Functions:
- *   1. scheduledWeeklyGeneration — Monday 4pm: generate weekly assignments for all children
+ *   1. scheduledWeeklyGeneration — Monday 4pm: generate weekly assignments (standard + adaptive)
  *   2. scheduledEmailReminder — Daily 5pm: send email reminders for incomplete worksheets
+ *   3. scheduledAdaptiveAutoApprove — Wednesday 4pm: auto-approve pending adaptive worksheets
  *
  * Callable Functions (server-side validation):
  *   3. validateMathSubmission — Server-authoritative math answer validation
- *   4. validateEnglishSubmission — Server-authoritative English completion validation
- *   5. validateAptitudeSubmission — Server-authoritative aptitude answer validation
+ *   4. validateAdaptiveSubmission — Validate adaptive worksheet answers against stored problems
+ *   5. validateEnglishSubmission — Server-authoritative English completion validation
+ *   6. validateAptitudeSubmission — Server-authoritative aptitude answer validation
  *   6. checkPageAccess — Server-side page access control
  *   7. getAccessiblePages — Server-authoritative accessible page list
  *   8. submitAssessment — Server-side assessment grading and level assignment
@@ -308,9 +310,92 @@ exports.scheduledWeeklyGeneration = onSchedule(
                     previousAssignment = prevSnapshot.docs[0].data();
                 }
 
-                // Generate assignment
-                const assignment = generateAssignmentServer(child, weekStr, previousAssignment);
-                await db.collection('weekly_assignments').doc(docId).set(assignment);
+                // Check if child has enough skill data for adaptive worksheets
+                let useAdaptive = false;
+                let adaptiveOperation = null;
+                let skillProfile = null;
+
+                try {
+                    const operations = ['addition', 'subtraction', 'multiplication', 'division'];
+                    const age = child.age || 6;
+                    const defaultOp = getOperationForAge(age);
+
+                    // Check skill profile for the child's primary operation
+                    const profileDoc = await db.collection('children').doc(child.id)
+                        .collection('skill_profile').doc(defaultOp).get();
+
+                    if (profileDoc.exists) {
+                        const profile = profileDoc.data();
+                        if (profile.totalAttempted >= 50) {
+                            useAdaptive = true;
+                            adaptiveOperation = defaultOp;
+                            skillProfile = profile;
+                            logger.log(`Child ${child.name} qualifies for adaptive (${profile.totalAttempted} attempts on ${defaultOp})`);
+                        }
+                    }
+                } catch (err) {
+                    logger.warn(`Adaptive check failed for ${child.name}: ${err.message}`);
+                }
+
+                if (useAdaptive && skillProfile) {
+                    // Generate adaptive math worksheet (pending admin review)
+                    const ageGroup = child.assessmentData?.[adaptiveOperation]?.level
+                        ? require('./shared/math-engine').levelToAgeGroup(child.assessmentData[adaptiveOperation].level)
+                        : getAgeGroupFromAge(child.age || 6);
+
+                    const { pages, reasoning } = generateAdaptivePages(
+                        adaptiveOperation, ageGroup, skillProfile, `${child.id}-${weekStr}`
+                    );
+
+                    const adaptiveDoc = {
+                        childId: child.id,
+                        childName: child.name || '',
+                        operation: adaptiveOperation,
+                        ageGroup,
+                        week: weekStr,
+                        status: 'pending_review',
+                        pages,
+                        reasoning,
+                        generatedAt: FieldValue.serverTimestamp(),
+                        generatedBy: 'scheduled-adaptive',
+                        reviewedAt: null,
+                        reviewedBy: null,
+                        adminNotes: null,
+                        deliveredAt: null
+                    };
+
+                    await db.collection('adaptive_worksheets').add(adaptiveDoc);
+
+                    // Still generate standard English-only assignment
+                    const assignment = generateAssignmentServer(child, weekStr, previousAssignment);
+                    // Remove math from standard assignment (adaptive handles math)
+                    assignment.math = { adaptive_pending: true, operation: adaptiveOperation };
+                    assignment.status = 'partial';
+                    assignment.generatedBy = 'cloud_function_adaptive';
+                    await db.collection('weekly_assignments').doc(docId).set(assignment);
+
+                    // Notify admin about pending review
+                    const adminNotifId = `admin_adaptive_${child.id}_${weekStr}`;
+                    await db.collection('notifications').doc(adminNotifId).set({
+                        childId: child.id,
+                        parentUid: 'admin',
+                        type: 'adaptive_review',
+                        title: 'Review Adaptive Worksheets',
+                        message: `Personalized ${adaptiveOperation} worksheets generated for ${child.name}. Please review.`,
+                        actionUrl: 'admin',
+                        actionData: { weekStr, childId: child.id },
+                        read: false,
+                        dismissed: false,
+                        createdAt: FieldValue.serverTimestamp(),
+                        expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+                    });
+
+                    logger.log(`Adaptive worksheet generated for ${child.name} (${adaptiveOperation}), pending review`);
+                } else {
+                    // Standard deterministic assignment
+                    const assignment = generateAssignmentServer(child, weekStr, previousAssignment);
+                    await db.collection('weekly_assignments').doc(docId).set(assignment);
+                }
 
                 // Create new_sheets notification
                 const notifId = `${child.id}_new_sheets_${weekStr}`;
@@ -318,8 +403,10 @@ exports.scheduledWeeklyGeneration = onSchedule(
                     childId: child.id,
                     parentUid: child.parent_uid,
                     type: 'new_sheets',
-                    title: 'New Worksheets Ready!',
-                    message: `${child.name} has ${MATH_PAGES_PER_WEEK} Math and ${ENGLISH_PAGES_PER_WEEK} English pages for this week.`,
+                    title: useAdaptive ? 'Personalized Worksheets Coming!' : 'New Worksheets Ready!',
+                    message: useAdaptive
+                        ? `${child.name}'s personalized Math sheets are being prepared. English pages are ready!`
+                        : `${child.name} has ${MATH_PAGES_PER_WEEK} Math and ${ENGLISH_PAGES_PER_WEEK} English pages for this week.`,
                     actionUrl: 'index',
                     actionData: { weekStr },
                     read: false,
@@ -329,7 +416,7 @@ exports.scheduledWeeklyGeneration = onSchedule(
                 });
 
                 generated++;
-                logger.log(`Generated assignment for ${child.name}: ${weekStr}`);
+                logger.log(`Generated assignment for ${child.name}: ${weekStr} (adaptive: ${useAdaptive})`);
             }
 
             logger.log(`Weekly generation complete: ${generated} generated, ${locked} locked, ${skipped} skipped`);
@@ -559,16 +646,88 @@ async function sendReminderEmail(sgMail, fromEmail, appUrl, toEmail, parentName,
 }
 
 // ============================================================================
+// FUNCTION 3: AUTO-APPROVE ADAPTIVE WORKSHEETS
+// Wednesday at 4pm — approve any pending adaptive worksheets not yet reviewed
+// ============================================================================
+
+const ADAPTIVE_MIN_ATTEMPTS = 50; // Minimum problems attempted before adaptive kicks in
+
+exports.scheduledAdaptiveAutoApprove = onSchedule(
+    {
+        schedule: '0 16 * * 3', // Wednesday 4pm
+        timeZone: 'Europe/Berlin',
+        timeoutSeconds: 300,
+    },
+    async (event) => {
+        logger.log('Running scheduled adaptive auto-approve...');
+
+        try {
+            const pendingSnapshot = await db.collection('adaptive_worksheets')
+                .where('status', '==', 'pending_review')
+                .get();
+
+            if (pendingSnapshot.empty) {
+                logger.log('No pending adaptive worksheets to auto-approve.');
+                return;
+            }
+
+            let approved = 0;
+            for (const doc of pendingSnapshot.docs) {
+                const worksheet = doc.data();
+
+                // Auto-approve: deliver to child
+                await deliverApprovedWorksheet(db, worksheet, doc.id);
+
+                // Update adaptive worksheet status
+                await doc.ref.update({
+                    status: 'approved',
+                    reviewedAt: FieldValue.serverTimestamp(),
+                    reviewedBy: 'auto-approve',
+                    adminNotes: 'Auto-approved (Wednesday deadline)'
+                });
+
+                // Notify parent that worksheets are ready
+                const notifId = `${worksheet.childId}_adaptive_ready_${worksheet.week}`;
+                await db.collection('notifications').doc(notifId).set({
+                    childId: worksheet.childId,
+                    parentUid: 'all',
+                    type: 'adaptive_worksheet_ready',
+                    title: 'Personalized Worksheets Ready!',
+                    message: `${worksheet.childName}'s personalized ${worksheet.operation} worksheets are ready for this week.`,
+                    actionUrl: 'index',
+                    actionData: { weekStr: worksheet.week },
+                    read: false,
+                    dismissed: false,
+                    createdAt: FieldValue.serverTimestamp(),
+                    expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+                });
+
+                approved++;
+                logger.log(`Auto-approved adaptive worksheet for ${worksheet.childName} (${worksheet.operation})`);
+            }
+
+            logger.log(`Auto-approve complete: ${approved} worksheets approved`);
+        } catch (error) {
+            logger.error('Error in scheduledAdaptiveAutoApprove:', error);
+        }
+    }
+);
+
+// ============================================================================
 // CALLABLE FUNCTIONS — Server-side validation & access control
 // ============================================================================
 
 // Import callable functions from separate modules
-const { validateMathSubmission, validateEnglishSubmission, validateAptitudeSubmission } = require('./validators');
+const { validateMathSubmission, validateAdaptiveSubmission, validateEnglishSubmission, validateAptitudeSubmission } = require('./validators');
 const { checkPageAccess, getAccessiblePages: getAccessiblePagesFunc } = require('./access-control');
 const { submitAssessment, submitLevelTest, checkLevelTestEligibility } = require('./level-functions');
 
+// Adaptive Learning Engine
+const { generateAdaptiveWorksheetCF, approveAdaptiveWorksheetCF, rejectAdaptiveWorksheetCF, generateAdaptivePages, deliverApprovedWorksheet } = require('./adaptive-engine');
+
 // Export all callable functions
 exports.validateMathSubmission = validateMathSubmission;
+exports.validateAdaptiveSubmission = validateAdaptiveSubmission;
 exports.validateEnglishSubmission = validateEnglishSubmission;
 exports.validateAptitudeSubmission = validateAptitudeSubmission;
 exports.checkPageAccess = checkPageAccess;
@@ -576,3 +735,6 @@ exports.getAccessiblePages = getAccessiblePagesFunc;
 exports.submitAssessment = submitAssessment;
 exports.submitLevelTest = submitLevelTest;
 exports.checkLevelTestEligibility = checkLevelTestEligibility;
+exports.generateAdaptiveWorksheet = generateAdaptiveWorksheetCF;
+exports.approveAdaptiveWorksheet = approveAdaptiveWorksheetCF;
+exports.rejectAdaptiveWorksheet = rejectAdaptiveWorksheetCF;

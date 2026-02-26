@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Children Profiles</title>
+    <title>Children Profiles - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -156,6 +163,94 @@
             background: #c0392b;
         }
 
+        .skills-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            background: #667eea;
+            color: white;
+        }
+
+        .skills-btn:hover {
+            background: #5a6fd6;
+        }
+
+        .skill-bar-container {
+            margin: 8px 0;
+        }
+
+        .skill-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            margin-bottom: 3px;
+        }
+
+        .skill-label .skill-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .skill-label .skill-stats {
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .skill-bar {
+            height: 14px;
+            background: #e9ecef;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            border-radius: 7px;
+            transition: width 0.5s ease;
+        }
+
+        .skill-bar-fill.strong { background: linear-gradient(90deg, #4caf50, #66bb6a); }
+        .skill-bar-fill.medium { background: linear-gradient(90deg, #ff9800, #ffb74d); }
+        .skill-bar-fill.weak { background: linear-gradient(90deg, #f44336, #ef5350); }
+
+        .skill-section-header {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 16px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .skill-legend {
+            display: flex;
+            gap: 16px;
+            margin: 12px 0;
+            font-size: 0.85em;
+        }
+
+        .skill-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .no-skills-message {
+            text-align: center;
+            color: #888;
+            padding: 30px;
+            font-style: italic;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -289,13 +384,17 @@
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
     <script src="firebase-auth.js"></script>
+    <script src="branding.js"></script>
 </head>
 <body>
     <div class="profiles-container">
         <a href="index" class="back-link">← Back to Home</a>
 
         <div class="header">
-            <h1>👨‍👩‍👧‍👦 Manage Children Profiles</h1>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; justify-content: center;">
+                <div id="app-branding"></div>
+                <h1>👨‍👩‍👧‍👦 Manage Children Profiles</h1>
+            </div>
             <p>Add and manage profiles for your children</p>
         </div>
 
@@ -314,6 +413,21 @@
             <div class="empty-state-icon">👶</div>
             <h3>No children profiles yet</h3>
             <p>Click the button above to create your first child profile</p>
+        </div>
+    </div>
+
+    <!-- Skill Progress Modal -->
+    <div id="skills-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="skills-modal-title">Skill Progress</h2>
+            </div>
+            <div id="skills-modal-body">
+                <p class="no-skills-message">Loading...</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="document.getElementById('skills-modal').style.display='none'" style="padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+            </div>
         </div>
     </div>
 
@@ -566,6 +680,7 @@
                 <div class="child-info" style="margin-top: 10px;">${versionBadge}</div>
                 <div class="child-info" style="color: #667eea; font-weight: bold;">📚 ${enabledCount} module(s) enabled</div>
                 <div class="child-actions">
+                    <button class="skills-btn" onclick="viewChildSkills('${id}', '${child.name}')">📊 Skills</button>
                     <button class="edit-btn" onclick="editChild('${id}')">✏️ Edit</button>
                     <button class="delete-btn" onclick="deleteChild('${id}', '${child.name}')">🗑️ Delete</button>
                 </div>
@@ -984,12 +1099,136 @@
             }
         }
 
+        // Skill name display mapping
+        const SKILL_DISPLAY_NAMES = {
+            'add-no-carry': 'Addition (no carry)',
+            'add-carry-once': 'Addition (carry once)',
+            'add-carry-multi': 'Addition (multiple carries)',
+            'add-single': 'Single-digit addition',
+            'add-2digit': '2-digit addition',
+            'add-3digit': '3-digit addition',
+            'add-4digit': '4-digit addition',
+            'sub-no-borrow': 'Subtraction (no borrow)',
+            'sub-borrow-once': 'Subtraction (borrow once)',
+            'sub-borrow-zero': 'Subtraction (borrow from zero)',
+            'sub-borrow-multi': 'Subtraction (multiple borrows)',
+            'sub-single': 'Single-digit subtraction',
+            'sub-2digit': '2-digit subtraction',
+            'sub-3digit': '3-digit subtraction',
+            'mul-tables-2-5': 'Times tables (2-5)',
+            'mul-tables-6-9': 'Times tables (6-9)',
+            'mul-2digit-by-1digit': 'Multi x single digit',
+            'mul-multi-digit': 'Multi-digit multiplication',
+            'div-basic': 'Basic division',
+            'div-exact': 'Division (exact)',
+            'div-remainder': 'Division (with remainder)',
+            'div-long': 'Long division',
+            'div-by-small': 'Divide by small numbers',
+            'div-by-large': 'Divide by large numbers'
+        };
+
+        async function viewChildSkills(childId, childName) {
+            const modal = document.getElementById('skills-modal');
+            const title = document.getElementById('skills-modal-title');
+            const body = document.getElementById('skills-modal-body');
+
+            title.textContent = `${childName}'s Skill Progress`;
+            body.innerHTML = '<p class="no-skills-message">Loading skill data...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const profileSnapshot = await firebase.firestore()
+                    .collection('children').doc(childId)
+                    .collection('skill_profile').get();
+
+                if (profileSnapshot.empty) {
+                    body.innerHTML = '<p class="no-skills-message">No skill data yet. Complete some worksheets to see progress!</p>';
+                    return;
+                }
+
+                let html = `
+                    <div class="skill-legend">
+                        <span><span class="legend-dot" style="background: #4caf50;"></span> Strong (&lt;10%)</span>
+                        <span><span class="legend-dot" style="background: #ff9800;"></span> Medium (10-30%)</span>
+                        <span><span class="legend-dot" style="background: #f44336;"></span> Weak (&gt;30%)</span>
+                    </div>
+                `;
+
+                const opNames = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division' };
+
+                profileSnapshot.forEach(doc => {
+                    const operation = doc.id;
+                    const profile = doc.data();
+                    const skills = profile.skills || {};
+
+                    const opTitle = opNames[operation] || operation;
+                    html += `<div class="skill-section-header">${opTitle}</div>`;
+
+                    if (profile.totalAttempted) {
+                        html += `<div style="font-size: 0.85em; color: #888; margin-bottom: 8px;">
+                            ${profile.totalAttempted} problems attempted | Overall: ${Math.round((1 - profile.overallErrorRate) * 100)}% accuracy
+                        </div>`;
+                    }
+
+                    // Sort skills: weak first (highest error rate), then medium, then strong
+                    const sortedSkills = Object.entries(skills)
+                        .filter(([, data]) => data.attempts >= 3)
+                        .sort((a, b) => (b[1].errorRate || 0) - (a[1].errorRate || 0));
+
+                    if (sortedSkills.length === 0) {
+                        html += '<p style="color: #888; font-size: 0.9em;">Not enough data yet (need 3+ attempts per skill)</p>';
+                    }
+
+                    for (const [skillName, data] of sortedSkills) {
+                        const accuracy = Math.round((1 - (data.errorRate || 0)) * 100);
+                        const errorRate = data.errorRate || 0;
+                        let barClass = 'strong';
+                        if (errorRate > 0.30) barClass = 'weak';
+                        else if (errorRate > 0.10) barClass = 'medium';
+
+                        const displayName = SKILL_DISPLAY_NAMES[skillName] || skillName;
+
+                        html += `
+                            <div class="skill-bar-container">
+                                <div class="skill-label">
+                                    <span class="skill-name">${displayName}</span>
+                                    <span class="skill-stats">${accuracy}% (${data.attempts} problems)</span>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-bar-fill ${barClass}" style="width: ${accuracy}%;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                body.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading skill data:', error);
+                body.innerHTML = '<p class="no-skills-message">Error loading skill data. Please try again.</p>';
+            }
+        }
+
         // Close modal on outside click
         document.getElementById('child-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
+
+        document.getElementById('skills-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
     </script>
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
 </body>
 </html>

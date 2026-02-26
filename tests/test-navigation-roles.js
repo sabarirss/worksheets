@@ -66,6 +66,7 @@ const allPages = [
     'learn-english-stories.html',
     'privacy-policy.html',
     'terms.html',
+    'rewards.html',
 ];
 
 allPages.forEach(page => {
@@ -103,6 +104,12 @@ const allJsFiles = [
     'branding.js',
     'progress-map.js',
     'progress-map.css',
+    'feedback.css',
+    'feedback.js',
+    'sound-manager.js',
+    'avatar-renderer.js',
+    'rewards.js',
+    'rewards.css',
 ];
 
 allJsFiles.forEach(file => {
@@ -2589,13 +2596,12 @@ test('worksheet-generator.js showSubjects() hides progress map', () => {
     }
 });
 
-test('worksheet-generator.js showMathLevels() hides progress map', () => {
+test('worksheet-generator.js showMathLevels() calls showProgressMap directly (BUG-034)', () => {
     const js = readFile('worksheet-generator.js');
-    const fnMatch = js.match(/function showMathLevels\(\)[\s\S]*?Age-based filtering removed/);
-    if (fnMatch) {
-        assert.ok(fnMatch[0].includes('progress-map-container'),
-            'showMathLevels should hide progress-map-container');
-    }
+    const fnMatch = js.match(/function showMathLevels\(\)[\s\S]*?(?=\nfunction )/);
+    assert.ok(fnMatch, 'showMathLevels function should exist');
+    assert.ok(fnMatch[0].includes("showProgressMap('math', 'addition')"),
+        'showMathLevels should call showProgressMap directly, not show operations page');
 });
 
 // --- Pure logic tests (no DOM/Firebase needed) ---
@@ -2655,6 +2661,697 @@ test('progress-map.js script loads before english-generator.js in english.html',
     assert.ok(pmIdx > -1, 'progress-map.js should be loaded via script tag in english.html');
     assert.ok(egIdx > -1, 'english-generator.js should be loaded via script tag in english.html');
     assert.ok(pmIdx < egIdx, 'progress-map.js script tag should appear before english-generator.js');
+});
+
+// ============================================================================
+console.log('\n--- BUG-034: Redundant Math Operations Page ---');
+// ============================================================================
+
+test('BUG-034: showMathLevels goes directly to progress map (no operations page)', () => {
+    const js = readFile('worksheet-generator.js');
+    const fnMatch = js.match(/function showMathLevels\(\)[\s\S]*?(?=\nfunction )/);
+    assert.ok(fnMatch, 'showMathLevels function should exist');
+    // Should NOT show the operations page (math-operations div)
+    assert.ok(!fnMatch[0].includes("operations.style.display = 'block'") ||
+              fnMatch[0].includes('// Fallback'),
+        'showMathLevels should not show operations page (except in fallback)');
+    // Should call showProgressMap
+    assert.ok(fnMatch[0].includes("showProgressMap('math', 'addition')"),
+        'showMathLevels should route directly to progress map with addition as default');
+});
+
+test('BUG-034: hideProgressMap returns to subject selection (not operations page)', () => {
+    const js = readFile('progress-map.js');
+    const fnMatch = js.match(/function hideProgressMap[\s\S]*?\n\}/);
+    assert.ok(fnMatch, 'hideProgressMap function should exist');
+    assert.ok(fnMatch[0].includes('showSubjects'),
+        'hideProgressMap should call showSubjects() to return to subject selection');
+    // Should NOT show operations page
+    assert.ok(!fnMatch[0].includes('math-operations'),
+        'hideProgressMap should not reference math-operations div');
+});
+
+test('BUG-034: Back button text says "Back to Subjects"', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('Back to Subjects'),
+        'Progress map back button should say "Back to Subjects"');
+    assert.ok(!js.includes('Back to Operations'),
+        'Progress map should NOT say "Back to Operations"');
+});
+
+test('BUG-034: index.html still has math-operations buttons with showProgressMap calls', () => {
+    const html = readFile('index.html');
+    // The operations page in index.html should still have showProgressMap calls on buttons
+    assert.ok(html.includes("showProgressMap('math','addition')"),
+        'Addition button should call showProgressMap');
+    assert.ok(html.includes("showProgressMap('math','subtraction')"),
+        'Subtraction button should call showProgressMap');
+});
+
+// ============================================================================
+console.log('\n--- BUG-033: Duplicate Clear All Button ---');
+// ============================================================================
+
+test('worksheet-generator.js has only ONE Clear All button (bottom, not top toolbar)', () => {
+    const js = readFile('worksheet-generator.js');
+    // The bottom Clear All button calls clearWorksheet()
+    assert.ok(js.includes("clearWorksheet()"), 'bottom Clear All (clearWorksheet) must exist');
+    // The top toolbar should NOT have a Clear All button
+    // The top toolbar has Save and PDF but NOT Clear All
+    const topToolbar = js.substring(
+        js.indexOf('<div class="control-buttons">'),
+        js.indexOf('</div>\n            </div>\n\n            <div class="results-summary"')
+    );
+    assert.ok(!topToolbar.includes('Clear All'), 'top toolbar must NOT have Clear All button');
+});
+
+test('english-generator.js has no duplicate Clear All buttons', () => {
+    const js = readFile('english-generator.js');
+    const matches = js.match(/Clear All/g) || [];
+    // English has 2 Clear All references: writing practice + assessment mode (different contexts)
+    // Neither should be duplicated within the same worksheet view
+    assert.ok(matches.length <= 2, `english should have at most 2 Clear All references, got ${matches.length}`);
+});
+
+test('aptitude-generator.js has no duplicate Clear All buttons', () => {
+    const js = readFile('aptitude-generator.js');
+    const matches = js.match(/Clear All/g) || [];
+    // Aptitude should have exactly 1 Clear All (in assessment toolbar)
+    assert.ok(matches.length <= 1, `aptitude should have at most 1 Clear All, got ${matches.length}`);
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: New Files Exist ===');
+// ============================================================================
+
+const uiuxNewFiles = [
+    'feedback.css',
+    'feedback.js',
+    'sound-manager.js',
+    'avatar-renderer.js',
+    'rewards.js',
+    'rewards.css',
+    'rewards.html',
+];
+
+uiuxNewFiles.forEach(file => {
+    test(`UI/UX: ${file} exists`, () => {
+        assert.ok(fileExists(file), `${file} not found`);
+    });
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: CSS Design Tokens ===');
+// ============================================================================
+
+test('styles.css has :root CSS variables block', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes(':root {'), ':root block not found');
+    assert.ok(css.includes('--color-primary:'), '--color-primary not found');
+    assert.ok(css.includes('--color-bg:'), '--color-bg not found');
+    assert.ok(css.includes('--font-family:'), '--font-family not found');
+    assert.ok(css.includes('--radius-md:'), '--radius-md not found');
+    assert.ok(css.includes('--shadow-md:'), '--shadow-md not found');
+    assert.ok(css.includes('--transition-normal:'), '--transition-normal not found');
+    assert.ok(css.includes('--spring-bounce:'), '--spring-bounce not found');
+});
+
+test('styles.css uses var(--font-family) for body', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes("font-family: var(--font-family)"), 'body should use var(--font-family)');
+});
+
+test('styles.css uses var(--color-bg) for body background', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes("background-color: var(--color-bg)"), 'body should use var(--color-bg)');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Reduced Motion + Focus ===');
+// ============================================================================
+
+test('styles.css has reduced motion media query', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('prefers-reduced-motion: reduce'), 'reduced motion query not found');
+    assert.ok(css.includes('animation-duration: 0.01ms !important'), 'animation override not found');
+});
+
+test('styles.css has :focus-visible rule', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes(':focus-visible'), ':focus-visible not found');
+    assert.ok(css.includes('outline: 3px solid var(--color-primary)'), 'focus outline not found');
+});
+
+test('styles.css has touch target minimum 44px', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('min-height: 44px'), 'min-height: 44px not found');
+    assert.ok(css.includes('min-width: 44px'), 'min-width: 44px not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Nunito Font on All Pages ===');
+// ============================================================================
+
+const fontPages = [
+    'index.html', 'english.html', 'aptitude.html', 'stories.html',
+    'drawing.html', 'emotional-quotient.html', 'german.html',
+    'german-kids.html', 'learn-english-stories.html', 'settings.html',
+    'login.html', 'signup.html', 'admin.html', 'children-profiles.html',
+    'progress.html', 'privacy-policy.html', 'terms.html'
+];
+
+fontPages.forEach(page => {
+    test(`${page} has Nunito font link`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('family=Nunito'), `${page} missing Nunito font link`);
+    });
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Feedback CSS + JS on All Pages ===');
+// ============================================================================
+
+fontPages.forEach(page => {
+    test(`${page} has feedback.css`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('feedback.css'), `${page} missing feedback.css link`);
+    });
+
+    test(`${page} has feedback.js`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('feedback.js'), `${page} missing feedback.js script`);
+    });
+
+    test(`${page} has sound-manager.js`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('sound-manager.js'), `${page} missing sound-manager.js script`);
+    });
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Feedback Animations ===');
+// ============================================================================
+
+test('feedback.css has correctFlash animation', () => {
+    const css = readFile('feedback.css');
+    assert.ok(css.includes('@keyframes correctFlash'), 'correctFlash animation not found');
+});
+
+test('feedback.css has gentleShake animation', () => {
+    const css = readFile('feedback.css');
+    assert.ok(css.includes('@keyframes gentleShake'), 'gentleShake animation not found');
+});
+
+test('feedback.css has skeleton shimmer', () => {
+    const css = readFile('feedback.css');
+    assert.ok(css.includes('.skeleton'), '.skeleton class not found');
+    assert.ok(css.includes('@keyframes shimmer'), 'shimmer animation not found');
+});
+
+test('feedback.css has answer-correct and answer-incorrect classes', () => {
+    const css = readFile('feedback.css');
+    assert.ok(css.includes('.answer-correct'), '.answer-correct not found');
+    assert.ok(css.includes('.answer-incorrect'), '.answer-incorrect not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Encouragement Text ===');
+// ============================================================================
+
+test('feedback.js has getEncouragement function', () => {
+    const js = readFile('feedback.js');
+    assert.ok(js.includes('function getEncouragement'), 'getEncouragement not found');
+    assert.ok(js.includes('CORRECT_PHRASES'), 'CORRECT_PHRASES not found');
+    assert.ok(js.includes('INCORRECT_PHRASES'), 'INCORRECT_PHRASES not found');
+});
+
+test('feedback.js never shows "Wrong!" in incorrect phrases', () => {
+    const js = readFile('feedback.js');
+    // Extract INCORRECT_PHRASES array content
+    const match = js.match(/INCORRECT_PHRASES\s*=\s*\[([\s\S]*?)\]/);
+    if (match) {
+        assert.ok(!match[1].includes("'Wrong!'"), 'INCORRECT_PHRASES should never contain "Wrong!"');
+        assert.ok(!match[1].includes('"Wrong!"'), 'INCORRECT_PHRASES should never contain "Wrong!"');
+    }
+});
+
+test('worksheet-generator.js uses getEncouragement', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('getEncouragement(true)'), 'getEncouragement(true) not used in worksheet-generator');
+    assert.ok(js.includes('getEncouragement(false)'), 'getEncouragement(false) not used in worksheet-generator');
+});
+
+test('english-generator.js uses getEncouragement', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('getEncouragement(true)'), 'getEncouragement(true) not used in english-generator');
+    assert.ok(js.includes('getEncouragement(false)'), 'getEncouragement(false) not used in english-generator');
+});
+
+test('aptitude-generator.js uses getEncouragement', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('getEncouragement(true)'), 'getEncouragement(true) not used in aptitude-generator');
+    assert.ok(js.includes('getEncouragement(false)'), 'getEncouragement(false) not used in aptitude-generator');
+});
+
+test('assessment.js uses getEncouragement', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('getEncouragement(true)'), 'getEncouragement(true) not used in assessment');
+    assert.ok(js.includes('getEncouragement(false)'), 'getEncouragement(false) not used in assessment');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Confetti on Worksheet Pages ===');
+// ============================================================================
+
+const confettiPages = ['index.html', 'english.html', 'aptitude.html'];
+
+confettiPages.forEach(page => {
+    test(`${page} has confetti CDN`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('canvas-confetti'), `${page} missing confetti CDN`);
+    });
+});
+
+test('worksheet-generator.js calls confetti on completion', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes("typeof confetti === 'function'"), 'confetti check not found in worksheet-generator');
+});
+
+test('aptitude-generator.js calls confetti on completion', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes("typeof confetti === 'function'"), 'confetti check not found in aptitude-generator');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Sound System ===');
+// ============================================================================
+
+test('sound-manager.js has SoundManager object', () => {
+    const js = readFile('sound-manager.js');
+    assert.ok(js.includes('const SoundManager'), 'SoundManager not found');
+    assert.ok(js.includes('isEnabled()'), 'isEnabled method not found');
+    assert.ok(js.includes('setEnabled('), 'setEnabled method not found');
+    assert.ok(js.includes('correct()'), 'correct() method not found');
+    assert.ok(js.includes('incorrect()'), 'incorrect() method not found');
+    assert.ok(js.includes('complete()'), 'complete() method not found');
+});
+
+test('sound-manager.js has playSound function', () => {
+    const js = readFile('sound-manager.js');
+    assert.ok(js.includes('function playSound'), 'playSound function not found');
+});
+
+test('worksheet-generator.js calls playSound', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes("playSound('correct')"), "playSound('correct') not found");
+    assert.ok(js.includes("playSound('incorrect')"), "playSound('incorrect') not found");
+    assert.ok(js.includes("playSound('complete')"), "playSound('complete') not found");
+});
+
+test('settings.html has sound toggle', () => {
+    const html = readFile('settings.html');
+    assert.ok(html.includes('sound-toggle-section'), 'sound-toggle-section not found');
+    assert.ok(html.includes('updateSoundMode'), 'updateSoundMode function not found');
+    assert.ok(html.includes('sound-mode-on'), 'sound-mode-on radio not found');
+    assert.ok(html.includes('sound-mode-off'), 'sound-mode-off radio not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Greeting Banner ===');
+// ============================================================================
+
+test('index.html has greeting-banner div', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('greeting-banner'), 'greeting-banner div not found');
+});
+
+test('index.html has updateGreeting function', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('function updateGreeting'), 'updateGreeting function not found');
+});
+
+test('styles.css has greeting banner styles', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('#greeting-banner'), 'greeting banner styles not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Age-Adaptive Theme ===');
+// ============================================================================
+
+test('styles.css has theme-young class', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('body.theme-young'), 'theme-young class not found');
+    assert.ok(css.includes('--color-primary: #EA580C'), 'theme-young orange primary not found');
+    assert.ok(css.includes('#FFF7ED'), 'theme-young warm bg not found');
+});
+
+test('profile-selector.js applies age theme', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('theme-young'), 'theme-young not referenced in profile-selector');
+});
+
+test('index.html has applyAgeTheme function', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('function applyAgeTheme'), 'applyAgeTheme function not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Bottom Navigation Bar ===');
+// ============================================================================
+
+const bottomNavPages = [
+    'index.html', 'english.html', 'aptitude.html', 'stories.html',
+    'drawing.html', 'emotional-quotient.html', 'german.html',
+    'german-kids.html', 'learn-english-stories.html', 'progress.html',
+    'children-profiles.html'
+];
+
+bottomNavPages.forEach(page => {
+    test(`${page} has bottom-nav`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('class="bottom-nav"'), `${page} missing bottom-nav`);
+        assert.ok(html.includes('bottom-nav-inner'), `${page} missing bottom-nav-inner`);
+        assert.ok(html.includes('bottom-nav-item'), `${page} missing bottom-nav-item links`);
+    });
+});
+
+test('styles.css has bottom-nav styles', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('.bottom-nav'), '.bottom-nav styles not found');
+    assert.ok(css.includes('.bottom-nav-item'), '.bottom-nav-item styles not found');
+    assert.ok(css.includes('padding-bottom: 70px'), 'body padding-bottom for bottom nav not found');
+});
+
+test('Bottom nav hidden on desktop, visible on mobile', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('.bottom-nav {\n    display: none;') || css.includes('.bottom-nav {\r\n    display: none;'), 'bottom-nav should be hidden by default');
+    assert.ok(css.includes('.bottom-nav {\n        display: block;') || css.includes('.bottom-nav {\n        display: block') || css.includes('display: block'), 'bottom-nav should be visible in mobile media query');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Reward Shop ===');
+// ============================================================================
+
+test('rewards.html exists and has shop structure', () => {
+    const html = readFile('rewards.html');
+    assert.ok(html.includes('Reward Shop'), 'Reward Shop title not found');
+    assert.ok(html.includes('star-balance-display'), 'star-balance-display not found');
+    assert.ok(html.includes('avatar-preview-container'), 'avatar-preview-container not found');
+    assert.ok(html.includes('shop-tabs'), 'shop-tabs not found');
+    assert.ok(html.includes('shop-items-grid'), 'shop-items-grid not found');
+    assert.ok(html.includes('rewards.js'), 'rewards.js script not found');
+    assert.ok(html.includes('avatar-renderer.js'), 'avatar-renderer.js script not found');
+    assert.ok(html.includes('rewards.css'), 'rewards.css link not found');
+});
+
+test('rewards.html has Nunito font and bottom nav', () => {
+    const html = readFile('rewards.html');
+    assert.ok(html.includes('family=Nunito'), 'Nunito font missing from rewards.html');
+    assert.ok(html.includes('bottom-nav'), 'bottom-nav missing from rewards.html');
+});
+
+test('rewards.js has initRewardShop function', () => {
+    const js = readFile('rewards.js');
+    assert.ok(js.includes('function initRewardShop'), 'initRewardShop not found');
+    assert.ok(js.includes('function purchaseItem'), 'purchaseItem not found');
+    assert.ok(js.includes('function equipItem'), 'equipItem not found');
+    assert.ok(js.includes('function renderShop'), 'renderShop not found');
+});
+
+test('rewards.js has shop tab switching', () => {
+    const js = readFile('rewards.js');
+    assert.ok(js.includes('function switchShopTab'), 'switchShopTab not found');
+    assert.ok(js.includes("currentShopTab"), 'currentShopTab not found');
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Avatar Renderer ===');
+// ============================================================================
+
+test('avatar-renderer.js has renderAvatar function', () => {
+    const js = readFile('avatar-renderer.js');
+    assert.ok(js.includes('function renderAvatar'), 'renderAvatar not found');
+});
+
+test('avatar-renderer.js has AVATAR_ITEMS catalog', () => {
+    const js = readFile('avatar-renderer.js');
+    assert.ok(js.includes('const AVATAR_ITEMS'), 'AVATAR_ITEMS not found');
+    assert.ok(js.includes('characters:'), 'characters category not found');
+    assert.ok(js.includes('hats:'), 'hats category not found');
+    assert.ok(js.includes('frames:'), 'frames category not found');
+    assert.ok(js.includes('backgrounds:'), 'backgrounds category not found');
+});
+
+test('avatar-renderer.js has DEFAULT_AVATAR', () => {
+    const js = readFile('avatar-renderer.js');
+    assert.ok(js.includes('const DEFAULT_AVATAR'), 'DEFAULT_AVATAR not found');
+});
+
+test('avatar-renderer.js has getStarBalance function', () => {
+    const js = readFile('avatar-renderer.js');
+    assert.ok(js.includes('function getStarBalance'), 'getStarBalance not found');
+});
+
+test('avatar-renderer.js items have categories with cost and name', () => {
+    const js = readFile('avatar-renderer.js');
+    // Check that items have cost property
+    const costMatches = js.match(/cost:\s*\d+/g);
+    assert.ok(costMatches && costMatches.length >= 20, `Expected 20+ items with cost, found ${costMatches ? costMatches.length : 0}`);
+});
+
+// ============================================================================
+console.log('\n=== UI/UX Enhancement: Star Tracking in Completion Manager ===');
+// ============================================================================
+
+test('completion-manager.js awards stars on completion', () => {
+    const js = readFile('completion-manager.js');
+    assert.ok(js.includes('totalStarsEarned'), 'totalStarsEarned not found');
+    assert.ok(js.includes('FieldValue.increment'), 'FieldValue.increment not found for star tracking');
+});
+
+test('completion-manager.js awards 3 stars for 95%+', () => {
+    const js = readFile('completion-manager.js');
+    assert.ok(js.includes('starsEarned = 3'), '3 stars for 95%+ not found');
+    assert.ok(js.includes('starsEarned = 2'), '2 stars for 85%+ not found');
+    assert.ok(js.includes('starsEarned = 1'), '1 star for completion not found');
+});
+
+// ============================================================================
+console.log('\n=== Phase 3: Adaptive Worksheet Client Integration ===');
+// ============================================================================
+
+test('worksheet-generator.js has adaptive mode variables', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('let isAdaptiveMode = false'), 'isAdaptiveMode variable not found');
+    assert.ok(js.includes('let currentAdaptiveAssignment = null'), 'currentAdaptiveAssignment variable not found');
+});
+
+test('worksheet-generator.js has loadAdaptiveWorksheet function', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('function loadAdaptiveWorksheet(operation, pageNumber)'), 'loadAdaptiveWorksheet function not found');
+});
+
+test('worksheet-generator.js loads adaptive problems from assignment doc', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('currentAdaptiveAssignment.math.pages'), 'Should read pages from adaptive assignment');
+    assert.ok(js.includes("difficulty: 'adaptive'"), 'Should set difficulty to adaptive');
+    assert.ok(js.includes('adaptive: true'), 'Should set adaptive flag on currentWorksheet');
+});
+
+test('worksheet-generator.js detects adaptive mode from getAccessiblePages', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('access.adaptive'), 'Should check access.adaptive flag');
+    assert.ok(js.includes('isAdaptiveMode = true'), 'Should set isAdaptiveMode when adaptive');
+    assert.ok(js.includes('currentAdaptiveAssignment = access.assignment'), 'Should store assignment doc');
+});
+
+test('worksheet-generator.js branches to adaptive in loadWorksheetByPage', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('isAdaptiveMode && currentAdaptiveAssignment'), 'Should check adaptive mode in loadWorksheetByPage');
+    assert.ok(js.includes('loadAdaptiveWorksheet(operation, absolutePage)'), 'Should call loadAdaptiveWorksheet');
+});
+
+test('worksheet-generator.js uses validateAdaptiveSubmission for adaptive worksheets', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes("httpsCallable('validateAdaptiveSubmission')"), 'Should call validateAdaptiveSubmission CF');
+    assert.ok(js.includes('currentWorksheet.adaptive'), 'Should check adaptive flag before choosing validator');
+    assert.ok(js.includes('pageNumber: currentAbsolutePage'), 'Should send pageNumber not absolutePage');
+});
+
+test('worksheet-generator.js adaptive problems strip answers', () => {
+    const js = readFile('worksheet-generator.js');
+    // In loadAdaptiveWorksheet, problems should not include answers
+    const adaptiveFunc = js.substring(js.indexOf('function loadAdaptiveWorksheet'));
+    const funcEnd = adaptiveFunc.indexOf('\nfunction ');
+    const funcBody = adaptiveFunc.substring(0, funcEnd > 0 ? funcEnd : 500);
+    assert.ok(funcBody.includes('a: p.a'), 'Should include a');
+    assert.ok(funcBody.includes('b: p.b'), 'Should include b');
+    assert.ok(!funcBody.includes('answer: p.answer'), 'Should NOT include answer in client-side problems');
+});
+
+test('validators.js exports validateAdaptiveSubmission', () => {
+    const js = readFile('functions/validators.js');
+    assert.ok(js.includes('validateAdaptiveSubmission'), 'validateAdaptiveSubmission not found');
+    assert.ok(js.includes("const validateAdaptiveSubmission = onCall("), 'Should be a callable function');
+});
+
+test('validators.js adaptive validation reads from weekly_assignments', () => {
+    const js = readFile('functions/validators.js');
+    const adaptiveStart = js.indexOf('const validateAdaptiveSubmission');
+    const adaptiveEnd = js.indexOf('const validateEnglishSubmission');
+    const adaptiveBody = js.substring(adaptiveStart, adaptiveEnd);
+    assert.ok(adaptiveBody.includes("weekly_assignments"), 'Should read from weekly_assignments collection');
+    assert.ok(adaptiveBody.includes('assignment.math.adaptive'), 'Should verify assignment is adaptive');
+    assert.ok(adaptiveBody.includes('pageData.problems'), 'Should get problems from stored page data');
+});
+
+test('validators.js adaptive validation does error tracking', () => {
+    const js = readFile('functions/validators.js');
+    const adaptiveStart = js.indexOf('const validateAdaptiveSubmission');
+    const adaptiveEnd = js.indexOf('const validateEnglishSubmission');
+    const adaptiveBody = js.substring(adaptiveStart, adaptiveEnd);
+    assert.ok(adaptiveBody.includes('logErrors'), 'Should call logErrors for adaptive submissions');
+    assert.ok(adaptiveBody.includes('updateSkillProfile'), 'Should call updateSkillProfile for adaptive submissions');
+});
+
+test('validators.js updateWeeklyAssignmentProgress handles adaptive page key', () => {
+    const js = readFile('functions/validators.js');
+    assert.ok(js.includes("isAdaptive ? 'pageNumber'"), 'Should use pageNumber key for adaptive assignments');
+    assert.ok(js.includes('moduleData.adaptive === true'), 'Should check adaptive flag on module data');
+});
+
+test('index.js registers validateAdaptiveSubmission', () => {
+    const js = readFile('functions/index.js');
+    assert.ok(js.includes('exports.validateAdaptiveSubmission'), 'Should export validateAdaptiveSubmission');
+    assert.ok(js.includes("validateAdaptiveSubmission"), 'Should import validateAdaptiveSubmission');
+    assert.ok(js.includes("require('./validators')"), 'Should import from validators');
+});
+
+test('weekly-assignments.js returns adaptive flag and assignment in getAccessiblePages', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes('adaptive: isAdaptive'), 'Should return adaptive flag');
+    assert.ok(js.includes('assignment.math.adaptive === true'), 'Should detect adaptive assignments');
+    assert.ok(js.includes("pages = assignment.math.pages.map(p => p.pageNumber)"), 'Should map pageNumber for adaptive');
+});
+
+test('admin.html has adaptive worksheets review section', () => {
+    const html = readFile('admin.html');
+    assert.ok(html.includes('adaptive-section'), 'Should have adaptive section');
+    assert.ok(html.includes('loadAdaptiveWorksheets'), 'Should have loadAdaptiveWorksheets function');
+    assert.ok(html.includes('approveAdaptiveWorksheet'), 'Should have approve function');
+    assert.ok(html.includes('rejectAdaptiveWorksheet'), 'Should have reject function');
+});
+
+test('children-profiles.html has skill progress dashboard', () => {
+    const html = readFile('children-profiles.html');
+    assert.ok(html.includes('skills-modal'), 'Should have skills modal');
+    assert.ok(html.includes('viewChildSkills'), 'Should have viewChildSkills function');
+    assert.ok(html.includes('skill_profile'), 'Should read from skill_profile subcollection');
+    assert.ok(html.includes('skill-bar-fill'), 'Should have skill progress bars');
+    assert.ok(html.includes('SKILL_DISPLAY_NAMES'), 'Should have human-readable skill names');
+});
+
+test('children-profiles.html child cards have Skills button', () => {
+    const html = readFile('children-profiles.html');
+    assert.ok(html.includes('skills-btn'), 'Should have skills button class');
+    assert.ok(html.includes('Skills</button>'), 'Should have Skills button text');
+});
+
+test('index.js has scheduledAdaptiveAutoApprove function', () => {
+    const js = readFile('functions/index.js');
+    assert.ok(js.includes('scheduledAdaptiveAutoApprove'), 'Should export auto-approve function');
+    assert.ok(js.includes("'0 16 * * 3'"), 'Should run on Wednesday at 4pm');
+    assert.ok(js.includes('pending_review'), 'Should query pending worksheets');
+    assert.ok(js.includes('deliverApprovedWorksheet'), 'Should call delivery function');
+});
+
+test('index.js scheduledWeeklyGeneration checks for adaptive eligibility', () => {
+    const js = readFile('functions/index.js');
+    assert.ok(js.includes('skill_profile'), 'Should check skill_profile subcollection');
+    assert.ok(js.includes('totalAttempted >= 50'), 'Should require 50+ attempts for adaptive');
+    assert.ok(js.includes('generateAdaptivePages'), 'Should call generateAdaptivePages');
+    assert.ok(js.includes('adaptive_worksheets'), 'Should write to adaptive_worksheets collection');
+});
+
+test('adaptive-engine.js has deliverApprovedWorksheet with correct format', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('async function deliverApprovedWorksheet'), 'Should have delivery function');
+    assert.ok(js.includes("adaptive: true"), 'Delivered assignment should have adaptive flag');
+    assert.ok(js.includes('pageNumber: i + 1'), 'Pages should have pageNumber field');
+    assert.ok(js.includes("weekly_assignments"), 'Should write to weekly_assignments collection');
+});
+
+// ============================================================================
+// BRANDING — GleeGrow logo on all pages
+// ============================================================================
+
+console.log('\n=== Branding: All Pages Have GleeGrow Branding ===');
+
+const brandingPages = [
+    'index.html', 'english.html', 'aptitude.html', 'stories.html',
+    'drawing.html', 'emotional-quotient.html', 'german.html',
+    'german-kids.html', 'learn-english-stories.html',
+    'settings.html', 'progress.html', 'children-profiles.html',
+    'admin.html', 'rewards.html',
+    'login.html', 'signup.html', 'terms.html', 'privacy-policy.html',
+    'fix-admin.html'
+];
+
+brandingPages.forEach(page => {
+    test(`${page} has app-branding div`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('id="app-branding"'), `${page} missing app-branding div`);
+    });
+
+    test(`${page} loads branding.js`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('branding.js'), `${page} missing branding.js script`);
+    });
+});
+
+test('branding.js exists and has brandingGoHome function', () => {
+    const js = readFile('branding.js');
+    assert.ok(js.includes('function brandingGoHome'), 'brandingGoHome function not found');
+    assert.ok(js.includes('APP_BRANDING'), 'APP_BRANDING config not found');
+});
+
+test('branding.js navigates to home on click', () => {
+    const js = readFile('branding.js');
+    assert.ok(js.includes("window.location.href = 'index'"), 'Should navigate to index on click');
+});
+
+test('branding.js warns about unsaved worksheet data', () => {
+    const js = readFile('branding.js');
+    assert.ok(js.includes('hasUnsavedChanges'), 'Should check hasUnsavedChanges');
+    assert.ok(js.includes('unsaved worksheet data'), 'Should warn about unsaved data');
+});
+
+test('branding.js stops running timer before navigating', () => {
+    const js = readFile('branding.js');
+    assert.ok(js.includes('stopTimer'), 'Should call stopTimer');
+});
+
+test('branding.js creates clickable logo with GleeGrow name', () => {
+    const js = readFile('branding.js');
+    assert.ok(js.includes("name: 'GleeGrow'"), 'Should have GleeGrow brand name');
+    assert.ok(js.includes("logo: 'gleegrow.png'"), 'Should use gleegrow.png logo');
+    assert.ok(js.includes("color: '#28a745'"), 'Should use brand green color');
+    assert.ok(js.includes('brandingGoHome()'), 'Click should trigger brandingGoHome');
+});
+
+test('branding.js logo is left-aligned (not right)', () => {
+    const js = readFile('branding.js');
+    // The wrapper should use flex with left alignment (no justify-content: flex-end)
+    assert.ok(!js.includes('flex-end'), 'Branding should NOT be right-aligned');
+    assert.ok(js.includes("display = 'flex'"), 'Branding wrapper should be flex');
+});
+
+// Verify test/utility pages do NOT need branding (not user-facing)
+test('test-stories.html and test-unique-stories.html are utility pages (no branding needed)', () => {
+    // These are developer-only test pages, not user-facing
+    assert.ok(fileExists('test-stories.html'), 'test-stories.html should exist');
+    assert.ok(fileExists('test-unique-stories.html'), 'test-unique-stories.html should exist');
 });
 
 // ============================================================================

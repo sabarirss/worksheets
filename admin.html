@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Parent & Children Management</title>
+    <title>Admin Panel - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -425,7 +432,10 @@
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Parent & Children Management</h1>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <div id="app-branding"></div>
+                <h1>Parent & Children Management</h1>
+            </div>
             <p>Manage parent accounts, children profiles, and per-child module allocations</p>
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="window.location.href='index'">
@@ -465,6 +475,25 @@
                 Parents have requested access to additional modules for their children. Approve or deny each request.
             </p>
             <div id="module-requests-list" style="display: grid; gap: 15px;">
+            </div>
+        </div>
+
+        <!-- Adaptive Worksheets Review Section -->
+        <div id="adaptive-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #9c27b0; padding-bottom: 15px;">
+                🧠 Adaptive Worksheets
+            </h2>
+            <p style="color: #666; margin-bottom: 15px;">
+                AI-generated personalized worksheets pending your review. Each worksheet targets the child's weak areas.
+            </p>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="loadAdaptiveWorksheets()" style="font-size: 0.9em; padding: 8px 16px;">Refresh</button>
+                <span id="adaptive-count" style="display: flex; align-items: center; color: #9c27b0; font-weight: bold;"></span>
+            </div>
+            <div id="adaptive-worksheets-list" style="display: grid; gap: 15px;">
+            </div>
+            <div id="no-adaptive-worksheets" style="display: none; padding: 30px; text-align: center; color: #999;">
+                No pending adaptive worksheets
             </div>
         </div>
 
@@ -736,6 +765,7 @@
 
     <!-- Firebase Auth -->
     <script src="firebase-auth.js"></script>
+    <script src="branding.js"></script>
 
     <script>
         let parentsData = [];
@@ -813,6 +843,7 @@
             loadParentsAndChildren();
             loadUpgradeRequests();
             loadModuleRequests();
+            loadAdaptiveWorksheets();
             loadFeedback();
         });
 
@@ -1840,6 +1871,129 @@ Would you like to view their children profiles?
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // ===== Adaptive Worksheet Functions =====
+
+        async function loadAdaptiveWorksheets() {
+            try {
+                const db = firebase.firestore();
+                const snapshot = await db.collection('adaptive_worksheets')
+                    .where('status', '==', 'pending_review')
+                    .orderBy('generatedAt', 'desc')
+                    .get();
+
+                const section = document.getElementById('adaptive-section');
+                const list = document.getElementById('adaptive-worksheets-list');
+                const noItems = document.getElementById('no-adaptive-worksheets');
+                const countEl = document.getElementById('adaptive-count');
+
+                if (snapshot.empty) {
+                    section.style.display = 'block';
+                    list.innerHTML = '';
+                    noItems.style.display = 'block';
+                    countEl.textContent = '';
+                    return;
+                }
+
+                section.style.display = 'block';
+                noItems.style.display = 'none';
+                countEl.textContent = `${snapshot.size} pending`;
+
+                list.innerHTML = snapshot.docs.map(doc => {
+                    const w = doc.data();
+                    const r = w.reasoning || {};
+                    const weakSkills = (r.weakSkills || []).map(s =>
+                        `<span style="background:#ffebee;color:#c62828;padding:2px 8px;border-radius:12px;font-size:0.85em;margin:2px;">${s.skill} (${Math.round(s.errorRate * 100)}%)</span>`
+                    ).join(' ');
+                    const mediumSkills = (r.mediumSkills || []).slice(0, 3).map(s =>
+                        `<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:12px;font-size:0.85em;margin:2px;">${s.skill}</span>`
+                    ).join(' ');
+                    const strongSkills = (r.strongSkills || []).slice(0, 3).map(s =>
+                        `<span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:12px;font-size:0.85em;margin:2px;">${s.skill}</span>`
+                    ).join(' ');
+                    const dist = r.distribution || {};
+
+                    return `
+                    <div style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; background: #fafafa;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div>
+                                <strong style="font-size: 1.2em; color: #2c3e50;">${w.childName || 'Unknown'}</strong>
+                                <span style="background: #e8eaf6; color: #3949ab; padding: 3px 10px; border-radius: 8px; font-size: 0.85em; margin-left: 8px;">${w.operation}</span>
+                                <span style="color: #999; font-size: 0.85em; margin-left: 8px;">Week: ${w.week || 'N/A'}</span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" onclick="approveAdaptiveWorksheet('${doc.id}', '${w.childName}')" style="font-size: 0.85em; padding: 6px 16px;">Approve</button>
+                                <button class="btn btn-danger" onclick="rejectAdaptiveWorksheet('${doc.id}', '${w.childName}')" style="font-size: 0.85em; padding: 6px 16px;">Reject</button>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #c62828;">Weak:</strong> ${weakSkills || '<span style="color:#999">None</span>'}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #e65100;">Medium:</strong> ${mediumSkills || '<span style="color:#999">None</span>'}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #2e7d32;">Strong:</strong> ${strongSkills || '<span style="color:#999">None</span>'}
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 0.85em; color: #666; margin-top: 8px;">
+                            <span>Total: ${r.totalProblems || 0} problems</span>
+                            <span>Weak: ${dist.weak || 0}</span>
+                            <span>Medium: ${dist.medium || 0}</span>
+                            <span>Strong: ${dist.strong || 0}</span>
+                            <span>Overall error rate: ${Math.round((r.profileSummary?.overallErrorRate || 0) * 100)}%</span>
+                        </div>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #667eea; font-weight: bold;">View Problems (${(w.pages || []).length} pages)</summary>
+                            <div style="margin-top: 10px; max-height: 300px; overflow-y: auto;">
+                                ${(w.pages || []).map((page, idx) => `
+                                    <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                        <strong>Page ${idx + 1}</strong> (${page.problems.length} problems)<br>
+                                        <span style="font-size: 0.85em; color: #666;">
+                                            ${page.problems.slice(0, 5).map(p => {
+                                                const op = w.operation === 'addition' ? '+' : w.operation === 'subtraction' ? '-' : w.operation === 'multiplication' ? 'x' : '/';
+                                                return `${p.a} ${op} ${p.b} = ${p.answer}`;
+                                            }).join(' | ')}${page.problems.length > 5 ? ' | ...' : ''}
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                    </div>`;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading adaptive worksheets:', error);
+            }
+        }
+
+        async function approveAdaptiveWorksheet(worksheetId, childName) {
+            if (!confirm(`Approve adaptive worksheet for ${childName}? This will deliver the worksheets to the child.`)) return;
+
+            try {
+                const fn = firebase.app().functions('europe-west1').httpsCallable('approveAdaptiveWorksheet');
+                await fn({ worksheetId });
+                alert(`Adaptive worksheet approved and delivered for ${childName}!`);
+                await loadAdaptiveWorksheets();
+            } catch (error) {
+                console.error('Error approving adaptive worksheet:', error);
+                alert('Error: ' + (error.message || 'Failed to approve'));
+            }
+        }
+
+        async function rejectAdaptiveWorksheet(worksheetId, childName) {
+            const notes = prompt(`Rejection notes for ${childName}'s worksheet (optional):`);
+            if (notes === null) return; // cancelled
+
+            try {
+                const fn = firebase.app().functions('europe-west1').httpsCallable('rejectAdaptiveWorksheet');
+                await fn({ worksheetId, adminNotes: notes || 'Rejected by admin' });
+                alert(`Adaptive worksheet rejected for ${childName}.`);
+                await loadAdaptiveWorksheets();
+            } catch (error) {
+                console.error('Error rejecting adaptive worksheet:', error);
+                alert('Error: ' + (error.message || 'Failed to reject'));
+            }
         }
 
         // Call on page load

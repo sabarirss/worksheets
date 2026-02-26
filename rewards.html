@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Shop - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="rewards.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Firebase Auth & Profile -->
+    <script src="firebase-auth.js"></script>
+    <script src="firebase-storage.js"></script>
+    <script src="age-filter.js"></script>
+    <script src="child-session-manager.js"></script>
+    <script src="profile-selector.js"></script>
+    <script src="avatar-renderer.js"></script>
+
+    <style>
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            font-size: 1.1em;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="user-header">
+            <div class="user-info">
+                <div id="profile-selector-container"></div>
+            </div>
+            <div class="user-actions">
+                <button class="header-btn" onclick="window.location.href='index'">Home</button>
+            </div>
+        </div>
+
+        <a href="index" class="rewards-back-btn">&larr; Back to Home</a>
+
+        <div class="rewards-container">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; justify-content: center;">
+                <div id="app-branding"></div>
+                <h2 style="text-align: center; margin-bottom: 20px; font-size: 1.8em;">Reward Shop</h2>
+            </div>
+
+            <!-- Star Balance -->
+            <div class="star-balance-bar" id="star-balance-display">
+                <div>
+                    <div class="balance-label">Your Stars</div>
+                    <div class="balance-amount"><span class="balance-icon">⭐</span>0</div>
+                </div>
+            </div>
+
+            <!-- Avatar Preview -->
+            <div class="avatar-preview-section">
+                <div id="avatar-preview-container"></div>
+                <h3>Your Avatar</h3>
+                <p class="preview-subtitle">Customize your look!</p>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="shop-tabs" id="shop-tabs"></div>
+
+            <!-- Items Grid -->
+            <div class="shop-items-grid" id="shop-items-grid"></div>
+        </div>
+
+        <footer>
+            <p>GleeGrow &copy; 2025</p>
+        </footer>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item active"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
+
+    <script src="branding.js"></script>
+    <script src="rewards.js"></script>
+    <script>
+        // Auth check
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                window.location.href = 'login';
+                return;
+            }
+            // Wait for profile selector to load child, then init shop
+            const checkInterval = setInterval(function() {
+                const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+                if (child) {
+                    clearInterval(checkInterval);
+                    initRewardShop();
+                }
+            }, 300);
+            setTimeout(function() { clearInterval(checkInterval); }, 10000);
+        });
+    </script>
+</body>
+</html>

@@ -702,7 +702,7 @@ async function submitAssessment() {
             feedback.textContent = '⚠️ Empty';
             feedback.style.color = '#999';
         } else if (fb.correct) {
-            feedback.textContent = '✓ Correct!';
+            feedback.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
             feedback.style.color = '#4caf50';
             if (answerElement) {
                 if (usePencil) {
@@ -712,8 +712,9 @@ async function submitAssessment() {
                     answerElement.style.borderWidth = '2px';
                 }
             }
+            if (typeof playSound === 'function') playSound('correct');
         } else {
-            feedback.textContent = `✗ Wrong (answer: ${fb.expected})`;
+            feedback.textContent = '✗ ' + (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!') + ` (Answer: ${fb.expected})`;
             feedback.style.color = '#f44336';
             if (answerElement) {
                 if (usePencil) {
@@ -723,6 +724,7 @@ async function submitAssessment() {
                     answerElement.style.borderWidth = '2px';
                 }
             }
+            if (typeof playSound === 'function') playSound('incorrect');
         }
 
         feedback.style.display = 'block';

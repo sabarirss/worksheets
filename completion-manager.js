@@ -104,6 +104,26 @@ async function savePageCompletion(module, identifier, data) {
 
         await firebase.firestore().collection('completions').doc(completionId).set(completionData, { merge: true });
 
+        // Award stars for completed pages (only on first completion)
+        if (data.completed && child.id) {
+            try {
+                const score = data.score || 0;
+                let starsEarned = 0;
+                if (score >= 95) starsEarned = 3;
+                else if (score >= 85) starsEarned = 2;
+                else if (data.completed) starsEarned = 1;
+
+                if (starsEarned > 0) {
+                    await firebase.firestore().collection('children').doc(child.id).update({
+                        'avatar.totalStarsEarned': firebase.firestore.FieldValue.increment(starsEarned)
+                    });
+                    console.log(`Awarded ${starsEarned} stars to child ${child.id}`);
+                }
+            } catch (starError) {
+                console.warn('Could not award stars:', starError.message);
+            }
+        }
+
         console.log(`Saved completion: ${completionId}`, completionData);
         return true;
 

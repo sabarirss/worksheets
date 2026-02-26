@@ -1,0 +1,86 @@
+/* ============================================
+   ANSWER FEEDBACK ANIMATIONS
+   ============================================ */
+
+/* Correct answer flash */
+@keyframes correctFlash {
+    0% { background-color: transparent; }
+    30% { background-color: rgba(76, 175, 80, 0.15); }
+    100% { background-color: transparent; }
+}
+
+/* Checkmark spring-in */
+@keyframes checkmarkIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Gentle shake for wrong answer */
+@keyframes gentleShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(2px); }
+}
+
+/* Correct answer styling */
+.answer-correct {
+    animation: correctFlash 0.6s ease-out;
+}
+
+.answer-correct .answer-feedback {
+    animation: checkmarkIn 0.4s var(--spring-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+    color: #4caf50;
+}
+
+/* Incorrect answer styling */
+.answer-incorrect {
+    animation: gentleShake 0.5s ease-out;
+}
+
+.answer-incorrect .answer-feedback {
+    color: #f44336;
+}
+
+/* Feedback text styling */
+.feedback-correct {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.feedback-incorrect {
+    color: #e65100;
+    font-weight: bold;
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+.skeleton-problem {
+    height: 44px;
+    margin: 10px 0;
+}
+
+.skeleton-text {
+    height: 20px;
+    margin: 8px 0;
+    width: 80%;
+}
+
+.skeleton-text.short {
+    width: 40%;
+}

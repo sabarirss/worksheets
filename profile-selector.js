@@ -270,6 +270,14 @@ function selectChild(childId, childData) {
         startActivityTracking();
     }
 
+    // Apply age-adaptive theme
+    const childAge = childData.age || 0;
+    if (childAge > 0 && childAge <= 7) {
+        document.body.classList.add('theme-young');
+    } else {
+        document.body.classList.remove('theme-young');
+    }
+
     // Update module visibility based on this child's permissions
     if (typeof updateModuleVisibility === 'function') {
         // Get current user from Firebase

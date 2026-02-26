@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - Practice Worksheets</title>
+    <title>Settings - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -260,12 +267,16 @@
     <script src="firebase-auth.js"></script>
     <script src="age-filter.js"></script>
     <script src="profile-selector.js"></script>
+    <script src="branding.js"></script>
 </head>
 <body>
     <div class="settings-container">
         <div class="settings-header">
             <button class="close-btn" onclick="window.location.href='index'" title="Close Settings">✕</button>
-            <h1>⚙️ Settings</h1>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; justify-content: center;">
+                <div id="app-branding"></div>
+                <h1>⚙️ Settings</h1>
+            </div>
             <p>Manage your profile and preferences</p>
         </div>
 
@@ -315,6 +326,22 @@
                     </label>
                 </div>
                 <div class="info-text">Select how you want to input answers in worksheets</div>
+            </div>
+
+            <!-- Sound Effects Toggle -->
+            <div class="form-group" id="sound-toggle-section">
+                <label>🔊 Sound Effects</label>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-on-label">
+                        <input type="radio" name="soundMode" value="on" id="sound-mode-on" onchange="updateSoundMode(true)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;">🔊 On</span>
+                    </label>
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-off-label">
+                        <input type="radio" name="soundMode" value="off" id="sound-mode-off" onchange="updateSoundMode(false)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;">🔇 Off</span>
+                    </label>
+                </div>
+                <div class="info-text">Toggle sound effects for answer feedback and celebrations</div>
             </div>
 
             <!-- Admin Demo Preview Toggle -->
@@ -636,6 +663,44 @@
                 stylusInput.checked = true;
             }
         }
+
+        // Sound mode toggle
+        function updateSoundMode(enabled) {
+            if (typeof SoundManager !== 'undefined') {
+                SoundManager.setEnabled(enabled);
+            } else {
+                localStorage.setItem('gleegrow_sound_enabled', String(enabled));
+            }
+            updateSoundModeUI(enabled);
+        }
+
+        function updateSoundModeUI(enabled) {
+            const onLabel = document.getElementById('sound-on-label');
+            const offLabel = document.getElementById('sound-off-label');
+            const onInput = document.getElementById('sound-mode-on');
+            const offInput = document.getElementById('sound-mode-off');
+            if (!onLabel || !offLabel) return;
+
+            if (enabled) {
+                onLabel.style.borderColor = '#667eea';
+                onLabel.style.background = '#f0f4ff';
+                offLabel.style.borderColor = '#e0e0e0';
+                offLabel.style.background = 'white';
+                onInput.checked = true;
+            } else {
+                onLabel.style.borderColor = '#e0e0e0';
+                onLabel.style.background = 'white';
+                offLabel.style.borderColor = '#667eea';
+                offLabel.style.background = '#f0f4ff';
+                offInput.checked = true;
+            }
+        }
+
+        // Initialize sound toggle UI
+        document.addEventListener('DOMContentLoaded', function() {
+            const soundEnabled = localStorage.getItem('gleegrow_sound_enabled');
+            updateSoundModeUI(soundEnabled === null ? true : soundEnabled === 'true');
+        });
 
         // Wait for Firebase auth
         firebase.auth().onAuthStateChanged(async function(user) {

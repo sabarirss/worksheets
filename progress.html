@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress Dashboard - Full Version</title>
+    <title>Progress Dashboard - GleeGrow</title>
+    <link rel="icon" type="image/png" href="gleegrow.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="feedback.css">
+    <script src="feedback.js"></script>
+    <script src="sound-manager.js"></script>
     <link rel="stylesheet" href="styles.css">
 
     <!-- Firebase SDK -->
@@ -362,7 +369,10 @@
         <div id="content" style="display: none;">
             <div class="header">
                 <div>
-                    <h1>📊 Progress Dashboard</h1>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                        <div id="app-branding"></div>
+                        <h1>📊 Progress Dashboard</h1>
+                    </div>
                     <p class="header-subtitle">Track your child's learning journey</p>
                 </div>
                 <button class="back-btn" onclick="window.location.href='children-profiles'">
@@ -429,6 +439,15 @@
         </div>
     </div>
 
+    <script src="branding.js"></script>
     <script src="progress-dashboard.js"></script>
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <div class="bottom-nav-inner">
+            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+        </div>
+    </nav>
 </body>
 </html>

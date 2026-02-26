@@ -96,47 +96,12 @@ async function recognizeDigitML5(canvas) {
 
 /**
  * Enhance canvas for kids' handwriting
- * Applies kid-friendly preprocessing for better recognition
+ * Returns original canvas unchanged — EMNIST preprocessing (preprocessCanvasForEmnist)
+ * handles proper bounding box centering and normalization.
+ * Previous version applied blur + intensity boost which destroyed features.
  */
 function enhanceCanvasForKids(originalCanvas) {
-    // Create a temporary canvas for enhancement
-    const enhanced = document.createElement('canvas');
-    enhanced.width = originalCanvas.width;
-    enhanced.height = originalCanvas.height;
-    const ctx = enhanced.getContext('2d');
-
-    // Copy original content
-    ctx.drawImage(originalCanvas, 0, 0);
-
-    // Get image data
-    const imageData = ctx.getImageData(0, 0, enhanced.width, enhanced.height);
-    const data = imageData.data;
-
-    // Kid-friendly enhancements:
-    // 1. Increase contrast (helps with light strokes)
-    // 2. Smooth edges (helps with shaky hands)
-    // 3. Thicken strokes slightly (helps with thin writing)
-
-    for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
-
-        if (alpha > 0) {
-            // Increase stroke intensity
-            const boost = 1.3;
-            data[i] = Math.min(255, data[i] * boost);     // R
-            data[i + 1] = Math.min(255, data[i + 1] * boost); // G
-            data[i + 2] = Math.min(255, data[i + 2] * boost); // B
-            data[i + 3] = Math.min(255, alpha * 1.2);     // A - thicken slightly
-        }
-    }
-
-    // Apply smoothing (simple box blur for kids' shaky strokes)
-    smoothImageData(imageData);
-
-    // Put enhanced data back
-    ctx.putImageData(imageData, 0, 0);
-
-    return enhanced;
+    return originalCanvas;
 }
 
 /**

@@ -964,8 +964,16 @@ async function getAccessiblePages(childId, module = 'math') {
 
         // Extract pages from assignment
         let pages = [];
+        let isAdaptive = false;
+
         if (module === 'math' && assignment.math && assignment.math.pages) {
-            pages = assignment.math.pages.map(p => p.absolutePage).sort((a, b) => a - b);
+            isAdaptive = assignment.math.adaptive === true;
+            if (isAdaptive) {
+                // Adaptive worksheets: pages have pageNumber and embedded problems
+                pages = assignment.math.pages.map(p => p.pageNumber).sort((a, b) => a - b);
+            } else {
+                pages = assignment.math.pages.map(p => p.absolutePage).sort((a, b) => a - b);
+            }
         } else if (module === 'english' && assignment.english && assignment.english.pages) {
             pages = assignment.english.pages.map(p => p.pageIndex).sort((a, b) => a - b);
         }
@@ -982,6 +990,7 @@ async function getAccessiblePages(childId, module = 'math') {
             mode: 'full',
             pending: false,
             assignment: assignment,
+            adaptive: isAdaptive,
         };
     } catch (error) {
         console.error('Error getting accessible pages:', error);

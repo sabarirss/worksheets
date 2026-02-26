@@ -41,13 +41,22 @@ run_test "Math Engine" "$ROOT_DIR/functions/test-math-engine.js"
 # Test 2: Client-Server Determinism
 run_test "Client-Server Determinism" "$ROOT_DIR/functions/test-client-server-match.js"
 
-# Test 3: Level Mapper
+# Test 3: Error Tracker (Adaptive Learning)
+run_test "Error Tracker" "$ROOT_DIR/functions/test-error-tracker.js"
+
+# Test 4: Adaptive Engine
+run_test "Adaptive Engine" "$ROOT_DIR/functions/test-adaptive-engine.js"
+
+# Test 5: Training Simulator (Synthetic Students + Validation Loop)
+run_test "Training Simulator" "$ROOT_DIR/functions/test-training-simulator.js"
+
+# Test 6: Level Mapper
 run_test "Level Mapper" "$SCRIPT_DIR/test-level-mapper.js"
 
-# Test 4: All Features
+# Test 7: All Features
 run_test "All Features" "$SCRIPT_DIR/test-all-features.js"
 
-# Test 5: Navigation & Roles
+# Test 8: Navigation & Roles
 run_test "Navigation & Roles" "$SCRIPT_DIR/test-navigation-roles.js"
 
 echo ""

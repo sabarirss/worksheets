@@ -140,7 +140,7 @@ function createFallbackModel() {
 function preprocessCanvas(canvas) {
     return tf.tidy(() => {
         // Get image data from canvas
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         // Convert to tensor
@@ -199,7 +199,7 @@ function preprocessCanvas(canvas) {
  * @returns {boolean} - True if canvas has content, false if empty
  */
 function isCanvasEmpty(canvas) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
 
@@ -239,13 +239,46 @@ async function recognizeDigit(canvas) {
             };
         }
 
-        // Ensure model is loaded
+        // Prefer EMNIST model (62 classes, locally trained, better accuracy)
+        // Falls back to old remote MNIST model only if EMNIST is unavailable
+        if (!emnistModelLoaded) {
+            await loadEmnistModel(); // Try to load EMNIST first
+        }
+
+        if (emnistModel) {
+            // Use EMNIST with digit-only filter for best accuracy
+            const emnistResult = await _recognizeWithEmnist(canvas, null, 'digit');
+
+            if (!emnistResult.isEmpty && !emnistResult.error) {
+                const digitValue = parseInt(emnistResult.character);
+                console.log(`📊 EMNIST digit recognition: '${emnistResult.character}' (${(emnistResult.confidence * 100).toFixed(1)}%)`);
+
+                return {
+                    digit: isNaN(digitValue) ? null : digitValue,
+                    confidence: emnistResult.confidence,
+                    alternativeDigit: emnistResult.topPredictions[1] ? parseInt(emnistResult.topPredictions[1].character) : null,
+                    alternativeConfidence: emnistResult.topPredictions[1] ? emnistResult.topPredictions[1].confidence : 0,
+                    isAmbiguous: emnistResult.isAmbiguous,
+                    isLowConfidence: emnistResult.isLowConfidence,
+                    allPredictions: [],
+                    topPredictions: emnistResult.topPredictions.slice(0, 3).map(p => ({
+                        digit: parseInt(p.character),
+                        confidence: p.confidence
+                    })),
+                    isEmpty: false
+                };
+            }
+        }
+
+        // Fallback: old remote MNIST model (10 classes)
+        console.log('Using fallback MNIST model for digit recognition');
+
         if (!modelLoaded) {
             await loadHandwritingModel();
         }
 
         if (!handwritingModel) {
-            throw new Error('Model not available');
+            throw new Error('No recognition model available');
         }
 
         // Preprocess canvas
@@ -266,7 +299,7 @@ async function recognizeDigit(canvas) {
         tensor.dispose();
 
         // Log top 3 predictions for debugging
-        console.log('📊 Recognition results:');
+        console.log('📊 MNIST fallback results:');
         console.log(`  1st: ${topPrediction.digit} (${(topPrediction.confidence * 100).toFixed(1)}%)`);
         console.log(`  2nd: ${secondPrediction.digit} (${(secondPrediction.confidence * 100).toFixed(1)}%)`);
         console.log(`  3rd: ${sortedPredictions[2].digit} (${(sortedPredictions[2].confidence * 100).toFixed(1)}%)`);
@@ -338,6 +371,183 @@ async function recognizeMultipleDigits(canvases) {
 }
 
 /**
+ * Find digit segments in a canvas by detecting vertical gaps between strokes.
+ * Returns array of {left, right, top, bottom} bounding boxes, one per digit.
+ *
+ * @param {HTMLCanvasElement} canvas - Canvas with handwritten number
+ * @returns {Array<Object>} Array of segment bounding boxes
+ */
+function findDigitSegments(canvas) {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const w = canvas.width;
+    const h = canvas.height;
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const pixels = imageData.data;
+
+    // Build column histogram and find vertical bounds
+    const colCounts = new Array(w).fill(0);
+    let top = h, bottom = 0;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const idx = (y * w + x) * 4;
+            const alpha = pixels[idx + 3];
+            const gray = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
+            if (alpha > 20 && gray < 220) {
+                colCounts[x]++;
+                if (y < top) top = y;
+                if (y > bottom) bottom = y;
+            }
+        }
+    }
+
+    // Find leftmost and rightmost non-empty columns
+    let left = -1, right = -1;
+    for (let x = 0; x < w; x++) {
+        if (colCounts[x] > 0) {
+            if (left === -1) left = x;
+            right = x;
+        }
+    }
+
+    if (left === -1) return [];
+
+    const contentWidth = right - left + 1;
+    const contentHeight = bottom - top + 1;
+
+    // If width < 1.3x height, likely single digit
+    if (contentWidth < contentHeight * 1.3) {
+        return [{ left, right, top, bottom }];
+    }
+
+    // Find vertical gaps (runs of empty columns)
+    const segments = [];
+    let segStart = left;
+    let inGap = false;
+    let gapStart = -1;
+    const minGapWidth = Math.max(2, Math.floor(contentWidth * 0.05));
+
+    for (let x = left; x <= right; x++) {
+        if (colCounts[x] === 0) {
+            if (!inGap) { inGap = true; gapStart = x; }
+        } else {
+            if (inGap) {
+                if (x - gapStart >= minGapWidth) {
+                    segments.push({ left: segStart, right: gapStart - 1, top, bottom });
+                    segStart = x;
+                }
+                inGap = false;
+            }
+        }
+    }
+    segments.push({ left: segStart, right, top, bottom });
+
+    // No gaps found but wide aspect ratio suggests multi-digit: split evenly
+    if (segments.length === 1 && contentWidth > contentHeight * 1.8) {
+        const numDigits = Math.min(3, Math.round(contentWidth / contentHeight));
+        const splitSegments = [];
+        const segW = contentWidth / numDigits;
+        for (let i = 0; i < numDigits; i++) {
+            splitSegments.push({
+                left: Math.round(left + i * segW),
+                right: Math.round(left + (i + 1) * segW - 1),
+                top, bottom
+            });
+        }
+        return splitSegments;
+    }
+
+    return segments;
+}
+
+/**
+ * Extract a segment from a canvas into a new square canvas for recognition.
+ *
+ * @param {HTMLCanvasElement} canvas - Source canvas
+ * @param {Object} seg - Segment bounds {left, right, top, bottom}
+ * @returns {HTMLCanvasElement} - New canvas with just the segment, white background
+ */
+function extractSegment(canvas, seg) {
+    const segW = seg.right - seg.left + 1;
+    const segH = seg.bottom - seg.top + 1;
+    const size = Math.max(segW, segH);
+
+    const segCanvas = document.createElement('canvas');
+    segCanvas.width = size;
+    segCanvas.height = size;
+    const segCtx = segCanvas.getContext('2d', { willReadFrequently: true });
+
+    segCtx.fillStyle = '#FFFFFF';
+    segCtx.fillRect(0, 0, size, size);
+
+    const offsetX = Math.round((size - segW) / 2);
+    const offsetY = Math.round((size - segH) / 2);
+    segCtx.drawImage(canvas, seg.left, seg.top, segW, segH, offsetX, offsetY, segW, segH);
+
+    return segCanvas;
+}
+
+/**
+ * Recognize a handwritten number (single or multi-digit) from a canvas.
+ * Segments the canvas by finding vertical gaps between digits,
+ * then recognizes each digit separately with the EMNIST model.
+ *
+ * @param {HTMLCanvasElement} canvas - Canvas with handwritten number
+ * @returns {Promise<Object>} - { number, digit, digits, confidence, isEmpty }
+ */
+async function recognizeNumber(canvas) {
+    if (isCanvasEmpty(canvas)) {
+        return { number: null, digit: null, digits: [], confidence: 0, isEmpty: true };
+    }
+
+    // Ensure EMNIST model is loaded
+    if (!emnistModelLoaded) await loadEmnistModel();
+
+    const segments = findDigitSegments(canvas);
+
+    if (segments.length === 0) {
+        return { number: null, digit: null, digits: [], confidence: 0, isEmpty: true };
+    }
+
+    // Single digit
+    if (segments.length === 1) {
+        const result = await recognizeDigit(canvas);
+        return {
+            number: result.digit,
+            digit: result.digit,
+            digits: result.digit !== null ? [result.digit] : [],
+            confidence: result.confidence,
+            isEmpty: result.isEmpty
+        };
+    }
+
+    // Multi-digit: recognize each segment
+    const digitResults = [];
+    for (const seg of segments) {
+        const segCanvas = extractSegment(canvas, seg);
+        const result = await recognizeDigit(segCanvas);
+        digitResults.push(result);
+    }
+
+    const digits = digitResults.map(r => r.digit);
+    const allRecognized = digits.every(d => d !== null);
+    const numberStr = digits.join('');
+    const number = allRecognized ? parseInt(numberStr) : null;
+    const avgConfidence = digitResults.reduce((s, r) => s + r.confidence, 0) / digitResults.length;
+
+    console.log(`📊 Multi-digit recognition: ${numberStr} (${(avgConfidence * 100).toFixed(1)}% avg confidence)`);
+
+    return {
+        number,
+        digit: number,
+        digits,
+        confidence: avgConfidence,
+        isEmpty: false,
+        individualResults: digitResults
+    };
+}
+
+/**
  * Show visual feedback on canvas based on recognition result
  *
  * @param {HTMLCanvasElement} canvas - The canvas element
@@ -389,6 +599,94 @@ function showCanvasFeedback(canvas, isCorrect, message = '') {
     }, 3000);
 }
 
+/**
+ * Preprocess canvas for EMNIST model - proper centering and normalization
+ * Matches EMNIST training pipeline: character cropped, centered in 28x28, [0,1] range
+ * No blur, no z-score normalization - just clean input matching training data
+ *
+ * @param {HTMLCanvasElement} canvas - Canvas with handwritten character
+ * @returns {tf.Tensor4D} - Preprocessed tensor [1, 28, 28, 1]
+ */
+function preprocessCanvasForEmnist(canvas) {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const w = canvas.width;
+    const h = canvas.height;
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const pixels = imageData.data;
+
+    // Find bounding box of drawn strokes
+    let top = h, bottom = 0, left = w, right = 0;
+    let hasContent = false;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const idx = (y * w + x) * 4;
+            const alpha = pixels[idx + 3];
+            const gray = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
+
+            // Detect stroke: visible and non-white
+            if (alpha > 20 && gray < 220) {
+                hasContent = true;
+                if (y < top) top = y;
+                if (y > bottom) bottom = y;
+                if (x < left) left = x;
+                if (x > right) right = x;
+            }
+        }
+    }
+
+    // If no content detected, return zeros
+    if (!hasContent) {
+        return tf.zeros([1, 28, 28, 1]);
+    }
+
+    // Crop dimensions
+    const charH = bottom - top + 1;
+    const charW = right - left + 1;
+    const maxDim = Math.max(charH, charW);
+
+    // Scale character to fit ~20px in 28x28 frame (~4px border, matching EMNIST format)
+    const targetSize = 20;
+    const scale = targetSize / maxDim;
+    const scaledW = Math.max(1, Math.round(charW * scale));
+    const scaledH = Math.max(1, Math.round(charH * scale));
+    const offsetX = Math.round((28 - scaledW) / 2);
+    const offsetY = Math.round((28 - scaledH) / 2);
+
+    // Create 28x28 temp canvas with white background
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 28;
+    tempCanvas.height = 28;
+    const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+
+    // White fill (becomes black after color inversion = EMNIST background)
+    tempCtx.fillStyle = '#FFFFFF';
+    tempCtx.fillRect(0, 0, 28, 28);
+
+    // High-quality downscaling
+    tempCtx.imageSmoothingEnabled = true;
+    tempCtx.imageSmoothingQuality = 'high';
+
+    // Draw cropped character centered in 28x28
+    tempCtx.drawImage(
+        canvas,
+        left, top, charW, charH,
+        offsetX, offsetY, scaledW, scaledH
+    );
+
+    // Convert to tensor: grayscale, invert, normalize to [0,1]
+    return tf.tidy(() => {
+        const imgData = tempCtx.getImageData(0, 0, 28, 28);
+        let tensor = tf.browser.fromPixels(imgData, 1); // [28, 28, 1] grayscale
+
+        // Normalize to [0,1] and invert (canvas: black-on-white → model: white-on-black)
+        tensor = tf.scalar(1.0).sub(tensor.div(255.0));
+
+        // Add batch dimension: [1, 28, 28, 1]
+        return tensor.expandDims(0);
+    });
+}
+
 // Initialize model loading when script loads
 console.log('Handwriting recognition module loaded. Call loadHandwritingModel() to initialize.');
 
@@ -423,8 +721,40 @@ function getCharType(char) {
 }
 
 /**
+ * Fix Keras 3 model topology for TF.js 4.x compatibility.
+ * Keras 3 uses different field names/structures than what older TF.js expects.
+ */
+function fixKeras3Topology(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(fixKeras3Topology);
+
+    const result = {};
+    for (const key in obj) {
+        const value = obj[key];
+
+        // batch_shape -> batch_input_shape (InputLayer)
+        if (key === 'batch_shape') {
+            result['batch_input_shape'] = value;
+            continue;
+        }
+
+        // DTypePolicy object -> string "float32"
+        if (key === 'dtype' && typeof value === 'object' && value !== null && value.class_name === 'DTypePolicy') {
+            result[key] = value.config.name;
+            continue;
+        }
+
+        // Remove Keras 3-only fields
+        if (key === 'registered_name' || key === 'module') continue;
+
+        result[key] = fixKeras3Topology(value);
+    }
+    return result;
+}
+
+/**
  * Load the EMNIST model for character recognition (digits + letters)
- * Loads from local models/emnist/model.json - generated by train-emnist-model.py
+ * Uses manual fetch + tf.io.fromMemory to bypass Keras 3 format incompatibilities
  * @returns {Promise<Object|null>} The loaded model or null if unavailable
  */
 async function loadEmnistModel() {
@@ -433,7 +763,6 @@ async function loadEmnistModel() {
     }
 
     if (emnistModelLoading) {
-        // Wait for loading to complete
         while (emnistModelLoading) {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -446,8 +775,33 @@ async function loadEmnistModel() {
 
         await tf.ready();
 
-        // Load from local path (model must be generated by train-emnist-model.py)
-        emnistModel = await tf.loadLayersModel('models/emnist/model.json');
+        // Fetch model.json and fix Keras 3 format incompatibilities
+        const modelResponse = await fetch('models/emnist/model.json');
+        if (!modelResponse.ok) throw new Error('model.json not found');
+        const modelJSON = await modelResponse.json();
+
+        const fixedTopology = fixKeras3Topology(modelJSON.modelTopology);
+
+        // Fetch weight binary
+        const weightPath = 'models/emnist/' + modelJSON.weightsManifest[0].paths[0];
+        const weightResponse = await fetch(weightPath);
+        if (!weightResponse.ok) throw new Error('Weight file not found');
+        const weightData = await weightResponse.arrayBuffer();
+
+        // Strip Keras 3 model-name prefix from weight names
+        // Keras 3: "sequential/conv2d/kernel" → TF.js expects: "conv2d/kernel"
+        const weightSpecs = modelJSON.weightsManifest[0].weights.map(w => ({
+            ...w,
+            name: w.name.replace(/^sequential\//, '')
+        }));
+
+        // Load model with fixed topology via tf.io.fromMemory (single-arg format)
+        emnistModel = await tf.loadLayersModel(tf.io.fromMemory({
+            modelTopology: fixedTopology,
+            weightSpecs: weightSpecs,
+            weightData: weightData
+        }));
+
         emnistModelLoaded = true;
         emnistModelLoading = false;
 
@@ -471,8 +825,8 @@ async function loadEmnistModel() {
  * @returns {Promise<Object>} Prediction result
  */
 async function _recognizeWithEmnist(canvas, expectedAnswer, expectedType) {
-    // Reuse existing preprocessCanvas (same 28x28 pipeline works for EMNIST)
-    const tensor = preprocessCanvas(canvas);
+    // Use EMNIST-specific preprocessing: bounding box crop, center, clean [0,1] normalization
+    const tensor = preprocessCanvasForEmnist(canvas);
 
     // Run prediction (62-class softmax)
     const rawPredictions = await emnistModel.predict(tensor).data();

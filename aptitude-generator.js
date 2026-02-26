@@ -989,7 +989,8 @@ function checkAnswers() {
         // For button-based problems (matching, patterns, sequences, oddone, comparison)
         if (input.type === 'hidden' && hasAnswer) {
             if (isCorrect) {
-                feedback.innerHTML = `<span style="color: #00aa00;">✓ Correct!</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                feedback.innerHTML = `<span style="color: #00aa00;">✓ ${typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!'}</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                if (typeof playSound === 'function') playSound('correct');
                 correct++;
 
                 // Highlight the correct button in green
@@ -1002,7 +1003,8 @@ function checkAnswers() {
                     }
                 });
             } else {
-                feedback.innerHTML = `<span style="color: #cc0000;">✗ Wrong</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+                feedback.innerHTML = `<span style="color: #cc0000;">✗ ${typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!'}</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+                if (typeof playSound === 'function') playSound('incorrect');
 
                 // Highlight user's wrong answer in red, correct answer in green
                 const buttons = input.closest('.aptitude-problem').querySelectorAll('.option-btn, .oddone-btn, .compare-btn');
@@ -1022,18 +1024,20 @@ function checkAnswers() {
         } else {
             // Original logic for checkboxes and empty answers
             if (isCorrect) {
-                feedback.textContent = '✓ Great!';
+                feedback.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Great!');
                 feedback.style.color = '#00aa00';
                 feedback.style.fontSize = '1.5em';
                 if (input.style) input.style.borderColor = '#00aa00';
                 correct++;
+                if (typeof playSound === 'function') playSound('correct');
             } else if (!hasAnswer) {
                 feedback.textContent = '';
             } else {
-                feedback.textContent = '✗ Try again';
+                feedback.textContent = '✗ ' + (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!');
                 feedback.style.color = '#cc0000';
                 feedback.style.fontSize = '1.5em';
                 if (input.style) input.style.borderColor = '#cc0000';
+                if (typeof playSound === 'function') playSound('incorrect');
             }
         }
     });
@@ -1136,9 +1140,11 @@ function toggleAnswers(event) {
 
                     if (hasAnswer) {
                         if (isCorrect) {
-                            feedback.innerHTML = `<span style="color: #00aa00;">✓ Correct!</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                            feedback.innerHTML = `<span style="color: #00aa00;">✓ ${typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!'}</span><br><span style="color: #00aa00; font-size: 0.9em;">${problem.reason || ''}</span>`;
+                            if (typeof playSound === 'function') playSound('correct');
                         } else {
-                            feedback.innerHTML = `<span style="color: #cc0000;">✗ Wrong</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+                            feedback.innerHTML = `<span style="color: #cc0000;">✗ ${typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!'}</span><br><span style="color: #00aa00; font-size: 0.9em;">Correct: ${problem.answer}</span><br><span style="color: #666; font-size: 0.85em;">${problem.reason || ''}</span>`;
+                            if (typeof playSound === 'function') playSound('incorrect');
                         }
 
                         // Highlight buttons
@@ -1476,13 +1482,15 @@ async function submitWorksheet() {
                 feedbackElement.style.color = '#999';
             } else if (isCorrect) {
                 correctCount++;
-                feedbackElement.textContent = '✓ Correct!';
+                feedbackElement.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
                 feedbackElement.style.color = '#4caf50';
                 feedbackElement.style.fontWeight = 'bold';
+                if (typeof playSound === 'function') playSound('correct');
             } else {
-                feedbackElement.textContent = `✗ Wrong (${correctAnswer})`;
+                feedbackElement.textContent = '✗ ' + (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Try again!') + ` (${correctAnswer})`;
                 feedbackElement.style.color = '#f44336';
                 feedbackElement.style.fontWeight = 'bold';
+                if (typeof playSound === 'function') playSound('incorrect');
             }
 
             feedbackElement.style.display = 'inline-block';
@@ -1557,6 +1565,8 @@ async function submitWorksheet() {
                 <span style="display: inline-block; font-size: 2em;">✓</span>
                 <p style="font-size: 1.1em; margin-top: 10px;">🌟 Excellent! You can now move to the next level.</p>
             `;
+            if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            if (typeof playSound === 'function') playSound('complete');
         } else {
             resultsDiv.innerHTML = `
                 <h3>✓ Submitted!</h3>
