@@ -2176,6 +2176,45 @@ test('Math: submitWorksheet sends raw values (no client-side answer type check)'
 });
 
 // ============================================================================
+// SUBMIT WORKSHEET VALIDATION (BUG-035: Missing childId for admin users)
+// ============================================================================
+
+console.log('\n--- Submit Worksheet Client Validation ---');
+
+test('submitWorksheet validates child profile before calling CF', () => {
+    const js = readFile('worksheet-generator.js');
+    // Must check child exists before sending to server
+    assert.ok(js.includes("!child || !child.id"),
+        'submitWorksheet must check for missing child/child.id');
+    assert.ok(js.includes('No child profile selected'),
+        'Must show user-friendly message when no child selected');
+});
+
+test('submitWorksheet validates operation is set', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes("if (!operation)"),
+        'submitWorksheet must validate operation is not falsy');
+});
+
+test('submitWorksheet sends childId, operation, absolutePage, answers to CF', () => {
+    const js = readFile('worksheet-generator.js');
+    // Standard path
+    assert.ok(js.includes('childId: child'), 'Must send childId');
+    assert.ok(js.includes('operation: operation'), 'Must send operation');
+    assert.ok(js.includes('absolutePage: currentAbsolutePage'), 'Must send absolutePage');
+    assert.ok(js.includes('answers: answers'), 'Must send answers array');
+});
+
+test('validators.js reports which specific fields are missing', () => {
+    const js = readFile('functions/validators.js');
+    assert.ok(js.includes("missing.push('childId')"), 'Should check childId individually');
+    assert.ok(js.includes("missing.push('operation')"), 'Should check operation individually');
+    assert.ok(js.includes("missing.push('absolutePage')"), 'Should check absolutePage individually');
+    assert.ok(js.includes("missing.push('answers')"), 'Should check answers individually');
+    assert.ok(js.includes('missing.join'), 'Should join missing fields in error message');
+});
+
+// ============================================================================
 // FEEDBACK MODULE FILTERING TESTS
 // ============================================================================
 

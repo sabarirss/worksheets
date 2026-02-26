@@ -53,8 +53,13 @@ const validateMathSubmission = onCall(
         const { childId, operation, absolutePage, answers, elapsedTime } = request.data;
 
         // Validate inputs
-        if (!childId || !operation || !absolutePage || !Array.isArray(answers)) {
-            throw new HttpsError('invalid-argument', 'Missing required fields: childId, operation, absolutePage, answers');
+        const missing = [];
+        if (!childId) missing.push('childId');
+        if (!operation) missing.push('operation');
+        if (!absolutePage) missing.push('absolutePage');
+        if (!Array.isArray(answers)) missing.push('answers');
+        if (missing.length > 0) {
+            throw new HttpsError('invalid-argument', `Missing required fields: ${missing.join(', ')}`);
         }
 
         const validOperations = ['addition', 'subtraction', 'multiplication', 'division'];

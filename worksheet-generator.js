@@ -2269,6 +2269,21 @@ async function submitWorksheet() {
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
     const child = getSelectedChild();
 
+    // Validate required fields before calling Cloud Function
+    if (!child || !child.id) {
+        alert('No child profile selected. Please select a child profile first.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Submit for Evaluation';
+        return;
+    }
+
+    if (!operation) {
+        console.error('Submit failed: no operation set on currentWorksheet');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Submit for Evaluation';
+        return;
+    }
+
     let score, correctCount, isCompleted, completionResult, feedback;
 
     // Cloud Function validation (server-authoritative, no local fallback)
