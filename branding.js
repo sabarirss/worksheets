@@ -58,9 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const brandName = document.createElement('div');
         brandName.textContent = APP_BRANDING.name;
         brandName.style.fontSize = APP_BRANDING.fontSize;
-        brandName.style.color = APP_BRANDING.color;
         brandName.style.fontWeight = 'bold';
         brandName.style.lineHeight = '1.2';
+
+        // Detect dark parent (gradient header) — use white text, otherwise green
+        const parent = brandingContainer.closest('.user-header');
+        brandName.style.color = parent ? '#ffffff' : APP_BRANDING.color;
 
         wrapper.appendChild(logo);
         wrapper.appendChild(brandName);

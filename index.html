@@ -992,13 +992,12 @@
 
     <div class="container">
         <div class="user-header" id="user-header">
-            <!-- Left side: Child selector -->
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div id="profile-selector-container"></div>
-            </div>
+            <!-- Left side: Branding -->
+            <div id="app-branding"></div>
 
-            <!-- Right side: Version badge, Notifications, Admin, Settings -->
+            <!-- Right side: Child selector, Version badge, Notifications, Admin, Settings -->
             <div class="user-actions" style="display: flex; align-items: center; gap: 10px;">
+                <div id="profile-selector-container"></div>
                 <div id="version-badge" style="display: none; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 0.9em; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="window.location.href='settings'" title="Click to upgrade">
                 </div>
                 <div id="notification-bell-container"></div>
@@ -1089,10 +1088,6 @@
                 </div>
             </div>
         </div>
-
-        <header style="display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; border-bottom: none; box-shadow: none; margin-bottom: 10px; padding-bottom: 10px;">
-            <div id="app-branding"></div>
-        </header>
 
         <!-- Weekly Assignment Progress -->
         <div id="weekly-progress-container" style="display: none;"></div>
