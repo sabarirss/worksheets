@@ -358,6 +358,24 @@ function selectChild(childId, childData) {
             updateModuleVisibility(childData, null);
         }
     }
+
+    // BUG-060: Re-initialize notifications for the newly selected child
+    if (typeof initializeNotifications === 'function') {
+        var fbUser = typeof firebase !== 'undefined' && firebase.auth().currentUser;
+        if (fbUser) {
+            initializeNotifications(childId, fbUser.uid, window.currentUserRole);
+            if (typeof renderNotificationBell === 'function') {
+                var bellContainer = document.getElementById('notification-bell-container');
+                if (bellContainer) renderNotificationBell(bellContainer);
+            }
+        }
+    }
+
+    // BUG-061: Re-render weekly progress for the newly selected child
+    if (typeof renderWeeklyProgress === 'function') {
+        var wpContainer = document.getElementById('weekly-progress-container');
+        if (wpContainer) renderWeeklyProgress(wpContainer);
+    }
 }
 
 // Get the currently selected child

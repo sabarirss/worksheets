@@ -362,3 +362,11 @@ var GleeIcons = (function() {
 
     return api;
 })();
+
+// Auto-init: inject SVGs into all data-icon elements once DOM is ready.
+// icons.js is loaded with defer, so DOMContentLoaded fires after it runs.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { GleeIcons.init(); });
+} else {
+    GleeIcons.init();
+}

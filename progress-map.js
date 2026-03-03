@@ -72,65 +72,248 @@ function getPlantSVG(stage, size) {
     size = size || 44;
     const svgs = {
         'seed': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <ellipse cx="25" cy="30" rx="12" ry="10" fill="#8B6914"/>
-            <text x="25" y="35" text-anchor="middle" font-size="14" fill="white" font-weight="bold">?</text>
-            <path d="M25 20 Q25 12 20 8" stroke="#4caf50" stroke-width="2" fill="none"/>
+            <defs>
+                <linearGradient id="seed-body" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#a1887f"/>
+                    <stop offset="50%" stop-color="#795548"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+                <linearGradient id="seed-soil" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#8d6e63"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+                <radialGradient id="seed-shine" cx="0.35" cy="0.3" r="0.5">
+                    <stop offset="0%" stop-color="white" stop-opacity="0.4"/>
+                    <stop offset="100%" stop-color="white" stop-opacity="0"/>
+                </radialGradient>
+            </defs>
+            <ellipse cx="25" cy="42" rx="14" ry="5" fill="url(#seed-soil)" opacity="0.6"/>
+            <ellipse cx="25" cy="30" rx="9" ry="11" fill="url(#seed-body)"/>
+            <ellipse cx="25" cy="30" rx="9" ry="11" fill="url(#seed-shine)"/>
+            <path d="M25 19 Q25 28 25 41" stroke="#4e342e" stroke-width="0.8" fill="none" opacity="0.4"/>
+            <path d="M25 38 Q27 42 26 46" stroke="#6d4c41" stroke-width="1.2" fill="none" opacity="0.5"/>
+            <path d="M25 20 Q23 14 20 10" stroke="#66bb6a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="19.5" cy="9.5" r="1.5" fill="#81c784" opacity="0.7"/>
         </svg>`,
         'sprout': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="23" y="25" width="4" height="18" rx="2" fill="#66bb6a"/>
-            <ellipse cx="19" cy="26" rx="7" ry="4" fill="#81c784" transform="rotate(-30 19 26)"/>
-            <ellipse cx="31" cy="26" rx="7" ry="4" fill="#81c784" transform="rotate(30 31 26)"/>
-            <ellipse cx="25" cy="44" rx="10" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="sprout-stem" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#43a047"/>
+                    <stop offset="50%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#43a047"/>
+                </linearGradient>
+                <linearGradient id="sprout-leaf" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#81c784"/>
+                    <stop offset="100%" stop-color="#4caf50"/>
+                </linearGradient>
+                <linearGradient id="sprout-soil" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#8d6e63"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="25" cy="43" rx="12" ry="4.5" fill="url(#sprout-soil)" opacity="0.5"/>
+            <path d="M25 39 Q25 30 25 24" stroke="url(#sprout-stem)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M25 27 Q18 22 14 24 Q17 20 25 24" fill="url(#sprout-leaf)"/>
+            <path d="M25 27 Q32 22 36 24 Q33 20 25 24" fill="url(#sprout-leaf)"/>
+            <path d="M25 27 L19 23" stroke="#388e3c" stroke-width="0.5" opacity="0.5"/>
+            <path d="M25 27 L31 23" stroke="#388e3c" stroke-width="0.5" opacity="0.5"/>
+            <circle cx="16" cy="22" r="1.2" fill="#b3e5fc" opacity="0.7"/>
         </svg>`,
         'seedling': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="23" y="18" width="4" height="25" rx="2" fill="#43a047"/>
-            <ellipse cx="16" cy="22" rx="8" ry="4" fill="#66bb6a" transform="rotate(-35 16 22)"/>
-            <ellipse cx="34" cy="22" rx="8" ry="4" fill="#66bb6a" transform="rotate(35 34 22)"/>
-            <ellipse cx="17" cy="30" rx="7" ry="3.5" fill="#81c784" transform="rotate(-25 17 30)"/>
-            <ellipse cx="33" cy="30" rx="7" ry="3.5" fill="#81c784" transform="rotate(25 33 30)"/>
-            <ellipse cx="25" cy="44" rx="10" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="sdlg-stem" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#388e3c"/>
+                    <stop offset="50%" stop-color="#4caf50"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </linearGradient>
+                <linearGradient id="sdlg-leaf1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#81c784"/>
+                    <stop offset="100%" stop-color="#43a047"/>
+                </linearGradient>
+                <linearGradient id="sdlg-leaf2" x1="1" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#a5d6a7"/>
+                    <stop offset="100%" stop-color="#66bb6a"/>
+                </linearGradient>
+                <linearGradient id="sdlg-soil" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#8d6e63"/>
+                    <stop offset="100%" stop-color="#5d4037"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="25" cy="44" rx="12" ry="4" fill="url(#sdlg-soil)" opacity="0.5"/>
+            <path d="M25 42 Q25 30 25 17" stroke="url(#sdlg-stem)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M25 21 Q16 16 11 18 Q15 13 25 18" fill="url(#sdlg-leaf1)"/>
+            <path d="M25 21 Q34 16 39 18 Q35 13 25 18" fill="url(#sdlg-leaf1)"/>
+            <path d="M25 30 Q17 26 13 28 Q16 23 25 27" fill="url(#sdlg-leaf2)"/>
+            <path d="M25 30 Q33 26 37 28 Q34 23 25 27" fill="url(#sdlg-leaf2)"/>
+            <path d="M25 21 L17 16" stroke="#2e7d32" stroke-width="0.5" opacity="0.4"/>
+            <path d="M25 21 L33 16" stroke="#2e7d32" stroke-width="0.5" opacity="0.4"/>
+            <path d="M25 30 L18 26" stroke="#388e3c" stroke-width="0.5" opacity="0.4"/>
+            <path d="M25 30 L32 26" stroke="#388e3c" stroke-width="0.5" opacity="0.4"/>
         </svg>`,
         'young': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="22" y="14" width="6" height="28" rx="3" fill="#388e3c"/>
-            <ellipse cx="14" cy="18" rx="9" ry="4.5" fill="#4caf50" transform="rotate(-40 14 18)"/>
-            <ellipse cx="36" cy="18" rx="9" ry="4.5" fill="#4caf50" transform="rotate(40 36 18)"/>
-            <ellipse cx="13" cy="26" rx="8" ry="4" fill="#66bb6a" transform="rotate(-30 13 26)"/>
-            <ellipse cx="37" cy="26" rx="8" ry="4" fill="#66bb6a" transform="rotate(30 37 26)"/>
-            <ellipse cx="15" cy="34" rx="7" ry="3.5" fill="#81c784" transform="rotate(-20 15 34)"/>
-            <ellipse cx="35" cy="34" rx="7" ry="3.5" fill="#81c784" transform="rotate(20 35 34)"/>
-            <ellipse cx="25" cy="44" rx="12" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="yng-stem" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#33691e"/>
+                    <stop offset="50%" stop-color="#558b2f"/>
+                    <stop offset="100%" stop-color="#33691e"/>
+                </linearGradient>
+                <linearGradient id="yng-leaf-a" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#81c784"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </linearGradient>
+                <linearGradient id="yng-leaf-b" x1="1" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#a5d6a7"/>
+                    <stop offset="100%" stop-color="#4caf50"/>
+                </linearGradient>
+                <linearGradient id="yng-leaf-c" x1="0.5" y1="0" x2="0.5" y2="1">
+                    <stop offset="0%" stop-color="#c8e6c9"/>
+                    <stop offset="100%" stop-color="#66bb6a"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="25" cy="45" rx="13" ry="4" fill="#8d6e63" opacity="0.35"/>
+            <path d="M25 43 Q25 30 25 12" stroke="url(#yng-stem)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+            <path d="M25 16 Q14 10 9 13 Q13 7 25 13" fill="url(#yng-leaf-a)"/>
+            <path d="M25 16 Q36 10 41 13 Q37 7 25 13" fill="url(#yng-leaf-a)"/>
+            <path d="M25 24 Q15 19 10 22 Q14 16 25 21" fill="url(#yng-leaf-b)"/>
+            <path d="M25 24 Q35 19 40 22 Q36 16 25 21" fill="url(#yng-leaf-b)"/>
+            <path d="M25 33 Q17 29 12 31 Q16 26 25 30" fill="url(#yng-leaf-c)"/>
+            <path d="M25 33 Q33 29 38 31 Q34 26 25 30" fill="url(#yng-leaf-c)"/>
+            <path d="M25 16 L16 11" stroke="#2e7d32" stroke-width="0.5" opacity="0.35"/>
+            <path d="M25 16 L34 11" stroke="#2e7d32" stroke-width="0.5" opacity="0.35"/>
+            <path d="M25 24 L16 19" stroke="#2e7d32" stroke-width="0.5" opacity="0.35"/>
+            <path d="M25 24 L34 19" stroke="#2e7d32" stroke-width="0.5" opacity="0.35"/>
         </svg>`,
         'small-tree': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="21" y="22" width="8" height="22" rx="3" fill="#5d4037"/>
-            <ellipse cx="25" cy="18" rx="18" ry="14" fill="#388e3c"/>
-            <ellipse cx="18" cy="15" rx="8" ry="7" fill="#43a047"/>
-            <ellipse cx="32" cy="15" rx="8" ry="7" fill="#43a047"/>
-            <ellipse cx="25" cy="10" rx="10" ry="8" fill="#4caf50"/>
-            <ellipse cx="25" cy="45" rx="14" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="st-trunk" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#5d4037"/>
+                    <stop offset="30%" stop-color="#795548"/>
+                    <stop offset="70%" stop-color="#6d4c41"/>
+                    <stop offset="100%" stop-color="#4e342e"/>
+                </linearGradient>
+                <radialGradient id="st-canopy1" cx="0.5" cy="0.6" r="0.55">
+                    <stop offset="0%" stop-color="#43a047"/>
+                    <stop offset="100%" stop-color="#2e7d32"/>
+                </radialGradient>
+                <radialGradient id="st-canopy2" cx="0.4" cy="0.4" r="0.5">
+                    <stop offset="0%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </radialGradient>
+                <radialGradient id="st-canopy3" cx="0.5" cy="0.3" r="0.5">
+                    <stop offset="0%" stop-color="#81c784"/>
+                    <stop offset="100%" stop-color="#4caf50"/>
+                </radialGradient>
+            </defs>
+            <ellipse cx="25" cy="45" rx="15" ry="4" fill="#6d4c41" opacity="0.25"/>
+            <rect x="21" y="24" width="8" height="20" rx="3" fill="url(#st-trunk)"/>
+            <path d="M22 30 L22 38" stroke="#4e342e" stroke-width="0.6" opacity="0.3"/>
+            <path d="M26 28 L26 40" stroke="#4e342e" stroke-width="0.6" opacity="0.3"/>
+            <ellipse cx="25" cy="20" rx="18" ry="14" fill="url(#st-canopy1)"/>
+            <ellipse cx="17" cy="16" rx="9" ry="8" fill="url(#st-canopy2)"/>
+            <ellipse cx="33" cy="16" rx="9" ry="8" fill="url(#st-canopy2)"/>
+            <ellipse cx="25" cy="11" rx="10" ry="8" fill="url(#st-canopy3)"/>
+            <ellipse cx="20" cy="10" rx="3" ry="2" fill="white" opacity="0.1"/>
         </svg>`,
         'big-tree': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="20" y="24" width="10" height="20" rx="4" fill="#4e342e"/>
-            <ellipse cx="25" cy="18" rx="20" ry="16" fill="#2e7d32"/>
-            <ellipse cx="16" cy="14" rx="10" ry="8" fill="#388e3c"/>
-            <ellipse cx="34" cy="14" rx="10" ry="8" fill="#388e3c"/>
-            <ellipse cx="25" cy="8" rx="12" ry="9" fill="#43a047"/>
-            <ellipse cx="25" cy="45" rx="16" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="bt-trunk" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#4e342e"/>
+                    <stop offset="25%" stop-color="#6d4c41"/>
+                    <stop offset="75%" stop-color="#5d4037"/>
+                    <stop offset="100%" stop-color="#3e2723"/>
+                </linearGradient>
+                <radialGradient id="bt-canopy1" cx="0.5" cy="0.6" r="0.55">
+                    <stop offset="0%" stop-color="#388e3c"/>
+                    <stop offset="100%" stop-color="#1b5e20"/>
+                </radialGradient>
+                <radialGradient id="bt-canopy2" cx="0.4" cy="0.4" r="0.5">
+                    <stop offset="0%" stop-color="#4caf50"/>
+                    <stop offset="100%" stop-color="#2e7d32"/>
+                </radialGradient>
+                <radialGradient id="bt-canopy3" cx="0.5" cy="0.3" r="0.5">
+                    <stop offset="0%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </radialGradient>
+                <radialGradient id="bt-highlight" cx="0.3" cy="0.25" r="0.4">
+                    <stop offset="0%" stop-color="white" stop-opacity="0.12"/>
+                    <stop offset="100%" stop-color="white" stop-opacity="0"/>
+                </radialGradient>
+            </defs>
+            <ellipse cx="25" cy="46" rx="17" ry="4" fill="#5d4037" opacity="0.25"/>
+            <rect x="19" y="25" width="12" height="20" rx="4" fill="url(#bt-trunk)"/>
+            <path d="M21 28 L21 40" stroke="#3e2723" stroke-width="0.7" opacity="0.3"/>
+            <path d="M25 26 L25 42" stroke="#3e2723" stroke-width="0.7" opacity="0.25"/>
+            <path d="M28 30 L28 38" stroke="#3e2723" stroke-width="0.7" opacity="0.3"/>
+            <path d="M19 35 Q14 37 12 40" stroke="#5d4037" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+            <path d="M31 35 Q36 37 38 40" stroke="#5d4037" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+            <ellipse cx="25" cy="19" rx="21" ry="17" fill="url(#bt-canopy1)"/>
+            <ellipse cx="14" cy="15" rx="10" ry="9" fill="url(#bt-canopy2)"/>
+            <ellipse cx="36" cy="15" rx="10" ry="9" fill="url(#bt-canopy2)"/>
+            <ellipse cx="25" cy="9" rx="13" ry="10" fill="url(#bt-canopy3)"/>
+            <ellipse cx="25" cy="14" rx="20" ry="14" fill="url(#bt-highlight)"/>
         </svg>`,
         'flowering': `<svg width="${size}" height="${size}" viewBox="0 0 50 50">
-            <rect x="20" y="24" width="10" height="20" rx="4" fill="#4e342e"/>
-            <ellipse cx="25" cy="18" rx="20" ry="16" fill="#2e7d32"/>
-            <ellipse cx="16" cy="14" rx="10" ry="8" fill="#388e3c"/>
-            <ellipse cx="34" cy="14" rx="10" ry="8" fill="#388e3c"/>
-            <ellipse cx="25" cy="8" rx="12" ry="9" fill="#43a047"/>
-            <circle cx="12" cy="12" r="4" fill="#f48fb1"/>
-            <circle cx="38" cy="10" r="3.5" fill="#ff80ab"/>
-            <circle cx="25" cy="4" r="3" fill="#f06292"/>
-            <circle cx="18" cy="22" r="3" fill="#ff80ab"/>
-            <circle cx="33" cy="20" r="3.5" fill="#f48fb1"/>
-            <circle cx="12" cy="12" r="1.5" fill="#fff176"/>
-            <circle cx="38" cy="10" r="1.2" fill="#fff176"/>
-            <circle cx="25" cy="4" r="1.2" fill="#fff176"/>
-            <ellipse cx="25" cy="45" rx="16" ry="4" fill="#8d6e63" opacity="0.3"/>
+            <defs>
+                <linearGradient id="fl-trunk" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#4e342e"/>
+                    <stop offset="25%" stop-color="#6d4c41"/>
+                    <stop offset="75%" stop-color="#5d4037"/>
+                    <stop offset="100%" stop-color="#3e2723"/>
+                </linearGradient>
+                <radialGradient id="fl-canopy1" cx="0.5" cy="0.6" r="0.55">
+                    <stop offset="0%" stop-color="#388e3c"/>
+                    <stop offset="100%" stop-color="#1b5e20"/>
+                </radialGradient>
+                <radialGradient id="fl-canopy2" cx="0.4" cy="0.4" r="0.5">
+                    <stop offset="0%" stop-color="#4caf50"/>
+                    <stop offset="100%" stop-color="#2e7d32"/>
+                </radialGradient>
+                <radialGradient id="fl-canopy3" cx="0.5" cy="0.3" r="0.5">
+                    <stop offset="0%" stop-color="#66bb6a"/>
+                    <stop offset="100%" stop-color="#388e3c"/>
+                </radialGradient>
+                <radialGradient id="fl-flower" cx="0.4" cy="0.35" r="0.5">
+                    <stop offset="0%" stop-color="#f8bbd0"/>
+                    <stop offset="100%" stop-color="#e91e63"/>
+                </radialGradient>
+            </defs>
+            <ellipse cx="25" cy="46" rx="17" ry="4" fill="#5d4037" opacity="0.25"/>
+            <rect x="19" y="25" width="12" height="20" rx="4" fill="url(#fl-trunk)"/>
+            <path d="M21 28 L21 40" stroke="#3e2723" stroke-width="0.7" opacity="0.3"/>
+            <path d="M25 26 L25 42" stroke="#3e2723" stroke-width="0.7" opacity="0.25"/>
+            <path d="M19 35 Q14 37 12 40" stroke="#5d4037" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+            <path d="M31 35 Q36 37 38 40" stroke="#5d4037" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/>
+            <ellipse cx="25" cy="19" rx="21" ry="17" fill="url(#fl-canopy1)"/>
+            <ellipse cx="14" cy="15" rx="10" ry="9" fill="url(#fl-canopy2)"/>
+            <ellipse cx="36" cy="15" rx="10" ry="9" fill="url(#fl-canopy2)"/>
+            <ellipse cx="25" cy="9" rx="13" ry="10" fill="url(#fl-canopy3)"/>
+            <g>
+                <circle cx="11" cy="13" r="3.5" fill="url(#fl-flower)" opacity="0.9"/>
+                <circle cx="11" cy="13" r="2.5" fill="#f48fb1" opacity="0.5"/>
+                <circle cx="11" cy="13" r="1" fill="#fff176"/>
+            </g>
+            <g>
+                <circle cx="38" cy="11" r="3" fill="url(#fl-flower)" opacity="0.9"/>
+                <circle cx="38" cy="11" r="2" fill="#f48fb1" opacity="0.5"/>
+                <circle cx="38" cy="11" r="0.9" fill="#fff176"/>
+            </g>
+            <g>
+                <circle cx="25" cy="4" r="3.2" fill="url(#fl-flower)" opacity="0.9"/>
+                <circle cx="25" cy="4" r="2.2" fill="#f48fb1" opacity="0.5"/>
+                <circle cx="25" cy="4" r="1" fill="#fff176"/>
+            </g>
+            <g>
+                <circle cx="18" cy="22" r="2.8" fill="url(#fl-flower)" opacity="0.85"/>
+                <circle cx="18" cy="22" r="1.8" fill="#f48fb1" opacity="0.5"/>
+                <circle cx="18" cy="22" r="0.8" fill="#fff176"/>
+            </g>
+            <g>
+                <circle cx="33" cy="20" r="3" fill="url(#fl-flower)" opacity="0.85"/>
+                <circle cx="33" cy="20" r="2" fill="#f48fb1" opacity="0.5"/>
+                <circle cx="33" cy="20" r="0.9" fill="#fff176"/>
+            </g>
+            <circle cx="8" cy="38" r="1.5" fill="#f8bbd0" opacity="0.5"/>
+            <circle cx="42" cy="35" r="1.2" fill="#f8bbd0" opacity="0.4"/>
         </svg>`
     };
     return svgs[stage] || svgs['seed'];

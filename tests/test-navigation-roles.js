@@ -4336,10 +4336,10 @@ test('Theme doodles: getThemeDoodlePaths uses grid transform placement', () => {
         'getThemeDoodlePaths must use translate+scale transforms for icon placement');
 });
 
-test('Theme doodles: desktop opacity is 0.16, mobile is 0.1', () => {
+test('Theme doodles: desktop opacity is 0.08, mobile is 0.05', () => {
     const js = readFile('theme-manager.js');
-    assert.ok(js.includes("window.innerWidth >= 1025 ? '0.16' : '0.1'"),
-        'applyThemeDoodle must use 0.16 opacity on desktop, 0.1 on mobile');
+    assert.ok(js.includes("window.innerWidth >= 1025 ? '0.08' : '0.05'"),
+        'applyThemeDoodle must use 0.08 opacity on desktop, 0.05 on mobile');
 });
 
 test('Theme doodles: no desktop media query override for doodles in CSS', () => {
@@ -6201,6 +6201,61 @@ test('compact bottom nav on mobile', () => {
     // The 480px bottom-nav-item rule
     assert.ok(css.includes('.bottom-nav-item') && css.includes('0.65em'),
         'Bottom nav must have compact font on mobile');
+});
+
+// ============================================================================
+// BUG-060: Notification bell race condition — re-render on home return
+// ============================================================================
+console.log('\n=== BUG-060: Notification bell re-render ===');
+
+test('BUG-060: showSubjects re-renders notification bell if empty', () => {
+    const ws = readFile('worksheet-generator.js');
+    assert.ok(ws.includes('renderNotificationBell') && ws.includes('notification-bell-container'),
+        'showSubjects must re-render notification bell');
+    assert.ok(ws.includes('hasChildNodes'),
+        'showSubjects must check if bell container is empty before re-rendering');
+});
+
+test('BUG-060: selectChild re-initializes notifications', () => {
+    const ps = readFile('profile-selector.js');
+    assert.ok(ps.includes('initializeNotifications') && ps.includes('renderNotificationBell'),
+        'selectChild must re-initialize notifications and render bell on child switch');
+});
+
+test('BUG-060: notification-bell-container exists in index.html', () => {
+    const index = readFile('index.html');
+    assert.ok(index.includes('notification-bell-container'),
+        'index.html must have notification-bell-container div');
+});
+
+// ============================================================================
+// BUG-061: Weekly progress not restored after worksheet navigation
+// ============================================================================
+console.log('\n=== BUG-061: Weekly progress restoration ===');
+
+test('BUG-061: showSubjects re-renders weekly progress', () => {
+    const ws = readFile('worksheet-generator.js');
+    assert.ok(ws.includes('renderWeeklyProgress') && ws.includes('weekly-progress-container'),
+        'showSubjects must call renderWeeklyProgress on weekly-progress-container');
+});
+
+test('BUG-061: showSubjects re-renders level test buttons', () => {
+    const ws = readFile('worksheet-generator.js');
+    assert.ok(ws.includes('renderLevelTestButtons') && ws.includes('level-test-buttons'),
+        'showSubjects must call renderLevelTestButtons on level-test-buttons');
+});
+
+test('BUG-061: selectChild triggers weekly progress re-render', () => {
+    const ps = readFile('profile-selector.js');
+    assert.ok(ps.includes('renderWeeklyProgress') && ps.includes('weekly-progress-container'),
+        'selectChild must trigger weekly progress re-render on child switch');
+});
+
+test('BUG-061: renderWorksheet hides weekly-progress-container', () => {
+    const ws = readFile('worksheet-generator.js');
+    // Verify the hide exists (so our restore is needed)
+    assert.ok(ws.includes("weeklyProgress") && ws.includes("display = 'none'"),
+        'renderWorksheet must hide weeklyProgress (confirming restore is needed)');
 });
 
 // ============================================================================

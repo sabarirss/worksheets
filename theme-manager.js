@@ -187,7 +187,7 @@ function applyThemeDoodle(themeName) {
     const themeConfig = THEMES[themeName] || THEMES[DEFAULT_THEME];
     const color = themeConfig.doodleColor;
     const paths = getThemeDoodlePaths(themeName);
-    const opacity = window.innerWidth >= 1025 ? '0.16' : '0.1';
+    const opacity = window.innerWidth >= 1025 ? '0.08' : '0.05';
     const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'>" +
         "<g opacity='" + opacity + "' fill='none' stroke='" + color + "' stroke-width='2' " +
         "stroke-linecap='round' stroke-linejoin='round'>" + paths + "</g></svg>";

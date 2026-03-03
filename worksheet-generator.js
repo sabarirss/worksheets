@@ -61,6 +61,33 @@ function showSubjects() {
     const pageFooter = document.querySelector('.container > footer');
     if (pageHeader) pageHeader.style.display = '';
     if (pageFooter) pageFooter.style.display = '';
+
+    // BUG-061: Re-render weekly progress (hidden by renderWorksheet, never restored)
+    if (typeof renderWeeklyProgress === 'function') {
+        const wpContainer = document.getElementById('weekly-progress-container');
+        if (wpContainer) renderWeeklyProgress(wpContainer);
+    }
+
+    // BUG-061: Re-render level test buttons (hidden by renderWorksheet)
+    if (typeof renderLevelTestButtons === 'function') {
+        const ltContainer = document.getElementById('level-test-buttons');
+        if (ltContainer) renderLevelTestButtons(ltContainer);
+    }
+
+    // BUG-060: Ensure notification bell is rendered (race condition on first load)
+    if (typeof renderNotificationBell === 'function') {
+        var bellContainer = document.getElementById('notification-bell-container');
+        if (bellContainer && !bellContainer.hasChildNodes()) {
+            var child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+            if (child && typeof initializeNotifications === 'function') {
+                var user = typeof firebase !== 'undefined' && firebase.auth().currentUser;
+                if (user) {
+                    initializeNotifications(child.id, user.uid, window.currentUserRole);
+                    renderNotificationBell(bellContainer);
+                }
+            }
+        }
+    }
 }
 
 function showMathLevels() {

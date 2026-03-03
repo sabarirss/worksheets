@@ -115,3 +115,10 @@ STRINGS.init = function() {
         if (val) el.textContent = val;
     });
 };
+
+// Auto-init: fill data-string elements once DOM is ready.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { STRINGS.init(); });
+} else {
+    STRINGS.init();
+}
