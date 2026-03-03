@@ -560,41 +560,38 @@ function determineLevelFromScore(score, ageGroup) {
  */
 function generateSeededAssessmentQuestions(operation, ageGroup, childId) {
     const youngerAge = getYoungerAgeGroup(ageGroup);
+    const olderAge = getOlderAgeGroup(ageGroup);
     const seed = hashCode(`assessment-${childId}-${operation}`);
     seededRandom = new SeededRandom(seed);
+
+    // BUG-042: Handle English assessment separately (no math generators)
+    if (operation === 'english') {
+        return generateSeededEnglishAssessment(ageGroup, childId);
+    }
 
     const questions = [];
     const opSymbol = { addition: '+', subtraction: '-', multiplication: '*', division: '/' }[operation] || '+';
 
-    // 5 questions from younger age (easy)
-    const youngerConfig = getConfigByAge(operation, youngerAge, 'easy');
-    if (youngerConfig) {
-        for (let i = 0; i < 5; i++) {
-            const problem = youngerConfig.generator();
+    function generateFromConfig(age, difficulty, count) {
+        const config = getConfigByAge(operation, age, difficulty);
+        if (!config) return;
+        for (let i = 0; i < count; i++) {
+            const problem = config.generator();
             questions.push({
                 ...problem,
                 operation,
                 problem: `${problem.a} ${opSymbol} ${problem.b} =`,
-                sourceAge: youngerAge,
-                sourceDifficulty: 'easy'
+                sourceAge: age,
+                sourceDifficulty: difficulty
             });
         }
     }
 
-    // 5 questions from current age (medium)
-    const currentConfig = getConfigByAge(operation, ageGroup, 'medium');
-    if (currentConfig) {
-        for (let i = 0; i < 5; i++) {
-            const problem = currentConfig.generator();
-            questions.push({
-                ...problem,
-                operation,
-                problem: `${problem.a} ${opSymbol} ${problem.b} =`,
-                sourceAge: ageGroup,
-                sourceDifficulty: 'medium'
-            });
-        }
-    }
+    // BUG-043: 4 tiers matching client (was 2 tiers / 10 questions)
+    generateFromConfig(youngerAge, 'easy', 5);
+    generateFromConfig(ageGroup, 'easy', 5);
+    generateFromConfig(ageGroup, 'medium', 5);
+    generateFromConfig(olderAge, 'easy', 5);
 
     // Deterministic shuffle using seeded random
     for (let i = questions.length - 1; i > 0; i--) {
@@ -602,7 +599,219 @@ function generateSeededAssessmentQuestions(operation, ageGroup, childId) {
         [questions[i], questions[j]] = [questions[j], questions[i]];
     }
 
-    return questions.slice(0, 10);
+    return questions.slice(0, 20);
+}
+
+/**
+ * English assessment question bank for server-side validation.
+ * Organized by age group and difficulty. Each entry has prompt + answer.
+ */
+const ENGLISH_ASSESSMENT_BANK = {
+    '4-5': {
+        easy: [
+            { prompt: 'Complete: c_t', answer: 'cat' },
+            { prompt: 'Complete: d_g', answer: 'dog' },
+            { prompt: 'Complete: s_n', answer: 'sun' },
+            { prompt: 'Complete: b_ll', answer: 'ball' },
+            { prompt: 'Complete: f_sh', answer: 'fish' },
+            { prompt: 'Complete: h_t', answer: 'hat' },
+            { prompt: 'Complete: b_d', answer: 'bed' },
+            { prompt: 'Complete: c_p', answer: 'cup' },
+            { prompt: 'Complete: p_n', answer: 'pen' },
+            { prompt: 'Complete: b_x', answer: 'box' }
+        ],
+        medium: [
+            { prompt: 'Write the word: the', answer: 'the' },
+            { prompt: 'Write the word: and', answer: 'and' },
+            { prompt: 'Write the word: is', answer: 'is' },
+            { prompt: 'Write the word: it', answer: 'it' },
+            { prompt: 'Write the word: to', answer: 'to' },
+            { prompt: 'Write the word: he', answer: 'he' },
+            { prompt: 'Write the word: she', answer: 'she' },
+            { prompt: 'Write the word: we', answer: 'we' },
+            { prompt: 'Write the word: can', answer: 'can' },
+            { prompt: 'Write the word: see', answer: 'see' }
+        ]
+    },
+    '6': {
+        easy: [
+            { prompt: 'Write the word: play', answer: 'play' },
+            { prompt: 'Write the word: come', answer: 'come' },
+            { prompt: 'Write the word: look', answer: 'look' },
+            { prompt: 'Write the word: said', answer: 'said' },
+            { prompt: 'Write the word: like', answer: 'like' },
+            { prompt: 'Write the word: have', answer: 'have' },
+            { prompt: 'Write the word: make', answer: 'make' },
+            { prompt: 'Write the word: good', answer: 'good' },
+            { prompt: 'Write the word: help', answer: 'help' },
+            { prompt: 'Write the word: want', answer: 'want' }
+        ],
+        medium: [
+            { prompt: 'The cat ___ on the mat.', answer: 'sat' },
+            { prompt: 'I ___ a red ball.', answer: 'have' },
+            { prompt: 'She ___ to school.', answer: 'goes' },
+            { prompt: 'The sun ___ in the sky.', answer: 'shines' },
+            { prompt: 'We ___ our homework.', answer: 'do' },
+            { prompt: 'The bird ___ in the tree.', answer: 'sits' },
+            { prompt: 'They ___ playing.', answer: 'are' },
+            { prompt: 'My dog ___ very fast.', answer: 'runs' },
+            { prompt: 'He ___ his breakfast.', answer: 'eats' },
+            { prompt: 'The baby ___ loudly.', answer: 'cries' }
+        ]
+    },
+    '7': {
+        easy: [
+            { prompt: 'Write the word: because', answer: 'because' },
+            { prompt: 'Write the word: people', answer: 'people' },
+            { prompt: 'Write the word: about', answer: 'about' },
+            { prompt: 'Write the word: could', answer: 'could' },
+            { prompt: 'Write the word: their', answer: 'their' },
+            { prompt: 'Write the word: other', answer: 'other' },
+            { prompt: 'Write the word: would', answer: 'would' },
+            { prompt: 'Write the word: which', answer: 'which' },
+            { prompt: 'Write the word: there', answer: 'there' },
+            { prompt: 'Write the word: water', answer: 'water' }
+        ],
+        medium: [
+            { prompt: 'The opposite of hot is ___', answer: 'cold' },
+            { prompt: 'The opposite of big is ___', answer: 'small' },
+            { prompt: 'The opposite of happy is ___', answer: 'sad' },
+            { prompt: 'The opposite of fast is ___', answer: 'slow' },
+            { prompt: 'A synonym for happy is ___', answer: 'glad' },
+            { prompt: 'A synonym for big is ___', answer: 'large' },
+            { prompt: 'The girl ___ her dinner. (eat)', answer: 'ate' },
+            { prompt: 'They ___ going to the park.', answer: 'are' },
+            { prompt: 'She ___ a good singer.', answer: 'is' },
+            { prompt: 'We ___ to school yesterday.', answer: 'went' }
+        ]
+    },
+    '8': {
+        easy: [
+            { prompt: 'The opposite of dark is ___', answer: 'light' },
+            { prompt: 'The opposite of quiet is ___', answer: 'loud' },
+            { prompt: 'A synonym for small is ___', answer: 'tiny' },
+            { prompt: 'A synonym for fast is ___', answer: 'quick' },
+            { prompt: 'Write the word: beautiful', answer: 'beautiful' },
+            { prompt: 'Write the word: different', answer: 'different' },
+            { prompt: 'Write the word: important', answer: 'important' },
+            { prompt: 'Write the word: together', answer: 'together' },
+            { prompt: 'He ___ very well.', answer: 'sings' },
+            { prompt: 'They ___ arrived.', answer: 'have' }
+        ],
+        medium: [
+            { prompt: 'In "The big dog runs", what is "dog"?', answer: 'noun' },
+            { prompt: 'In "She runs fast", what is "runs"?', answer: 'verb' },
+            { prompt: 'In "The big dog", what is "big"?', answer: 'adjective' },
+            { prompt: 'The children ___ (play) outside now.', answer: 'are playing' },
+            { prompt: 'She ___ (go) to school yesterday.', answer: 'went' },
+            { prompt: 'The opposite of ancient is ___', answer: 'modern' },
+            { prompt: 'A synonym for scared is ___', answer: 'afraid' },
+            { prompt: 'Write the word: knowledge', answer: 'knowledge' },
+            { prompt: 'Write the word: exercise', answer: 'exercise' },
+            { prompt: 'The cat sat ___ the mat.', answer: 'on' }
+        ]
+    },
+    '9+': {
+        easy: [
+            { prompt: 'Write the word: necessary', answer: 'necessary' },
+            { prompt: 'Write the word: immediately', answer: 'immediately' },
+            { prompt: 'A synonym for enormous is ___', answer: 'huge' },
+            { prompt: 'The opposite of generous is ___', answer: 'selfish' },
+            { prompt: 'In "She sings beautifully", "beautifully" is a/an ___', answer: 'adverb' },
+            { prompt: 'In "The tall tree", "tall" is a/an ___', answer: 'adjective' },
+            { prompt: 'He ___ (write) a letter yesterday.', answer: 'wrote' },
+            { prompt: 'They ___ (be) friends for years.', answer: 'have been' },
+            { prompt: 'The book ___ (belong) to me.', answer: 'belongs' },
+            { prompt: 'If I ___ rich, I would travel.', answer: 'were' }
+        ],
+        medium: [
+            { prompt: 'The past tense of "begin" is ___', answer: 'began' },
+            { prompt: 'The past tense of "swim" is ___', answer: 'swam' },
+            { prompt: 'The past tense of "bring" is ___', answer: 'brought' },
+            { prompt: 'The comparative form of "good" is ___', answer: 'better' },
+            { prompt: 'The superlative form of "bad" is ___', answer: 'worst' },
+            { prompt: 'A synonym for "difficult" is ___', answer: 'hard' },
+            { prompt: 'The opposite of "temporary" is ___', answer: 'permanent' },
+            { prompt: 'Complete: Neither Tom ___ Jerry came.', answer: 'nor' },
+            { prompt: 'Write the word: environment', answer: 'environment' },
+            { prompt: 'Write the word: government', answer: 'government' }
+        ]
+    },
+    '10+': {
+        easy: [
+            { prompt: 'Write the word: accommodation', answer: 'accommodation' },
+            { prompt: 'Write the word: independent', answer: 'independent' },
+            { prompt: 'The past participle of "go" is ___', answer: 'gone' },
+            { prompt: 'The past participle of "write" is ___', answer: 'written' },
+            { prompt: 'A synonym for "resilient" is ___', answer: 'tough' },
+            { prompt: 'The opposite of "transparent" is ___', answer: 'opaque' },
+            { prompt: 'Complete: He insisted ___ going.', answer: 'on' },
+            { prompt: 'Complete: She is good ___ math.', answer: 'at' },
+            { prompt: 'In "Running is fun", "Running" is a ___', answer: 'gerund' },
+            { prompt: 'Write the word: conscientious', answer: 'conscientious' }
+        ],
+        medium: [
+            { prompt: 'The past tense of "lead" is ___', answer: 'led' },
+            { prompt: 'The plural of "analysis" is ___', answer: 'analyses' },
+            { prompt: 'Complete: If I ___ known, I would have helped.', answer: 'had' },
+            { prompt: 'A synonym for "meticulous" is ___', answer: 'careful' },
+            { prompt: 'The opposite of "affluent" is ___', answer: 'poor' },
+            { prompt: 'Complete: He is allergic ___ peanuts.', answer: 'to' },
+            { prompt: 'Complete: She succeeded ___ passing the test.', answer: 'in' },
+            { prompt: 'The noun form of "decide" is ___', answer: 'decision' },
+            { prompt: 'Write the word: phenomenon', answer: 'phenomenon' },
+            { prompt: 'Write the word: exaggerate', answer: 'exaggerate' }
+        ]
+    }
+};
+
+/**
+ * Generate seeded English assessment questions (server-side).
+ * Uses a fixed question bank instead of dynamic generators.
+ */
+function generateSeededEnglishAssessment(ageGroup, childId) {
+    const youngerAge = getYoungerAgeGroup(ageGroup);
+    const olderAge = getOlderAgeGroup(ageGroup);
+    const seed = hashCode(`assessment-${childId}-english`);
+    seededRandom = new SeededRandom(seed);
+
+    const questions = [];
+
+    function pickQuestions(age, difficulty, count) {
+        const bank = ENGLISH_ASSESSMENT_BANK[age]?.[difficulty];
+        if (!bank || bank.length === 0) return;
+
+        // Seeded shuffle of the bank
+        const shuffled = [...bank];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom.next() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        for (let i = 0; i < Math.min(count, shuffled.length); i++) {
+            questions.push({
+                ...shuffled[i],
+                operation: 'english',
+                problem: shuffled[i].prompt,
+                sourceAge: age,
+                sourceDifficulty: difficulty
+            });
+        }
+    }
+
+    // 5 from younger easy, 5 from current easy, 5 from current medium, 5 from older easy
+    pickQuestions(youngerAge, 'easy', 5);
+    pickQuestions(ageGroup, 'easy', 5);
+    pickQuestions(ageGroup, 'medium', 5);
+    pickQuestions(olderAge, 'easy', 5);
+
+    // Seeded shuffle
+    for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom.next() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+
+    return questions.slice(0, 20);
 }
 
 /**

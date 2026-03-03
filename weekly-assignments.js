@@ -699,16 +699,16 @@ async function renderWeeklyProgress(container) {
     const dueDateStr = weekEnd.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
     let statusText = '';
-    let statusColor = '#667eea';
+    let statusColor = 'var(--color-primary)';
     if (isCarryover) {
         statusText = 'From Last Week';
-        statusColor = '#ff9800';
+        statusColor = 'var(--color-warning)';
     } else if (assignment.status === 'completed') {
         statusText = 'All Done!';
-        statusColor = '#28a745';
+        statusColor = 'var(--color-success)';
     } else if (daysLeft === 0) {
         statusText = 'Due Today!';
-        statusColor = '#dc3545';
+        statusColor = '#dc3545';  /* danger red - not themed */
     } else {
         statusText = `Due ${dueDateStr}`;
     }
@@ -750,14 +750,14 @@ async function renderWeeklyProgress(container) {
 
             <div style="display: flex; gap: 20px; justify-content: center;">
                 <div style="text-align: center; flex: 1;">
-                    <div style="font-size: 1.6em; font-weight: bold; color: ${mathDone >= mathTotal ? '#28a745' : '#667eea'};">
+                    <div style="font-size: 1.6em; font-weight: bold; color: ${mathDone >= mathTotal ? 'var(--color-success)' : 'var(--color-primary)'};">
                         ${mathDone}/${mathTotal}
                     </div>
                     <div style="font-size: 0.85em; color: #666;">Math Pages</div>
                 </div>
                 <div style="width: 1px; background: #ddd;"></div>
                 <div style="text-align: center; flex: 1;">
-                    <div style="font-size: 1.6em; font-weight: bold; color: ${englishDone >= englishTotal ? '#28a745' : '#667eea'};">
+                    <div style="font-size: 1.6em; font-weight: bold; color: ${englishDone >= englishTotal ? 'var(--color-success)' : 'var(--color-primary)'};">
                         ${englishDone}/${englishTotal}
                     </div>
                     <div style="font-size: 0.85em; color: #666;">English Pages</div>
@@ -765,7 +765,7 @@ async function renderWeeklyProgress(container) {
             </div>
 
             ${percentage === 100 ? `
-                <div style="text-align: center; margin-top: 12px; padding: 8px; background: #d4edda; border-radius: 8px; color: #28a745; font-weight: bold;">
+                <div style="text-align: center; margin-top: 12px; padding: 8px; background: #d4edda; border-radius: 8px; color: var(--color-success); font-weight: bold;">
                     Great work this week! Keep it up!
                 </div>
             ` : ''}
@@ -813,7 +813,7 @@ async function renderAssignmentHistory(container, childId, weeksBack = 4) {
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
                     <div>
                         <strong>${a.week}</strong>
-                        <span style="font-size: 0.85em; color: ${a.status === 'completed' ? '#28a745' : '#999'}; margin-left: 8px;">
+                        <span style="font-size: 0.85em; color: ${a.status === 'completed' ? 'var(--color-success)' : '#999'}; margin-left: 8px;">
                             ${a.status === 'completed' ? 'Completed' : 'Incomplete'}
                         </span>
                     </div>

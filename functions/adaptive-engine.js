@@ -19,11 +19,31 @@ const admin = require('firebase-admin');
 const { generateProblemBySkill, classifyProblem, hashCode, levelToAgeGroup, getAgeGroupFromAge } = require('./shared/math-engine');
 const { bootstrapSkillProfile } = require('./synthetic-students');
 
-// Distribution: what percentage of problems target each skill bucket
-const DISTRIBUTION = {
-    weak: 0.60,     // 60% of problems target weak skills
-    medium: 0.30,   // 30% target medium skills
-    strong: 0.10    // 10% target strong skills (maintenance)
+// Motivational zone profiles — determines problem ordering within each page
+// Each page has 5 zones: warmup → rampup → focus → mixed → cooldown
+// This keeps kids engaged: start confident, work on weak areas, end on a high note
+const ZONE_PROFILES = {
+    gentle: {   // Pages 1-2: confidence building (more strong/medium, fewer weak)
+        warmup:   { count: 4, bucket: 'strong' },
+        rampup:   { count: 3, bucket: 'medium' },
+        focus:    { count: 5, bucket: 'weak' },
+        mixed:    { count: 3, buckets: ['weak', 'strong', 'medium'] },
+        cooldown: { count: 5, buckets: ['medium', 'strong', 'strong', 'medium', 'strong'] }
+    },
+    standard: { // Pages 3-5: balanced practice
+        warmup:   { count: 3, bucket: 'strong' },
+        rampup:   { count: 3, bucket: 'medium' },
+        focus:    { count: 7, bucket: 'weak' },
+        mixed:    { count: 3, buckets: ['weak', 'strong', 'medium'] },
+        cooldown: { count: 4, buckets: ['medium', 'strong', 'strong', 'medium'] }
+    },
+    challenge: { // Pages 6-7: push harder (more weak, fewer easy)
+        warmup:   { count: 2, bucket: 'strong' },
+        rampup:   { count: 3, bucket: 'medium' },
+        focus:    { count: 9, bucket: 'weak' },
+        mixed:    { count: 3, buckets: ['weak', 'strong', 'weak'] },
+        cooldown: { count: 3, buckets: ['medium', 'strong', 'strong'] }
+    }
 };
 
 // Thresholds for classifying skills
@@ -34,6 +54,31 @@ const THRESHOLDS = {
 
 const PROBLEMS_PER_PAGE = 20;
 const PAGES_PER_WEEK = 7;
+
+/**
+ * Get the zone profile name for a given page number in the weekly arc.
+ * Pages 1-2: gentle, Pages 3-5: standard, Pages 6-7: challenge
+ */
+function getPageProfile(pageNumber) {
+    if (pageNumber <= 2) return 'gentle';
+    if (pageNumber <= 5) return 'standard';
+    return 'challenge';
+}
+
+/**
+ * Get the skill pool for a target bucket, with fallback chain.
+ * If the target bucket is empty, falls back to whatever is available.
+ */
+function getSkillPool(targetBucket, buckets, effectiveMedium) {
+    if (targetBucket === 'weak' && buckets.weak.length > 0) return buckets.weak;
+    if (targetBucket === 'medium' && effectiveMedium.length > 0) return effectiveMedium;
+    if (targetBucket === 'strong' && buckets.strong.length > 0) return buckets.strong;
+    // Fallback chain: use whatever is available
+    if (effectiveMedium.length > 0) return effectiveMedium;
+    if (buckets.weak.length > 0) return buckets.weak;
+    if (buckets.strong.length > 0) return buckets.strong;
+    return [];
+}
 
 // ============================================================================
 // CORE: Classify skills into buckets based on error rates
@@ -82,103 +127,47 @@ function generateAdaptivePages(operation, ageGroup, skillProfile, baseSeed) {
     // Merge untested into medium (give them moderate exposure)
     const effectiveMedium = [...buckets.medium, ...buckets.untested];
 
-    // If no weak skills, redistribute
-    const hasWeak = buckets.weak.length > 0;
-    const hasMedium = effectiveMedium.length > 0;
-    const hasStrong = buckets.strong.length > 0;
-
-    // Calculate per-page problem distribution
-    const weakCount = hasWeak ? Math.round(PROBLEMS_PER_PAGE * DISTRIBUTION.weak) : 0;
-    const mediumCount = hasMedium ? Math.round(PROBLEMS_PER_PAGE * DISTRIBUTION.medium) : 0;
-    const strongCount = PROBLEMS_PER_PAGE - weakCount - mediumCount;
-
-    // Redistribute if a bucket is empty
-    let finalWeak = weakCount, finalMedium = mediumCount, finalStrong = strongCount;
-    if (!hasWeak) {
-        finalMedium += finalWeak;
-        finalWeak = 0;
-    }
-    if (!hasMedium) {
-        finalStrong += finalMedium;
-        finalMedium = 0;
-    }
-    if (!hasStrong && hasMedium) {
-        finalMedium += finalStrong;
-        finalStrong = 0;
-    }
-
     const pages = [];
 
     for (let pageNum = 1; pageNum <= PAGES_PER_WEEK; pageNum++) {
         const problems = [];
         const pageSeed = hashCode(`${baseSeed}-page${pageNum}`);
         let seedCounter = 0;
+        const profileName = getPageProfile(pageNum);
+        const profile = ZONE_PROFILES[profileName];
 
-        // Generate weak-targeted problems
-        for (let i = 0; i < finalWeak; i++) {
-            const skill = buckets.weak[i % buckets.weak.length];
-            const problem = generateProblemBySkill(operation, ageGroup, skill, pageSeed + seedCounter);
-            if (problem) {
-                problems.push({
-                    a: problem.a,
-                    b: problem.b,
-                    answer: problem.answer,
-                    skills: problem.skills,
-                    targetBucket: 'weak'
-                });
-            }
-            seedCounter++;
-        }
-
-        // Generate medium-targeted problems
-        for (let i = 0; i < finalMedium; i++) {
-            const skill = effectiveMedium.length > 0
-                ? effectiveMedium[i % effectiveMedium.length]
-                : buckets.weak.length > 0
-                    ? buckets.weak[i % buckets.weak.length]
-                    : null;
-            if (skill) {
-                const problem = generateProblemBySkill(operation, ageGroup, skill, pageSeed + seedCounter);
-                if (problem) {
-                    problems.push({
-                        a: problem.a,
-                        b: problem.b,
-                        answer: problem.answer,
-                        skills: problem.skills,
-                        targetBucket: 'medium'
-                    });
+        // Generate problems zone by zone (motivational order — no shuffle needed)
+        for (const [zoneName, zone] of Object.entries(profile)) {
+            for (let i = 0; i < zone.count; i++) {
+                // Determine target bucket for this position
+                let targetBucket;
+                if (zone.buckets) {
+                    targetBucket = zone.buckets[i % zone.buckets.length];
+                } else {
+                    targetBucket = zone.bucket;
                 }
-            }
-            seedCounter++;
-        }
 
-        // Generate strong-targeted problems (maintenance)
-        for (let i = 0; i < finalStrong; i++) {
-            const pool = hasStrong ? buckets.strong : (hasMedium ? effectiveMedium : buckets.weak);
-            if (pool.length > 0) {
-                const skill = pool[i % pool.length];
-                const problem = generateProblemBySkill(operation, ageGroup, skill, pageSeed + seedCounter);
-                if (problem) {
-                    problems.push({
-                        a: problem.a,
-                        b: problem.b,
-                        answer: problem.answer,
-                        skills: problem.skills,
-                        targetBucket: 'strong'
-                    });
+                const pool = getSkillPool(targetBucket, buckets, effectiveMedium);
+                if (pool.length > 0) {
+                    const skill = pool[(seedCounter) % pool.length];
+                    const problem = generateProblemBySkill(
+                        operation, ageGroup, skill, pageSeed + seedCounter
+                    );
+                    if (problem) {
+                        problems.push({
+                            a: problem.a,
+                            b: problem.b,
+                            answer: problem.answer,
+                            skills: problem.skills,
+                            targetBucket: targetBucket,
+                            zone: zoneName
+                        });
+                    }
                 }
+                seedCounter++;
             }
-            seedCounter++;
         }
-
-        // Deterministic shuffle
-        const shuffleSeed = pageSeed + 99999;
-        let shuffleState = shuffleSeed;
-        for (let i = problems.length - 1; i > 0; i--) {
-            shuffleState = (shuffleState * 9301 + 49297) % 233280;
-            const j = Math.floor((shuffleState / 233280) * (i + 1));
-            [problems[i], problems[j]] = [problems[j], problems[i]];
-        }
+        // NO SHUFFLE — problems are already in motivational order
 
         pages.push({
             pageNumber: pageNum,
@@ -186,13 +175,22 @@ function generateAdaptivePages(operation, ageGroup, skillProfile, baseSeed) {
         });
     }
 
+    // Count actual distribution across all pages
+    let totalWeak = 0, totalMedium = 0, totalStrong = 0;
+    for (const page of pages) {
+        for (const p of page.problems) {
+            if (p.targetBucket === 'weak') totalWeak++;
+            else if (p.targetBucket === 'medium') totalMedium++;
+            else totalStrong++;
+        }
+    }
+
     // Build reasoning metadata
     const reasoning = {
         weakSkills: buckets.weak.map(s => ({
             skill: s,
             errorRate: skills[s]?.errorRate || 0,
-            attempts: skills[s]?.attempts || 0,
-            problemCount: finalWeak > 0 ? Math.ceil(finalWeak / Math.max(buckets.weak.length, 1)) : 0
+            attempts: skills[s]?.attempts || 0
         })),
         mediumSkills: effectiveMedium.map(s => ({
             skill: s,
@@ -206,9 +204,14 @@ function generateAdaptivePages(operation, ageGroup, skillProfile, baseSeed) {
         })),
         totalProblems: pages.reduce((sum, p) => sum + p.problems.length, 0),
         distribution: {
-            weak: finalWeak * PAGES_PER_WEEK,
-            medium: finalMedium * PAGES_PER_WEEK,
-            strong: finalStrong * PAGES_PER_WEEK
+            weak: totalWeak,
+            medium: totalMedium,
+            strong: totalStrong
+        },
+        sequencing: {
+            type: 'motivational',
+            zones: ['warmup', 'rampup', 'focus', 'mixed', 'cooldown'],
+            weeklyArc: ['gentle', 'gentle', 'standard', 'standard', 'standard', 'challenge', 'challenge']
         },
         profileSummary: {
             totalAttempted: skillProfile.totalAttempted || 0,
@@ -495,7 +498,9 @@ module.exports = {
     classifySkillBuckets,
     generateAdaptivePages,
     deliverApprovedWorksheet,
-    DISTRIBUTION,
+    getPageProfile,
+    getSkillPool,
+    ZONE_PROFILES,
     THRESHOLDS,
     PROBLEMS_PER_PAGE,
     PAGES_PER_WEEK

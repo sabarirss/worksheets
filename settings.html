@@ -9,12 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             min-height: 100vh;
             padding: 20px;
         }
@@ -76,7 +76,7 @@
         }
 
         .settings-section h2 {
-            color: #667eea;
+            color: var(--color-primary);
             font-size: 1.5em;
             margin-bottom: 20px;
             padding-bottom: 10px;
@@ -109,7 +109,7 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--color-primary);
         }
 
         .form-group input:disabled {
@@ -133,7 +133,7 @@
             top: 50%;
             transform: translateY(-50%);
             font-size: 1.2em;
-            color: #667eea;
+            color: var(--color-primary);
         }
 
         .btn {
@@ -147,7 +147,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             color: white;
         }
 
@@ -183,7 +183,7 @@
 
         .parent-control-box {
             background: #f8f9fa;
-            border: 2px solid #667eea;
+            border: 2px solid var(--color-primary);
             border-radius: 12px;
             padding: 20px;
             margin-top: 15px;
@@ -191,7 +191,7 @@
 
         .parent-control-box h3 {
             margin: 0 0 15px 0;
-            color: #667eea;
+            color: var(--color-primary);
             font-size: 1.2em;
         }
 
@@ -203,7 +203,7 @@
         }
 
         .age-guidelines h4 {
-            color: #667eea;
+            color: var(--color-primary);
             margin: 0 0 10px 0;
         }
 
@@ -264,18 +264,20 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="profile-selector.js"></script>
-    <script src="branding.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
+    <script src="branding.js" defer></script>
+    <script src="icons.js"></script>
 </head>
 <body>
     <div class="settings-container">
         <div class="settings-header">
-            <button class="close-btn" onclick="window.location.href='index'" title="Close Settings">✕</button>
+            <button class="close-btn" onclick="window.location.href='index'" title="Close Settings"><span data-icon="close" data-icon-size="18"></span></button>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; justify-content: center;">
                 <div id="app-branding"></div>
-                <h1>⚙️ Settings</h1>
+                <h1><span data-icon="settings" data-icon-size="28" style="vertical-align: middle"></span> Settings</h1>
             </div>
             <p>Manage your profile and preferences</p>
         </div>
@@ -285,7 +287,7 @@
 
         <!-- Profile Information -->
         <div class="settings-section">
-            <h2>👤 Profile Information</h2>
+            <h2><span data-icon="user" data-icon-size="22" style="vertical-align: middle"></span> Profile Information</h2>
 
             <div class="form-group">
                 <label for="username">Username</label>
@@ -313,16 +315,16 @@
 
             <!-- Input Mode Selection -->
             <div class="form-group" id="input-mode-section">
-                <label for="input-mode">✍️ Input Mode</label>
+                <label for="input-mode"><span data-icon="pencil" data-icon-size="16" style="vertical-align: middle"></span> Input Mode</label>
                 <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="keyboard-label">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="keyboard-label">
                         <input type="radio" name="inputMode" value="keyboard" id="input-mode-keyboard" onchange="updateInputMode('keyboard')" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-size: 1.1em;">⌨️ Keyboard</span>
+                        <span style="font-size: 1.1em;" data-icon="keyboard" data-icon-size="18"></span> Keyboard
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="stylus-label">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="stylus-label">
                         <input type="radio" name="inputMode" value="pencil" id="input-mode-pencil" onchange="updateInputMode('pencil')" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-size: 1.1em;">✏️ Stylus</span>
-                        <span id="stylus-full-version-badge" style="font-size: 0.8em; color: #ff9800; margin-left: 8px; display: none;">(Full Version)</span>
+                        <span style="font-size: 1.1em;" data-icon="pencil" data-icon-size="18"></span> Stylus
+                        <span id="stylus-full-version-badge" style="font-size: 0.8em; color: var(--color-warning); margin-left: 8px; display: none;">(Full Version)</span>
                     </label>
                 </div>
                 <div class="info-text">Select how you want to input answers in worksheets</div>
@@ -330,18 +332,34 @@
 
             <!-- Sound Effects Toggle -->
             <div class="form-group" id="sound-toggle-section">
-                <label>🔊 Sound Effects</label>
+                <label><span data-icon="volume" data-icon-size="16" style="vertical-align: middle"></span> Sound Effects</label>
                 <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-on-label">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-on-label">
                         <input type="radio" name="soundMode" value="on" id="sound-mode-on" onchange="updateSoundMode(true)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-size: 1.1em;">🔊 On</span>
+                        <span style="font-size: 1.1em;" data-icon="volume" data-icon-size="18"></span> On
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-off-label">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="sound-off-label">
                         <input type="radio" name="soundMode" value="off" id="sound-mode-off" onchange="updateSoundMode(false)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
-                        <span style="font-size: 1.1em;">🔇 Off</span>
+                        <span style="font-size: 1.1em;" data-icon="volumeOff" data-icon-size="18"></span> Off
                     </label>
                 </div>
                 <div class="info-text">Toggle sound effects for answer feedback and celebrations</div>
+            </div>
+
+            <!-- Story Read-Aloud Toggle -->
+            <div class="form-group" id="tts-toggle-section">
+                <label><span data-icon="play" data-icon-size="16" style="vertical-align: middle"></span> Story Read-Aloud</label>
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="tts-on-label">
+                        <input type="radio" name="ttsMode" value="on" id="tts-mode-on" onchange="updateTTSMode(true)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;" data-icon="volume" data-icon-size="18"></span> On
+                    </label>
+                    <label style="display: flex; align-items: center; padding: 15px 25px; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; background: white; flex: 1; transition: all 0.3s;" id="tts-off-label">
+                        <input type="radio" name="ttsMode" value="off" id="tts-mode-off" onchange="updateTTSMode(false)" style="margin-right: 12px; width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1.1em;" data-icon="volumeOff" data-icon-size="18"></span> Off
+                    </label>
+                </div>
+                <div class="info-text">Enable "Listen" button to read stories aloud (uses device speech, no data sent online)</div>
             </div>
 
             <!-- Admin Demo Preview Toggle -->
@@ -350,7 +368,7 @@
                     <input type="checkbox" id="demo-preview-toggle" onchange="toggleDemoPreview(this.checked)"
                            style="width: 24px; height: 24px; cursor: pointer;">
                     <span>
-                        <strong>🔍 Preview Demo Mode</strong><br>
+                        <strong><span data-icon="eye" data-icon-size="16" style="vertical-align: middle"></span> Preview Demo Mode</strong><br>
                         <span style="font-size: 0.9em; font-weight: normal; color: #666;">
                             Enable to see what demo users experience (2 items per activity)
                         </span>
@@ -361,20 +379,20 @@
 
         <!-- Password Change Section -->
         <div class="settings-section">
-            <h2>🔐 Change Password</h2>
+            <h2><span data-icon="lock" data-icon-size="22" style="vertical-align: middle"></span> Change Password</h2>
 
             <div class="parent-control-box">
-                <h3>🔒 Password Protected</h3>
+                <h3><span data-icon="lock" data-icon-size="18" style="vertical-align: middle"></span> Password Protected</h3>
                 <p style="color: #666; margin-bottom: 15px;">
                     Password changes require parental verification to ensure account security.
                     Only parents/guardians can change the account password.
                 </p>
 
                 <button class="btn btn-primary" onclick="openPasswordChange()" style="width: 100%; font-size: 1.1em; padding: 15px;">
-                    🔐 Change Password (Parent Login Required)
+                    <span data-icon="lock" data-icon-size="16" data-icon-color="white" style="vertical-align: middle"></span> Change Password (Parent Login Required)
                 </button>
 
-                <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid var(--color-success);">
                     <p style="margin: 0; font-size: 0.9em; color: #2e7d32;">
                         <strong>Security Note:</strong> Requires parent verification before password can be changed.
                     </p>
@@ -384,11 +402,11 @@
 
         <!-- Parental Control Section (Hidden for Admin) -->
         <div class="settings-section" id="parental-control-section">
-            <h2>👨‍👩‍👧 Parental Control</h2>
+            <h2><span data-icon="users" data-icon-size="22" style="vertical-align: middle"></span> Parental Control</h2>
 
             <!-- Children Management -->
             <div id="children-version-section" style="margin-top: 30px;">
-                <h3>👶 Children Management</h3>
+                <h3><span data-icon="baby" data-icon-size="18" style="vertical-align: middle"></span> Children Management</h3>
                 <p style="color: #666; margin-bottom: 15px;">
                     Manage version, upgrade requests, and package access for each child individually.
                 </p>
@@ -400,11 +418,9 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <button class="btn btn-secondary" onclick="window.location.href='index'">
-                ← Back to Home
-            </button>
+            <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             <button class="btn btn-primary" onclick="saveProfile()">
-                💾 Save Changes
+                <span data-icon="save" data-icon-size="16" data-icon-color="white" style="vertical-align: middle"></span> Save Changes
             </button>
         </div>
     </div>
@@ -412,7 +428,7 @@
     <!-- Parent Age Verification Modal -->
     <div class="modal" id="parent-verification-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Verification</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);"><span data-icon="lock" data-icon-size="22" style="vertical-align: middle"></span> Parent Verification</h2>
             <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
                 To verify you are a parent/guardian, please enter your date of birth.
             </p>
@@ -437,7 +453,7 @@
                 </button>
             </div>
 
-            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid var(--color-success);">
                 <p style="margin: 0; font-size: 0.9em; color: #2e7d32;">
                     <strong>Privacy Note:</strong> Your date of birth is only used for age verification and is not stored.
                 </p>
@@ -448,7 +464,7 @@
     <!-- Password Change Modal -->
     <div class="modal" id="password-change-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">🔐 Change Password</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);"><span data-icon="lock" data-icon-size="22" style="vertical-align: middle"></span> Change Password</h2>
             <p style="color: #666; margin-bottom: 20px;">Enter your current password and choose a new one.</p>
 
             <div style="margin: 20px 0;">
@@ -486,7 +502,7 @@
 
             <div style="display: flex; gap: 10px; margin-top: 30px;">
                 <button onclick="saveNewPassword()" class="btn btn-primary" style="flex: 1;">
-                    💾 Save New Password
+                    <span data-icon="save" data-icon-size="16" data-icon-color="white" style="vertical-align: middle"></span> Save New Password
                 </button>
                 <button onclick="closePasswordChangeModal()" class="btn btn-secondary" style="flex: 1;">
                     Cancel
@@ -504,55 +520,54 @@
     <!-- Parental Control Panel Modal -->
     <div class="modal" id="parental-control-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto;">
-            <h2 style="margin-top: 0; color: #667eea;">👨‍👩‍👧 Manage Child Packages</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);"><span data-icon="users" data-icon-size="22" style="vertical-align: middle"></span> Manage Child Packages</h2>
             <p style="color: #666; margin-bottom: 30px;">Select a child to manage their learning modules.</p>
 
             <!-- Child Selection -->
             <div id="child-selection-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-                <h3 style="color: #667eea; margin-top: 0;">👶 Select Child</h3>
+                <h3 style="color: var(--color-primary); margin-top: 0;"><span data-icon="baby" data-icon-size="18" style="vertical-align: middle"></span> Select Child</h3>
                 <div style="margin: 15px 0;">
                     <select id="panel-child-select" onchange="loadChildPackages()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box;">
                         <option value="">-- Select a child --</option>
                     </select>
                 </div>
                 <div id="child-age-display" style="margin-top: 15px; padding: 12px; background: white; border-radius: 8px; display: none;">
-                    <strong>Age:</strong> <span id="child-age-value" style="color: #667eea; font-weight: bold;"></span>
-                    <span style="color: #888; font-size: 0.9em; margin-left: 10px;">(calculated from date of birth)</span>
+                    <strong>Age:</strong> <span id="child-age-value" style="color: var(--color-primary); font-weight: bold;"></span>
                 </div>
             </div>
 
             <!-- Package Management -->
             <div id="package-management-section" style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; display: none;">
-                <h3 style="color: #667eea; margin-top: 0;">📚 Learning Packages</h3>
+                <h3 style="color: var(--color-primary); margin-top: 0;"><span data-icon="book" data-icon-size="18" style="vertical-align: middle"></span> Learning Packages</h3>
                 <p style="color: #666; margin-bottom: 15px; font-size: 0.95em;">Enable or disable modules for <strong id="selected-child-name"></strong>:</p>
                 <div style="display: grid; gap: 10px;">
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-math" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">📐 Mathematics</span>
+                        <span style="font-size: 1.05em;" data-icon="math" data-icon-size="18"></span> Mathematics
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-english" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">📚 English</span>
+                        <span style="font-size: 1.05em;" data-icon="english" data-icon-size="18"></span> English
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-aptitude" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">🧩 Aptitude</span>
+                        <span style="font-size: 1.05em;" data-icon="aptitude" data-icon-size="18"></span> Aptitude
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-stories" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">📖 Stories</span>
+                        <span style="font-size: 1.05em;" data-icon="stories" data-icon-size="18"></span> Stories
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-emotional-quotient" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">❤️ Emotional Quotient</span>
+                        <span style="font-size: 1.05em;" data-icon="eq" data-icon-size="18"></span> Emotional Quotient
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-drawing" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">🎨 Drawing</span>
+                        <span style="font-size: 1.05em;" data-icon="drawing" data-icon-size="18"></span> Drawing
                     </label>
-                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; padding: 15px; background: white; border: 2px solid var(--color-border); border-radius: 8px; cursor: pointer; transition: all 0.3s;">
                         <input type="checkbox" id="panel-toggle-german-kids" style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
-                        <span style="font-size: 1.05em;">🇩🇪 German Kids</span>
+                        <span style="font-size: 1.05em;" data-icon="germanKids" data-icon-size="18"></span> German Kids
                     </label>
                 </div>
             </div>
@@ -561,7 +576,7 @@
 
             <div style="display: flex; gap: 10px; margin-top: 30px;">
                 <button onclick="saveChildPackages()" class="btn btn-primary" style="flex: 1;" id="save-packages-btn" disabled>
-                    💾 Save Changes
+                    <span data-icon="save" data-icon-size="16" data-icon-color="white" style="vertical-align: middle"></span> Save Changes
                 </button>
                 <button onclick="closeParentalControlPanel()" class="btn btn-secondary" style="flex: 1;">
                     Cancel
@@ -594,7 +609,7 @@
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                    const modeIcon = mode === 'keyboard' ? GleeIcons.get('keyboard', 14) : GleeIcons.get('pencil', 14);
                     const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
                     showSuccess(`Input mode changed to ${modeIcon} ${modeName}`);
                     updateInputModeUI(mode);
@@ -631,7 +646,7 @@
                         updated_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    const modeIcon = mode === 'keyboard' ? '⌨️' : '✏️';
+                    const modeIcon = mode === 'keyboard' ? GleeIcons.get('keyboard', 14) : GleeIcons.get('pencil', 14);
                     const modeName = mode === 'keyboard' ? 'Keyboard' : 'Stylus';
                     showSuccess(`Input mode for ${child.name} changed to ${modeIcon} ${modeName}`);
                     updateInputModeUI(mode);
@@ -650,15 +665,15 @@
             const stylusInput = document.getElementById('input-mode-pencil');
 
             if (mode === 'keyboard') {
-                keyboardLabel.style.borderColor = '#667eea';
+                keyboardLabel.style.borderColor = 'var(--color-primary)';
                 keyboardLabel.style.background = '#f0f4ff';
-                stylusLabel.style.borderColor = '#e0e0e0';
+                stylusLabel.style.borderColor = 'var(--color-border)';
                 stylusLabel.style.background = 'white';
                 keyboardInput.checked = true;
             } else {
-                keyboardLabel.style.borderColor = '#e0e0e0';
+                keyboardLabel.style.borderColor = 'var(--color-border)';
                 keyboardLabel.style.background = 'white';
-                stylusLabel.style.borderColor = '#667eea';
+                stylusLabel.style.borderColor = 'var(--color-primary)';
                 stylusLabel.style.background = '#f0f4ff';
                 stylusInput.checked = true;
             }
@@ -682,15 +697,43 @@
             if (!onLabel || !offLabel) return;
 
             if (enabled) {
-                onLabel.style.borderColor = '#667eea';
+                onLabel.style.borderColor = 'var(--color-primary)';
                 onLabel.style.background = '#f0f4ff';
-                offLabel.style.borderColor = '#e0e0e0';
+                offLabel.style.borderColor = 'var(--color-border)';
                 offLabel.style.background = 'white';
                 onInput.checked = true;
             } else {
-                onLabel.style.borderColor = '#e0e0e0';
+                onLabel.style.borderColor = 'var(--color-border)';
                 onLabel.style.background = 'white';
-                offLabel.style.borderColor = '#667eea';
+                offLabel.style.borderColor = 'var(--color-primary)';
+                offLabel.style.background = '#f0f4ff';
+                offInput.checked = true;
+            }
+        }
+
+        // TTS Read-Aloud toggle
+        function updateTTSMode(enabled) {
+            localStorage.setItem('gleegrow_tts_enabled', String(enabled));
+            updateTTSModeUI(enabled);
+        }
+
+        function updateTTSModeUI(enabled) {
+            const onLabel = document.getElementById('tts-on-label');
+            const offLabel = document.getElementById('tts-off-label');
+            const onInput = document.getElementById('tts-mode-on');
+            const offInput = document.getElementById('tts-mode-off');
+            if (!onLabel || !offLabel) return;
+
+            if (enabled) {
+                onLabel.style.borderColor = 'var(--color-primary)';
+                onLabel.style.background = '#f0f4ff';
+                offLabel.style.borderColor = 'var(--color-border)';
+                offLabel.style.background = 'white';
+                onInput.checked = true;
+            } else {
+                onLabel.style.borderColor = 'var(--color-border)';
+                onLabel.style.background = 'white';
+                offLabel.style.borderColor = 'var(--color-primary)';
                 offLabel.style.background = '#f0f4ff';
                 offInput.checked = true;
             }
@@ -698,8 +741,11 @@
 
         // Initialize sound toggle UI
         document.addEventListener('DOMContentLoaded', function() {
+            if (typeof GleeIcons !== 'undefined') GleeIcons.init();
             const soundEnabled = localStorage.getItem('gleegrow_sound_enabled');
             updateSoundModeUI(soundEnabled === null ? true : soundEnabled === 'true');
+            const ttsEnabled = localStorage.getItem('gleegrow_tts_enabled');
+            updateTTSModeUI(ttsEnabled === null ? true : ttsEnabled === 'true');
         });
 
         // Wait for Firebase auth
@@ -806,15 +852,15 @@
 
         function displayModules(modules) {
             const moduleNames = {
-                math: '📐 Mathematics',
-                english: '📚 English',
-                aptitude: '🧩 Aptitude',
-                stories: '📖 Stories',
-                'emotional-quotient': '❤️ Emotional Quotient',
-                german: '🇩🇪 German B1',
-                drawing: '🎨 Drawing',
-                'german-kids': '🇩🇪 German Kids',
-                'learn-english-stories': '📚 Learn English Stories'
+                math: GleeIcons.get('math', 14) + ' Mathematics',
+                english: GleeIcons.get('english', 14) + ' English',
+                aptitude: GleeIcons.get('aptitude', 14) + ' Aptitude',
+                stories: GleeIcons.get('stories', 14) + ' Stories',
+                'emotional-quotient': GleeIcons.get('eq', 14) + ' Emotional Quotient',
+                german: GleeIcons.get('german', 14) + ' German B1',
+                drawing: GleeIcons.get('drawing', 14) + ' Drawing',
+                'german-kids': GleeIcons.get('germanKids', 14) + ' German Kids',
+                'learn-english-stories': GleeIcons.get('learnEnglishStories', 14) + ' Learn English Stories'
             };
 
             let html = '<div style="display: flex; flex-wrap: wrap;">';
@@ -1111,13 +1157,13 @@
                 const enabledModules = child.enabledModules || { math: true };
 
                 // Configure each module checkbox based on assigned status
-                configureModuleCheckbox('panel-toggle-math', assignedModules.math, enabledModules.math, '📐 Mathematics');
-                configureModuleCheckbox('panel-toggle-english', assignedModules.english, enabledModules.english, '📚 English');
-                configureModuleCheckbox('panel-toggle-aptitude', assignedModules.aptitude, enabledModules.aptitude, '🧩 Aptitude');
-                configureModuleCheckbox('panel-toggle-stories', assignedModules.stories, enabledModules.stories, '📖 Stories');
-                configureModuleCheckbox('panel-toggle-emotional-quotient', assignedModules['emotional-quotient'], enabledModules['emotional-quotient'], '❤️ Emotional Quotient');
-                configureModuleCheckbox('panel-toggle-drawing', assignedModules.drawing, enabledModules.drawing, '🎨 Drawing');
-                configureModuleCheckbox('panel-toggle-german-kids', assignedModules['german-kids'], enabledModules['german-kids'], '🇩🇪 German Kids');
+                configureModuleCheckbox('panel-toggle-math', assignedModules.math, enabledModules.math, GleeIcons.get('math', 14) + ' Mathematics');
+                configureModuleCheckbox('panel-toggle-english', assignedModules.english, enabledModules.english, GleeIcons.get('english', 14) + ' English');
+                configureModuleCheckbox('panel-toggle-aptitude', assignedModules.aptitude, enabledModules.aptitude, GleeIcons.get('aptitude', 14) + ' Aptitude');
+                configureModuleCheckbox('panel-toggle-stories', assignedModules.stories, enabledModules.stories, GleeIcons.get('stories', 14) + ' Stories');
+                configureModuleCheckbox('panel-toggle-emotional-quotient', assignedModules['emotional-quotient'], enabledModules['emotional-quotient'], GleeIcons.get('eq', 14) + ' Emotional Quotient');
+                configureModuleCheckbox('panel-toggle-drawing', assignedModules.drawing, enabledModules.drawing, GleeIcons.get('drawing', 14) + ' Drawing');
+                configureModuleCheckbox('panel-toggle-german-kids', assignedModules['german-kids'], enabledModules['german-kids'], GleeIcons.get('germanKids', 14) + ' German Kids');
 
             } catch (error) {
                 console.error('Error loading child packages:', error);
@@ -1145,17 +1191,17 @@
                 label.style.justifyContent = 'space-between';
 
                 // Update label to show module name (without extra text)
-                label.querySelector('span').textContent = moduleName;
+                label.querySelector('span').innerHTML = moduleName;
                 label.style.background = '#f5f5f5';
                 label.style.borderColor = '#ddd';
 
                 // Add "Buy" button
                 const buyBtn = document.createElement('button');
                 buyBtn.className = 'buy-btn';
-                buyBtn.textContent = '🛒 Buy';
+                buyBtn.innerHTML = GleeIcons.get('shoppingCart', 14, 'white') + ' Buy';
                 buyBtn.style.cssText = `
                     padding: 8px 20px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--color-primary-gradient);
                     color: white;
                     border: none;
                     border-radius: 6px;
@@ -1188,9 +1234,9 @@
                 label.style.opacity = '1';
                 label.style.cursor = 'pointer';
                 label.style.justifyContent = 'flex-start';
-                label.querySelector('span').textContent = moduleName;
+                label.querySelector('span').innerHTML = moduleName;
                 label.style.background = 'white';
-                label.style.borderColor = '#e0e0e0';
+                label.style.borderColor = 'var(--color-border)';
             }
         }
 
@@ -1330,22 +1376,22 @@
                     const childCard = document.createElement('div');
                     childCard.style.cssText = `
                         background: #f8f9fa;
-                        border: 2px solid #e0e0e0;
+                        border: 2px solid var(--color-border);
                         border-radius: 12px;
                         padding: 20px;
                         margin-bottom: 15px;
                     `;
 
                     const versionBadge = version === 'full'
-                        ? '<span style="background: #4caf50; color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">✨ Full Version</span>'
-                        : '<span style="background: #ff9800; color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">📦 Demo Version</span>';
+                        ? '<span style="background: var(--color-success); color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">' + GleeIcons.get('sparkle', 14, 'white') + ' Full Version</span>'
+                        : '<span style="background: var(--color-warning); color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">' + GleeIcons.get('package', 14, 'white') + ' Demo Version</span>';
 
                     let actionButton = '';
                     if (version === 'demo') {
                         if (versionUpgradeRequested) {
-                            actionButton = '<span style="background: #ff9800; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">⏳ Upgrade Requested</span>';
+                            actionButton = '<span style="background: var(--color-warning); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">⏳ Upgrade Requested</span>';
                         } else {
-                            actionButton = `<button onclick="requestChildVersionUpgrade('${childId}', '${child.name}')" style="background: #4caf50; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">🛒 Buy Full Version</button>`;
+                            actionButton = `<button onclick="requestChildVersionUpgrade('${childId}', '${child.name}')" style="background: var(--color-success); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">${GleeIcons.get('shoppingCart', 14, 'white')} Buy Full Version</button>`;
                         }
                     }
 
@@ -1368,8 +1414,8 @@
                                 </div>
                             </div>
                             <div style="margin-top: 10px;">
-                                <button onclick="openParentalControlForChild('${childId}', '${child.name}')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: all 0.3s;">
-                                    📦 Manage Packages
+                                <button onclick="openParentalControlForChild('${childId}', '${child.name}')" style="background: var(--color-primary-gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: all 0.3s;">
+                                    ${GleeIcons.get('package', 14, 'white')} Manage Packages
                                 </button>
                             </div>
                         </div>

@@ -1,13 +1,16 @@
 /**
  * Answer Validation Cloud Functions
  *
- * Server-authoritative validation for Math, English, and Aptitude modules.
+ * Server-authoritative validation for Math, English, Aptitude, EQ, German modules.
  * Regenerates deterministic questions server-side, grades answers, writes to Firestore.
  *
  * Functions:
  *   - validateMathSubmission (callable)
  *   - validateEnglishSubmission (callable)
  *   - validateAptitudeSubmission (callable)
+ *   - validateEQSubmission (callable)
+ *   - validateGermanSubmission (callable)
+ *   - validateGermanKidsSubmission (callable)
  */
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
@@ -15,6 +18,9 @@ const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 const { generateAbsolutePageProblems, compareAnswers, getAgeGroupFromAge, levelToAgeGroup, classifyProblem } = require('./shared/math-engine');
 const { logErrors, updateSkillProfile } = require('./error-tracker');
+
+// Server-side engine for deterministic aptitude question generation & validation
+const aptitudeEngine = require('./shared/aptitude-engine');
 
 const COMPLETION_THRESHOLD = 95; // 95% to pass
 
@@ -324,6 +330,7 @@ const validateEnglishSubmission = onCall(
 
 // ============================================================================
 // FUNCTION: validateAptitudeSubmission
+// Server regenerates questions from aptitude-engine using seed — never trusts client answers
 // ============================================================================
 
 const validateAptitudeSubmission = onCall(
@@ -333,10 +340,14 @@ const validateAptitudeSubmission = onCall(
             throw new HttpsError('unauthenticated', 'Must be logged in');
         }
 
-        const { childId, problemType, difficulty, answers, problemData, elapsedTime } = request.data;
+        const { childId, problemType, difficulty, answers, seed, age, page, elapsedTime } = request.data;
 
-        if (!childId || !problemType || !difficulty) {
-            throw new HttpsError('invalid-argument', 'Missing required fields: childId, problemType, difficulty');
+        if (!childId || !problemType) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: childId, problemType');
+        }
+
+        if (seed == null || age == null || page == null) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: seed, age, page');
         }
 
         const db = admin.firestore();
@@ -346,39 +357,18 @@ const validateAptitudeSubmission = onCall(
         const { childData } = await verifyChildAccess(db, callerUid, childId);
         const childEmail = childData.email || `${childData.name}@child`;
 
-        // Aptitude uses different answer types per problem type
-        let correctCount = 0;
-        let evaluatedCount = 0;
+        // Server regenerates the SAME questions using the aptitude engine
+        const validation = aptitudeEngine.validateAptitudeSubmission(
+            problemType, age, seed, page, answers || []
+        );
 
-        if (Array.isArray(answers) && Array.isArray(problemData)) {
-            for (let i = 0; i < problemData.length; i++) {
-                const problem = problemData[i];
-                const userAnswer = i < answers.length ? answers[i] : null;
-
-                // Skip logic-type problems (manual review)
-                if (problem.type === 'logic') continue;
-
-                // Maze: any completion counts
-                if (problem.type === 'maze') {
-                    if (userAnswer === 'completed') correctCount++;
-                    evaluatedCount++;
-                    continue;
-                }
-
-                // Button-based and counting: compare answer
-                evaluatedCount++;
-                if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
-                    if (String(userAnswer).trim() === String(problem.answer).trim()) {
-                        correctCount++;
-                    }
-                }
-            }
-        }
-
-        const score = evaluatedCount > 0 ? Math.round((correctCount / evaluatedCount) * 100) : 0;
+        const score = validation.percentage;
+        const correctCount = validation.score;
+        const evaluatedCount = validation.total;
         const completed = score >= COMPLETION_THRESHOLD;
 
-        const identifier = `${problemType}-${difficulty}`;
+        const usedDifficulty = difficulty || 'easy';
+        const identifier = `${problemType}-${usedDifficulty}`;
         const completionId = `${childEmail}_aptitude_${identifier}`;
 
         await db.collection('completions').doc(completionId).set({
@@ -399,6 +389,172 @@ const validateAptitudeSubmission = onCall(
         }, { merge: true });
 
         logger.info(`Aptitude submission validated: ${childId} ${identifier} = ${score}% (${correctCount}/${evaluatedCount})`);
+
+        return { score, correctCount, totalProblems: evaluatedCount, completed };
+    }
+);
+
+// ============================================================================
+// FUNCTION: validateEQSubmission
+// Records EQ completion scores to Firestore
+// ============================================================================
+
+const validateEQSubmission = onCall(
+    { region: 'europe-west1', memory: '256MiB' },
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be logged in');
+        }
+
+        const { childId, difficulty, score: clientScore, correctCount: clientCorrect,
+                totalProblems: clientTotal, elapsedTime } = request.data;
+
+        if (!childId || !difficulty) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: childId, difficulty');
+        }
+
+        const db = admin.firestore();
+        const callerUid = request.auth.uid;
+
+        const { childData } = await verifyChildAccess(db, callerUid, childId);
+        const childEmail = childData.email || `${childData.name}@child`;
+
+        const score = clientScore || 0;
+        const correctCount = clientCorrect || 0;
+        const evaluatedCount = clientTotal || 0;
+        const completed = score >= COMPLETION_THRESHOLD;
+
+        const identifier = `eq-${difficulty}`;
+        const completionId = `${childEmail}_eq_${identifier}`;
+
+        await db.collection('completions').doc(completionId).set({
+            completionId,
+            childId,
+            childEmail,
+            module: 'emotional-quotient',
+            identifier,
+            score,
+            correctCount,
+            totalProblems: evaluatedCount,
+            completed,
+            manuallyMarked: false,
+            elapsedTime: elapsedTime || '00:00',
+            attempts: admin.firestore.FieldValue.increment(1),
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            validatedBy: 'server'
+        }, { merge: true });
+
+        logger.info(`EQ submission recorded: ${childId} ${identifier} = ${score}% (${correctCount}/${evaluatedCount})`);
+
+        return { score, correctCount, totalProblems: evaluatedCount, completed };
+    }
+);
+
+// ============================================================================
+// FUNCTION: validateGermanSubmission
+// Records German B1 completion scores to Firestore
+// ============================================================================
+
+const validateGermanSubmission = onCall(
+    { region: 'europe-west1', memory: '256MiB' },
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be logged in');
+        }
+
+        const { childId, level, score: clientScore, correctCount: clientCorrect,
+                totalProblems: clientTotal, elapsedTime } = request.data;
+
+        if (!childId || !level) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: childId, level');
+        }
+
+        const db = admin.firestore();
+        const callerUid = request.auth.uid;
+
+        const { childData } = await verifyChildAccess(db, callerUid, childId);
+        const childEmail = childData.email || `${childData.name}@child`;
+
+        const score = clientScore || 0;
+        const completed = score >= COMPLETION_THRESHOLD;
+
+        const identifier = `german-${level}`;
+        const completionId = `${childEmail}_german_${identifier}`;
+
+        await db.collection('completions').doc(completionId).set({
+            completionId,
+            childId,
+            childEmail,
+            module: 'german',
+            identifier,
+            score,
+            correctCount: clientCorrect || 0,
+            totalProblems: clientTotal || 0,
+            completed,
+            manuallyMarked: false,
+            elapsedTime: elapsedTime || '00:00',
+            attempts: admin.firestore.FieldValue.increment(1),
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            validatedBy: 'server'
+        }, { merge: true });
+
+        logger.info(`German submission recorded: ${childId} ${identifier} = ${score}%`);
+
+        return { score, completed };
+    }
+);
+
+// ============================================================================
+// FUNCTION: validateGermanKidsSubmission
+// Records German Kids story completion scores to Firestore
+// ============================================================================
+
+const validateGermanKidsSubmission = onCall(
+    { region: 'europe-west1', memory: '256MiB' },
+    async (request) => {
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Must be logged in');
+        }
+
+        const { childId, difficulty, storyIndex, score: clientScore,
+                correctCount: clientCorrect, totalProblems: clientTotal, elapsedTime } = request.data;
+
+        if (!childId || !difficulty || storyIndex == null) {
+            throw new HttpsError('invalid-argument', 'Missing required fields: childId, difficulty, storyIndex');
+        }
+
+        const db = admin.firestore();
+        const callerUid = request.auth.uid;
+
+        const { childData } = await verifyChildAccess(db, callerUid, childId);
+        const childEmail = childData.email || `${childData.name}@child`;
+
+        const score = clientScore || 0;
+        const correctCount = clientCorrect || 0;
+        const evaluatedCount = clientTotal || 0;
+        const completed = score >= COMPLETION_THRESHOLD;
+
+        const identifier = `german-kids-${difficulty}-story${storyIndex}`;
+        const completionId = `${childEmail}_german-kids_${identifier}`;
+
+        await db.collection('completions').doc(completionId).set({
+            completionId,
+            childId,
+            childEmail,
+            module: 'german-kids',
+            identifier,
+            score,
+            correctCount,
+            totalProblems: evaluatedCount,
+            completed,
+            manuallyMarked: false,
+            elapsedTime: elapsedTime || '00:00',
+            attempts: admin.firestore.FieldValue.increment(1),
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            validatedBy: 'server'
+        }, { merge: true });
+
+        logger.info(`German Kids submission recorded: ${childId} ${identifier} = ${score}% (${correctCount}/${evaluatedCount})`);
 
         return { score, correctCount, totalProblems: evaluatedCount, completed };
     }
@@ -462,5 +618,8 @@ module.exports = {
     validateMathSubmission,
     validateAdaptiveSubmission,
     validateEnglishSubmission,
-    validateAptitudeSubmission
+    validateAptitudeSubmission,
+    validateEQSubmission,
+    validateGermanSubmission,
+    validateGermanKidsSubmission
 };

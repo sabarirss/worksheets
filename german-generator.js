@@ -486,8 +486,8 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="location.reload()">← Back to Modules</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="location.reload()" title="Back to Modules"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
             <div class="worksheet-header">
@@ -769,6 +769,32 @@ function checkAnswers() {
         ${percentage < 80 ? '<p style="color: #cc6600; font-weight: bold;">Weiter üben! Keep practicing!</p>' : ''}
     `;
     resultsDiv.style.display = 'block';
+
+    // Record score to server via Cloud Function
+    submitGermanScore(currentWorksheet.level || 'articles', fullCorrect, maxScore, percentage);
+}
+
+// Submit German B1 score to Cloud Function for Firestore persistence
+async function submitGermanScore(level, correctCount, totalProblems, percentage) {
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    if (!child || !child.id) return;
+
+    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+
+    try {
+        const validateGerman = firebase.app().functions('europe-west1').httpsCallable('validateGermanSubmission');
+        const result = await validateGerman({
+            childId: child.id,
+            level: level,
+            score: percentage,
+            correctCount: correctCount,
+            totalProblems: totalProblems,
+            elapsedTime: elapsedTime
+        });
+        console.log('German submission recorded by server:', result.data);
+    } catch (err) {
+        console.error('German Cloud Function submission failed:', err.message);
+    }
 }
 
 function showAnswerKey() {
@@ -806,17 +832,17 @@ function savePDF() {
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
-    const navigation = document.querySelector('.navigation');
+    const backRow = document.querySelector('.back-row');
     const answerKey = document.getElementById('answer-key');
 
     const controlsDisplay = controls.style.display;
     const resultsDisplay = results.style.display;
-    const navigationDisplay = navigation.style.display;
+    const backRowDisplay = backRow ? backRow.style.display : '';
     const answerKeyDisplay = answerKey.style.display;
 
     controls.style.display = 'none';
     results.style.display = 'none';
-    navigation.style.display = 'none';
+    if (backRow) backRow.style.display = 'none';
     answerKey.style.display = 'none';
 
     const element = document.querySelector('.worksheet-container');
@@ -831,7 +857,7 @@ function savePDF() {
     html2pdf().set(opt).from(element).save().then(() => {
         controls.style.display = controlsDisplay;
         results.style.display = resultsDisplay;
-        navigation.style.display = navigationDisplay;
+        if (backRow) backRow.style.display = backRowDisplay;
         answerKey.style.display = answerKeyDisplay;
     });
 }

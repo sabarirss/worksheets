@@ -114,7 +114,7 @@ function showAdminLevelIndicator(module, container) {
         const banner = document.createElement('div');
         banner.className = 'admin-level-banner';
         banner.style.cssText = `
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
@@ -122,7 +122,7 @@ function showAdminLevelIndicator(module, container) {
             font-size: 1.1em;
             font-weight: bold;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px var(--color-primary-30);
         `;
         banner.innerHTML = `
             📊 Admin Mode: Viewing ${getLevelDisplayName(access.level)}

@@ -35,6 +35,21 @@ let modelLoading = false;
 let modelLoaded = false;
 
 /**
+ * Lazy-load TensorFlow.js only when handwriting recognition is first needed.
+ * Removes 1.4MB blocking load from page startup.
+ */
+async function ensureTFLoaded() {
+    if (window.tf) return;
+    return new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js';
+        s.onload = resolve;
+        s.onerror = function() { reject(new Error('Failed to load TensorFlow.js')); };
+        document.head.appendChild(s);
+    });
+}
+
+/**
  * Load the pre-trained MNIST model for digit recognition
  * Uses TensorFlow.js hosted model
  */
@@ -56,6 +71,9 @@ async function loadHandwritingModel() {
     try {
         modelLoading = true;
         console.log('Loading handwriting recognition model...');
+
+        // Lazy-load TensorFlow.js if not already loaded
+        await ensureTFLoaded();
 
         // Ensure TensorFlow.js is fully initialized first
         await tf.ready();
@@ -371,13 +389,15 @@ async function recognizeMultipleDigits(canvases) {
 }
 
 /**
- * Find digit segments in a canvas by detecting vertical gaps between strokes.
- * Returns array of {left, right, top, bottom} bounding boxes, one per digit.
+ * Find character/digit segments in a canvas by detecting vertical gaps between strokes.
+ * Returns array of {left, right, top, bottom} bounding boxes, one per character.
  *
- * @param {HTMLCanvasElement} canvas - Canvas with handwritten number
+ * @param {HTMLCanvasElement} canvas - Canvas with handwritten text/number
+ * @param {number} [expectedCount=0] - Expected number of characters (hint for better splitting)
  * @returns {Array<Object>} Array of segment bounding boxes
  */
-function findDigitSegments(canvas) {
+function findDigitSegments(canvas, expectedCount) {
+    expectedCount = expectedCount || 0;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const w = canvas.width;
     const h = canvas.height;
@@ -415,46 +435,66 @@ function findDigitSegments(canvas) {
     const contentWidth = right - left + 1;
     const contentHeight = bottom - top + 1;
 
-    // If width < 1.3x height, likely single digit
-    if (contentWidth < contentHeight * 1.3) {
+    // If width < 1.2x height and no expectedCount hint, likely single character
+    if (contentWidth < contentHeight * 1.2 && expectedCount <= 1) {
         return [{ left, right, top, bottom }];
     }
 
-    // Find vertical gaps (runs of empty columns)
-    const segments = [];
-    let segStart = left;
-    let inGap = false;
-    let gapStart = -1;
-    const minGapWidth = Math.max(2, Math.floor(contentWidth * 0.05));
+    // Find vertical gaps (runs of empty or near-empty columns)
+    var segments = [];
+    var segStart = left;
+    var inGap = false;
+    var gapStart = -1;
+    // Use smaller gap threshold (2% of width, min 1px) to detect closely-written characters
+    var minGapWidth = Math.max(1, Math.floor(contentWidth * 0.02));
 
-    for (let x = left; x <= right; x++) {
+    for (var x = left; x <= right; x++) {
         if (colCounts[x] === 0) {
             if (!inGap) { inGap = true; gapStart = x; }
         } else {
             if (inGap) {
                 if (x - gapStart >= minGapWidth) {
-                    segments.push({ left: segStart, right: gapStart - 1, top, bottom });
+                    segments.push({ left: segStart, right: gapStart - 1, top: top, bottom: bottom });
                     segStart = x;
                 }
                 inGap = false;
             }
         }
     }
-    segments.push({ left: segStart, right, top, bottom });
+    segments.push({ left: segStart, right: right, top: top, bottom: bottom });
 
-    // No gaps found but wide aspect ratio suggests multi-digit: split evenly
-    if (segments.length === 1 && contentWidth > contentHeight * 1.8) {
-        const numDigits = Math.min(3, Math.round(contentWidth / contentHeight));
-        const splitSegments = [];
-        const segW = contentWidth / numDigits;
-        for (let i = 0; i < numDigits; i++) {
+    // If we have expectedCount and found fewer segments, try even split
+    if (expectedCount > 1 && segments.length < expectedCount) {
+        // Use expectedCount for even splitting
+        var splitSegments = [];
+        var segW = contentWidth / expectedCount;
+        for (var i = 0; i < expectedCount; i++) {
             splitSegments.push({
                 left: Math.round(left + i * segW),
                 right: Math.round(left + (i + 1) * segW - 1),
-                top, bottom
+                top: top, bottom: bottom
             });
         }
         return splitSegments;
+    }
+
+    // No gaps found but wide aspect ratio suggests multiple characters: split evenly
+    if (segments.length === 1 && contentWidth > contentHeight * 1.5) {
+        // Estimate character count: letters are ~0.6-0.8x as wide as tall
+        var estCharWidth = contentHeight * 0.7;
+        var numChars = Math.max(2, Math.round(contentWidth / estCharWidth));
+        // Cap at reasonable max (10 chars)
+        numChars = Math.min(10, numChars);
+        var splitSegs = [];
+        var sw = contentWidth / numChars;
+        for (var j = 0; j < numChars; j++) {
+            splitSegs.push({
+                left: Math.round(left + j * sw),
+                right: Math.round(left + (j + 1) * sw - 1),
+                top: top, bottom: bottom
+            });
+        }
+        return splitSegs;
     }
 
     return segments;

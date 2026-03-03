@@ -256,7 +256,7 @@ function getAptitudeFeedback(result, correct) {
         return {
             icon: '👀',
             message: 'Answer recorded! Teacher will check.',
-            color: '#667eea'
+            color: 'var(--color-primary)'
         };
     }
 
@@ -264,14 +264,14 @@ function getAptitudeFeedback(result, correct) {
         return {
             icon: '🌟',
             message: 'Correct! Great thinking!',
-            color: '#4caf50'
+            color: 'var(--color-success)'
         };
     }
 
     return {
         icon: '💪',
         message: 'Not quite! Try again!',
-        color: '#ff9800'
+        color: 'var(--color-warning)'
     };
 }
 
@@ -308,7 +308,7 @@ function validateCountingAnswer(recognized, expected) {
             feedback: {
                 icon: '👍',
                 message: 'Almost perfect!',
-                color: '#4caf50'
+                color: 'var(--color-success)'
             }
         };
     }

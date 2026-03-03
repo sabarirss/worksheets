@@ -166,68 +166,75 @@ function getOlderAgeGroup(currentAgeGroup) {
 
 /**
  * Generate 20 assessment questions for Math
- * 4 tiers: younger-easy, current-easy, current-medium, older-easy (stretch)
- * This spread properly differentiates skill levels across a wide range.
+ * BUG-043: Must use seeded random matching server's generateSeededAssessmentQuestions()
+ * in math-engine.js. Uses 4 tiers: younger-easy, current-easy, current-medium, older-easy.
  * @param {string} operation - Math operation (addition, subtraction, etc.)
  * @param {string} ageGroup - Child's age group
+ * @param {string} childId - Child's ID for deterministic seed
  * @returns {Array} Array of 20 questions with answers
  */
-function generateMathAssessmentQuestions(operation, ageGroup) {
+function generateMathAssessmentQuestions(operation, ageGroup, childId) {
     const questions = [];
     const youngerAge = getYoungerAgeGroup(ageGroup);
     const olderAge = getOlderAgeGroup(ageGroup);
 
+    // Set seeded random (worksheet-generator.js global) for deterministic generation
+    // matching server's seed: hashCode('assessment-${childId}-${operation}')
+    const seed = assessmentHashCode('assessment-' + childId + '-' + operation);
+    seededRandom = new SeededRandom(seed);
+
     // Get config access functions from worksheet-generator.js
     if (typeof getConfigByAge === 'undefined') {
         console.error('getConfigByAge not available - ensure worksheet-generator.js is loaded');
+        seededRandom = null;
         return [];
     }
 
     const opSymbol = {
         'addition': '+',
-        'subtraction': '−',
-        'multiplication': '×',
-        'division': '÷'
+        'subtraction': '\u2212',
+        'multiplication': '\u00d7',
+        'division': '\u00f7'
     }[operation] || '+';
 
     // Helper to generate N questions from a config
     function generateFromConfig(age, difficulty, count) {
         const config = getConfigByAge(operation, age, difficulty);
         if (!config || !config.generator) {
-            console.warn(`No generator found for ${operation} age ${age} (${difficulty})`);
+            console.warn('No generator found for ' + operation + ' age ' + age + ' (' + difficulty + ')');
             return;
         }
         for (let i = 0; i < count; i++) {
             const problem = config.generator();
             questions.push({
-                ...problem,
+                a: problem.a,
+                b: problem.b,
+                answer: problem.answer,
                 operation: operation,
-                problem: `${problem.a} ${opSymbol} ${problem.b} =`,
+                problem: problem.a + ' ' + opSymbol + ' ' + problem.b + ' =',
                 sourceAge: age,
                 sourceDifficulty: difficulty,
-                tier: `${age}-${difficulty}`
+                tier: age + '-' + difficulty
             });
         }
-        console.log(`Generated ${count} questions from age ${age} (${difficulty})`);
     }
 
-    // Tier 1: 5 from younger age (easy) — baseline, should be easy for the child
+    // 4 tiers matching server: younger-easy, current-easy, current-medium, older-easy
     generateFromConfig(youngerAge, 'easy', 5);
-
-    // Tier 2: 5 from current age (easy) — at-level warmup
     generateFromConfig(ageGroup, 'easy', 5);
-
-    // Tier 3: 5 from current age (medium) — challenging for current level
     generateFromConfig(ageGroup, 'medium', 5);
-
-    // Tier 4: 5 from older age (easy) — stretch to detect advanced ability
     generateFromConfig(olderAge, 'easy', 5);
 
-    // Shuffle questions so they're mixed (not grouped by difficulty)
+    // Seeded shuffle (same algorithm as server)
     for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questions[i], questions[j]] = [questions[j], questions[i]];
+        const j = Math.floor(seededRandom.next() * (i + 1));
+        var temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
     }
+
+    // Clear seeded random so worksheet generation uses Math.random() as normal
+    seededRandom = null;
 
     return questions.slice(0, 20);
 }
@@ -272,57 +279,247 @@ function determineLevelFromScore(score, ageGroup) {
 }
 
 /**
- * Generate 20 assessment questions for English
- * 4 tiers: younger-easy, current-easy, current-medium, older-easy (stretch)
+ * English Assessment Question Bank — MUST match server-side ENGLISH_ASSESSMENT_BANK
+ * in functions/shared/math-engine.js exactly.
+ * BUG-043: Client was generating questions dynamically (different every time) while
+ * server validated against this fixed bank. Now both sides use the same bank + seed.
+ */
+const ENGLISH_ASSESSMENT_BANK = {
+    '4-5': {
+        easy: [
+            { prompt: 'Complete: c_t', answer: 'cat' },
+            { prompt: 'Complete: d_g', answer: 'dog' },
+            { prompt: 'Complete: s_n', answer: 'sun' },
+            { prompt: 'Complete: b_ll', answer: 'ball' },
+            { prompt: 'Complete: f_sh', answer: 'fish' },
+            { prompt: 'Complete: h_t', answer: 'hat' },
+            { prompt: 'Complete: b_d', answer: 'bed' },
+            { prompt: 'Complete: c_p', answer: 'cup' },
+            { prompt: 'Complete: p_n', answer: 'pen' },
+            { prompt: 'Complete: b_x', answer: 'box' }
+        ],
+        medium: [
+            { prompt: 'Write the word: the', answer: 'the' },
+            { prompt: 'Write the word: and', answer: 'and' },
+            { prompt: 'Write the word: is', answer: 'is' },
+            { prompt: 'Write the word: it', answer: 'it' },
+            { prompt: 'Write the word: to', answer: 'to' },
+            { prompt: 'Write the word: he', answer: 'he' },
+            { prompt: 'Write the word: she', answer: 'she' },
+            { prompt: 'Write the word: we', answer: 'we' },
+            { prompt: 'Write the word: can', answer: 'can' },
+            { prompt: 'Write the word: see', answer: 'see' }
+        ]
+    },
+    '6': {
+        easy: [
+            { prompt: 'Write the word: play', answer: 'play' },
+            { prompt: 'Write the word: come', answer: 'come' },
+            { prompt: 'Write the word: look', answer: 'look' },
+            { prompt: 'Write the word: said', answer: 'said' },
+            { prompt: 'Write the word: like', answer: 'like' },
+            { prompt: 'Write the word: have', answer: 'have' },
+            { prompt: 'Write the word: make', answer: 'make' },
+            { prompt: 'Write the word: good', answer: 'good' },
+            { prompt: 'Write the word: help', answer: 'help' },
+            { prompt: 'Write the word: want', answer: 'want' }
+        ],
+        medium: [
+            { prompt: 'The cat ___ on the mat.', answer: 'sat' },
+            { prompt: 'I ___ a red ball.', answer: 'have' },
+            { prompt: 'She ___ to school.', answer: 'goes' },
+            { prompt: 'The sun ___ in the sky.', answer: 'shines' },
+            { prompt: 'We ___ our homework.', answer: 'do' },
+            { prompt: 'The bird ___ in the tree.', answer: 'sits' },
+            { prompt: 'They ___ playing.', answer: 'are' },
+            { prompt: 'My dog ___ very fast.', answer: 'runs' },
+            { prompt: 'He ___ his breakfast.', answer: 'eats' },
+            { prompt: 'The baby ___ loudly.', answer: 'cries' }
+        ]
+    },
+    '7': {
+        easy: [
+            { prompt: 'Write the word: because', answer: 'because' },
+            { prompt: 'Write the word: people', answer: 'people' },
+            { prompt: 'Write the word: about', answer: 'about' },
+            { prompt: 'Write the word: could', answer: 'could' },
+            { prompt: 'Write the word: their', answer: 'their' },
+            { prompt: 'Write the word: other', answer: 'other' },
+            { prompt: 'Write the word: would', answer: 'would' },
+            { prompt: 'Write the word: which', answer: 'which' },
+            { prompt: 'Write the word: there', answer: 'there' },
+            { prompt: 'Write the word: water', answer: 'water' }
+        ],
+        medium: [
+            { prompt: 'The opposite of hot is ___', answer: 'cold' },
+            { prompt: 'The opposite of big is ___', answer: 'small' },
+            { prompt: 'The opposite of happy is ___', answer: 'sad' },
+            { prompt: 'The opposite of fast is ___', answer: 'slow' },
+            { prompt: 'A synonym for happy is ___', answer: 'glad' },
+            { prompt: 'A synonym for big is ___', answer: 'large' },
+            { prompt: 'The girl ___ her dinner. (eat)', answer: 'ate' },
+            { prompt: 'They ___ going to the park.', answer: 'are' },
+            { prompt: 'She ___ a good singer.', answer: 'is' },
+            { prompt: 'We ___ to school yesterday.', answer: 'went' }
+        ]
+    },
+    '8': {
+        easy: [
+            { prompt: 'The opposite of dark is ___', answer: 'light' },
+            { prompt: 'The opposite of quiet is ___', answer: 'loud' },
+            { prompt: 'A synonym for small is ___', answer: 'tiny' },
+            { prompt: 'A synonym for fast is ___', answer: 'quick' },
+            { prompt: 'Write the word: beautiful', answer: 'beautiful' },
+            { prompt: 'Write the word: different', answer: 'different' },
+            { prompt: 'Write the word: important', answer: 'important' },
+            { prompt: 'Write the word: together', answer: 'together' },
+            { prompt: 'He ___ very well.', answer: 'sings' },
+            { prompt: 'They ___ arrived.', answer: 'have' }
+        ],
+        medium: [
+            { prompt: 'In "The big dog runs", what is "dog"?', answer: 'noun' },
+            { prompt: 'In "She runs fast", what is "runs"?', answer: 'verb' },
+            { prompt: 'In "The big dog", what is "big"?', answer: 'adjective' },
+            { prompt: 'The children ___ (play) outside now.', answer: 'are playing' },
+            { prompt: 'She ___ (go) to school yesterday.', answer: 'went' },
+            { prompt: 'The opposite of ancient is ___', answer: 'modern' },
+            { prompt: 'A synonym for scared is ___', answer: 'afraid' },
+            { prompt: 'Write the word: knowledge', answer: 'knowledge' },
+            { prompt: 'Write the word: exercise', answer: 'exercise' },
+            { prompt: 'The cat sat ___ the mat.', answer: 'on' }
+        ]
+    },
+    '9+': {
+        easy: [
+            { prompt: 'Write the word: necessary', answer: 'necessary' },
+            { prompt: 'Write the word: immediately', answer: 'immediately' },
+            { prompt: 'A synonym for enormous is ___', answer: 'huge' },
+            { prompt: 'The opposite of generous is ___', answer: 'selfish' },
+            { prompt: 'In "She sings beautifully", "beautifully" is a/an ___', answer: 'adverb' },
+            { prompt: 'In "The tall tree", "tall" is a/an ___', answer: 'adjective' },
+            { prompt: 'He ___ (write) a letter yesterday.', answer: 'wrote' },
+            { prompt: 'They ___ (be) friends for years.', answer: 'have been' },
+            { prompt: 'The book ___ (belong) to me.', answer: 'belongs' },
+            { prompt: 'If I ___ rich, I would travel.', answer: 'were' }
+        ],
+        medium: [
+            { prompt: 'The past tense of "begin" is ___', answer: 'began' },
+            { prompt: 'The past tense of "swim" is ___', answer: 'swam' },
+            { prompt: 'The past tense of "bring" is ___', answer: 'brought' },
+            { prompt: 'The comparative form of "good" is ___', answer: 'better' },
+            { prompt: 'The superlative form of "bad" is ___', answer: 'worst' },
+            { prompt: 'A synonym for "difficult" is ___', answer: 'hard' },
+            { prompt: 'The opposite of "temporary" is ___', answer: 'permanent' },
+            { prompt: 'Complete: Neither Tom ___ Jerry came.', answer: 'nor' },
+            { prompt: 'Write the word: environment', answer: 'environment' },
+            { prompt: 'Write the word: government', answer: 'government' }
+        ]
+    },
+    '10+': {
+        easy: [
+            { prompt: 'Write the word: accommodation', answer: 'accommodation' },
+            { prompt: 'Write the word: independent', answer: 'independent' },
+            { prompt: 'The past participle of "go" is ___', answer: 'gone' },
+            { prompt: 'The past participle of "write" is ___', answer: 'written' },
+            { prompt: 'A synonym for "resilient" is ___', answer: 'tough' },
+            { prompt: 'The opposite of "transparent" is ___', answer: 'opaque' },
+            { prompt: 'Complete: He insisted ___ going.', answer: 'on' },
+            { prompt: 'Complete: She is good ___ math.', answer: 'at' },
+            { prompt: 'In "Running is fun", "Running" is a ___', answer: 'gerund' },
+            { prompt: 'Write the word: conscientious', answer: 'conscientious' }
+        ],
+        medium: [
+            { prompt: 'The past tense of "lead" is ___', answer: 'led' },
+            { prompt: 'The plural of "analysis" is ___', answer: 'analyses' },
+            { prompt: 'Complete: If I ___ known, I would have helped.', answer: 'had' },
+            { prompt: 'A synonym for "meticulous" is ___', answer: 'careful' },
+            { prompt: 'The opposite of "affluent" is ___', answer: 'poor' },
+            { prompt: 'Complete: He is allergic ___ peanuts.', answer: 'to' },
+            { prompt: 'Complete: She succeeded ___ passing the test.', answer: 'in' },
+            { prompt: 'The noun form of "decide" is ___', answer: 'decision' },
+            { prompt: 'Write the word: phenomenon', answer: 'phenomenon' },
+            { prompt: 'Write the word: exaggerate', answer: 'exaggerate' }
+        ]
+    }
+};
+
+/**
+ * Seeded PRNG for assessment — matches server-side SeededRandom in math-engine.js.
+ * Used to ensure client and server generate identical question sequences.
+ */
+class AssessmentSeededRandom {
+    constructor(seed) {
+        this.seed = seed;
+    }
+    next() {
+        this.seed = (this.seed * 9301 + 49297) % 233280;
+        return this.seed / 233280;
+    }
+}
+
+function assessmentHashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash);
+}
+
+/**
+ * Generate 20 assessment questions for English using the fixed question bank.
+ * BUG-043: Must use the same bank + seeded shuffle as server's
+ * generateSeededEnglishAssessment() in math-engine.js.
  * @param {string} ageGroup - Child's age group
+ * @param {string} childId - Child's ID for deterministic seed
  * @returns {Array} Array of 20 questions with answers
  */
-function generateEnglishAssessmentQuestions(ageGroup) {
-    const questions = [];
+function generateEnglishAssessmentQuestions(ageGroup, childId) {
     const youngerAge = getYoungerAgeGroup(ageGroup);
     const olderAge = getOlderAgeGroup(ageGroup);
+    const seed = assessmentHashCode('assessment-' + childId + '-english');
+    const rng = new AssessmentSeededRandom(seed);
 
-    // Get config access function from english-generator.js
-    if (typeof getConfigByAge === 'undefined') {
-        console.error('getConfigByAge not available - ensure english-generator.js is loaded');
-        return [];
-    }
+    const questions = [];
 
-    // Helper to generate N questions from a config
-    function generateFromConfig(age, difficulty, count) {
-        const config = getConfigByAge(age, difficulty);
-        if (!config || !config.generator) {
-            console.warn(`No generator found for English age ${age} (${difficulty})`);
-            return;
+    function pickQuestions(age, difficulty, count) {
+        const bank = ENGLISH_ASSESSMENT_BANK[age] && ENGLISH_ASSESSMENT_BANK[age][difficulty];
+        if (!bank || bank.length === 0) return;
+
+        // Seeded shuffle of the bank (same algorithm as server)
+        const shuffled = bank.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(rng.next() * (i + 1));
+            var temp = shuffled[i];
+            shuffled[i] = shuffled[j];
+            shuffled[j] = temp;
         }
-        for (let i = 0; i < count; i++) {
-            const problem = config.generator();
+
+        for (let i = 0; i < Math.min(count, shuffled.length); i++) {
             questions.push({
-                ...problem,
+                prompt: shuffled[i].prompt,
+                answer: shuffled[i].answer,
+                operation: 'english',
+                problem: shuffled[i].prompt,
                 sourceAge: age,
-                sourceDifficulty: difficulty,
-                tier: `${age}-${difficulty}`
+                sourceDifficulty: difficulty
             });
         }
-        console.log(`Generated ${count} English questions from age ${age} (${difficulty})`);
     }
 
-    // Tier 1: 5 from younger age (easy) — baseline
-    generateFromConfig(youngerAge, 'easy', 5);
+    // 4 tiers matching server: younger-easy, current-easy, current-medium, older-easy
+    pickQuestions(youngerAge, 'easy', 5);
+    pickQuestions(ageGroup, 'easy', 5);
+    pickQuestions(ageGroup, 'medium', 5);
+    pickQuestions(olderAge, 'easy', 5);
 
-    // Tier 2: 5 from current age (easy) — at-level warmup
-    generateFromConfig(ageGroup, 'easy', 5);
-
-    // Tier 3: 5 from current age (medium) — challenging
-    generateFromConfig(ageGroup, 'medium', 5);
-
-    // Tier 4: 5 from older age (easy) — stretch
-    generateFromConfig(olderAge, 'easy', 5);
-
-    // Shuffle questions so they're mixed
+    // Seeded shuffle (same algorithm as server)
     for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questions[i], questions[j]] = [questions[j], questions[i]];
+        const j = Math.floor(rng.next() * (i + 1));
+        var temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
     }
 
     return questions.slice(0, 20);
@@ -344,11 +541,15 @@ function startAssessment(subject, operation, ageGroup) {
         return;
     }
 
+    // Get childId for seeded generation (must match server)
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    const childId = child ? child.id : 'unknown';
+
     // Generate questions based on subject
     if (subject === 'english') {
-        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup);
+        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup, childId);
     } else {
-        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup, childId);
     }
 
     if (!assessmentQuestions || assessmentQuestions.length === 0) {
@@ -396,10 +597,11 @@ function renderAssessmentUI() {
     let html = `
         <div class="assessment-page">
             <div class="assessment-header">
-                <h2>📝 Assessment Test - ${currentAssessment.operation.toUpperCase()}</h2>
+                <h2>📝 ${currentAssessment.subject === 'english' ? 'English Vocabulary Assessment' : 'Assessment Test - ' + currentAssessment.operation.toUpperCase()}</h2>
                 <p class="assessment-instructions">
-                    Solve all 10 problems below. Write your answers clearly in the boxes.
-                    Click "Submit Assessment" when you're done.
+                    ${currentAssessment.subject === 'english'
+                        ? 'Answer all questions below. Type your answers in the boxes and click "Submit Assessment" when done.'
+                        : 'Solve all 10 problems below. Write your answers clearly in the boxes. Click "Submit Assessment" when done.'}
                 </p>
             </div>
 
@@ -431,12 +633,14 @@ function renderAssessmentUI() {
             // Keyboard mode: Text input
             const inputType = isEnglish ? 'text' : 'number';
             const inputMode = isEnglish ? 'text' : 'numeric';
+            const inputStyle = isEnglish ? 'width: 200px; font-size: 1.4em; height: 50px;' : '';
             answerInput = `
                 <input type="${inputType}"
                        id="assessment-answer-${index}"
                        class="answer-input"
                        placeholder=""
-                       inputmode="${inputMode}">
+                       inputmode="${inputMode}"
+                       style="${inputStyle}">
             `;
         }
 
@@ -592,6 +796,7 @@ async function submitAssessment() {
 
     // Check if using pencil mode
     const usePencil = typeof isPencilMode === 'function' ? isPencilMode() : false;
+    const isEnglish = currentAssessment.subject === 'english';
 
     // Ensure handwriting models are loaded for pencil mode
     if (usePencil) {
@@ -612,7 +817,6 @@ async function submitAssessment() {
         }
     }
 
-    const isEnglish = currentAssessment.subject === 'english';
     const child = getSelectedChild();
 
     // Collect answers from DOM
@@ -876,11 +1080,13 @@ function retakeAssessment() {
         cancelBtn.style.display = 'inline-block';
     }
 
-    // Generate new questions based on subject type
+    // Generate new questions based on subject type (same seed = same questions for server validation)
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    const childId = child ? child.id : 'unknown';
     if (currentAssessment.subject === 'english') {
-        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup);
+        assessmentQuestions = generateEnglishAssessmentQuestions(ageGroup, childId);
     } else {
-        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup);
+        assessmentQuestions = generateMathAssessmentQuestions(operation, ageGroup, childId);
     }
     assessmentAnswers = new Array(APP_CONFIG.ASSESSMENT.QUESTION_COUNT).fill(null);
 

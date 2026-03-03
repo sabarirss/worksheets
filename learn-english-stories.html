@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         .age-selection {
@@ -25,7 +27,7 @@
         }
 
         .age-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             border: none;
             padding: 40px 20px;
             cursor: pointer;
@@ -61,7 +63,7 @@
         .story-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            border-color: #667eea;
+            border-color: var(--color-primary);
         }
 
         .story-icon {
@@ -98,7 +100,7 @@
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--color-primary);
         }
 
         .story-content {
@@ -121,7 +123,7 @@
 
         .question {
             background: white;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid var(--color-primary);
             padding: 20px;
             margin: 15px 0;
             border-radius: 8px;
@@ -152,17 +154,17 @@
         }
 
         .option-btn:hover {
-            border-color: #667eea;
+            border-color: var(--color-primary);
             background: #f8f9fa;
         }
 
         .option-btn.selected {
-            border-color: #667eea;
+            border-color: var(--color-primary);
             background: #e3f2fd;
         }
 
         .option-btn.correct {
-            border-color: #4caf50;
+            border-color: var(--color-success);
             background: #e8f5e9;
             color: #2e7d32;
         }
@@ -182,7 +184,7 @@
         }
 
         .vocabulary-box h4 {
-            color: #f57c00;
+            color: var(--color-warning-dark);
             margin-bottom: 15px;
         }
 
@@ -198,7 +200,7 @@
 
         .grammar-focus {
             background: #e8f5e9;
-            border: 2px solid #4caf50;
+            border: 2px solid var(--color-success);
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -315,11 +317,12 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="admin-level-manager.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="admin-level-manager.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
 </head>
 <body>
     <script>
@@ -340,13 +343,16 @@
             if (!userDoc.empty) {
                 const userData = userDoc.docs[0].data();
                 isAdmin = userData.role === 'admin';
+                // BUG-054: Set window.currentUserRole so generators can check admin status
+                window.currentUserRole = userData.role;
             }
 
             let childAge;
             if (isAdmin) {
-                // Admin doesn't need child profile - use default age 10+ (full access)
-                childAge = '10';
-                console.log('Admin user - using default age:', childAge);
+                // Admin: use selected child's age if available, else default 10+
+                const adminChild = getSelectedChild();
+                childAge = (adminChild && adminChild.age) ? adminChild.age.toString() : '10';
+                console.log('Admin user - using age:', childAge);
             } else {
                 // Auto-detect child's age from selected profile
                 const child = getSelectedChild();
@@ -373,7 +379,7 @@
     </script>
 
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="user-header">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div id="app-branding"></div>
                 <div>
@@ -381,17 +387,17 @@
                     <p class="subtitle">Fun stories to build reading and grammar skills</p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="user-actions">
                 <div id="profile-selector-container"></div>
             </div>
-        </header>
+        </div>
 
         <!-- Story List -->
         <div id="story-selection">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index'">← Back to Subjects</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Subjects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
-            <h2 id="story-list-title">Choose a Story</h2>
+            <h2 id="story-list-title">Stories</h2>
             <div class="story-list" id="story-list"></div>
         </div>
 
@@ -403,10 +409,10 @@
         </footer>
     </div>
 
-    <script src="level-mapper.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="learn-english-stories-generator.js"></script>
-    <script src="branding.js"></script>
+    <script src="level-mapper.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="learn-english-stories-generator.js" defer></script>
+    <script src="branding.js" defer></script>
     <script>
         // Load all stories on page load (skip difficulty selection)
         document.addEventListener('DOMContentLoaded', function() {
@@ -417,11 +423,12 @@
     </script>
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
+    <script>if (typeof GleeIcons !== 'undefined') GleeIcons.init();</script>
 </body>
 </html>

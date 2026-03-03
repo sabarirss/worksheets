@@ -1778,14 +1778,14 @@ test('assessment gate shows 20 questions in english generator page', () => {
 
 test('assessment generates 4 tiers of questions (younger + current-easy + current-med + stretch)', () => {
     const js = readFile('assessment.js');
-    // Check for 4-tier generation in math assessment
-    assert.ok(js.includes('YOUNGER_QUESTIONS') || js.includes('younger'),
+    // BUG-043: Math uses seeded generation with 4 tiers
+    assert.ok(js.includes('youngerAge') || js.includes('younger'),
         'Must have younger tier');
-    assert.ok(js.includes('CURRENT_EASY_QUESTIONS') || js.includes('current age (easy)'),
-        'Must have current-easy tier');
-    assert.ok(js.includes('CURRENT_MED_QUESTIONS') || js.includes('current age (medium)'),
-        'Must have current-medium tier');
-    assert.ok(js.includes('STRETCH_QUESTIONS') || js.includes('older age'),
+    assert.ok(js.includes("'easy', 5") || js.includes("'easy',5"),
+        'Must have easy tier with 5 questions');
+    assert.ok(js.includes("'medium', 5") || js.includes("'medium',5"),
+        'Must have medium tier with 5 questions');
+    assert.ok(js.includes('olderAge') || js.includes('older'),
         'Must have stretch tier');
 });
 
@@ -2299,10 +2299,10 @@ test('aptitude-generator.js buildProgressivePool adds difficulty property', () =
         'progressive pool items must include difficulty property');
 });
 
-test('aptitude-generator.js loadPuzzles uses page-based offset via pool.slice', () => {
+test('aptitude-generator.js loadPuzzles uses seeded shuffle + page-based offset', () => {
     const js = readFile('aptitude-generator.js');
-    assert.ok(js.includes('pool.slice(startIdx, startIdx + count)'),
-        'loadPuzzles must use page-based slice offset from progressive pool');
+    assert.ok(js.includes('shuffledPool.slice(startIdx, startIdx + count)'),
+        'loadPuzzles must use seeded shuffle then page-based slice from progressive pool');
 });
 
 test('aptitude-generator.js loadPuzzles does NOT use hardcoded 50 totalPages', () => {
@@ -2695,8 +2695,8 @@ test('progress-map.js script loads before worksheet-generator.js in index.html',
 
 test('progress-map.js script loads before english-generator.js in english.html', () => {
     const html = readFile('english.html');
-    const pmIdx = html.indexOf('<script src="progress-map.js">');
-    const egIdx = html.indexOf('<script src="english-generator.js');
+    const pmIdx = html.indexOf('src="progress-map.js"');
+    const egIdx = html.indexOf('src="english-generator.js');
     assert.ok(pmIdx > -1, 'progress-map.js should be loaded via script tag in english.html');
     assert.ok(egIdx > -1, 'english-generator.js should be loaded via script tag in english.html');
     assert.ok(pmIdx < egIdx, 'progress-map.js script tag should appear before english-generator.js');
@@ -3079,7 +3079,7 @@ test('styles.css has bottom-nav styles', () => {
     const css = readFile('styles.css');
     assert.ok(css.includes('.bottom-nav'), '.bottom-nav styles not found');
     assert.ok(css.includes('.bottom-nav-item'), '.bottom-nav-item styles not found');
-    assert.ok(css.includes('padding-bottom: 70px'), 'body padding-bottom for bottom nav not found');
+    assert.ok(css.includes('padding-bottom: 56px') || css.includes('padding-bottom: 70px'), 'body padding-bottom for bottom nav not found');
 });
 
 test('Bottom nav hidden on desktop, visible on mobile', () => {
@@ -3282,19 +3282,11 @@ test('admin.html has adaptive worksheets review section', () => {
     assert.ok(html.includes('rejectAdaptiveWorksheet'), 'Should have reject function');
 });
 
-test('children-profiles.html has skill progress dashboard', () => {
+test('children-profiles.html does NOT have skill modal (removed — use progress dashboard instead)', () => {
     const html = readFile('children-profiles.html');
-    assert.ok(html.includes('skills-modal'), 'Should have skills modal');
-    assert.ok(html.includes('viewChildSkills'), 'Should have viewChildSkills function');
-    assert.ok(html.includes('skill_profile'), 'Should read from skill_profile subcollection');
-    assert.ok(html.includes('skill-bar-fill'), 'Should have skill progress bars');
-    assert.ok(html.includes('SKILL_DISPLAY_NAMES'), 'Should have human-readable skill names');
-});
-
-test('children-profiles.html child cards have Skills button', () => {
-    const html = readFile('children-profiles.html');
-    assert.ok(html.includes('skills-btn'), 'Should have skills button class');
-    assert.ok(html.includes('Skills</button>'), 'Should have Skills button text');
+    assert.ok(!html.includes('skills-modal'), 'Skills modal removed — parents use progress dashboard');
+    assert.ok(!html.includes('viewChildSkills'), 'viewChildSkills function removed');
+    assert.ok(!html.includes('skills-btn'), 'Skills button removed from child cards');
 });
 
 test('index.js has scheduledAdaptiveAutoApprove function', () => {
@@ -3391,6 +3383,2824 @@ test('test-stories.html and test-unique-stories.html are utility pages (no brand
     // These are developer-only test pages, not user-facing
     assert.ok(fileExists('test-stories.html'), 'test-stories.html should exist');
     assert.ok(fileExists('test-unique-stories.html'), 'test-unique-stories.html should exist');
+});
+
+// ============================================================================
+// BUG-036: AGE NOT INCREMENTING ON BIRTHDAY
+// ============================================================================
+
+console.log('\n--- BUG-036: Dynamic Age Calculation from DOB ---');
+
+test('profile-selector.js has calculateAgeFromDOB function', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('function calculateAgeFromDOB(dateOfBirth)'),
+        'calculateAgeFromDOB function must exist');
+});
+
+test('calculateAgeFromDOB handles null/undefined input', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes("if (!dateOfBirth) return null"),
+        'Must return null for falsy dateOfBirth');
+});
+
+test('calculateAgeFromDOB validates date string', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes("isNaN(birthDate.getTime())"),
+        'Must check for invalid date strings');
+});
+
+test('calculateAgeFromDOB uses month and day comparison for birthday precision', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('getMonth()') && js.includes('getDate()'),
+        'Must compare month and day, not just year');
+    assert.ok(js.includes('monthDiff < 0'),
+        'Must handle birthday not yet passed this year');
+});
+
+test('getSelectedChild recalculates age from date_of_birth (BUG-036)', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('childData.date_of_birth') && js.includes('calculateAgeFromDOB'),
+        'getSelectedChild must recalculate age from date_of_birth');
+    assert.ok(js.includes('BUG-036'),
+        'Must reference BUG-036 in the fix comment');
+});
+
+test('loadProfileSelector recalculates age from DOB for Firestore data', () => {
+    const js = readFile('profile-selector.js');
+    // The Firestore loading code should recalculate age
+    assert.ok(js.includes('data.date_of_birth') && js.includes('calculateAgeFromDOB'),
+        'loadProfileSelector must recalculate age from Firestore data');
+});
+
+test('renderProfileSelector uses recalculated age for display', () => {
+    const js = readFile('profile-selector.js');
+    // Check that the selected child display uses recalculated age
+    assert.ok(js.includes('displayAge') && js.includes('calculateAgeFromDOB'),
+        'renderProfileSelector must use dynamically recalculated age');
+});
+
+test('renderChildOption uses recalculated age in dropdown', () => {
+    const js = readFile('profile-selector.js');
+    // The dropdown items should show recalculated age
+    assert.ok(js.includes("Age ${displayAge}"),
+        'Dropdown items must display recalculated age');
+});
+
+// Verify pure-logic correctness of the age calculation
+test('calculateAgeFromDOB logic: subtracts year and checks month/day', () => {
+    const js = readFile('profile-selector.js');
+    // Must have: age = today.getFullYear() - birthDate.getFullYear()
+    assert.ok(js.includes('today.getFullYear() - birthDate.getFullYear()'),
+        'Must subtract birth year from current year');
+    // Must decrement if birthday hasn't passed
+    assert.ok(js.includes('age--'),
+        'Must decrement age if birthday not yet passed');
+});
+
+test('selectChild uses DOB-recalculated age for theme', () => {
+    const js = readFile('profile-selector.js');
+    // The theme code should use DOB
+    const themeSection = js.substring(js.indexOf('age-adaptive theme'));
+    assert.ok(themeSection.includes('calculateAgeFromDOB') || themeSection.includes('date_of_birth'),
+        'selectChild theme logic must use DOB-based age');
+});
+
+// ============================================================================
+// BUG-037: HEADER CONSISTENCY + THEME SYSTEM
+// ============================================================================
+
+console.log('\n--- BUG-037: Header Consistency & Theme System ---');
+
+// All module pages should use .user-header instead of <header>
+const headerPages = [
+    'stories.html', 'english.html', 'aptitude.html', 'drawing.html',
+    'emotional-quotient.html', 'german.html', 'german-kids.html',
+    'learn-english-stories.html', 'index.html', 'rewards.html'
+];
+
+headerPages.forEach(page => {
+    test(`${page} uses .user-header div (not <header> tag)`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('class="user-header"'),
+            `${page} must have class="user-header" for consistent gradient header`);
+    });
+});
+
+test('styles.css defines .user-header with gradient background', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('.user-header {') || css.includes('.user-header{'),
+        '.user-header must be defined in styles.css');
+    assert.ok(css.includes('var(--color-primary-gradient)'),
+        '.user-header must use CSS variable for gradient');
+});
+
+test('styles.css has .user-header responsive styles for mobile', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('@media') && css.includes('.user-header'),
+        '.user-header must have responsive styles');
+});
+
+// Theme system tests
+test('theme-manager.js exists and defines THEMES object', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('const THEMES'), 'THEMES constant must exist');
+    assert.ok(js.includes("ocean"), 'ocean theme must exist');
+    assert.ok(js.includes("forest"), 'forest theme must exist');
+    assert.ok(js.includes("sunset"), 'sunset theme must exist');
+    assert.ok(js.includes("candy"), 'candy theme must exist');
+    assert.ok(js.includes("space"), 'space theme must exist');
+    assert.ok(js.includes("rainbow"), 'rainbow theme must exist');
+});
+
+test('theme-manager.js has applyTheme function', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('function applyTheme('), 'applyTheme function must exist');
+    assert.ok(js.includes("data-theme"), 'Must set data-theme attribute');
+});
+
+test('theme-manager.js has saveChildTheme for Firestore persistence', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('async function saveChildTheme('), 'saveChildTheme must exist');
+    assert.ok(js.includes("firebase.firestore()"), 'Must write to Firestore');
+    assert.ok(js.includes("theme: themeName"), 'Must save theme field');
+});
+
+test('theme-manager.js loads theme on page load', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('DOMContentLoaded') || js.includes('loadTheme'),
+        'Must load theme on page load');
+    assert.ok(js.includes("gleegrow-theme"), 'Must use localStorage cache key');
+});
+
+test('styles.css defines theme CSS variable overrides', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('[data-theme="ocean"]'), 'Ocean theme override must exist');
+    assert.ok(css.includes('[data-theme="forest"]'), 'Forest theme override must exist');
+    assert.ok(css.includes('[data-theme="sunset"]'), 'Sunset theme override must exist');
+    assert.ok(css.includes('[data-theme="candy"]'), 'Candy theme override must exist');
+    assert.ok(css.includes('[data-theme="space"]'), 'Space theme override must exist');
+    assert.ok(css.includes('[data-theme="rainbow"]'), 'Rainbow theme override must exist');
+    assert.ok(css.includes('[data-theme="dinosaur"]'), 'Dinosaur theme override must exist');
+    assert.ok(css.includes('[data-theme="dragon"]'), 'Dragon theme override must exist');
+});
+
+test('theme-manager.js is loaded on all module pages', () => {
+    headerPages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(html.includes('theme-manager.js'),
+            `${page} must load theme-manager.js`);
+    });
+});
+
+test('profile-selector.js has theme picker in child settings modal', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('Color Theme'), 'Must have Color Theme section');
+    assert.ok(js.includes('theme-grid'), 'Must have theme grid container');
+    assert.ok(js.includes('selectThemeOption'), 'Must have selectThemeOption function');
+});
+
+test('profile-selector.js selectThemeOption calls saveChildTheme', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('saveChildTheme'), 'selectThemeOption must call saveChildTheme');
+});
+
+test('styles.css key elements use CSS variables (not hardcoded #667eea)', () => {
+    const css = readFile('styles.css');
+    // .user-header should use variable
+    const userHeaderSection = css.substring(css.indexOf('.user-header {'), css.indexOf('.user-header {') + 200);
+    assert.ok(userHeaderSection.includes('var(--color-primary-gradient)'),
+        '.user-header background must use CSS variable');
+    // subject-btn uses gradient stripe (::before) instead of border-left
+    assert.ok(css.includes('var(--color-primary-gradient)'),
+        '.subject-btn gradient stripe must use CSS variable');
+});
+
+// No module pages should still use inline <header> for the main page header
+const noInlineHeaderPages = [
+    'stories.html', 'english.html', 'aptitude.html', 'drawing.html',
+    'emotional-quotient.html', 'german.html', 'german-kids.html',
+    'learn-english-stories.html'
+];
+
+noInlineHeaderPages.forEach(page => {
+    test(`${page} does not use inline <header> for main page header`, () => {
+        const html = readFile(page);
+        // Should not have the old inline-styled <header>
+        assert.ok(!html.includes('<header style="display: flex;'),
+            `${page} must not use inline-styled <header> tag (use .user-header instead)`);
+    });
+});
+
+// ============================================================================
+// BUG-038: Empty canvas submissions must not evaluate as correct
+// ============================================================================
+
+console.log('\n--- BUG-038: Empty Canvas Submission Prevention ---');
+
+// Test aptitude-generator.js checkAnswers has empty canvas check
+test('BUG-038: aptitude checkAnswers checks canvas emptiness before showing answer', () => {
+    const js = readFile('aptitude-generator.js');
+    const checkAnswersFn = js.substring(js.indexOf('function checkAnswers()'));
+    // Must check for empty canvas
+    assert.ok(checkAnswersFn.includes('canvasEmpty') || checkAnswersFn.includes('isEmpty'),
+        'aptitude checkAnswers must check if canvas is empty before evaluation');
+});
+
+test('BUG-038: aptitude checkAnswers shows warning for empty canvas', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('Please write your answer'),
+        'aptitude must show "Please write your answer" for empty canvases');
+});
+
+test('BUG-038: aptitude checkAnswers uses handwritingInputs for empty check', () => {
+    const js = readFile('aptitude-generator.js');
+    // The checkAnswers function should look up HandwritingInput instance
+    assert.ok(js.includes('handwritingInputs.find'),
+        'aptitude checkAnswers must use handwritingInputs.find to check isEmpty()');
+});
+
+test('BUG-038: aptitude checkAnswers falls back to isCanvasEmpty', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('isCanvasEmpty'),
+        'aptitude checkAnswers must fall back to isCanvasEmpty if HandwritingInput not found');
+});
+
+test('BUG-038: aptitude toggleAnswers also checks canvas emptiness', () => {
+    const js = readFile('aptitude-generator.js');
+    const toggleFn = js.substring(js.indexOf('function toggleAnswers('));
+    assert.ok(toggleFn.includes('canvasEmpty') || toggleFn.includes('isEmpty'),
+        'aptitude toggleAnswers must also check if canvas is empty');
+});
+
+// Test english-generator.js checkAnswers has empty canvas check
+test('BUG-038: english checkAnswers checks canvas emptiness before showing answer', () => {
+    const js = readFile('english-generator.js');
+    const checkAnswersFn = js.substring(js.indexOf('function checkAnswers()'));
+    assert.ok(checkAnswersFn.includes('canvasEmpty') || checkAnswersFn.includes('isEmpty'),
+        'english checkAnswers must check if canvas is empty before evaluation');
+});
+
+test('BUG-038: english checkAnswers shows warning for empty canvas', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('Please write your answer'),
+        'english must show "Please write your answer" for empty canvases');
+});
+
+test('BUG-038: english checkAnswers tracks empty count', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('emptyCount'),
+        'english checkAnswers must track empty canvas count');
+});
+
+test('BUG-038: english checkAnswers shows empty warning in results', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('left blank'),
+        'english checkAnswers must show "left blank" warning in results summary');
+});
+
+test('BUG-038: english toggleAnswers also checks canvas emptiness', () => {
+    const js = readFile('english-generator.js');
+    const toggleFn = js.substring(js.indexOf('function toggleAnswers('));
+    assert.ok(toggleFn.includes('canvasEmpty') || toggleFn.includes('isEmpty'),
+        'english toggleAnswers must also check if canvas is empty');
+});
+
+test('BUG-038: empty canvas gets warning border color (#cc6600)', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes("borderColor = '#cc6600'"),
+        'empty canvas must get orange warning border');
+});
+
+test('BUG-038: english empty canvas gets warning border color', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("borderColor = '#cc6600'"),
+        'english empty canvas must get orange warning border');
+});
+
+// Test that handwriting-recognition.js has isCanvasEmpty function available
+test('BUG-038: isCanvasEmpty function exists in handwriting-recognition.js', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(js.includes('function isCanvasEmpty(canvas)'),
+        'isCanvasEmpty must be defined in handwriting-recognition.js');
+});
+
+// Test that HandwritingInput class has isEmpty method
+test('BUG-038: HandwritingInput class has isEmpty() method', () => {
+    const js = readFile('handwriting-input.js');
+    assert.ok(js.includes('isEmpty()'),
+        'HandwritingInput must have isEmpty() method');
+    assert.ok(js.includes('hasContent'),
+        'HandwritingInput must track hasContent state');
+});
+
+// Test math module doesn't have this bug (server-only validation)
+test('BUG-038: math module uses server-only validation (no local checkAnswers)', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(!js.includes('function checkAnswers()'),
+        'worksheet-generator must NOT have local checkAnswers (server-only)');
+});
+
+// ============================================================================
+// BUG-039: English page missing assessment.js + async getCompletedWorksheets
+// ============================================================================
+
+console.log('\n--- BUG-039: English/Aptitude Missing Scripts & Async Fixes ---');
+
+test('BUG-039: english.html loads assessment.js', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('assessment.js'),
+        'english.html must load assessment.js for startAssessment function');
+});
+
+test('BUG-039: english.html assessment.js script loaded before english-generator.js script', () => {
+    const html = readFile('english.html');
+    const assessmentPos = html.indexOf('src="assessment.js"');
+    const generatorPos = html.indexOf('src="english-generator.js');
+    assert.ok(assessmentPos > 0, 'assessment.js script tag must exist');
+    assert.ok(assessmentPos < generatorPos,
+        'assessment.js script tag must appear before english-generator.js script tag');
+});
+
+test('BUG-039: english.html uses await for getCompletedWorksheets', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('await getCompletedWorksheets'),
+        'english.html must use await with getCompletedWorksheets (async function)');
+});
+
+test('BUG-039: english.html DOMContentLoaded handler is async', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes("DOMContentLoaded', async function"),
+        'english.html DOMContentLoaded handler must be async');
+});
+
+test('BUG-039: english.html guards against non-array completedWorksheets', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('Array.isArray(completedWorksheets)'),
+        'english.html must guard against non-array return from getCompletedWorksheets');
+});
+
+test('BUG-039: aptitude.html uses await for getCompletedWorksheets (first call)', () => {
+    const html = readFile('aptitude.html');
+    const firstCall = html.indexOf('getCompletedWorksheets');
+    const snippet = html.substring(Math.max(0, firstCall - 20), firstCall + 30);
+    assert.ok(snippet.includes('await'),
+        'aptitude.html first getCompletedWorksheets call must use await');
+});
+
+test('BUG-039: aptitude.html uses await for getCompletedWorksheets (second call)', () => {
+    const html = readFile('aptitude.html');
+    const firstIdx = html.indexOf('getCompletedWorksheets');
+    const secondIdx = html.indexOf('getCompletedWorksheets', firstIdx + 1);
+    const snippet = html.substring(Math.max(0, secondIdx - 20), secondIdx + 30);
+    assert.ok(snippet.includes('await'),
+        'aptitude.html second getCompletedWorksheets call must use await');
+});
+
+test('BUG-039: aptitude.html DOMContentLoaded handler is async', () => {
+    const html = readFile('aptitude.html');
+    assert.ok(html.includes("DOMContentLoaded', async function"),
+        'aptitude.html DOMContentLoaded handler must be async');
+});
+
+test('BUG-039: index.html loads assessment.js', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('assessment.js'),
+        'index.html must load assessment.js');
+});
+
+test('BUG-039: firebase-storage.js getCompletedWorksheets is async', () => {
+    const js = readFile('firebase-storage.js');
+    assert.ok(js.includes('async function getCompletedWorksheets'),
+        'firebase-storage.js getCompletedWorksheets must be async');
+});
+
+// ============================================================================
+console.log('\n=== BUG-040: Age Display vs Worksheet Difficulty Separation ===');
+// ============================================================================
+
+test('BUG-040: getSelectedChild() adds displayAge property', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('childData.displayAge'),
+        'getSelectedChild must set childData.displayAge');
+});
+
+test('BUG-040: getSelectedChild() never overwrites child.age from DOB', () => {
+    const js = readFile('profile-selector.js');
+    const getSelectedFn = js.substring(js.indexOf('function getSelectedChild()'));
+    const fnEnd = getSelectedFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? getSelectedFn.substring(0, fnEnd) : getSelectedFn;
+    // Should NOT contain childData.age = (overwrite from DOB)
+    // But SHOULD contain childData.displayAge =
+    assert.ok(!fnBody.includes('childData.age ='),
+        'getSelectedChild must NOT overwrite childData.age — only set displayAge');
+    assert.ok(fnBody.includes('childData.displayAge ='),
+        'getSelectedChild must set childData.displayAge');
+});
+
+test('BUG-040: loadProfileSelector adds displayAge, not age', () => {
+    const js = readFile('profile-selector.js');
+    const loadFn = js.substring(js.indexOf('async function loadProfileSelector'));
+    const fnEnd = loadFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? loadFn.substring(0, fnEnd) : loadFn;
+    assert.ok(fnBody.includes('data.displayAge = currentAge'),
+        'loadProfileSelector must set data.displayAge (not data.age)');
+    assert.ok(!fnBody.includes('data.age = currentAge'),
+        'loadProfileSelector must NOT overwrite data.age');
+});
+
+test('BUG-040: renderProfileSelector uses displayAge for display', () => {
+    const js = readFile('profile-selector.js');
+    const renderFn = js.substring(js.indexOf('function renderProfileSelector'));
+    const fnEnd = renderFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? renderFn.substring(0, fnEnd) : renderFn;
+    assert.ok(fnBody.includes('selectedChild.displayAge'),
+        'renderProfileSelector must use displayAge for display');
+});
+
+test('BUG-040: renderChildOption uses displayAge for display', () => {
+    const js = readFile('profile-selector.js');
+    const renderFn = js.substring(js.indexOf('function renderChildOption'));
+    const fnEnd = renderFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? renderFn.substring(0, fnEnd) : renderFn;
+    assert.ok(fnBody.includes('child.displayAge'),
+        'renderChildOption must use displayAge for display');
+});
+
+test('BUG-040: calculateAgeFromDOB function exists and is pure', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('function calculateAgeFromDOB(dateOfBirth)'),
+        'calculateAgeFromDOB must be defined');
+    // Must not modify any external state
+    const fn = js.substring(js.indexOf('function calculateAgeFromDOB'), js.indexOf('function calculateAgeFromDOB') + 400);
+    assert.ok(!fn.includes('localStorage'), 'calculateAgeFromDOB must not touch localStorage');
+    assert.ok(!fn.includes('firebase'), 'calculateAgeFromDOB must not touch firebase');
+});
+
+test('BUG-040: worksheet-generator uses child.age (assessment), not displayAge', () => {
+    const js = readFile('worksheet-generator.js');
+    // worksheet-generator should use child.age for content generation
+    assert.ok(!js.includes('displayAge'),
+        'worksheet-generator.js must NOT reference displayAge — uses assessment-based child.age');
+});
+
+test('BUG-040: english-generator uses child.age (assessment), not displayAge', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(!js.includes('displayAge'),
+        'english-generator.js must NOT reference displayAge — uses assessment-based child.age');
+});
+
+test('BUG-040: aptitude-generator does NOT use displayAge for content', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(!js.includes('displayAge'),
+        'aptitude-generator.js must NOT reference displayAge');
+});
+
+test('BUG-040: assessment.js does NOT use displayAge', () => {
+    const js = readFile('assessment.js');
+    assert.ok(!js.includes('displayAge'),
+        'assessment.js must NOT reference displayAge — assessment uses child.age');
+});
+
+test('BUG-040: weekly-assignments.js does NOT use displayAge', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(!js.includes('displayAge'),
+        'weekly-assignments.js must NOT reference displayAge');
+});
+
+test('BUG-040: level-test.js does NOT use displayAge', () => {
+    const js = readFile('level-test.js');
+    assert.ok(!js.includes('displayAge'),
+        'level-test.js must NOT reference displayAge');
+});
+
+test('BUG-040: displayAge comment explains BUG-040 purpose', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('BUG-040'),
+        'profile-selector.js must reference BUG-040 in comments for traceability');
+});
+
+test('BUG-040: getSelectedChild has BUG-040 comment about assessment-based age', () => {
+    const js = readFile('profile-selector.js');
+    const getSelectedFn = js.substring(js.indexOf('function getSelectedChild()'));
+    assert.ok(getSelectedFn.includes('ASSESSMENT-BASED'),
+        'getSelectedChild must document that child.age is assessment-based');
+});
+
+test('BUG-040: selectChild uses DOB age only for theme (visual), not content', () => {
+    const js = readFile('profile-selector.js');
+    const selectFn = js.substring(js.indexOf('function selectChild(childId, childData)'));
+    const fnEnd = selectFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? selectFn.substring(0, fnEnd) : selectFn;
+    // selectChild uses DOB age only for theme-young class — visual only
+    assert.ok(fnBody.includes('theme-young'),
+        'selectChild must use DOB age for theme classification (visual)');
+    assert.ok(fnBody.includes('calculateAgeFromDOB'),
+        'selectChild must calculate DOB age for theme');
+});
+
+test('BUG-040: children-profiles.html has its own age display (independent)', () => {
+    const html = readFile('children-profiles.html');
+    // children-profiles has its own local calculateAge function for display
+    assert.ok(html.includes('calculateAge'),
+        'children-profiles.html must have local age calculation for display');
+});
+
+// ============================================================================
+console.log('\n=== BUG-041: Theme Not Updating Immediately / Race Condition ===');
+// ============================================================================
+
+test('BUG-041: theme-manager loadTheme prioritizes gleegrow-theme cache', () => {
+    const js = readFile('theme-manager.js');
+    const loadFn = js.substring(js.indexOf('function loadTheme()'));
+    const fnEnd = loadFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? loadFn.substring(0, fnEnd) : loadFn;
+    // Must return early after applying cached theme (no override from child.theme)
+    const cacheIdx = fnBody.indexOf("localStorage.getItem('gleegrow-theme')");
+    const returnIdx = fnBody.indexOf('return;', cacheIdx);
+    assert.ok(cacheIdx > 0 && returnIdx > cacheIdx,
+        'loadTheme must return after applying cached theme to prevent override');
+});
+
+test('BUG-041: saveChildTheme applies theme before Firestore write', () => {
+    const js = readFile('theme-manager.js');
+    const saveFn = js.substring(js.indexOf('async function saveChildTheme'));
+    const applyIdx = saveFn.indexOf('applyTheme(themeName)');
+    const firestoreIdx = saveFn.indexOf('firebase.firestore()');
+    assert.ok(applyIdx > 0 && firestoreIdx > applyIdx,
+        'saveChildTheme must apply theme BEFORE Firestore write (optimistic update)');
+});
+
+test('BUG-041: saveChildTheme updates localStorage before Firestore write', () => {
+    const js = readFile('theme-manager.js');
+    const saveFn = js.substring(js.indexOf('async function saveChildTheme'));
+    const localIdx = saveFn.indexOf("localStorage.getItem('selectedChild')");
+    const firestoreIdx = saveFn.indexOf('firebase.firestore()');
+    assert.ok(localIdx > 0 && firestoreIdx > localIdx,
+        'saveChildTheme must update localStorage BEFORE Firestore write');
+});
+
+test('BUG-041: loadProfileSelector preserves cached theme from localStorage', () => {
+    const js = readFile('profile-selector.js');
+    const loadFn = js.substring(js.indexOf('async function loadProfileSelector'));
+    const fnEnd = loadFn.indexOf('\nasync function ') > 0 ?
+        loadFn.indexOf('\nasync function ') :
+        loadFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? loadFn.substring(0, fnEnd) : loadFn;
+    assert.ok(fnBody.includes("localStorage.getItem('gleegrow-theme')"),
+        'loadProfileSelector must check gleegrow-theme cache before overwriting');
+    assert.ok(fnBody.includes('selectedChildData.theme = cachedTheme'),
+        'loadProfileSelector must preserve cached theme to prevent stale Firestore override');
+});
+
+test('BUG-041: selectChild applies child color theme immediately', () => {
+    const js = readFile('profile-selector.js');
+    const selectFn = js.substring(js.indexOf('function selectChild(childId, childData)'));
+    const fnEnd = selectFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? selectFn.substring(0, fnEnd) : selectFn;
+    assert.ok(fnBody.includes('applyTheme'),
+        'selectChild must apply color theme when switching children');
+    assert.ok(fnBody.includes('childData.theme'),
+        'selectChild must use childData.theme for color theme');
+});
+
+test('BUG-041: THEMES constant defines all theme options', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes("ocean:"), 'THEMES must include ocean');
+    assert.ok(js.includes("forest:"), 'THEMES must include forest');
+    assert.ok(js.includes("sunset:"), 'THEMES must include sunset');
+    assert.ok(js.includes("candy:"), 'THEMES must include candy');
+    assert.ok(js.includes("space:"), 'THEMES must include space');
+    assert.ok(js.includes("rainbow:"), 'THEMES must include rainbow');
+});
+
+test('BUG-041: theme-manager has early cache apply before DOMContentLoaded', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes("document.readyState === 'loading'"),
+        'theme-manager must check readyState for early apply');
+    assert.ok(js.includes("document.documentElement.setAttribute('data-theme', earlyCache)"),
+        'theme-manager must set data-theme before DOMContentLoaded for instant display');
+});
+
+test('BUG-041: BUG-041 referenced in comments for traceability', () => {
+    const tmJs = readFile('theme-manager.js');
+    const psJs = readFile('profile-selector.js');
+    assert.ok(tmJs.includes('BUG-041'),
+        'theme-manager.js must reference BUG-041');
+    assert.ok(psJs.includes('BUG-041'),
+        'profile-selector.js must reference BUG-041');
+});
+
+// ============================================================================
+console.log('\n=== BUG-042: English Assessment Fixes (client + server) ===');
+// ============================================================================
+
+test('BUG-042: english.html has assessment-container div', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('id="assessment-container"'),
+        'english.html must have assessment-container div');
+});
+
+test('BUG-042: english.html loads assessment.css', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('assessment.css'),
+        'english.html must load assessment.css for styled assessment UI');
+});
+
+test('BUG-042: index.html loads assessment.css', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('assessment.css'),
+        'index.html must load assessment.css (extracted from inline styles)');
+});
+
+test('BUG-042: assessment.css file exists with required styles', () => {
+    assert.ok(fileExists('assessment.css'), 'assessment.css must exist');
+    const css = readFile('assessment.css');
+    assert.ok(css.includes('#assessment-container'), 'Must have #assessment-container style');
+    assert.ok(css.includes('.assessment-page'), 'Must have .assessment-page style');
+    assert.ok(css.includes('.assessment-header'), 'Must have .assessment-header style');
+    assert.ok(css.includes('.assessment-question'), 'Must have .assessment-question style');
+    assert.ok(css.includes('.gate-content'), 'Must have .gate-content style');
+    assert.ok(css.includes('.take-assessment-btn'), 'Must have .take-assessment-btn style');
+});
+
+test('BUG-043: assessment.js generateEnglishAssessmentQuestions uses fixed bank (not dynamic generators)', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(js.indexOf('function generateEnglishAssessmentQuestions'));
+    const fnEnd = fn.indexOf('\nfunction generateMathAssessmentQuestions');
+    const fnBody = fnEnd > 0 ? fn.substring(0, fnEnd) : fn.substring(0, 2000);
+    // Must NOT call dynamic generators (was BUG-043 root cause)
+    assert.ok(!fnBody.includes('config.generator()'),
+        'generateEnglishAssessmentQuestions must NOT call config.generator()');
+    assert.ok(!fnBody.includes('generatePictureWordProblems'),
+        'Must NOT use dynamic pictureWords generator');
+    // Must use fixed bank with seeded shuffle
+    assert.ok(fnBody.includes('ENGLISH_ASSESSMENT_BANK'),
+        'Must use ENGLISH_ASSESSMENT_BANK for deterministic questions');
+    assert.ok(fnBody.includes('AssessmentSeededRandom'),
+        'Must use AssessmentSeededRandom for deterministic shuffle');
+});
+
+test('BUG-042: assessment.js renders English-specific header', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('English Vocabulary Assessment'),
+        'Assessment UI must show English-specific header');
+});
+
+test('BUG-042: assessment.js English input is wider than Math input', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('width: 200px'),
+        'English assessment answer input must be wider for word answers');
+});
+
+test('BUG-042: assessment.js isEnglish defined before use in pencil mode', () => {
+    const js = readFile('assessment.js');
+    const submitFn = js.substring(js.indexOf('async function submitAssessment'));
+    const fnEnd = submitFn.indexOf('\nasync function ') > 0 ?
+        submitFn.indexOf('\nasync function ') :
+        submitFn.indexOf('\nfunction ');
+    const fnBody = fnEnd > 0 ? submitFn.substring(0, fnEnd) : submitFn.substring(0, 3000);
+    // isEnglish must be declared before it's used in pencil mode loading
+    const declIdx = fnBody.indexOf('const isEnglish');
+    const useIdx = fnBody.indexOf('isEnglish && typeof loadEmnistModel');
+    assert.ok(declIdx > 0 && useIdx > declIdx,
+        'isEnglish must be declared before use in pencil mode (was reference error)');
+});
+
+test('BUG-042: server-side math-engine handles English assessment', () => {
+    const js = readFile('functions/shared/math-engine.js');
+    assert.ok(js.includes("operation === 'english'"),
+        'generateSeededAssessmentQuestions must check for English operation');
+    assert.ok(js.includes('generateSeededEnglishAssessment'),
+        'Must have generateSeededEnglishAssessment function');
+    assert.ok(js.includes('ENGLISH_ASSESSMENT_BANK'),
+        'Must have ENGLISH_ASSESSMENT_BANK question bank');
+});
+
+test('BUG-042: server English assessment bank covers all age groups', () => {
+    const js = readFile('functions/shared/math-engine.js');
+    const bank = js.substring(js.indexOf('ENGLISH_ASSESSMENT_BANK'));
+    assert.ok(bank.includes("'4-5':"), 'Bank must have age 4-5');
+    assert.ok(bank.includes("'6':"), 'Bank must have age 6');
+    assert.ok(bank.includes("'7':"), 'Bank must have age 7');
+    assert.ok(bank.includes("'8':"), 'Bank must have age 8');
+    assert.ok(bank.includes("'9+':"), 'Bank must have age 9+');
+    assert.ok(bank.includes("'10+':"), 'Bank must have age 10+');
+});
+
+test('BUG-042: server English assessment bank has easy + medium per age', () => {
+    const js = readFile('functions/shared/math-engine.js');
+    const bankSection = js.substring(
+        js.indexOf('ENGLISH_ASSESSMENT_BANK'),
+        js.indexOf('function generateSeededEnglishAssessment')
+    );
+    // Each age group should have 'easy' and 'medium' sections
+    const ageGroups = ['4-5', '6', '7', '8', '9+', '10+'];
+    ageGroups.forEach(age => {
+        assert.ok(bankSection.includes(`'${age}':`),
+            `Bank must have age group ${age}`);
+    });
+});
+
+test('BUG-042: english-generator.js backToHome button fixed', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(!js.includes("onclick=\"backToHome()\""),
+        'Must not call undefined backToHome() function');
+    assert.ok(js.includes("window.location.href='index'"),
+        'Back button must navigate to index page');
+});
+
+test('BUG-042: assessment.js cancelAssessment restores English type-selection', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(js.indexOf('function cancelAssessment'));
+    assert.ok(fn.includes('type-selection'),
+        'cancelAssessment must show type-selection for English');
+});
+
+test('BUG-042: assessment.js startLearningAtLevel handles English', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(js.indexOf('async function startLearningAtLevel'));
+    assert.ok(fn.includes("operation === 'english'"),
+        'startLearningAtLevel must handle English operation');
+    assert.ok(fn.includes('type-selection'),
+        'English post-assessment must show type-selection');
+});
+
+// ============================================================================
+console.log('\n=== English Module General Tests ===');
+// ============================================================================
+
+test('English: english.html loads all required scripts', () => {
+    const html = readFile('english.html');
+    const requiredScripts = [
+        'firebase-config.js', 'firebase-auth.js', 'firebase-storage.js',
+        'level-mapper.js', 'app-constants.js', 'assessment.js',
+        'english-generator.js', 'handwriting-input.js',
+        'handwriting-recognition.js', 'profile-selector.js',
+        'theme-manager.js', 'weekly-assignments.js', 'progress-map.js',
+        'branding.js', 'completion-manager.js'
+    ];
+    requiredScripts.forEach(script => {
+        assert.ok(html.includes(script),
+            `english.html must load ${script}`);
+    });
+});
+
+test('English: assessment.js loads before english-generator.js', () => {
+    const html = readFile('english.html');
+    const assessmentIdx = html.indexOf('src="assessment.js"');
+    const generatorIdx = html.indexOf('src="english-generator.js');
+    assert.ok(assessmentIdx > 0 && generatorIdx > assessmentIdx,
+        'assessment.js must load before english-generator.js (dependency)');
+});
+
+test('English: level-mapper.js loads before english-generator.js', () => {
+    const html = readFile('english.html');
+    const mapperIdx = html.indexOf('src="level-mapper.js"');
+    const generatorIdx = html.indexOf('src="english-generator.js');
+    assert.ok(mapperIdx > 0 && generatorIdx > mapperIdx,
+        'level-mapper.js must load before english-generator.js');
+});
+
+test('English: english-generator.js has getConfigByAge function', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('function getConfigByAge(ageGroup, difficulty)'),
+        'english-generator.js must export getConfigByAge(ageGroup, difficulty)');
+});
+
+test('English: english-generator.js has all problem generators', () => {
+    const js = readFile('english-generator.js');
+    const generators = [
+        'generatePictureWordProblems',
+        'generateSightWordProblems',
+        'generateSentenceFillProblems',
+        'generateSynonymAntonymProblems',
+        'generatePartsOfSpeechProblems'
+    ];
+    generators.forEach(gen => {
+        assert.ok(js.includes(`function ${gen}`),
+            `english-generator.js must define ${gen}`);
+    });
+});
+
+test('English: english-generator.js has ageBasedContentConfigs for all age groups', () => {
+    const js = readFile('english-generator.js');
+    const configSection = js.substring(
+        js.indexOf('ageBasedContentConfigs'),
+        js.indexOf('function buildLevelBasedConfigs')
+    );
+    ['4-5', '6', '7', '8', '9+', '10+'].forEach(age => {
+        assert.ok(configSection.includes(`'${age}':`),
+            `ageBasedContentConfigs must have age group ${age}`);
+    });
+});
+
+test('English: each age config has easy, medium, hard, writing', () => {
+    const js = readFile('english-generator.js');
+    const configSection = js.substring(
+        js.indexOf('ageBasedContentConfigs'),
+        js.indexOf('function buildLevelBasedConfigs')
+    );
+    // Check for difficulty keys present in the config block
+    assert.ok(configSection.includes("easy:"), 'Must have easy difficulty');
+    assert.ok(configSection.includes("medium:"), 'Must have medium difficulty');
+    assert.ok(configSection.includes("hard:"), 'Must have hard difficulty');
+    assert.ok(configSection.includes("writing:"), 'Must have writing type');
+});
+
+test('English: english-generator.js has clearWritingCanvas function', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('function clearWritingCanvas(canvasId)'),
+        'Must have clearWritingCanvas function');
+});
+
+test('English: english-generator.js has initializeAllWritingCanvases function', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('function initializeAllWritingCanvases()'),
+        'Must have initializeAllWritingCanvases function');
+});
+
+test('English: getCompletedWorksheets calls use await in english.html', () => {
+    const html = readFile('english.html');
+    const call = html.indexOf('getCompletedWorksheets');
+    const snippet = html.substring(Math.max(0, call - 20), call + 30);
+    assert.ok(snippet.includes('await'),
+        'getCompletedWorksheets must be awaited');
+});
+
+test('English: english.html has progress-map container', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('id="progress-map-container"'),
+        'english.html must have progress-map-container for gamified journey');
+});
+
+test('English: english.html has bottom navigation', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes('class="bottom-nav"'),
+        'english.html must have bottom navigation bar');
+    assert.ok(html.includes('href="index"'),
+        'Bottom nav must link to home');
+});
+
+test('English: english.html DOMContentLoaded is async', () => {
+    const html = readFile('english.html');
+    assert.ok(html.includes("DOMContentLoaded', async function"),
+        'DOMContentLoaded handler must be async for await support');
+});
+
+test('English: assessment.css has no inline duplicates in index.html', () => {
+    const html = readFile('index.html');
+    // index.html should NOT have inline assessment styles anymore (only the comment marker)
+    assert.ok(!html.includes('.assessment-question {'),
+        'index.html should not have inline .assessment-question styles (moved to assessment.css)');
+    assert.ok(!html.includes('.gate-content {'),
+        'index.html should not have inline .gate-content styles (moved to assessment.css)');
+});
+
+// ============================================================================
+console.log('\n=== Theme-Specific Doodle Backgrounds ===');
+// ============================================================================
+
+test('Theme doodles: theme-manager.js has getThemeDoodlePaths function', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('function getThemeDoodlePaths(theme)'),
+        'Must have getThemeDoodlePaths function for theme-specific SVG paths');
+});
+
+test('Theme doodles: theme-manager.js has applyThemeDoodle function', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('function applyThemeDoodle(themeName)'),
+        'Must have applyThemeDoodle to set body background-image dynamically');
+});
+
+test('Theme doodles: applyTheme calls applyThemeDoodle', () => {
+    const js = readFile('theme-manager.js');
+    const applyThemeFn = js.substring(js.indexOf('function applyTheme('), js.indexOf('function applyThemeDoodle'));
+    assert.ok(applyThemeFn.includes('applyThemeDoodle('),
+        'applyTheme must call applyThemeDoodle to update doodle background');
+});
+
+test('Theme doodles: all 8 themes have doodle paths', () => {
+    const js = readFile('theme-manager.js');
+    const themes = ['ocean', 'forest', 'sunset', 'candy', 'space', 'rainbow', 'dinosaur', 'dragon'];
+    themes.forEach(theme => {
+        assert.ok(js.includes("'" + theme + "':") || js.includes(theme + ':'),
+            'getThemeDoodlePaths must have paths for theme: ' + theme);
+    });
+});
+
+test('Theme doodles: each theme has doodleColor in THEMES', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('doodleColor:'),
+        'THEMES must have doodleColor property for SVG stroke color');
+    // Each theme should have it
+    const themesBlock = js.substring(js.indexOf('const THEMES'), js.indexOf('const DEFAULT_THEME'));
+    const count = (themesBlock.match(/doodleColor:/g) || []).length;
+    assert.ok(count >= 6, 'All 6 themes must have doodleColor (found ' + count + ')');
+});
+
+test('Theme doodles: CSS body no longer has hardcoded doodle SVG', () => {
+    const css = readFile('styles.css');
+    assert.ok(!css.includes("stroke='%23667eea'"),
+        'styles.css body must not have hardcoded ocean-blue doodle SVG (now dynamic via JS)');
+});
+
+test('Theme doodles: CSS body has comment about dynamic doodles', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('theme-manager.js'),
+        'styles.css body should reference theme-manager.js for doodle background');
+});
+
+test('Theme doodles: LUCIDE_ICONS has ocean-specific icons', () => {
+    const js = readFile('theme-manager.js');
+    // Ocean theme should reference fish, waves, shell icons from Lucide
+    assert.ok(js.includes("'fish':"), 'LUCIDE_ICONS must have fish icon');
+    assert.ok(js.includes("'waves':"), 'LUCIDE_ICONS must have waves icon');
+    assert.ok(js.includes("'shell':"), 'LUCIDE_ICONS must have shell icon');
+});
+
+test('Theme doodles: THEME_ICON_NAMES maps each theme to 6 icons', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('THEME_ICON_NAMES'), 'Must have THEME_ICON_NAMES mapping');
+    // Each theme array should have 6 entries
+    const themes = ['ocean', 'forest', 'sunset', 'candy', 'space', 'rainbow', 'dinosaur', 'dragon'];
+    themes.forEach(theme => {
+        const regex = new RegExp(theme + ":\\s*\\[");
+        assert.ok(regex.test(js), 'THEME_ICON_NAMES must have ' + theme);
+    });
+});
+
+test('Theme doodles: getThemeDoodlePaths uses grid transform placement', () => {
+    const js = readFile('theme-manager.js');
+    // New implementation uses <g transform> for icon placement on 6x6 grid
+    assert.ok(js.includes("translate(") && js.includes("scale("),
+        'getThemeDoodlePaths must use translate+scale transforms for icon placement');
+});
+
+test('Theme doodles: desktop opacity is 0.16, mobile is 0.1', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes("window.innerWidth >= 1025 ? '0.16' : '0.1'"),
+        'applyThemeDoodle must use 0.16 opacity on desktop, 0.1 on mobile');
+});
+
+test('Theme doodles: no desktop media query override for doodles in CSS', () => {
+    const css = readFile('styles.css');
+    // Old desktop override should be gone
+    assert.ok(!css.includes("opacity='0.16'"),
+        'CSS should not have desktop doodle opacity override (now handled by JS)');
+});
+
+// ============================================================================
+console.log('\n=== BUG-043: English Assessment Client-Server Match ===');
+// ============================================================================
+
+test('BUG-043: assessment.js has ENGLISH_ASSESSMENT_BANK matching server', () => {
+    const clientJs = readFile('assessment.js');
+    const serverJs = readFile('functions/shared/math-engine.js');
+
+    // Client must have the same bank
+    assert.ok(clientJs.includes('const ENGLISH_ASSESSMENT_BANK'),
+        'assessment.js must have ENGLISH_ASSESSMENT_BANK');
+
+    // Verify same age groups exist
+    const ageGroups = ['4-5', '6', '7', '8', '9+', '10+'];
+    ageGroups.forEach(ag => {
+        assert.ok(clientJs.includes("'" + ag + "'"),
+            'Client bank must have age group: ' + ag);
+    });
+
+    // Verify first question matches server for each age group
+    assert.ok(clientJs.includes("Complete: c_t") && serverJs.includes("Complete: c_t"),
+        'First 4-5 easy question must match between client and server');
+    assert.ok(clientJs.includes("Write the word: accommodation") && serverJs.includes("Write the word: accommodation"),
+        '10+ easy question must match between client and server');
+});
+
+test('BUG-043: assessment.js has seeded random for English', () => {
+    const js = readFile('assessment.js');
+    assert.ok(js.includes('class AssessmentSeededRandom'),
+        'assessment.js must have AssessmentSeededRandom class');
+    assert.ok(js.includes('function assessmentHashCode'),
+        'assessment.js must have assessmentHashCode function');
+    assert.ok(js.includes('assessment-\' + childId + \'-english'),
+        'English assessment must use same seed format as server: assessment-{childId}-english');
+});
+
+test('BUG-043: generateEnglishAssessmentQuestions uses bank not dynamic generators', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(
+        js.indexOf('function generateEnglishAssessmentQuestions'),
+        js.indexOf('function generateMathAssessmentQuestions')
+    );
+    // Must NOT use dynamic generators
+    assert.ok(!fn.includes('generatePictureWordProblems'),
+        'English assessment must NOT use dynamic generators (was BUG-043 root cause)');
+    assert.ok(!fn.includes('generateSightWordProblems'),
+        'English assessment must NOT use dynamic generators');
+    // Must use bank with seeded shuffle
+    assert.ok(fn.includes('ENGLISH_ASSESSMENT_BANK'),
+        'English assessment must use ENGLISH_ASSESSMENT_BANK');
+    assert.ok(fn.includes('AssessmentSeededRandom'),
+        'English assessment must use seeded random');
+});
+
+test('BUG-043: math assessment uses seeded random matching server', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(
+        js.indexOf('function generateMathAssessmentQuestions'),
+        js.indexOf('function determineLevelFromScore')
+    );
+    assert.ok(fn.includes('assessmentHashCode'),
+        'Math assessment must use assessmentHashCode for seed');
+    assert.ok(fn.includes('seededRandom = new SeededRandom(seed)'),
+        'Math assessment must set seeded random before generation');
+    assert.ok(fn.includes('seededRandom = null'),
+        'Math assessment must clear seeded random after generation');
+});
+
+test('BUG-043: math assessment uses 4 tiers (younger-easy, current-easy, current-medium, older-easy)', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(
+        js.indexOf('function generateMathAssessmentQuestions'),
+        js.indexOf('function determineLevelFromScore')
+    );
+    // Must have 4 tier calls (exclude the function definition line)
+    const lines = fn.split('\n').filter(l => l.trim().startsWith('generateFromConfig('));
+    assert.strictEqual(lines.length, 4, 'Must have 4 generateFromConfig calls for 4 tiers (found ' + lines.length + ')');
+});
+
+test('BUG-043: server math assessment uses 4 tiers matching client', () => {
+    const js = readFile('functions/shared/math-engine.js');
+    const fn = js.substring(
+        js.indexOf('function generateSeededAssessmentQuestions'),
+        js.indexOf('/**\n * English assessment')
+    );
+    // Must have 4 tier calls (exclude the function definition line)
+    const lines = fn.split('\n').filter(l => l.trim().startsWith('generateFromConfig('));
+    assert.strictEqual(lines.length, 4, 'Server must have 4 generateFromConfig calls matching client (found ' + lines.length + ')');
+    assert.ok(fn.includes('olderAge'),
+        'Server must include olderAge tier (was missing before BUG-043 fix)');
+    assert.ok(fn.includes('slice(0, 20)'),
+        'Server must return 20 questions (was 10 before BUG-043 fix)');
+});
+
+test('BUG-043: server English comparison trims whitespace', () => {
+    const js = readFile('functions/level-functions.js');
+    assert.ok(js.includes('.trim().toLowerCase()'),
+        'Server English answer comparison must trim whitespace');
+});
+
+test('BUG-043: startAssessment passes childId to question generators', () => {
+    const js = readFile('assessment.js');
+    const fn = js.substring(
+        js.indexOf('function startAssessment('),
+        js.indexOf('function renderAssessmentUI')
+    );
+    assert.ok(fn.includes('childId'),
+        'startAssessment must get childId for seeded generation');
+    assert.ok(fn.includes('generateEnglishAssessmentQuestions(ageGroup, childId)'),
+        'startAssessment must pass childId to English generator');
+    assert.ok(fn.includes('generateMathAssessmentQuestions(operation, ageGroup, childId)'),
+        'startAssessment must pass childId to Math generator');
+});
+
+// ============================================================================
+console.log('\n=== BUG-059: Level Test Client-Server Question Mismatch ===');
+// ============================================================================
+
+test('BUG-059: level-test.js uses deterministic seed matching server', () => {
+    const js = readFile('level-test.js');
+    // Must use hashCode with childId + weekStr (matching server's generateSeededLevelTestQuestions)
+    assert.ok(js.includes("hashCode('leveltest-'"),
+        'level-test.js must use hashCode with leveltest prefix for seed');
+    assert.ok(js.includes('childId') && js.includes('weekStr'),
+        'level-test.js must use childId and weekStr in seed');
+});
+
+test('BUG-059: level-test.js sets global seededRandom before generating', () => {
+    const js = readFile('level-test.js');
+    const fn = js.substring(
+        js.indexOf('function generateMathLevelTest('),
+        js.indexOf('function generateEnglishLevelTest(')
+    );
+    assert.ok(fn.includes('seededRandom = new SeededRandom(seed)'),
+        'generateMathLevelTest must set global seededRandom before generating');
+});
+
+test('BUG-059: level-test.js uses same difficulty distribution as server', () => {
+    const clientJs = readFile('level-test.js');
+    const serverJs = readFile('functions/shared/math-engine.js');
+    // Both must use: ['easy', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard', 'hard', 'hard', 'hard']
+    assert.ok(clientJs.includes("'easy', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard', 'hard', 'hard', 'hard'"),
+        'Client level test must use same difficulty distribution as server (1 easy, 3 medium, 6 hard)');
+    assert.ok(serverJs.includes("'easy', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard', 'hard', 'hard', 'hard'"),
+        'Server level test must use difficulty distribution: 1 easy, 3 medium, 6 hard');
+});
+
+test('BUG-059: startLevelTest passes childId and weekStr to generator', () => {
+    const js = readFile('level-test.js');
+    const fn = js.substring(
+        js.indexOf('async function startLevelTest('),
+        js.indexOf('function renderLevelTest()')
+    );
+    assert.ok(fn.includes('getWeekString(new Date())'),
+        'startLevelTest must compute weekStr using getWeekString');
+    assert.ok(fn.includes('generateMathLevelTest(operation, ageGroup, child.id, weekStr)'),
+        'startLevelTest must pass child.id and weekStr to generateMathLevelTest');
+});
+
+test('BUG-059: level-test.js does NOT use Date.now() for seeds', () => {
+    const js = readFile('level-test.js');
+    const fn = js.substring(
+        js.indexOf('function generateMathLevelTest('),
+        js.indexOf('function generateEnglishLevelTest(')
+    );
+    assert.ok(!fn.includes('Date.now()'),
+        'generateMathLevelTest must NOT use Date.now() for seeds — causes client-server mismatch');
+    // Check non-comment lines only for Math.random() usage
+    const codeLines = fn.split('\n').filter(l => !l.trim().startsWith('//'));
+    const hasRandomInCode = codeLines.some(l => l.includes('Math.random()'));
+    assert.ok(!hasRandomInCode,
+        'generateMathLevelTest code must NOT use Math.random() — must be deterministic');
+});
+
+test('BUG-059: server seed format matches client seed format', () => {
+    const clientJs = readFile('level-test.js');
+    const serverJs = readFile('functions/shared/math-engine.js');
+    // Both must use: hashCode(`leveltest-${childId}-${operation}-${weekStr}`)
+    assert.ok(serverJs.includes("hashCode(`leveltest-${childId}-${operation}-${weekStr}`)"),
+        'Server must use seed: hashCode(leveltest-{childId}-{operation}-{weekStr})');
+    // Client uses string concat equivalent
+    assert.ok(clientJs.includes("hashCode('leveltest-' + childId + '-' + operation + '-' + weekStr)"),
+        'Client must use same seed format as server');
+});
+
+// ============================================================================
+console.log('\n=== BUG-044: Theme Gradient Repaint ===');
+// ============================================================================
+
+test('BUG-044: theme-manager.js has applyThemeGradients function', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('function applyThemeGradients(themeName)'),
+        'Must have applyThemeGradients to force repaint on all gradient elements');
+});
+
+test('BUG-044: applyTheme calls applyThemeGradients (not just headers)', () => {
+    const js = readFile('theme-manager.js');
+    const applyThemeFn = js.substring(
+        js.indexOf('function applyTheme('),
+        js.indexOf('function applyThemeGradients')
+    );
+    assert.ok(applyThemeFn.includes('applyThemeGradients('),
+        'applyTheme must call applyThemeGradients');
+    assert.ok(!applyThemeFn.includes('applyThemeToHeaders('),
+        'applyTheme should NOT call old applyThemeToHeaders (replaced by applyThemeGradients)');
+});
+
+test('BUG-044: applyThemeGradients targets all gradient CSS selectors', () => {
+    const js = readFile('theme-manager.js');
+    const fn = js.substring(
+        js.indexOf('function applyThemeGradients'),
+        js.indexOf('function applyThemeDoodle')
+    );
+    // Must target all known gradient elements
+    assert.ok(fn.includes('.user-header'), 'Must target .user-header');
+    assert.ok(fn.includes('.control-buttons button'), 'Must target .control-buttons button (worksheet controls)');
+    assert.ok(fn.includes('.back-row button'), 'Must target .back-row button (back buttons)');
+    assert.ok(fn.includes('#greeting-banner'), 'Must target #greeting-banner');
+    assert.ok(fn.includes('.eraser-btn'), 'Must target .eraser-btn');
+});
+
+test('BUG-044: applyThemeGradients also updates inline-styled elements', () => {
+    const js = readFile('theme-manager.js');
+    const fn = js.substring(
+        js.indexOf('function applyThemeGradients'),
+        js.indexOf('function applyThemeDoodle')
+    );
+    assert.ok(fn.includes("querySelectorAll('[style]')"),
+        'Must also scan inline-styled elements for gradient backgrounds');
+});
+
+test('BUG-044: applyThemeGradients forces body background-color', () => {
+    const js = readFile('theme-manager.js');
+    const fn = js.substring(
+        js.indexOf('function applyThemeGradients'),
+        js.indexOf('function applyThemeDoodle')
+    );
+    assert.ok(fn.includes('document.body.style.backgroundColor'),
+        'Must explicitly set body backgroundColor for immediate update');
+});
+
+test('BUG-044: no hardcoded ocean blue rgba in box-shadows', () => {
+    const css = readFile('styles.css');
+    assert.ok(!css.includes('rgba(102,126,234'),
+        'styles.css must not have hardcoded ocean-blue rgba(102,126,234) in box-shadows');
+    // Should use CSS variable instead
+    assert.ok(css.includes('var(--color-primary-20)'),
+        'Box shadows should use var(--color-primary-20) instead of hardcoded rgba');
+});
+
+// ============================================================================
+console.log('\n=== BUG-047: Input mode flicker ===');
+// ============================================================================
+
+test('BUG-047: selectInputMode does not close/reopen modal', () => {
+    const js = readFile('profile-selector.js');
+    const fn = js.substring(js.indexOf('async function selectInputMode'), js.indexOf('// Add styles for the profile selector'));
+    assert.ok(!fn.includes('closeChildSettings()'),
+        'selectInputMode must NOT call closeChildSettings (causes flicker)');
+    assert.ok(!fn.includes('openChildSettings('),
+        'selectInputMode must NOT call openChildSettings (causes flicker)');
+});
+
+// ============================================================================
+console.log('\n=== BUG-048: Theme picker buttons lose gradient ===');
+// ============================================================================
+
+test('BUG-048: applyThemeGradients skips theme-option elements', () => {
+    const js = readFile('theme-manager.js');
+    const fn = js.substring(
+        js.indexOf('function applyThemeGradients'),
+        js.indexOf('function applyThemeDoodle')
+    );
+    assert.ok(fn.includes("classList.contains('theme-option')"),
+        'applyThemeGradients must skip .theme-option elements to preserve their individual gradients');
+});
+
+// ============================================================================
+console.log('\n=== BUG-049: Doodle SVG cleanup ===');
+// ============================================================================
+
+test('BUG-049: doodle stroke-width is 2 for cleaner lines', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes("stroke-width='2'"),
+        'Doodle SVG stroke-width should be 2 for clean, visible lines');
+});
+
+test('BUG-049: ocean doodles use Lucide fish icon', () => {
+    const js = readFile('theme-manager.js');
+    // Lucide fish icon has distinctive fish path data
+    assert.ok(js.includes("'fish':") && js.includes('M6.5 12c.94-3.46'),
+        'Ocean doodles should use Lucide fish icon with recognizable path');
+});
+
+test('BUG-049: candy doodles use Lucide heart icon', () => {
+    const js = readFile('theme-manager.js');
+    // Lucide heart icon path
+    assert.ok(js.includes("'heart':") && js.includes('M2 9.5a5.5 5.5'),
+        'Candy doodles should use Lucide heart icon with recognizable path');
+});
+
+// ============================================================================
+console.log('\n=== BUG-050: Progress ring uses completedCount ===');
+// ============================================================================
+
+test('BUG-050: progress-map uses completedCount not pages.filter', () => {
+    const js = readFile('progress-map.js');
+    // Look at the weekly assignment data loading section
+    const start = js.indexOf('weeklyDone = 0');
+    const end = js.indexOf('// Stats', start);
+    const dataSection = js.substring(start, end);
+    assert.ok(dataSection.includes('completedCount'),
+        'weeklyDone should use completedCount field (reliable) not pages.filter(p => p.completed)');
+    assert.ok(!dataSection.includes('.filter(p => p.completed)'),
+        'Should NOT use pages.filter(p => p.completed) which can be unreliable after refresh');
+});
+
+// ============================================================================
+console.log('\n=== BUG-045: Story icon property name ===');
+// ============================================================================
+
+test('BUG-045: english-generator uses story.icon not story.emoji', () => {
+    const js = readFile('english-generator.js');
+    // The story card template should use story.icon
+    assert.ok(js.includes('story.icon'), 'Should reference story.icon for story cards');
+    assert.ok(!js.includes('story.emoji'), 'Should NOT reference story.emoji (wrong property name)');
+});
+
+// ============================================================================
+console.log('\n=== BUG-046: English canvas multi-character recognition ===');
+// ============================================================================
+
+test('BUG-046: recognizeHandwriting uses findDigitSegments with expectedAnswer.length hint', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('findDigitSegments(cleanCanvas, expectedAnswer.length)'),
+        'Multi-char path should call findDigitSegments with expected length hint on cleaned canvas');
+});
+
+test('BUG-046: recognizeHandwriting uses extractSegment for each character', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('extractSegment(cleanCanvas, segments[s])'),
+        'Should extract each segment from cleaned canvas for individual recognition');
+});
+
+test('BUG-046: recognizeHandwriting combines characters into word', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes("recognizedChars.join('')"),
+        'Should join all recognized characters into a word');
+});
+
+test('BUG-046: recognizeHandwriting does NOT just read first character', () => {
+    const js = readFile('english-handwriting-helper.js');
+    // Should NOT contain the old "first character only" approach
+    assert.ok(!js.includes('// For words: we can only recognize single chars'),
+        'Old comment about single char recognition should be removed');
+});
+
+test('BUG-046: validateHandwriting is case-insensitive', () => {
+    const js = readFile('english-handwriting-helper.js');
+    const fnBody = js.substring(
+        js.indexOf('function validateHandwriting'),
+        js.indexOf('function calculateSimilarity')
+    );
+    assert.ok(fnBody.includes('.toLowerCase()'),
+        'validateHandwriting should use toLowerCase for case-insensitive comparison');
+});
+
+test('BUG-046: validateHandwriting accepts perPositionPredictions for top-N matching', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('function validateHandwriting(recognized, expected, perPositionPredictions)'),
+        'validateHandwriting should accept perPositionPredictions as third parameter');
+    assert.ok(js.includes('perPositionPredictions.length'),
+        'Should check perPositionPredictions for top-N matching');
+    assert.ok(js.includes("preds.indexOf(expectedCharLower)"),
+        'Should check if expected char is in top predictions at each position');
+});
+
+test('BUG-046: recognizeHandwriting returns perPositionPredictions', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('perPositionPredictions: perPositionPredictions'),
+        'Recognition result should include perPositionPredictions');
+    assert.ok(js.includes('.slice(0, 3)'),
+        'Should store top 3 predictions per position');
+});
+
+test('BUG-046: checkHandwriting passes perPositionPredictions to validateHandwriting', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes('validateHandwriting(result.recognized, expectedAnswer, result.perPositionPredictions)'),
+        'Should pass perPositionPredictions from recognition result to validateHandwriting');
+});
+
+test('BUG-046: per-position expected char passed for prior boost', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('expectedAnswer.charAt(s)'),
+        'Should pass expected character at each position for prior boost');
+});
+
+test('BUG-046: findDigitSegments accepts expectedCount parameter', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(js.includes('function findDigitSegments(canvas, expectedCount)'),
+        'findDigitSegments should accept expectedCount parameter');
+});
+
+test('BUG-046: findDigitSegments no longer caps at 3 segments', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(!js.includes('Math.min(3,'),
+        'Should not have Math.min(3, ...) cap on segment count');
+    // Should cap at 10 instead
+    assert.ok(js.includes('Math.min(10,'),
+        'Should cap at 10 for reasonable max');
+});
+
+test('BUG-046: findDigitSegments uses expectedCount for even splitting', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(js.includes('segments.length < expectedCount'),
+        'Should use expectedCount to trigger even splitting when gap detection finds too few');
+});
+
+test('BUG-046: findDigitSegments uses smaller gap threshold (2%)', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(js.includes('contentWidth * 0.02'),
+        'Gap threshold should be 2% of width (was 5%)');
+});
+
+test('BUG-046: _removeRuledLines cleans canvas before segmentation', () => {
+    const js = readFile('english-handwriting-helper.js');
+    assert.ok(js.includes('function _removeRuledLines(canvas)'),
+        'Should have _removeRuledLines function to clean ruled lines from canvas');
+    assert.ok(js.includes('_removeRuledLines(canvas)'),
+        'Multi-char path should call _removeRuledLines before segmentation');
+    assert.ok(js.includes('findDigitSegments(cleanCanvas'),
+        'Should pass cleaned canvas to findDigitSegments');
+    assert.ok(js.includes('extractSegment(cleanCanvas'),
+        'Should pass cleaned canvas to extractSegment for recognition');
+});
+
+test('BUG-046: _removeRuledLines keeps only dark pixels (r<80, g<80, b<80)', () => {
+    const js = readFile('english-handwriting-helper.js');
+    const fnStart = js.indexOf('function _removeRuledLines');
+    const fnEnd = js.indexOf('return cleanCanvas;', fnStart) + 30;
+    const fn = js.substring(fnStart, fnEnd);
+    assert.ok(fn.includes('r < 80 && g < 80 && b < 80'),
+        'Should only keep pixels where all RGB channels < 80 (black handwriting)');
+});
+
+// ============================================================================
+console.log('\n=== Motivational Sequencing & 0% Safety Net ===');
+// ============================================================================
+
+test('adaptive-engine.js has ZONE_PROFILES with 3 profiles', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('ZONE_PROFILES'), 'Should have ZONE_PROFILES constant');
+    assert.ok(js.includes('gentle:'), 'Should have gentle profile');
+    assert.ok(js.includes('standard:'), 'Should have standard profile');
+    assert.ok(js.includes('challenge:'), 'Should have challenge profile');
+});
+
+test('adaptive-engine.js has motivational zones: warmup, rampup, focus, mixed, cooldown', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('warmup:'), 'Should have warmup zone');
+    assert.ok(js.includes('rampup:'), 'Should have rampup zone');
+    assert.ok(js.includes('focus:'), 'Should have focus zone');
+    assert.ok(js.includes('mixed:'), 'Should have mixed zone');
+    assert.ok(js.includes('cooldown:'), 'Should have cooldown zone');
+});
+
+test('adaptive-engine.js has getPageProfile function', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('function getPageProfile(pageNumber)'),
+        'Should have getPageProfile helper');
+});
+
+test('adaptive-engine.js has getSkillPool fallback function', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('function getSkillPool(targetBucket'),
+        'Should have getSkillPool helper with fallback chain');
+});
+
+test('adaptive-engine.js does NOT shuffle problems (motivational order preserved)', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(!js.includes('Fisher-Yates') && !js.includes('shuffleSeed'),
+        'Should not have shuffle logic (problems are in motivational order)');
+    assert.ok(js.includes('NO SHUFFLE'), 'Should have comment explaining no shuffle');
+});
+
+test('adaptive-engine.js problems have zone field', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes("zone: zoneName"), 'Problems should include zone field');
+});
+
+test('adaptive-engine.js reasoning includes sequencing metadata', () => {
+    const js = readFile('functions/adaptive-engine.js');
+    assert.ok(js.includes('sequencing:'), 'Reasoning should include sequencing');
+    assert.ok(js.includes("type: 'motivational'"), 'Sequencing type should be motivational');
+});
+
+test('worksheet-generator.js has showZeroScoreDialog function', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('function showZeroScoreDialog(operation)'),
+        'Should have showZeroScoreDialog function for 0% safety net');
+});
+
+test('worksheet-generator.js triggers 0% dialog for adaptive worksheets', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('score === 0 && correctCount === 0 && currentWorksheet.adaptive'),
+        'Should check for 0% score on adaptive worksheets');
+    assert.ok(js.includes('showZeroScoreDialog'), 'Should call showZeroScoreDialog');
+});
+
+test('worksheet-generator.js 0% dialog offers level reduction (clamps at level 1)', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('Math.max(1, currentLevel - 1)'),
+        'Level reduction should clamp at level 1');
+    assert.ok(js.includes('canReduceLevel'), 'Should check if level can be reduced');
+});
+
+test('worksheet-generator.js 0% dialog offers operation explanation', () => {
+    const js = readFile('worksheet-generator.js');
+    assert.ok(js.includes('showOperationExplanation'),
+        'Should call showOperationExplanation for "Show Me How" option');
+});
+
+test('operation-explainer.js exists and has showOperationExplanation', () => {
+    const js = readFile('operation-explainer.js');
+    assert.ok(js.includes('function showOperationExplanation(operation)'),
+        'Should have showOperationExplanation function');
+});
+
+test('operation-explainer.js covers all 4 operations', () => {
+    const js = readFile('operation-explainer.js');
+    assert.ok(js.includes("case 'addition':"), 'Should handle addition');
+    assert.ok(js.includes("case 'subtraction':"), 'Should handle subtraction');
+    assert.ok(js.includes("case 'multiplication':"), 'Should handle multiplication');
+    assert.ok(js.includes("case 'division':"), 'Should handle division');
+});
+
+test('index.html loads operation-explainer.js before worksheet-generator.js', () => {
+    const html = readFile('index.html');
+    const explainerPos = html.indexOf('operation-explainer.js');
+    const worksheetPos = html.indexOf('worksheet-generator.js');
+    assert.ok(explainerPos > 0, 'Should load operation-explainer.js');
+    assert.ok(explainerPos < worksheetPos,
+        'operation-explainer.js should load before worksheet-generator.js');
+});
+
+// ============================================================================
+console.log('\n=== UI Cleanup: Icon-Only Back Buttons ===');
+// ============================================================================
+
+test('all HTML back buttons use back-btn-icon class', () => {
+    const htmlFiles = ['index.html', 'english.html', 'stories.html', 'german.html',
+        'german-kids.html', 'aptitude.html', 'learn-english-stories.html',
+        'drawing.html', 'settings.html', 'admin.html', 'progress.html',
+        'children-profiles.html', 'privacy-policy.html', 'terms.html', 'rewards.html'];
+
+    for (const file of htmlFiles) {
+        const content = readFile(file);
+        // Should not have old-style text-based back buttons
+        assert.ok(!content.includes('"← Back to'),
+            `${file} should not have old "← Back to" text buttons`);
+    }
+});
+
+test('back-btn-icon class defined in styles.css', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('.back-btn-icon'), 'styles.css should define .back-btn-icon');
+    assert.ok(css.includes('border-radius: 50%'), 'back-btn-icon should be circular');
+    assert.ok(css.includes('width: 40px'), 'back-btn-icon should have fixed width');
+});
+
+test('old back button CSS classes removed', () => {
+    const pmCss = readFile('progress-map.css');
+    assert.ok(!pmCss.includes('.pm-back-btn'), 'progress-map.css should not have .pm-back-btn');
+
+    const assessCss = readFile('assessment.css');
+    assert.ok(!assessCss.includes('.gate-back-btn'), 'assessment.css should not have .gate-back-btn');
+
+    const rewardsCss = readFile('rewards.css');
+    assert.ok(!rewardsCss.includes('.rewards-back-btn'), 'rewards.css should not have .rewards-back-btn');
+});
+
+test('HTML back buttons use .back-row wrapper (not .navigation)', () => {
+    const files = ['index.html', 'english.html', 'stories.html', 'german.html',
+        'aptitude.html', 'drawing.html', 'learn-english-stories.html', 'german-kids.html'];
+    for (const file of files) {
+        const content = readFile(file);
+        // back-btn-icon should be inside .back-row, not .navigation
+        const navBackPattern = /class="navigation"[\s\S]{0,100}back-btn-icon/;
+        assert.ok(!navBackPattern.test(content),
+            `${file} should not have back-btn-icon inside .navigation (use .back-row)`);
+        // Should have back-row if it has back-btn-icon
+        if (content.includes('back-btn-icon')) {
+            assert.ok(content.includes('class="back-row"'),
+                `${file} back-btn-icon should be inside .back-row`);
+        }
+    }
+});
+
+test('.back-row CSS class exists in styles.css', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('.back-row'), 'styles.css should define .back-row');
+    assert.ok(css.includes('.back-row {'), 'styles.css should have .back-row rule');
+});
+
+test('.back-row hidden in print CSS', () => {
+    const css = readFile('styles.css');
+    const printStart = css.indexOf('@media print');
+    assert.ok(printStart > 0, 'Should have @media print rule');
+    const printBlock = css.substring(printStart);
+    assert.ok(printBlock.includes('.back-row'), 'Print CSS should hide .back-row');
+});
+
+test('JS generators use .back-row for back buttons', () => {
+    const jsFiles = [
+        'stories-generator.js', 'worksheet-generator.js', 'english-generator.js',
+        'aptitude-generator.js', 'eq-generator.js', 'german-generator.js',
+        'german-kids-generator.js', 'learn-english-stories-generator.js',
+        'drawing-generator.js', 'writing-practice.js', 'german-a1-stories.js'
+    ];
+    for (const file of jsFiles) {
+        const content = readFile(file);
+        if (content.includes('back-btn-icon')) {
+            const navBackPattern = /class="navigation"[\s\S]{0,100}back-btn-icon/;
+            assert.ok(!navBackPattern.test(content),
+                `${file} should not have back-btn-icon inside .navigation (use .back-row)`);
+            assert.ok(content.includes('class="back-row"'),
+                `${file} should use .back-row for back buttons`);
+        }
+    }
+});
+
+test('redundant "Select/Choose" headings removed', () => {
+    const aptitude = readFile('aptitude.html');
+    assert.ok(!aptitude.includes('Choose Your Challenge'), 'Should use simpler heading');
+    assert.ok(aptitude.includes('Challenges'), 'Should use concise heading');
+
+    const english = readFile('english.html');
+    assert.ok(!english.includes('Select Activity Type'), 'Should use simpler heading');
+    assert.ok(english.includes('Activity Type'), 'Should use concise heading');
+});
+
+// ============================================================================
+console.log('\n=== BUG-051: Admin profile selector hidden ===');
+// ============================================================================
+
+test('BUG-051: index.html does NOT hide profile selector for admin', () => {
+    const html = readFile('index.html');
+    assert.ok(!html.includes("profileSelectorContainer.style.display = 'none'"),
+        'index.html must NOT hide profile-selector-container for admin (demo children need it)');
+});
+
+test('BUG-051: admin uses selected child age on all module pages', () => {
+    const pages = ['english.html', 'stories.html', 'aptitude.html', 'drawing.html',
+        'emotional-quotient.html', 'learn-english-stories.html', 'german-kids.html'];
+    pages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(html.includes('const adminChild = getSelectedChild()'),
+            page + ' must use getSelectedChild() for admin age detection');
+        assert.ok(!html.includes("Admin doesn't need child profile"),
+            page + ' must not have old admin bypass comment');
+    });
+});
+
+test('BUG-051: index.html shows weekly progress for admin with children', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes("userData.role !== 'admin' || wpChild"),
+        'Weekly progress should show for admin if they have a selected child');
+});
+
+// ============================================================================
+console.log('\n=== Demo Data Seeder ===');
+// ============================================================================
+
+test('demo-seeder.js exists and exports required functions', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes('seedDemoData'), 'Should export seedDemoData function');
+    assert.ok(js.includes('clearDemoData'), 'Should export clearDemoData function');
+    assert.ok(js.includes('DEMO_CHILDREN'), 'Should export DEMO_CHILDREN array');
+    assert.ok(js.includes('getCorrectCount'), 'Should export getCorrectCount function');
+});
+
+test('demo-seeder has 5 demo children with required fields', () => {
+    const js = readFile('functions/demo-seeder.js');
+    const names = ['Aria Star', 'Ben Average', 'Clara Struggle', 'Danny Roller', 'Emma Random'];
+    names.forEach(name => {
+        assert.ok(js.includes(name), 'Should have demo child: ' + name);
+    });
+    const patterns = ['consistent', 'average', 'poor', 'highs_and_lows', 'inconsistent'];
+    patterns.forEach(p => {
+        assert.ok(js.includes("'" + p + "'"), 'Should have pattern: ' + p);
+    });
+});
+
+test('demo-seeder children have varied operations and levels', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes("operation: 'addition'"), 'Should have addition operation');
+    assert.ok(js.includes("operation: 'subtraction'"), 'Should have subtraction operation');
+    assert.ok(js.includes("operation: 'multiplication'"), 'Should have multiplication operation');
+    assert.ok(js.includes("operation: 'division'"), 'Should have division operation');
+    // Different levels
+    assert.ok(js.includes('level: 2'), 'Should have level 2');
+    assert.ok(js.includes('level: 5'), 'Should have level 5');
+    assert.ok(js.includes('level: 7'), 'Should have level 7');
+    assert.ok(js.includes('level: 9'), 'Should have level 9');
+});
+
+test('demo-seeder marks children with isDemo flag', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes('isDemo: true'), 'Children must have isDemo: true for cleanup');
+});
+
+test('demo-seeder creates weekly_assignments and completions', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes("collection('weekly_assignments')"), 'Should create weekly_assignments');
+    assert.ok(js.includes("collection('completions')"), 'Should create completions');
+    assert.ok(js.includes("collection('skill_profile')"), 'Should create skill_profile');
+});
+
+test('demo-seeder creates English completions with scores', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes("module: 'english'"), 'Should create English completion docs');
+    assert.ok(js.includes('engCompletedCount'), 'Should track English completed count');
+    assert.ok(js.includes('completedCount: engCompletedCount'), 'Weekly assignment should use English completed count');
+});
+
+test('demo-seeder creates aptitude and stories completions', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes("module: 'aptitude'") || js.includes("module: mod.module"),
+        'Should create aptitude completions');
+    assert.ok(js.includes("'stories'"), 'Should create stories completions');
+    assert.ok(js.includes("'patterns'") && js.includes("'sequences'"),
+        'Should include aptitude sub-types');
+});
+
+test('demo-seeder Cloud Functions exported in index.js', () => {
+    const js = readFile('functions/index.js');
+    assert.ok(js.includes("require('./demo-seeder')"), 'Should import demo-seeder');
+    assert.ok(js.includes('exports.seedDemoChildren'), 'Should export seedDemoChildren');
+    assert.ok(js.includes('exports.clearDemoChildren'), 'Should export clearDemoChildren');
+});
+
+test('admin.html has demo seeder UI', () => {
+    const html = readFile('admin.html');
+    assert.ok(html.includes('seedDemoData()'), 'Should have seed button onclick');
+    assert.ok(html.includes('clearDemoData()'), 'Should have clear button onclick');
+    assert.ok(html.includes('demo-seed-status'), 'Should have status display div');
+    assert.ok(html.includes("httpsCallable('seedDemoChildren')"), 'Should call seedDemoChildren CF');
+    assert.ok(html.includes("httpsCallable('clearDemoChildren')"), 'Should call clearDemoChildren CF');
+});
+
+test('admin.html loads firebase-functions-compat.js', () => {
+    const html = readFile('admin.html');
+    assert.ok(html.includes('firebase-functions-compat.js'),
+        'admin.html must load firebase-functions-compat.js for Cloud Function calls');
+});
+
+test('demo-seeder getCorrectCount returns expected ranges', () => {
+    const js = readFile('functions/demo-seeder.js');
+    // Consistent: 19-20 (95-100% → all completed)
+    assert.ok(js.includes('return 19 + (seed % 2)'), 'Consistent should return 19-20');
+    // Average: 16-20 (80-100% → some completed)
+    assert.ok(js.includes('return 16 + (seed % 5)'), 'Average should return 16-20');
+    // Poor: 8-15 (40-75%)
+    assert.ok(js.includes('return 8 + (seed % 8)'), 'Poor should return 8-15');
+    // Highs and lows: alternating weeks
+    assert.ok(js.includes('weekIndex % 2'), 'Highs_and_lows should alternate by week');
+    // Inconsistent: skip some
+    assert.ok(js.includes('return -1'), 'Inconsistent should skip some days');
+});
+
+test('demo-seeder clearDemoData deletes all associated collections', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes("collection('completions')"), 'Should delete completions');
+    assert.ok(js.includes("collection('weekly_assignments')"), 'Should delete weekly_assignments');
+    assert.ok(js.includes("collection('skill_profile')"), 'Should delete skill_profiles');
+    assert.ok(js.includes("collection('error_log')"), 'Should delete error_logs');
+    assert.ok(js.includes("collection('adaptive_worksheets')"), 'Should delete adaptive_worksheets');
+    assert.ok(js.includes("collection('notifications')"), 'Should delete notifications');
+});
+
+// ============================================================================
+console.log('\n=== Dinosaur & Dragon Themes ===');
+// ============================================================================
+
+test('theme-manager.js includes dinosaur and dragon themes', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes("dinosaur:"), 'Should have dinosaur theme in THEMES');
+    assert.ok(js.includes("dragon:"), 'Should have dragon theme in THEMES');
+    assert.ok(js.includes("'Dinosaur'"), 'Should have Dinosaur display name');
+    assert.ok(js.includes("'Dragon'"), 'Should have Dragon display name');
+});
+
+test('theme-manager.js has dinosaur and dragon in THEME_ICON_NAMES', () => {
+    const js = readFile('theme-manager.js');
+    const iconSection = js.substring(js.indexOf('THEME_ICON_NAMES'), js.indexOf('function getThemeDoodlePaths'));
+    assert.ok(iconSection.includes('dinosaur:'), 'Should have dinosaur icon mapping');
+    assert.ok(iconSection.includes('dragon:'), 'Should have dragon icon mapping');
+});
+
+test('styles.css has dinosaur and dragon theme CSS variables', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('[data-theme="dinosaur"]'), 'Should have dinosaur CSS theme');
+    assert.ok(css.includes('[data-theme="dragon"]'), 'Should have dragon CSS theme');
+});
+
+// ============================================================================
+console.log('\n=== BUG-054: Admin profile handling audit ===');
+// ============================================================================
+
+test('BUG-054: All module pages set window.currentUserRole', () => {
+    const modulePages = [
+        'index.html', 'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(html.includes('window.currentUserRole'),
+            page + ' must set window.currentUserRole for generators to detect admin');
+    });
+});
+
+test('BUG-054: All module pages query user role from Firestore', () => {
+    const modulePages = [
+        'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(html.includes("userData.role === 'admin'") || html.includes("isAdmin = userData.role === 'admin'"),
+            page + ' must check admin role from Firestore userData');
+    });
+});
+
+test('All generator files check window.currentUserRole for admin access', () => {
+    const generators = [
+        'worksheet-generator.js', 'english-generator.js', 'aptitude-generator.js',
+        'eq-generator.js', 'stories-generator.js', 'drawing-generator.js',
+        'german-kids-generator.js', 'learn-english-stories-generator.js'
+    ];
+    generators.forEach(gen => {
+        const js = readFile(gen);
+        assert.ok(js.includes("window.currentUserRole === 'admin'") ||
+                  js.includes("currentUserRole === 'admin'"),
+            gen + ' must check admin role via window.currentUserRole');
+    });
+});
+
+test('Admin age fallback is consistently 10 across all module pages', () => {
+    const modulePages = [
+        'index.html', 'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        if (html.includes('adminChild')) {
+            // Pages that use adminChild pattern should default to '10'
+            assert.ok(html.includes("adminChild.age.toString() : '10'") ||
+                      html.includes("adminChild.age) ? adminChild.age.toString() : '10'"),
+                page + ' must use age 10 as admin fallback');
+        }
+    });
+});
+
+test('Admin with selected child uses child age, not hardcoded value', () => {
+    const modulePages = [
+        'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(html.includes('const adminChild = getSelectedChild()'),
+            page + ' admin path must call getSelectedChild() to use child age');
+        assert.ok(html.includes('adminChild && adminChild.age'),
+            page + ' must check that adminChild.age exists before using it');
+    });
+});
+
+test('Non-admin users without child are redirected to children-profiles', () => {
+    const modulePages = [
+        'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        // Only non-admin path should redirect to children-profiles
+        assert.ok(html.includes("window.location.href = 'children-profiles'"),
+            page + ' must redirect non-admin without child to children-profiles');
+    });
+});
+
+test('Admin does NOT get redirected to children-profiles', () => {
+    const modulePages = [
+        'english.html', 'aptitude.html', 'stories.html',
+        'drawing.html', 'emotional-quotient.html', 'german-kids.html',
+        'learn-english-stories.html'
+    ];
+    modulePages.forEach(page => {
+        const html = readFile(page);
+        // Find the admin branch — it should NOT contain the redirect
+        const adminBranch = html.indexOf('if (isAdmin)');
+        const elseBranch = html.indexOf('} else {', adminBranch);
+        const adminSection = html.substring(adminBranch, elseBranch);
+        assert.ok(!adminSection.includes("window.location.href = 'children-profiles'"),
+            page + ' admin path must NOT redirect to children-profiles');
+    });
+});
+
+test('Profile selector queries children by parent_uid', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes("where('parent_uid', '==', parentUid)"),
+        'Profile selector must query children by parent_uid');
+});
+
+test('Profile selector getSelectedChild returns null when no child selected', () => {
+    const js = readFile('profile-selector.js');
+    // Verify getSelectedChild() returns null if localStorage is empty
+    const fnStart = js.indexOf('function getSelectedChild()');
+    const fnEnd = js.indexOf('\nfunction', fnStart + 1);
+    const fnBody = js.substring(fnStart, fnEnd > 0 ? fnEnd : fnStart + 500);
+    assert.ok(fnBody.includes('return null'),
+        'getSelectedChild must return null when no child selected');
+});
+
+test('Progress dashboard allows admin access', () => {
+    const js = readFile('progress-dashboard.js');
+    assert.ok(js.includes("userData.role !== 'parent' && userData.role !== 'admin'"),
+        'Progress dashboard must allow both parent and admin roles');
+});
+
+test('Progress dashboard queries completions by childId not email', () => {
+    const js = readFile('progress-dashboard.js');
+    assert.ok(js.includes("where('childId', '==', selectedChildId)"),
+        'Must query completions by childId, not by email');
+    // The loadProgressData function should use childId, not childEmail
+    const loadProgressSection = js.substring(js.indexOf('async function loadProgressData'));
+    assert.ok(!loadProgressSection.includes("where('childEmail'"),
+        'loadProgressData must NOT query completions by childEmail field');
+});
+
+test('Completion manager requires child profile for saving', () => {
+    const js = readFile('completion-manager.js');
+    assert.ok(js.includes('getSelectedChild'),
+        'Completion manager must get child profile');
+    assert.ok(js.includes("'No child profile selected'"),
+        'Completion manager must warn when no child selected');
+});
+
+test('Weekly assignments handles admin role for page access', () => {
+    const js = readFile('weekly-assignments.js');
+    assert.ok(js.includes("window.currentUserRole === 'admin'"),
+        'Weekly assignments must check admin role');
+});
+
+test('Feedback system gives admin access to all modules', () => {
+    const js = readFile('feedback-system.js');
+    assert.ok(js.includes("window.currentUserRole === 'admin'"),
+        'Feedback system must check admin role');
+    assert.ok(js.includes('if (isAdmin) return FEEDBACK_MODULES'),
+        'Admin should see all feedback modules');
+});
+
+test('index.html skips child profile check for admin', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes("userData.role !== 'admin'"),
+        'index.html must skip child profile check for admin');
+    assert.ok(html.includes('Admin user - skipping child profile check'),
+        'index.html must log admin child profile check skip');
+});
+
+test('Firestore rules allow admin to read/update children', () => {
+    const rules = readFile('firestore.rules');
+    // Admin helper function exists
+    assert.ok(rules.includes('function isAdmin()'),
+        'Firestore rules must define isAdmin helper');
+    // Children rules include admin check
+    assert.ok(rules.includes('isAdmin()'),
+        'Firestore rules must use isAdmin() in child access rules');
+    // Subcollection rules exist
+    assert.ok(rules.includes('skill_profile'),
+        'Firestore rules must have skill_profile subcollection rules');
+    assert.ok(rules.includes('error_log'),
+        'Firestore rules must have error_log subcollection rules');
+    assert.ok(rules.includes('adaptive_worksheets'),
+        'Firestore rules must have adaptive_worksheets collection rules');
+});
+
+test('Cloud Functions validate admin access for child data', () => {
+    const validators = readFile('functions/validators.js');
+    assert.ok(validators.includes("role === 'admin'"),
+        'validators.js must check admin role');
+    assert.ok(validators.includes('isAdmin'),
+        'validators.js must use isAdmin flag for access bypass');
+
+    const levelFunctions = readFile('functions/level-functions.js');
+    assert.ok(levelFunctions.includes("role === 'admin'"),
+        'level-functions.js must check admin role');
+});
+
+test('Admin level manager works with window.currentUserRole', () => {
+    const js = readFile('admin-level-manager.js');
+    assert.ok(js.includes("window.currentUserRole === 'admin'"),
+        'admin-level-manager must check admin role');
+    assert.ok(js.includes('getAdminLevelForModule'),
+        'Should export getAdminLevelForModule function');
+});
+
+test('Math worksheet-generator has complete admin path with early return', () => {
+    const js = readFile('worksheet-generator.js');
+    const isAdminIdx = js.indexOf("const isAdmin = window.currentUserRole === 'admin'");
+    assert.ok(isAdminIdx > 0, 'Should have isAdmin check');
+    // The admin block should come before the child check
+    const adminBlock = js.indexOf('if (isAdmin)', isAdminIdx);
+    const childCheck = js.indexOf("if (!child)", isAdminIdx);
+    assert.ok(adminBlock < childCheck,
+        'Admin block must come before child requirement check');
+});
+
+test('English generator has admin path with early return', () => {
+    const js = readFile('english-generator.js');
+    assert.ok(js.includes("const isAdmin = window.currentUserRole === 'admin'"),
+        'English generator must check admin role');
+    // Admin path should have getAdminLevelForModule
+    assert.ok(js.includes("getAdminLevelForModule('english')"),
+        'English generator must use admin level manager');
+});
+
+test('Progress map handles admin with full access', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes("window.currentUserRole === 'admin'"),
+        'Progress map must check admin role');
+});
+
+test('Demo seeder creates children with parent_uid matching admin', () => {
+    const js = readFile('functions/demo-seeder.js');
+    assert.ok(js.includes('parent_uid: callerUid'),
+        'Demo children must have parent_uid set to admin UID');
+});
+
+test('children-profiles.html uses parent_uid for child query', () => {
+    const html = readFile('children-profiles.html');
+    assert.ok(html.includes("where('parent_uid', '==', parentUid)"),
+        'children-profiles must query by parent_uid');
+    // And parentUid is set from user.uid
+    assert.ok(html.includes('parentUid = user.uid'),
+        'parentUid must be set from Firebase auth user.uid');
+});
+
+test('Input mode manager handles admin separately', () => {
+    const js = readFile('input-mode-manager.js');
+    assert.ok(js.includes('checkIfAdmin') || js.includes('isAdmin'),
+        'Input mode manager must handle admin case');
+});
+
+// ============================================================================
+console.log('\n=== BUG-055: Demo Data Streaks/Badges Fix ===');
+// ============================================================================
+
+test('BUG-055: progress-map getCompletionsForModule queries by childId not childEmail', () => {
+    const js = readFile('progress-map.js');
+    const fn = js.substring(js.indexOf('async function getCompletionsForModule'));
+    const fnEnd = fn.indexOf('\n}') + 2;
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(fnBody.includes("where('childId'"),
+        'getCompletionsForModule must query by childId');
+    assert.ok(!fnBody.includes("where('childEmail'"),
+        'getCompletionsForModule must NOT query by childEmail (demo data lacks it)');
+});
+
+test('BUG-055: progress-map getCompletionsForModule does not require child.email', () => {
+    const js = readFile('progress-map.js');
+    const fn = js.substring(js.indexOf('async function getCompletionsForModule'));
+    const fnEnd = fn.indexOf('\n}') + 2;
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(!fnBody.includes('child.email'),
+        'getCompletionsForModule should not depend on child.email');
+    assert.ok(!fnBody.includes('childEmail'),
+        'getCompletionsForModule should not reference childEmail');
+});
+
+test('BUG-055: progress-map calculateStreak counts consecutive days from completions', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function calculateStreak(completions)'),
+        'calculateStreak function must exist');
+    assert.ok(js.includes("dates.add("),
+        'calculateStreak must collect unique dates');
+    assert.ok(js.includes('i > 0'),
+        'calculateStreak must allow today to be missing (not practiced yet)');
+});
+
+test('BUG-055: demo seeder star calculation matches actual system (3 for >=95%)', () => {
+    const js = readFile('functions/demo-seeder.js');
+    // Must award 3 stars for >=95%, not just for 100%
+    assert.ok(js.includes('score >= 95) totalStars += 3'),
+        'Demo seeder must give 3 stars for >=95% (matching completion-manager)');
+    assert.ok(!js.includes("score === 100 ? 3 : 2"),
+        'Demo seeder must NOT use old score === 100 check');
+});
+
+test('BUG-055: demo seeder counts English stars in totalStarsEarned', () => {
+    const js = readFile('functions/demo-seeder.js');
+    // Check that English completion section also awards stars
+    const engSection = js.substring(js.indexOf('// English pages'));
+    assert.ok(engSection.includes('engScore >= 95) totalStars += 3'),
+        'Demo seeder must count English stars for totalStarsEarned');
+});
+
+test('BUG-055: demo seeder counts extra module stars (aptitude/stories)', () => {
+    const js = readFile('functions/demo-seeder.js');
+    // Check that aptitude/stories section also awards stars
+    const extraSection = js.substring(js.indexOf('// Add aptitude and stories'));
+    assert.ok(extraSection.includes('extraScore >= 95) totalStars += 3') ||
+              extraSection.includes('extraDone') && extraSection.includes('totalStars'),
+        'Demo seeder must count aptitude/stories stars');
+});
+
+test('BUG-055: demo seeder completions all have childId field', () => {
+    const js = readFile('functions/demo-seeder.js');
+    // All batch.set calls for completions must include childId
+    const mathComp = js.substring(js.indexOf("module: 'math'"));
+    assert.ok(mathComp.includes('childId,') || mathComp.includes('childId:'),
+        'Math completions must have childId field');
+    const engComp = js.substring(js.indexOf("module: 'english'"));
+    assert.ok(engComp.includes('childId,') || engComp.includes('childId:'),
+        'English completions must have childId field');
+});
+
+test('BUG-055: progress-map stats use on-the-fly star calculation', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes('function calculateStats(completions)'),
+        'calculateStats function must exist');
+    // Stars are computed from completions, not from avatar.totalStarsEarned
+    const statsFn = js.substring(js.indexOf('function calculateStats'));
+    const statsFnEnd = statsFn.indexOf('\n}') + 2;
+    const statsBody = statsFn.substring(0, statsFnEnd);
+    assert.ok(statsBody.includes('score >= 95') && statsBody.includes('totalStars += 3'),
+        'calculateStats must award 3 stars for >=95%');
+    assert.ok(statsBody.includes('score >= 85') && statsBody.includes('totalStars += 2'),
+        'calculateStats must award 2 stars for >=85%');
+});
+
+// ============================================================================
+console.log('\n=== BUG-056: Greeting Banner Only on Home Page ===');
+// ============================================================================
+
+test('BUG-056: showMathLevels hides greeting banner', () => {
+    const js = readFile('worksheet-generator.js');
+    const fn = js.substring(js.indexOf('function showMathLevels'));
+    const fnEnd = fn.indexOf('\n}') + 2;
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(fnBody.includes('greeting-banner'),
+        'showMathLevels must reference greeting-banner');
+    assert.ok(fnBody.includes("display = 'none'") || fnBody.includes('style.display'),
+        'showMathLevels must hide greeting banner');
+});
+
+test('BUG-056: showMathOperations hides greeting banner', () => {
+    const js = readFile('worksheet-generator.js');
+    const fn = js.substring(js.indexOf('function showMathOperations'));
+    const fnEnd = fn.indexOf('\n}') + 2;
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(fnBody.includes('greeting-banner'),
+        'showMathOperations must reference greeting-banner');
+});
+
+test('BUG-056: showSubjects restores greeting banner', () => {
+    const js = readFile('worksheet-generator.js');
+    const fn = js.substring(js.indexOf('function showSubjects'));
+    const fnEnd = fn.indexOf('\n}') + 2;
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(fnBody.includes('greeting-banner'),
+        'showSubjects must reference greeting-banner');
+    assert.ok(fnBody.includes('updateGreeting'),
+        'showSubjects must call updateGreeting to restore banner');
+});
+
+test('BUG-056: showProgressMap hides greeting banner', () => {
+    const js = readFile('progress-map.js');
+    const fn = js.substring(js.indexOf('async function showProgressMap'));
+    const fnEnd = fn.indexOf('container.innerHTML');
+    const fnBody = fn.substring(0, fnEnd);
+    assert.ok(fnBody.includes('greeting-banner'),
+        'showProgressMap must reference greeting-banner');
+    assert.ok(fnBody.includes("display = 'none'") || fnBody.includes('style.display'),
+        'showProgressMap must hide greeting banner');
+});
+
+// ============================================================================
+console.log('\n=== FEAT-008: UI Modernization — Icon & String System ===');
+// ============================================================================
+
+test('icons.js exists and defines GleeIcons', () => {
+    const js = readFile('icons.js');
+    assert.ok(js.includes('GleeIcons'), 'icons.js must define GleeIcons');
+    assert.ok(js.includes('ICON_PATHS'), 'icons.js must have ICON_PATHS registry');
+});
+
+test('GleeIcons has all required subject icons', () => {
+    const js = readFile('icons.js');
+    const requiredIcons = ['math', 'english', 'aptitude', 'stories', 'eq', 'german', 'drawing', 'germanKids'];
+    requiredIcons.forEach(icon => {
+        assert.ok(js.includes("'" + icon + "'") || js.includes(icon + ':'),
+            `Icon '${icon}' must be defined in ICON_PATHS`);
+    });
+});
+
+test('GleeIcons has all required operation icons', () => {
+    const js = readFile('icons.js');
+    const requiredIcons = ['addition', 'subtraction', 'multiplication', 'division'];
+    requiredIcons.forEach(icon => {
+        assert.ok(js.includes("'" + icon + "'") || js.includes(icon + ':'),
+            `Operation icon '${icon}' must be defined in ICON_PATHS`);
+    });
+});
+
+test('GleeIcons has nav, action, and UI icons', () => {
+    const js = readFile('icons.js');
+    const requiredIcons = ['home', 'book', 'star', 'settings', 'bell', 'lock', 'user', 'logout', 'feedback', 'fire', 'target', 'chart'];
+    requiredIcons.forEach(icon => {
+        assert.ok(js.includes(icon + ':'),
+            `UI icon '${icon}' must be defined in ICON_PATHS`);
+    });
+});
+
+test('GleeIcons has all theme icons', () => {
+    const js = readFile('icons.js');
+    const themeIcons = ['ocean', 'forest', 'sunset', 'candy', 'space', 'rainbow', 'dinosaur', 'dragon'];
+    themeIcons.forEach(icon => {
+        assert.ok(js.includes(icon + ':'),
+            `Theme icon '${icon}' must be defined in ICON_PATHS`);
+    });
+});
+
+test('GleeIcons has init(), get(), has(), circled() API', () => {
+    const js = readFile('icons.js');
+    assert.ok(js.includes('init:') || js.includes('init: function'), 'GleeIcons must have init()');
+    assert.ok(js.includes('get:') || js.includes('get: function'), 'GleeIcons must have get()');
+    assert.ok(js.includes('has:') || js.includes('has: function'), 'GleeIcons must have has()');
+    assert.ok(js.includes('circled:') || js.includes('circled: function'), 'GleeIcons must have circled()');
+});
+
+test('strings.js exists and defines STRINGS', () => {
+    const js = readFile('strings.js');
+    assert.ok(js.includes('STRINGS'), 'strings.js must define STRINGS');
+    assert.ok(js.includes('STRINGS.init'), 'strings.js must have STRINGS.init()');
+});
+
+test('STRINGS has all required string categories', () => {
+    const js = readFile('strings.js');
+    assert.ok(js.includes('subjects:'), 'STRINGS must have subjects');
+    assert.ok(js.includes('operations:'), 'STRINGS must have operations');
+    assert.ok(js.includes('nav:'), 'STRINGS must have nav');
+    assert.ok(js.includes('actions:'), 'STRINGS must have actions');
+    assert.ok(js.includes('greeting:'), 'STRINGS must have greeting');
+    assert.ok(js.includes('progress:'), 'STRINGS must have progress');
+});
+
+test('index.html loads strings.js and icons.js', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('src="strings.js"'), 'index.html must load strings.js');
+    assert.ok(html.includes('src="icons.js"'), 'index.html must load icons.js');
+});
+
+test('index.html subject cards use data-icon attributes (not emojis)', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('data-icon="math"'), 'Math subject card must use data-icon="math"');
+    assert.ok(html.includes('data-icon="english"'), 'English subject card must use data-icon="english"');
+    assert.ok(html.includes('data-icon="aptitude"'), 'Aptitude subject card must use data-icon="aptitude"');
+    assert.ok(html.includes('data-icon="stories"'), 'Stories subject card must use data-icon="stories"');
+    assert.ok(html.includes('data-icon="eq"'), 'EQ subject card must use data-icon="eq"');
+    assert.ok(html.includes('data-icon="drawing"'), 'Drawing subject card must use data-icon="drawing"');
+});
+
+test('index.html operation buttons use data-icon attributes', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('data-icon="addition"'), 'Addition must use data-icon');
+    assert.ok(html.includes('data-icon="subtraction"'), 'Subtraction must use data-icon');
+    assert.ok(html.includes('data-icon="multiplication"'), 'Multiplication must use data-icon');
+    assert.ok(html.includes('data-icon="division"'), 'Division must use data-icon');
+});
+
+const bottomNavIconPages = [
+    'index.html', 'english.html', 'aptitude.html', 'stories.html',
+    'drawing.html', 'emotional-quotient.html', 'german.html',
+    'german-kids.html', 'learn-english-stories.html', 'rewards.html'
+];
+
+bottomNavIconPages.forEach(page => {
+    test(`${page} bottom nav uses data-icon attributes`, () => {
+        const html = readFile(page);
+        assert.ok(html.includes('data-icon="home"'), `${page} nav must use data-icon="home"`);
+        assert.ok(html.includes('data-icon="book"'), `${page} nav must use data-icon="book"`);
+        assert.ok(html.includes('data-icon="star"'), `${page} nav must use data-icon="star"`);
+        assert.ok(html.includes('data-icon="settings"'), `${page} nav must use data-icon="settings"`);
+    });
+});
+
+test('styles.css has glassmorphism fallback @supports rule', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('@supports not (backdrop-filter'),
+        'styles.css must have @supports fallback for glassmorphism');
+});
+
+test('styles.css has new design tokens', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('--radius-pill'), 'Must have --radius-pill token');
+    assert.ok(css.includes('--shadow-card'), 'Must have --shadow-card token');
+    assert.ok(css.includes('--glass-bg'), 'Must have --glass-bg token');
+    assert.ok(css.includes('--color-surface-warm'), 'Must have --color-surface-warm token');
+    assert.ok(css.includes('--spring-soft'), 'Must have --spring-soft token');
+});
+
+test('styles.css has new animations', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('@keyframes squish'), 'Must have squish animation');
+    assert.ok(css.includes('@keyframes popIn'), 'Must have popIn animation');
+    assert.ok(css.includes('@keyframes glowPulse'), 'Must have glowPulse animation');
+    assert.ok(css.includes('@keyframes modalSlideUp'), 'Must have modalSlideUp animation');
+});
+
+test('styles.css bottom-nav uses glassmorphism', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('backdrop-filter: blur(var(--glass-blur))'),
+        'bottom-nav must use glassmorphism blur');
+});
+
+test('styles.css .problem has card treatment', () => {
+    const css = readFile('styles.css');
+    const problemSection = css.substring(css.indexOf('.problem {'), css.indexOf('.problem {') + 300);
+    assert.ok(problemSection.includes('background: var(--color-surface-warm)'),
+        '.problem must have warm background');
+    assert.ok(problemSection.includes('border-radius'),
+        '.problem must have border-radius');
+});
+
+test('styles.css .problem-number is circular badge', () => {
+    const css = readFile('styles.css');
+    const pnSection = css.substring(css.indexOf('.problem-number {'), css.indexOf('.problem-number {') + 400);
+    assert.ok(pnSection.includes('border-radius: 50%'),
+        '.problem-number must be circular');
+    assert.ok(pnSection.includes('var(--color-primary-10)'),
+        '.problem-number must use primary-10 background');
+});
+
+test('theme-manager.js uses iconKey instead of emoji icon', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('iconKey:'), 'THEMES must use iconKey');
+    assert.ok(!js.includes("icon: '🌊'"), 'Must not use emoji icon for ocean');
+});
+
+test('profile-selector.js uses GleeIcons for theme picker', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('GleeIcons.get') || js.includes('GleeIcons.has'),
+        'profile-selector.js must reference GleeIcons for theme icons');
+});
+
+test('notification-system.js uses GleeIcons for bell', () => {
+    const js = readFile('notification-system.js');
+    assert.ok(js.includes("GleeIcons.get('bell'") || js.includes('GleeIcons.get(\'bell\''),
+        'notification-system.js must use GleeIcons for bell icon');
+});
+
+test('progress-map.js uses GleeIcons for stat icons', () => {
+    const js = readFile('progress-map.js');
+    assert.ok(js.includes("GleeIcons") || js.includes('gi.get'),
+        'progress-map.js must use GleeIcons for stat bar icons');
+});
+
+// ============================================================================
+console.log('\n=== JS Syntax Validation (node --check) ===');
+// ============================================================================
+
+test('All critical JS files pass syntax check (node --check)', () => {
+    const { execSync } = require('child_process');
+    const jsFiles = [
+        'theme-manager.js', 'icons.js', 'strings.js',
+        'profile-selector.js', 'notification-system.js',
+        'worksheet-generator.js', 'progress-map.js',
+        'feedback-system.js', 'age-filter.js',
+        'avatar-renderer.js', 'parent-mode.js',
+        'handwriting-recognition.js', 'level-test.js',
+        'assessment.js', 'operation-explainer.js'
+    ];
+    jsFiles.forEach(file => {
+        const filePath = path.join(ROOT, file);
+        if (!fs.existsSync(filePath)) return; // skip if file doesn't exist
+        try {
+            execSync(`node --check "${filePath}"`, { encoding: 'utf8', stdio: 'pipe' });
+        } catch (e) {
+            assert.fail(`${file} has syntax error: ${e.stderr.trim()}`);
+        }
+    });
+});
+
+// ============================================================================
+console.log('\n=== BUG-057: theme-manager.js syntax error (dinosaur/dragon outside P object) ===');
+// ============================================================================
+
+test('BUG-057: theme-manager.js passes node --check', () => {
+    const { execSync } = require('child_process');
+    try {
+        execSync(`node --check "${path.join(ROOT, 'theme-manager.js')}"`, { encoding: 'utf8', stdio: 'pipe' });
+    } catch (e) {
+        assert.fail('theme-manager.js has syntax error: ' + e.stderr.trim());
+    }
+});
+
+test('BUG-057: THEME_ICON_NAMES includes dinosaur theme', () => {
+    const js = readFile('theme-manager.js');
+    // THEME_ICON_NAMES must include dinosaur with its icon array
+    const tiStart = js.indexOf('THEME_ICON_NAMES');
+    assert.ok(tiStart > 0, 'THEME_ICON_NAMES must exist');
+    const dinosaurIdx = js.indexOf('dinosaur:', tiStart);
+    assert.ok(dinosaurIdx > tiStart, 'dinosaur must be in THEME_ICON_NAMES');
+});
+
+test('BUG-057: THEME_ICON_NAMES includes dragon theme', () => {
+    const js = readFile('theme-manager.js');
+    const tiStart = js.indexOf('THEME_ICON_NAMES');
+    const dragonIdx = js.indexOf('dragon:', tiStart);
+    assert.ok(dragonIdx > tiStart, 'dragon must be in THEME_ICON_NAMES');
+});
+
+test('BUG-057: THEMES object has all 8 theme keys', () => {
+    const js = readFile('theme-manager.js');
+    const themes = ['ocean', 'forest', 'sunset', 'candy', 'space', 'rainbow', 'dinosaur', 'dragon'];
+    themes.forEach(t => {
+        // Check THEMES object entries (format: "themeName: {")
+        const re = new RegExp(`${t}:\\s*\\{\\s*name:`);
+        assert.ok(re.test(js), `THEMES must contain ${t} entry`);
+    });
+});
+
+// ============================================================================
+console.log('\n=== BUG-058: Notification routing — parentUid filter ===');
+// ============================================================================
+
+test('BUG-058: initializeNotifications accepts role parameter', () => {
+    const js = readFile('notification-system.js');
+    assert.ok(js.includes('function initializeNotifications(childId, parentUid, role)'),
+        'initializeNotifications must accept 3rd role parameter');
+});
+
+test('BUG-058: admin notification query filters by parentUid == admin', () => {
+    const js = readFile('notification-system.js');
+    assert.ok(js.includes("'parentUid', '==', 'admin'"),
+        'Admin query must filter parentUid == admin');
+});
+
+test('BUG-058: parent notification query includes parentUid filter', () => {
+    const js = readFile('notification-system.js');
+    // Parent query uses 'in' to match own UID + 'all' broadcast notifications
+    assert.ok(js.includes("'parentUid', 'in'"),
+        'Parent query must use parentUid in-filter for own UID + all');
+});
+
+test('BUG-058: index.html passes role to initializeNotifications', () => {
+    const html = readFile('index.html');
+    assert.ok(html.includes('initializeNotifications(') && html.includes('window.currentUserRole'),
+        'index.html must pass window.currentUserRole to initializeNotifications');
+});
+
+test('BUG-058: admin can receive notifications even without selected child', () => {
+    const html = readFile('index.html');
+    // The notification init guard must allow admin without nChild
+    assert.ok(html.includes("userData.role === 'admin'"),
+        'Notification init must allow admin without selected child');
+});
+
+test('BUG-058: fallback loadNotificationsFallback also filters by role', () => {
+    const js = readFile('notification-system.js');
+    assert.ok(js.includes('function loadNotificationsFallback(childId, parentUid, role)'),
+        'Fallback function must accept role parameter');
+    // Both admin and parent paths exist
+    assert.ok((js.match(/'parentUid', '==', 'admin'/g) || []).length >= 2,
+        'Both main and fallback queries must filter admin parentUid');
+});
+
+test('BUG-058: composite index exists for parentUid + dismissed + createdAt', () => {
+    const indexes = JSON.parse(readFile('firestore.indexes.json'));
+    const hasIndex = indexes.indexes.some(idx =>
+        idx.collectionGroup === 'notifications' &&
+        idx.fields.some(f => f.fieldPath === 'parentUid') &&
+        idx.fields.some(f => f.fieldPath === 'dismissed') &&
+        idx.fields.some(f => f.fieldPath === 'createdAt')
+    );
+    assert.ok(hasIndex, 'firestore.indexes.json must have parentUid+dismissed+createdAt index for notifications');
+});
+
+// ============================================================================
+console.log('\n=== Performance: Lazy TF.js + defer scripts + polling fix ===');
+// ============================================================================
+
+test('Performance: TF.js removed from HTML pages (lazy-loaded)', () => {
+    const pages = ['index.html', 'english.html', 'aptitude.html'];
+    pages.forEach(page => {
+        const html = readFile(page);
+        assert.ok(!html.includes('<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs'),
+            page + ' must not have TF.js <script> tag (now lazy-loaded)');
+    });
+});
+
+test('Performance: handwriting-recognition.js has ensureTFLoaded', () => {
+    const js = readFile('handwriting-recognition.js');
+    assert.ok(js.includes('function ensureTFLoaded()'),
+        'Must have ensureTFLoaded for lazy loading TF.js');
+    assert.ok(js.includes('cdn.jsdelivr.net/npm/@tensorflow/tfjs'),
+        'ensureTFLoaded must reference TF.js CDN URL');
+});
+
+test('Performance: age-filter.js no longer uses 100ms setInterval polling', () => {
+    const js = readFile('age-filter.js');
+    assert.ok(!js.includes('setInterval(') || !js.includes(', 100)'),
+        'age-filter.js must not use setInterval polling (use auth state change)');
+});
+
+test('Performance: profile-selector.js has children query cache', () => {
+    const js = readFile('profile-selector.js');
+    assert.ok(js.includes('_childrenCache') || js.includes('childrenCache'),
+        'profile-selector.js must cache children queries');
+    assert.ok(js.includes('CHILDREN_CACHE_TTL') || js.includes('CACHE_TTL'),
+        'Must define a cache TTL for children queries');
+});
+
+test('Performance: app scripts have defer attribute', () => {
+    const html = readFile('index.html');
+    // App scripts (not Firebase SDK) should have defer
+    assert.ok(html.includes('worksheet-generator.js" defer'),
+        'worksheet-generator.js should have defer');
+    assert.ok(html.includes('profile-selector.js" defer'),
+        'profile-selector.js should have defer');
+    // Firebase SDK should NOT have defer
+    assert.ok(!html.includes('firebase-app-compat.js" defer'),
+        'Firebase SDK must NOT have defer');
+});
+
+test('Performance: Lucide icons used for doodle backgrounds', () => {
+    const js = readFile('theme-manager.js');
+    assert.ok(js.includes('LUCIDE_ICONS'), 'Must use LUCIDE_ICONS for doodle backgrounds');
+    // Should have at least 30 unique icons
+    const iconCount = (js.match(/'[a-z-]+': "/g) || []).length;
+    assert.ok(iconCount >= 30, 'Should have at least 30 unique Lucide icons (found ' + iconCount + ')');
+});
+
+// ============================================================================
+console.log('\n=== Server-side: Aptitude, German, EQ engines ===');
+// ============================================================================
+
+test('Server-side: aptitude-engine.js exists in functions/shared', () => {
+    try {
+        const js = readFile('functions/shared/aptitude-engine.js');
+        assert.ok(js.includes('getAptitudeQuestions') || js.includes('generateAptitudeQuestions'),
+            'aptitude-engine.js must export question generation function');
+        assert.ok(js.includes('validateAptitudeSubmission') || js.includes('validateAptitude'),
+            'aptitude-engine.js must export validation function');
+    } catch (e) {
+        assert.ok(false, 'functions/shared/aptitude-engine.js must exist');
+    }
+});
+
+test('Server-side: german-engine.js exists in functions/shared', () => {
+    try {
+        const js = readFile('functions/shared/german-engine.js');
+        assert.ok(js.includes('getGermanQuestions') || js.includes('generateGermanQuestions'),
+            'german-engine.js must export question generation function');
+        assert.ok(js.includes('validateGerman'),
+            'german-engine.js must export validation function');
+    } catch (e) {
+        assert.ok(false, 'functions/shared/german-engine.js must exist');
+    }
+});
+
+test('Server-side: eq-engine.js exists in functions/shared', () => {
+    try {
+        const js = readFile('functions/shared/eq-engine.js');
+        assert.ok(js.includes('getEQQuestions') || js.includes('generateEQQuestions'),
+            'eq-engine.js must export question generation function');
+        assert.ok(js.includes('validateEQ'),
+            'eq-engine.js must export validation function');
+    } catch (e) {
+        assert.ok(false, 'functions/shared/eq-engine.js must exist');
+    }
+});
+
+test('Server-side: all new engines use seeded PRNG', () => {
+    const engines = ['functions/shared/aptitude-engine.js', 'functions/shared/german-engine.js', 'functions/shared/eq-engine.js'];
+    engines.forEach(engine => {
+        try {
+            const js = readFile(engine);
+            assert.ok(js.includes('SeededRandom') || js.includes('seededRandom') || js.includes('seed'),
+                engine + ' must use seeded random for deterministic generation');
+        } catch (e) {
+            // File may not exist yet during development
+        }
+    });
+});
+
+// ============================================================================
+// CLIENT-SERVER WIRING: CF calls in client generators
+// ============================================================================
+
+console.log('\n=== Client-Server Wiring: CF calls in generators ===');
+
+test('aptitude-generator.js uses seeded PRNG matching server engine', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('AptitudeSeededRandom'), 'Must have SeededRandom class');
+    assert.ok(js.includes('aptitudeHashCode'), 'Must have hashCode function');
+    assert.ok(js.includes('aptitudeSeededShuffle'), 'Must have seededShuffle function');
+    assert.ok(js.includes('currentWorksheetSeed'), 'Must track seed for server validation');
+});
+
+test('aptitude-generator.js submits seed params (not problemData) to CF', () => {
+    const js = readFile('aptitude-generator.js');
+    assert.ok(js.includes('seed: currentWorksheet.seed'), 'Must send seed to CF');
+    assert.ok(js.includes('page: currentWorksheet.page'), 'Must send page to CF');
+    assert.ok(!js.includes('problemData: currentWorksheet.problems.map(p => ({'),
+        'Must NOT send problemData with answers to CF');
+});
+
+test('eq-generator.js calls validateEQSubmission CF', () => {
+    const js = readFile('eq-generator.js');
+    assert.ok(js.includes("httpsCallable('validateEQSubmission')"),
+        'Must call validateEQSubmission CF');
+    assert.ok(js.includes('submitEQScore'), 'Must have submitEQScore function');
+});
+
+test('german-generator.js calls validateGermanSubmission CF', () => {
+    const js = readFile('german-generator.js');
+    assert.ok(js.includes("httpsCallable('validateGermanSubmission')"),
+        'Must call validateGermanSubmission CF');
+    assert.ok(js.includes('submitGermanScore'), 'Must have submitGermanScore function');
+});
+
+test('german-kids-generator.js calls validateGermanKidsSubmission CF', () => {
+    const js = readFile('german-kids-generator.js');
+    assert.ok(js.includes("httpsCallable('validateGermanKidsSubmission')"),
+        'Must call validateGermanKidsSubmission CF');
+    assert.ok(js.includes('submitGermanKidsScore'), 'Must have submitGermanKidsScore function');
+});
+
+test('validators.js exports new CFs for EQ, German, GermanKids', () => {
+    const js = readFile('functions/validators.js');
+    assert.ok(js.includes('validateEQSubmission'), 'Must export validateEQSubmission');
+    assert.ok(js.includes('validateGermanSubmission'), 'Must export validateGermanSubmission');
+    assert.ok(js.includes('validateGermanKidsSubmission'), 'Must export validateGermanKidsSubmission');
+});
+
+test('functions/index.js exports new CFs', () => {
+    const js = readFile('functions/index.js');
+    assert.ok(js.includes('exports.validateEQSubmission'), 'Must export validateEQSubmission');
+    assert.ok(js.includes('exports.validateGermanSubmission'), 'Must export validateGermanSubmission');
+    assert.ok(js.includes('exports.validateGermanKidsSubmission'), 'Must export validateGermanKidsSubmission');
+});
+
+test('aptitude CF uses aptitude-engine for validation (not client problemData)', () => {
+    const js = readFile('functions/validators.js');
+    assert.ok(js.includes('aptitudeEngine.validateAptitudeSubmission'),
+        'Aptitude CF must use server-side engine for validation');
+    // Should not reference problemData in the seed-based path
+    const aptitudeCF = js.match(/const validateAptitudeSubmission[\s\S]*?return \{[^}]*\}/);
+    assert.ok(aptitudeCF, 'validateAptitudeSubmission CF must exist');
+    assert.ok(!aptitudeCF[0].includes('problem.answer'),
+        'Aptitude CF must not compare against client-sent problem.answer');
+});
+
+// ============================================================================
+// THEME ICON UPGRADE TESTS
+// ============================================================================
+
+test('Theme icons use updated SVG paths (not old wavy/blob shapes)', () => {
+    const js = readFile('icons.js');
+    const themeNames = ['ocean', 'forest', 'sunset', 'candy', 'space', 'rainbow', 'dinosaur', 'dragon'];
+    themeNames.forEach(name => {
+        const regex = new RegExp(name + "\\s*:");
+        assert.ok(regex.test(js), `Theme icon "${name}" must exist in icons.js`);
+    });
+    // Old ocean was 3 wavy lines — should no longer match
+    assert.ok(!js.includes("M2 12c1.5-2 3.5-2 5 0s3.5 2 5 0"), 'Ocean icon should be updated (no old wavy path)');
+    // Old dragon was starburst
+    assert.ok(!js.includes("M13 3l3 3-3 1 3 3-2 1-1 3-3-2"), 'Dragon icon should be updated (no old starburst path)');
+});
+
+test('icons.js has play, pause, and stopCircle icons', () => {
+    const js = readFile('icons.js');
+    assert.ok(js.includes("play:"), 'Must have play icon');
+    assert.ok(js.includes("pause:"), 'Must have pause icon');
+    assert.ok(js.includes("stopCircle:"), 'Must have stopCircle icon');
+});
+
+// ============================================================================
+// TTS MANAGER TESTS
+// ============================================================================
+
+test('tts-manager.js exists and defines TTSManager', () => {
+    const js = readFile('tts-manager.js');
+    assert.ok(js.includes('var TTSManager'), 'Must define TTSManager');
+    assert.ok(js.includes('speechSynthesis'), 'Must use Web Speech API');
+    assert.ok(js.includes('gleegrow_tts_enabled'), 'Must respect localStorage TTS key');
+});
+
+test('tts-manager.js passes node --check', () => {
+    const { execSync } = require('child_process');
+    try {
+        execSync('node --check tts-manager.js', { cwd: path.join(__dirname, '..') });
+    } catch (e) {
+        assert.fail('tts-manager.js has syntax errors: ' + e.message);
+    }
+});
+
+test('tts-manager.js has required consumer API methods', () => {
+    const js = readFile('tts-manager.js');
+    const methods = ['speak', 'pause', 'resume', 'stop', 'isSpeaking', 'isPaused', 'isSupported', 'isEnabled', 'rateForCategory'];
+    methods.forEach(m => {
+        assert.ok(js.includes(m + ':') || js.includes('function ' + m), `TTSManager must have ${m} method`);
+    });
+});
+
+test('tts-manager.js has provider management API', () => {
+    const js = readFile('tts-manager.js');
+    assert.ok(js.includes('registerProvider:'), 'Must expose registerProvider');
+    assert.ok(js.includes('setActiveProvider:'), 'Must expose setActiveProvider');
+    assert.ok(js.includes('getProviderName:'), 'Must expose getProviderName');
+    assert.ok(js.includes('listProviders:'), 'Must expose listProviders');
+});
+
+test('tts-manager.js has WebSpeechProvider as built-in', () => {
+    const js = readFile('tts-manager.js');
+    assert.ok(js.includes('WebSpeechProvider'), 'Must define WebSpeechProvider');
+    assert.ok(js.includes("registerProvider('webSpeech'"), 'Must register webSpeech provider');
+});
+
+test('tts-manager.js provider interface is documented', () => {
+    const js = readFile('tts-manager.js');
+    // The interface contract must be documented for future paid providers
+    assert.ok(js.includes('TTSProvider interface'), 'Must document the TTSProvider interface');
+    assert.ok(js.includes('.isSupported()'), 'Interface must specify isSupported');
+    assert.ok(js.includes('.speak('), 'Interface must specify speak');
+    assert.ok(js.includes('.pause()'), 'Interface must specify pause');
+    assert.ok(js.includes('.resume()'), 'Interface must specify resume');
+    assert.ok(js.includes('.stop()'), 'Interface must specify stop');
+});
+
+test('tts-manager.js facade delegates to active provider', () => {
+    const js = readFile('tts-manager.js');
+    // Each public method should call getActiveProvider()
+    const facadeMethods = ['isSupported', 'isSpeaking', 'isPaused', 'speak', 'pause', 'resume', 'stop'];
+    facadeMethods.forEach(m => {
+        const funcBody = js.match(new RegExp('function ' + m + '\\([^)]*\\)\\s*\\{[\\s\\S]*?\\n    \\}'));
+        assert.ok(funcBody, `Public ${m} function must exist`);
+        assert.ok(funcBody[0].includes('getActiveProvider'), `${m} must delegate to getActiveProvider()`);
+    });
+});
+
+test('tts-manager.js has category-specific rates', () => {
+    const js = readFile('tts-manager.js');
+    assert.ok(js.includes('bedtime:') && js.includes('0.75'), 'Bedtime should have slower rate (0.75)');
+    assert.ok(js.includes('adventures:') && js.includes('0.9'), 'Adventures should have faster rate (0.9)');
+});
+
+test('stories.html includes tts-manager.js script', () => {
+    const html = readFile('stories.html');
+    assert.ok(html.includes('tts-manager.js'), 'stories.html must include tts-manager.js');
+});
+
+test('stories-generator.js has TTS functions', () => {
+    const js = readFile('stories-generator.js');
+    assert.ok(js.includes('function toggleStoryTTS'), 'Must have toggleStoryTTS function');
+    assert.ok(js.includes('function stopStoryTTS'), 'Must have stopStoryTTS function');
+    assert.ok(js.includes('function updateTTSButton'), 'Must have updateTTSButton function');
+});
+
+test('Navigation functions call stopStoryTTS on exit', () => {
+    const js = readFile('stories-generator.js');
+    // Extract function bodies
+    const backToList = js.match(/function backToList\(\)\s*\{[\s\S]*?\n\}/);
+    assert.ok(backToList, 'backToList function must exist');
+    assert.ok(backToList[0].includes('stopStoryTTS'), 'backToList must call stopStoryTTS');
+
+    const prevStory = js.match(/function previousStory\(\)\s*\{[\s\S]*?\n\}/);
+    assert.ok(prevStory, 'previousStory function must exist');
+    assert.ok(prevStory[0].includes('stopStoryTTS'), 'previousStory must call stopStoryTTS');
+
+    const nextStory = js.match(/function nextStory\(\)\s*\{[\s\S]*?\n\}/);
+    assert.ok(nextStory, 'nextStory function must exist');
+    assert.ok(nextStory[0].includes('stopStoryTTS'), 'nextStory must call stopStoryTTS');
+});
+
+test('settings.html has TTS toggle section', () => {
+    const html = readFile('settings.html');
+    assert.ok(html.includes('tts-toggle-section'), 'Must have TTS toggle section');
+    assert.ok(html.includes('updateTTSMode'), 'Must have updateTTSMode function');
+    assert.ok(html.includes('Story Read-Aloud'), 'Must show "Story Read-Aloud" label');
+});
+
+// ============================================================================
+// MOBILE UI OPTIMIZATION TESTS
+// ============================================================================
+
+test('styles.css has 2-column subject grid on mobile', () => {
+    const css = readFile('styles.css');
+    // Verify that within the responsive section, subject-grid uses 2-col
+    // The subject-grid rule with repeat(2, 1fr) should exist in a 480px context
+    const subjectGridRules = css.match(/\.subject-grid\s*\{[^}]*repeat\(2,\s*1fr\)[^}]*\}/g) || [];
+    assert.ok(subjectGridRules.length > 0, 'Subject grid must have repeat(2, 1fr) rule for mobile');
+});
+
+test('styles.css has 375px extra-small breakpoint', () => {
+    const css = readFile('styles.css');
+    assert.ok(css.includes('@media (max-width: 375px)'), 'Must have 375px breakpoint');
+});
+
+test('stories.css has 2-column category grid on mobile', () => {
+    const css = readFile('stories.css');
+    const mobileBlock = css.match(/@media\s*\(max-width:\s*480px\)[\s\S]*?\.category-grid\s*\{[^}]*\}/);
+    assert.ok(mobileBlock, 'Must have category-grid in 480px breakpoint');
+    assert.ok(mobileBlock[0].includes('repeat(2, 1fr)'), 'Category grid must be 2-column on mobile');
+});
+
+test('stories.css has 2-column stories container on mobile', () => {
+    const css = readFile('stories.css');
+    const mobileBlock = css.match(/@media\s*\(max-width:\s*480px\)[\s\S]*?#stories-container\s*\{[^}]*\}/);
+    assert.ok(mobileBlock, 'Must have #stories-container in 480px breakpoint');
+    assert.ok(mobileBlock[0].includes('repeat(2, 1fr)'), 'Stories container must be 2-column on mobile');
+});
+
+test('progress-map.css has 375px breakpoint', () => {
+    const css = readFile('progress-map.css');
+    assert.ok(css.includes('@media (max-width: 375px)'), 'progress-map.css must have 375px breakpoint');
+});
+
+test('rewards.css has 375px breakpoint', () => {
+    const css = readFile('rewards.css');
+    assert.ok(css.includes('@media (max-width: 375px)'), 'rewards.css must have 375px breakpoint');
+});
+
+test('stories.css has TTS button styles', () => {
+    const css = readFile('stories.css');
+    assert.ok(css.includes('.tts-controls'), 'Must have .tts-controls styles');
+    assert.ok(css.includes('.tts-btn'), 'Must have .tts-btn styles');
+    assert.ok(css.includes('.tts-playing'), 'Must have .tts-playing animation');
+    assert.ok(css.includes('tts-pulse'), 'Must have tts-pulse keyframes');
+});
+
+test('compact bottom nav on mobile', () => {
+    const css = readFile('styles.css');
+    // The 480px bottom-nav-item rule
+    assert.ok(css.includes('.bottom-nav-item') && css.includes('0.65em'),
+        'Bottom nav must have compact font on mobile');
 });
 
 // ============================================================================

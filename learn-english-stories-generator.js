@@ -1366,7 +1366,7 @@ function loadAllStories() {
     const limit = getDemoLimit(allStories.length);
     const limitedStories = allStories.slice(0, limit);
 
-    const title = `Choose a Story (${limitedStories.length})`;
+    const title = `Stories (${limitedStories.length})`;
     document.getElementById('story-list-title').textContent = title;
 
     const listContainer = document.getElementById('story-list');
@@ -1466,11 +1466,11 @@ function loadStory(storyId) {
 
     const readerContainer = document.getElementById('story-reader');
     readerContainer.innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToStoryList()">← Back to Stories</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToStoryList()" title="Back to Stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
 
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+        <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
             📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
 
@@ -1496,7 +1496,7 @@ function loadStory(storyId) {
             </div>
 
             <div class="comprehension-section">
-                <h3 style="color: #667eea; text-align: center; margin-bottom: 25px;">
+                <h3 style="color: var(--color-primary); text-align: center; margin-bottom: 25px;">
                     🤔 Comprehension Questions
                 </h3>
                 ${story.questions.map((q, index) => `
@@ -1537,7 +1537,7 @@ function checkAnswer(questionIndex, selectedOption, correctOption) {
 
     if (selectedOption === correctOption) {
         feedback.textContent = '✓ Correct! Well done!';
-        feedback.style.color = '#4caf50';
+        feedback.style.color = 'var(--color-success)';
     } else {
         // Mark wrong answer in red
         buttons[selectedOption].classList.add('incorrect');

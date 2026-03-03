@@ -1415,7 +1415,7 @@ function loadAllTutorials() {
     tutorialSelection.style.display = 'block';
     worksheetArea.innerHTML = '';
 
-    document.getElementById('tutorial-list-title').textContent = 'Choose a Tutorial';
+    document.getElementById('tutorial-list-title').textContent = 'Tutorials';
 
     const tutorialList = document.getElementById('tutorial-list');
     tutorialList.innerHTML = '';
@@ -1523,11 +1523,11 @@ function loadDrawingTutorial(tutorialKey) {
     const tutorial = getTutorial(currentAge, currentDifficulty, tutorialKey);
 
     worksheetArea.innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToTutorialList()">← Back to Tutorial List</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToTutorialList()" title="Back to Tutorial List"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
 
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+        <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
             📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
 
@@ -1540,11 +1540,11 @@ function loadDrawingTutorial(tutorialKey) {
 
         <div class="split-screen">
             <div class="instructions-panel">
-                <h3 style="color: #667eea; text-align: center; margin-bottom: 20px;">📋 Follow These Steps</h3>
+                <h3 style="color: var(--color-primary); text-align: center; margin-bottom: 20px;">📋 Follow These Steps</h3>
 
                 <!-- Step Progress Indicator -->
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <span style="font-size: 1.2em; font-weight: bold; color: #764ba2;">
+                    <span style="font-size: 1.2em; font-weight: bold; color: var(--color-primary-dark);">
                         Step <span id="current-step-num">1</span> of ${tutorial.steps.length}
                     </span>
                 </div>
@@ -1554,22 +1554,22 @@ function loadDrawingTutorial(tutorialKey) {
                 </div>
 
                 <!-- Step Text -->
-                <div id="step-text" style="background: #e8f5e9; border-left: 5px solid #4caf50; padding: 20px; border-radius: 8px; font-size: 1.2em; line-height: 1.6; text-align: center; margin-bottom: 20px;">
+                <div id="step-text" style="background: #e8f5e9; border-left: 5px solid var(--color-success); padding: 20px; border-radius: 8px; font-size: 1.2em; line-height: 1.6; text-align: center; margin-bottom: 20px;">
                 </div>
 
                 <!-- Navigation Buttons -->
                 <div style="display: flex; gap: 15px; justify-content: center;">
-                    <button id="prev-step-btn" onclick="previousStep()" style="padding: 15px 30px; font-size: 1.1em; border: 3px solid #667eea; background: white; color: #667eea; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    <button id="prev-step-btn" onclick="previousStep()" style="padding: 15px 30px; font-size: 1.1em; border: 3px solid var(--color-primary); background: white; color: var(--color-primary); border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
                         ⬅️ Previous Step
                     </button>
-                    <button id="next-step-btn" onclick="nextStep()" style="padding: 15px 30px; font-size: 1.1em; border: 3px solid #4caf50; background: #4caf50; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    <button id="next-step-btn" onclick="nextStep()" style="padding: 15px 30px; font-size: 1.1em; border: 3px solid var(--color-success); background: var(--color-success); color: white; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
                         Next Step ➡️
                     </button>
                 </div>
             </div>
 
             <div class="canvas-panel">
-                <h3 style="color: #764ba2; margin-bottom: 20px;">✏️ Your Drawing Canvas</h3>
+                <h3 style="color: var(--color-primary-dark); margin-bottom: 20px;">✏️ Your Drawing Canvas</h3>
                 <div class="canvas-container">
                     <canvas id="drawing-canvas" width="500" height="500"></canvas>
                 </div>
@@ -1577,7 +1577,7 @@ function loadDrawingTutorial(tutorialKey) {
                     <button class="canvas-btn" id="undo-btn" onclick="undo()" title="Undo">↶</button>
                     <button class="canvas-btn" id="redo-btn" onclick="redo()" title="Redo">↷</button>
                     <button class="canvas-btn" onclick="clearCanvas()" title="Clear Canvas">🗑️</button>
-                    <button class="canvas-btn" onclick="toggleColorPicker()" id="brush-btn" title="Choose Color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 1.3em;">🖌️</button>
+                    <button class="canvas-btn" onclick="toggleColorPicker()" id="brush-btn" title="Choose Color" style="background: var(--color-primary-gradient); color: white; font-size: 1.3em;">🖌️</button>
                     <button class="canvas-btn" onclick="changeColor('white')" title="Eraser">🧹</button>
                 </div>
                 <div class="canvas-controls" id="color-picker-container" style="display: none; flex-wrap: wrap; gap: 8px; padding: 15px; background: #f8f9fa; border-radius: 10px; justify-content: center;">
@@ -1601,7 +1601,7 @@ function loadDrawingTutorial(tutorialKey) {
                     <button class="color-dot" onclick="changeColor('#ff1493')" style="background: #ff1493;" title="Deep Pink">🩷</button>
                 </div>
                 <div class="canvas-controls" id="eraser-size-container" style="display: none; flex-direction: column; align-items: center; background: #f0f0f0; padding: 15px; border-radius: 10px; margin: 10px 0;">
-                    <label style="font-weight: bold; margin-bottom: 10px; color: #764ba2;">
+                    <label style="font-weight: bold; margin-bottom: 10px; color: var(--color-primary-dark);">
                         🧹 <span id="eraser-size-value">20</span>px
                     </label>
                     <input type="range" min="5" max="50" value="20"
@@ -1614,7 +1614,7 @@ function loadDrawingTutorial(tutorialKey) {
                     <button class="canvas-btn" onclick="changeBrushSize('large')" title="Large Brush" style="font-size: 1.8em;">⚫</button>
                 </div>
                 <div class="canvas-controls">
-                    <button class="canvas-btn" style="background: #4caf50; color: white;" onclick="savePDF()">💾 Save as PDF</button>
+                    <button class="canvas-btn" style="background: var(--color-success); color: white;" onclick="savePDF()">💾 Save as PDF</button>
                 </div>
             </div>
         </div>
@@ -1679,10 +1679,10 @@ function updateStep() {
 
     if (currentStep === tutorial.steps.length - 1) {
         nextBtn.textContent = '✓ Finished!';
-        nextBtn.style.background = '#4caf50';
+        nextBtn.style.background = 'var(--color-success)';
     } else {
         nextBtn.textContent = 'Next Step ➡️';
-        nextBtn.style.background = '#4caf50';
+        nextBtn.style.background = 'var(--color-success)';
     }
 }
 
@@ -1933,10 +1933,10 @@ function toggleColorPicker() {
     const brushBtn = document.getElementById('brush-btn');
     if (colorPicker.style.display === 'none' || colorPicker.style.display === '') {
         colorPicker.style.display = 'flex';
-        brushBtn.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
+        brushBtn.style.background = 'linear-gradient(135deg, var(--color-success) 0%, #45a049 100%)';
     } else {
         colorPicker.style.display = 'none';
-        brushBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        brushBtn.style.background = 'var(--color-primary-gradient)';
     }
 }
 
@@ -2034,13 +2034,13 @@ function savePDF() {
         const content = `
             <div style="font-family: 'Comic Sans MS', 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; background: white;">
                 <!-- Header Section -->
-                <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
-                    <h1 style="color: #667eea; font-size: 32px; margin: 0 0 10px 0;">${tutorial.icon} ${tutorial.name}</h1>
-                    <p style="color: #764ba2; font-size: 18px; margin: 5px 0;">🎨 Step-by-Step Drawing Practice</p>
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid var(--color-primary); padding-bottom: 20px;">
+                    <h1 style="color: var(--color-primary); font-size: 32px; margin: 0 0 10px 0;">${tutorial.icon} ${tutorial.name}</h1>
+                    <p style="color: var(--color-primary-dark); font-size: 18px; margin: 5px 0;">🎨 Step-by-Step Drawing Practice</p>
                 </div>
 
                 <!-- Student Info -->
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #667eea;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid var(--color-primary);">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 16px;">
                         <div><strong>👤 Name:</strong> ${(() => {
                             const child = getSelectedChild();
@@ -2054,19 +2054,19 @@ function savePDF() {
 
                 <!-- Drawing Section -->
                 <div style="text-align: center; margin: 30px 0;">
-                    <h2 style="color: #764ba2; font-size: 24px; margin-bottom: 15px;">✨ Your Artwork</h2>
-                    <div style="border: 4px solid #667eea; border-radius: 15px; padding: 15px; background: white; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: var(--color-primary-dark); font-size: 24px; margin-bottom: 15px;">✨ Your Artwork</h2>
+                    <div style="border: 4px solid var(--color-primary); border-radius: 15px; padding: 15px; background: white; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                         <img src="${canvasImage}" style="max-width: 600px; width: 100%; height: auto; display: block; border-radius: 8px;">
                     </div>
                 </div>
 
                 <!-- Steps Section -->
                 <div style="margin-top: 35px; background: #fff9e6; padding: 25px; border-radius: 10px; border: 2px solid #ffd700;">
-                    <h2 style="color: #667eea; font-size: 22px; margin-bottom: 15px; text-align: center;">📝 Steps You Followed</h2>
+                    <h2 style="color: var(--color-primary); font-size: 22px; margin-bottom: 15px; text-align: center;">📝 Steps You Followed</h2>
                     <ol style="font-size: 15px; line-height: 2; color: #333; padding-left: 30px;">
                         ${tutorial.steps.map((step, idx) => `
                             <li style="margin: 8px 0; padding: 5px 0;">
-                                <strong style="color: #764ba2;">Step ${idx + 1}:</strong> ${step.text}
+                                <strong style="color: var(--color-primary-dark);">Step ${idx + 1}:</strong> ${step.text}
                             </li>
                         `).join('')}
                     </ol>

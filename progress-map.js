@@ -12,10 +12,16 @@ const PROGRESS_CONFIG = {
     math: {
         subtypes: ['addition', 'subtraction', 'multiplication', 'division'],
         labels: {
-            addition: '➕ Addition',
-            subtraction: '➖ Subtraction',
-            multiplication: '✖️ Multiplication',
-            division: '➗ Division'
+            addition: 'Addition',
+            subtraction: 'Subtraction',
+            multiplication: 'Multiplication',
+            division: 'Division'
+        },
+        iconKeys: {
+            addition: 'addition',
+            subtraction: 'subtraction',
+            multiplication: 'multiplication',
+            division: 'division'
         },
         totalPages: 150,
         pagesPerDifficulty: 50,
@@ -27,10 +33,16 @@ const PROGRESS_CONFIG = {
     english: {
         subtypes: ['writing', 'easy', 'medium', 'hard'],
         labels: {
-            writing: '✏️ Writing',
-            easy: '📝 Vocab Easy',
-            medium: '📝 Vocab Medium',
-            hard: '📝 Vocab Hard'
+            writing: 'Writing',
+            easy: 'Vocab Easy',
+            medium: 'Vocab Medium',
+            hard: 'Vocab Hard'
+        },
+        iconKeys: {
+            writing: 'writingPen',
+            easy: 'vocab',
+            medium: 'vocab',
+            hard: 'vocab'
         },
         totalPages: 50,
         pagesPerDifficulty: 50,
@@ -148,15 +160,9 @@ function getPlantStage(fraction) {
 async function getCompletionsForModule(childId, module) {
     if (!childId) return [];
 
-    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
-    if (!child) return [];
-
     try {
-        const childEmail = child.email;
-        if (!childEmail) return [];
-
         const snapshot = await firebase.firestore().collection('completions')
-            .where('childEmail', '==', childEmail)
+            .where('childId', '==', childId)
             .where('module', '==', module)
             .get();
 
@@ -229,9 +235,9 @@ async function loadProgressData(module, subtype) {
         if (!access.pending && access.assignment) {
             const modAssignment = module === 'math'
                 ? access.assignment.math : access.assignment.english;
-            if (modAssignment && modAssignment.pages) {
-                weeklyTotal = modAssignment.pages.length;
-                weeklyDone = modAssignment.pages.filter(p => p.completed).length;
+            if (modAssignment) {
+                weeklyTotal = modAssignment.totalPages || modAssignment.pages.length;
+                weeklyDone = modAssignment.completedCount || 0;
             }
         }
     } else if (isAdmin) {
@@ -553,6 +559,10 @@ async function showProgressMap(module, subtype) {
     if (operations) operations.style.display = 'none';
     if (typeSelection) typeSelection.style.display = 'none';
 
+    // Hide greeting banner — only shown on home/subject selection
+    const greetingBanner = document.getElementById('greeting-banner');
+    if (greetingBanner) greetingBanner.style.display = 'none';
+
     // Show container
     const container = document.getElementById('progress-map-container');
     if (!container) {
@@ -586,7 +596,7 @@ function renderProgressMap(container, data, nodes) {
 
     // Back button — goes directly to subject selection (no intermediate operations page)
     html += '<div class="pm-back-row">';
-    html += '<button class="pm-back-btn" onclick="hideProgressMap(\'' + module + '\')">&#8592; Back to Subjects</button>';
+    html += '<button class="back-btn-icon" onclick="hideProgressMap(\'' + module + '\')" title="Back to Subjects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>';
     html += '</div>';
 
     // Tabs
@@ -620,11 +630,14 @@ function renderProgressMap(container, data, nodes) {
  * Render tabs for switching between subtypes.
  */
 function renderTabs(module, activeSubtype, config) {
+    var gi = typeof GleeIcons !== 'undefined' ? GleeIcons : null;
     let html = '<div class="pm-tabs">';
     config.subtypes.forEach(st => {
         const isActive = st === activeSubtype;
         const label = config.labels[st] || st;
-        html += `<button class="pm-tab${isActive ? ' active' : ''}" onclick="switchProgressTab('${module}','${st}')">${label}</button>`;
+        const iconKey = config.iconKeys && config.iconKeys[st];
+        const iconHtml = (gi && iconKey) ? gi.get(iconKey, 16, isActive ? 'white' : 'var(--color-primary)') + ' ' : '';
+        html += `<button class="pm-tab${isActive ? ' active' : ''}" onclick="switchProgressTab('${module}','${st}')">${iconHtml}${label}</button>`;
     });
     html += '</div>';
     return html;
@@ -634,24 +647,25 @@ function renderTabs(module, activeSubtype, config) {
  * Render the 4-stat cards.
  */
 function renderStatsBar(stats, streak) {
+    var gi = typeof GleeIcons !== 'undefined' ? GleeIcons : null;
     return `<div class="pm-stats">
         <div class="pm-stat-card">
-            <span class="pm-stat-icon">&#x1F525;</span>
+            <span class="pm-stat-icon">${gi ? gi.get('fire', 20, 'var(--color-warning)') : '&#x1F525;'}</span>
             <span class="pm-stat-value">${streak}</span>
             <span class="pm-stat-label">day streak</span>
         </div>
         <div class="pm-stat-card">
-            <span class="pm-stat-icon">&#x2B50;</span>
+            <span class="pm-stat-icon">${gi ? gi.get('star', 20, '#fbbf24') : '&#x2B50;'}</span>
             <span class="pm-stat-value">${stats.totalStars}</span>
             <span class="pm-stat-label">stars</span>
         </div>
         <div class="pm-stat-card">
-            <span class="pm-stat-icon">&#x1F4DD;</span>
+            <span class="pm-stat-icon">${gi ? gi.get('chart', 20, 'var(--color-primary)') : '&#x1F4DD;'}</span>
             <span class="pm-stat-value">${stats.totalProblems}</span>
             <span class="pm-stat-label">solved</span>
         </div>
         <div class="pm-stat-card">
-            <span class="pm-stat-icon">&#x1F3AF;</span>
+            <span class="pm-stat-icon">${gi ? gi.get('target', 20, 'var(--color-success)') : '&#x1F3AF;'}</span>
             <span class="pm-stat-value">${stats.accuracy}%</span>
             <span class="pm-stat-label">accuracy</span>
         </div>
@@ -671,8 +685,15 @@ function renderWeeklyRing(done, total) {
         <span class="pm-weekly-label">This Week</span>
         <div class="pm-weekly-ring">
             <svg viewBox="0 0 56 56">
+                <defs>
+                    <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--color-primary, #667eea)"/>
+                        <stop offset="100%" stop-color="var(--color-success, #4caf50)"/>
+                    </linearGradient>
+                </defs>
                 <circle class="pm-ring-bg" cx="28" cy="28" r="${radius}"/>
                 <circle class="pm-ring-fill" cx="28" cy="28" r="${radius}"
+                    stroke="url(#ring-grad)"
                     stroke-dasharray="${circumference}"
                     stroke-dashoffset="${dashoffset}"/>
             </svg>
@@ -691,9 +712,10 @@ function renderAssessmentNode(node, module, subtype, data) {
         ? '' // Completed assessments don't navigate
         : `onclick="handleAssessmentClick('${module}','${subtype}')"`;
 
+    var gi = typeof GleeIcons !== 'undefined' ? GleeIcons : null;
     const icon = node.state === 'completed'
         ? getPlantSVG('seed', 44)
-        : '<svg width="44" height="44" viewBox="0 0 50 50"><circle cx="25" cy="25" r="18" fill="#667eea" opacity="0.2"/><text x="25" y="32" text-anchor="middle" font-size="22" fill="#667eea">&#x1F4CB;</text></svg>';
+        : (gi ? gi.circled('clipboard', 44, 'var(--color-primary-10)', 'var(--color-primary)') : '<svg width="44" height="44" viewBox="0 0 50 50"><circle cx="25" cy="25" r="18" fill="var(--color-primary)" opacity="0.2"/><text x="25" y="32" text-anchor="middle" font-size="22" fill="var(--color-primary)">&#x1F4CB;</text></svg>');
 
     return `<div class="pm-node assessment ${stateClass}" ${clickHandler}>
         <div class="pm-node-icon">${icon}</div>
@@ -701,7 +723,7 @@ function renderAssessmentNode(node, module, subtype, data) {
             <div class="pm-node-title">${escapeHtml(node.title)}</div>
             <div class="pm-node-subtitle">${escapeHtml(node.subtitle)}</div>
         </div>
-        ${node.state === 'completed' ? '<div class="pm-node-stars">&#x2705;</div>' : ''}
+        ${node.state === 'completed' ? '<div class="pm-node-stars">' + (gi ? gi.get('check', 20, 'var(--color-success)') : '&#x2705;') + '</div>' : ''}
     </div>`;
 }
 
@@ -719,11 +741,13 @@ function renderGroupNode(node, module, subtype, idx) {
         clickHandler = `onclick="showLockedToast()"`;
     }
 
+    var gi2 = typeof GleeIcons !== 'undefined' ? GleeIcons : null;
     let rightContent = '';
     if (node.state === 'completed' && node.stars > 0) {
-        rightContent = `<div class="pm-node-stars">${'&#x2B50;'.repeat(node.stars)}</div>`;
+        var starIcon = gi2 ? gi2.get('star', 16, '#fbbf24', {fill: '#fbbf24', strokeWidth: '0'}) : '&#x2B50;';
+        rightContent = `<div class="pm-node-stars">${starIcon.repeat(node.stars)}</div>`;
     } else if (node.state === 'locked') {
-        rightContent = '<div class="pm-node-lock">&#x1F512;</div>';
+        rightContent = '<div class="pm-node-lock">' + (gi2 ? gi2.get('lock', 18, '#999') : '&#x1F512;') + '</div>';
     }
 
     return `<div class="pm-node ${stateClass}" ${clickHandler}>

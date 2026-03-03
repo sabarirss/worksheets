@@ -9,12 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             min-height: 100vh;
             margin: 0;
             padding: 20px;
@@ -38,7 +38,7 @@
         .admin-header h1 {
             margin: 0 0 10px 0;
             font-size: 2.2em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -109,7 +109,7 @@
         .stat-value {
             font-size: 3em;
             font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -140,7 +140,7 @@
 
         .search-filter input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--color-primary);
         }
 
         .parents-list {
@@ -293,7 +293,7 @@
         }
 
         .module-checkbox input[type="checkbox"]:checked {
-            accent-color: #667eea;
+            accent-color: var(--color-primary);
         }
 
         .module-checkbox label {
@@ -304,7 +304,7 @@
 
         .save-modules-btn {
             margin-top: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -316,7 +316,7 @@
 
         .save-modules-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px var(--color-primary-30);
         }
 
         .no-children {
@@ -397,7 +397,7 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--color-primary);
         }
 
         .modal-actions {
@@ -438,9 +438,7 @@
             </div>
             <p>Manage parent accounts, children profiles, and per-child module allocations</p>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="window.location.href='index'">
-                    Back to Home
-                </button>
+                <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
                 <button class="btn btn-secondary" onclick="loadParentsAndChildren()">
                     Refresh
                 </button>
@@ -452,8 +450,8 @@
 
         <!-- Version Upgrade Requests Section -->
         <div id="upgrade-requests-section" class="upgrade-requests" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
-            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #4caf50; padding-bottom: 15px;">
-                📤 Version Upgrade Requests
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid var(--color-success); padding-bottom: 15px;">
+                <span data-icon="upload" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Version Upgrade Requests
             </h2>
             <p style="color: #666; margin-bottom: 25px;">
                 Review and approve or deny full version upgrade requests from users.
@@ -468,8 +466,8 @@
 
         <!-- Module Request Approval Section -->
         <div id="module-requests-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
-            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
-                📦 Module Access Requests
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid var(--color-primary); padding-bottom: 15px;">
+                <span data-icon="package" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Module Access Requests
             </h2>
             <p style="color: #666; margin-bottom: 25px;">
                 Parents have requested access to additional modules for their children. Approve or deny each request.
@@ -481,7 +479,7 @@
         <!-- Adaptive Worksheets Review Section -->
         <div id="adaptive-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: none;">
             <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #9c27b0; padding-bottom: 15px;">
-                🧠 Adaptive Worksheets
+                <span data-icon="brain" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Adaptive Worksheets
             </h2>
             <p style="color: #666; margin-bottom: 15px;">
                 AI-generated personalized worksheets pending your review. Each worksheet targets the child's weak areas.
@@ -499,9 +497,9 @@
 
         <!-- Feedback Viewer Section -->
         <div id="feedback-section" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #ff9800; padding-bottom: 15px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--color-warning); padding-bottom: 15px; margin-bottom: 20px;">
                 <h2 style="margin: 0; color: #2c3e50;">
-                    💬 Parent Feedback
+                    <span data-icon="feedback" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Parent Feedback
                 </h2>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <select id="feedback-filter-module" onchange="filterFeedback()" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9em; cursor: pointer;">
@@ -531,15 +529,37 @@
             </div>
 
             <div id="feedback-empty" style="display: none; text-align: center; padding: 40px; color: #999;">
-                <div style="font-size: 3em; margin-bottom: 10px;">📭</div>
+                <div style="margin-bottom: 10px;"><span data-icon="inbox" data-icon-size="48" data-icon-color="#999"></span></div>
                 <p>No feedback received yet</p>
             </div>
         </div>
 
+        <!-- Demo Data Seeder Section -->
+        <div style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid var(--color-primary); padding-bottom: 15px;">
+                <span data-icon="beaker" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Demo Data Seeder
+            </h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Create 5 demo child accounts with different performance profiles
+                (consistent, average, poor, highs &amp; lows, inconsistent) and 4 weeks of historical data.
+            </p>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                <button onclick="seedDemoData()" id="btn-seed-demo"
+                    style="padding: 12px 25px; background: var(--color-primary-gradient); color: white; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; font-weight: bold;">
+                    <span data-icon="seedling" data-icon-size="18" data-icon-color="white" style="vertical-align: middle"></span> Seed Demo Children
+                </button>
+                <button onclick="clearDemoData()" id="btn-clear-demo"
+                    style="padding: 12px 25px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; font-weight: bold;">
+                    <span data-icon="trash" data-icon-size="18" data-icon-color="white" style="vertical-align: middle"></span> Clear Demo Data
+                </button>
+            </div>
+            <div id="demo-seed-status" style="display: none; padding: 15px; border-radius: 10px; margin-top: 10px;"></div>
+        </div>
+
         <!-- Admin Level Selection Section -->
         <div class="admin-level-selection" style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid #667eea; padding-bottom: 15px;">
-                📊 Admin Content Level Selection
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 3px solid var(--color-primary); padding-bottom: 15px;">
+                <span data-icon="chart" data-icon-size="22" data-icon-color="#2c3e50" style="vertical-align: middle"></span> Admin Content Level Selection
             </h2>
             <p style="color: #666; margin-bottom: 25px;">
                 Select which level (1-12) you want to view for each module. When you access a module, you'll see only content from the selected level.
@@ -547,9 +567,9 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 <!-- Math -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">🔢</span> Math
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="math" data-icon-size="28" data-icon-color="var(--color-primary)"></span> Math
                     </h3>
                     <select id="admin-level-math" class="level-select" onchange="saveAdminLevelSelection('math', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -570,9 +590,9 @@
                 </div>
 
                 <!-- English -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">📝</span> English
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="english" data-icon-size="28" data-icon-color="var(--color-primary)"></span> English
                     </h3>
                     <select id="admin-level-english" class="level-select" onchange="saveAdminLevelSelection('english', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -593,9 +613,9 @@
                 </div>
 
                 <!-- Aptitude -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">🧩</span> Aptitude
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="aptitude" data-icon-size="28" data-icon-color="var(--color-primary)"></span> Aptitude
                     </h3>
                     <select id="admin-level-aptitude" class="level-select" onchange="saveAdminLevelSelection('aptitude', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -616,9 +636,9 @@
                 </div>
 
                 <!-- Stories -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">📖</span> Stories
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="stories" data-icon-size="28" data-icon-color="var(--color-primary)"></span> Stories
                     </h3>
                     <select id="admin-level-stories" class="level-select" onchange="saveAdminLevelSelection('stories', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -639,9 +659,9 @@
                 </div>
 
                 <!-- Drawing -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">🎨</span> Drawing
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="drawing" data-icon-size="28" data-icon-color="var(--color-primary)"></span> Drawing
                     </h3>
                     <select id="admin-level-drawing" class="level-select" onchange="saveAdminLevelSelection('drawing', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -662,9 +682,9 @@
                 </div>
 
                 <!-- Emotional Quotient -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">😊</span> EQ
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="eq" data-icon-size="28" data-icon-color="var(--color-primary)"></span> EQ
                     </h3>
                     <select id="admin-level-emotional-quotient" class="level-select" onchange="saveAdminLevelSelection('emotional-quotient', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -685,9 +705,9 @@
                 </div>
 
                 <!-- German Kids -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">🇩🇪</span> German Kids
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="germanKids" data-icon-size="28" data-icon-color="var(--color-primary)"></span> German Kids
                     </h3>
                     <select id="admin-level-german-kids" class="level-select" onchange="saveAdminLevelSelection('german-kids', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -708,9 +728,9 @@
                 </div>
 
                 <!-- Learn English Stories -->
-                <div class="level-select-card" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; transition: all 0.3s;">
-                    <h3 style="margin: 0 0 15px 0; color: #667eea; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5em;">🌍</span> Learn English Stories
+                <div class="level-select-card" style="border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; transition: all 0.3s;">
+                    <h3 style="margin: 0 0 15px 0; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                        <span data-icon="learnEnglishStories" data-icon-size="28" data-icon-color="var(--color-primary)"></span> Learn English Stories
                     </h3>
                     <select id="admin-level-learn-english-stories" class="level-select" onchange="saveAdminLevelSelection('learn-english-stories', this.value)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; cursor: pointer;">
                         <option value="">All Levels</option>
@@ -732,7 +752,7 @@
             </div>
 
             <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
-                <strong>💡 How it works:</strong> Select a level for any module and only that level's content will be shown when you access that module from the home page. Select "All Levels" to see all content.
+                <strong><span data-icon="lightbulb" data-icon-size="16" data-icon-color="#856404" style="vertical-align: middle"></span> How it works:</strong> Select a level for any module and only that level's content will be shown when you access that module from the home page. Select "All Levels" to see all content.
             </div>
         </div>
 
@@ -749,7 +769,7 @@
         </div>
 
         <div id="empty-state" class="empty-state" style="display: none;">
-            <div class="empty-state-icon">👨‍👩‍👧‍👦</div>
+            <div class="empty-state-icon"><span data-icon="users" data-icon-size="48" data-icon-color="#999"></span></div>
             <h3>No parent accounts found</h3>
             <p>Parent accounts will appear here when created</p>
         </div>
@@ -759,13 +779,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
 
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="branding.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="branding.js" defer></script>
+    <script src="icons.js"></script>
 
     <script>
         let parentsData = [];
@@ -893,7 +915,7 @@
 
                     const requestCard = document.createElement('div');
                     requestCard.style.cssText = `
-                        border: 2px solid #e0e0e0;
+                        border: 2px solid var(--color-border);
                         border-radius: 10px;
                         padding: 20px;
                         background: #fafafa;
@@ -1049,13 +1071,13 @@
                 list.innerHTML = '';
 
                 const MODULE_NAMES = {
-                    english: '📝 English',
-                    aptitude: '🧩 Aptitude',
-                    stories: '📚 Stories',
-                    'emotional-quotient': '❤️ EQ',
-                    drawing: '🎨 Drawing',
-                    'german-kids': '🇩🇪 German Kids',
-                    'learn-english-stories': '🌍 Learn English Stories'
+                    english: GleeIcons.get('english', 16) + ' English',
+                    aptitude: GleeIcons.get('aptitude', 16) + ' Aptitude',
+                    stories: GleeIcons.get('stories', 16) + ' Stories',
+                    'emotional-quotient': GleeIcons.get('eq', 16) + ' EQ',
+                    drawing: GleeIcons.get('drawing', 16) + ' Drawing',
+                    'german-kids': GleeIcons.get('germanKids', 16) + ' German Kids',
+                    'learn-english-stories': GleeIcons.get('learnEnglishStories', 16) + ' Learn English Stories'
                 };
 
                 let hasRequests = false;
@@ -1098,7 +1120,7 @@
                         : 'Unknown';
 
                     const card = document.createElement('div');
-                    card.style.cssText = 'border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; background: #fafafa;';
+                    card.style.cssText = 'border: 2px solid var(--color-border); border-radius: 10px; padding: 20px; background: #fafafa;';
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
                             <div>
@@ -1401,8 +1423,8 @@
 
                 const currentVersion = child.version || 'demo';
                 const versionBadge = currentVersion === 'full'
-                    ? '<span style="background: #4caf50; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">✨ Full</span>'
-                    : '<span style="background: #ff9800; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">📦 Demo</span>';
+                    ? '<span style="background: var(--color-success); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">' + GleeIcons.get('sparkle', 14, 'white') + ' Full</span>'
+                    : '<span style="background: var(--color-warning); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-left: 10px;">' + GleeIcons.get('package', 14, 'white') + ' Demo</span>';
 
                 return `
                     <div class="child-card">
@@ -1412,7 +1434,7 @@
                                 <div class="child-name">${child.name} ${versionBadge}</div>
                                 <div class="child-info-line">Age: ${age} years old | Grade: ${child.grade || 'Not set'}</div>
                                 <div class="child-info-line">Born: ${formatDate(child.date_of_birth)}</div>
-                                <div class="child-info-line" style="color: #667eea; font-weight: bold; margin-top: 8px;">
+                                <div class="child-info-line" style="color: var(--color-primary); font-weight: bold; margin-top: 8px;">
                                     ✓ Assigned: ${assignedCount} | Enabled by Parent: ${enabledCount}
                                 </div>
                                 <div style="margin-top: 12px;">
@@ -1428,7 +1450,7 @@
                         </div>
 
                         <div class="modules-section">
-                            <div class="modules-title">📦 Assign Modules (Admin Control)</div>
+                            <div class="modules-title">${GleeIcons.get('package', 16)} Assign Modules (Admin Control)</div>
                             <div style="color: #666; font-size: 0.9em; margin-bottom: 15px; padding: 10px; background: #f0f4ff; border-radius: 8px;">
                                 ℹ️ <strong>Admin assigns modules</strong> that become available to parents. Parents can then enable/disable assigned modules for their child.
                             </div>
@@ -1436,7 +1458,7 @@
                                 ${renderModuleCheckboxes(child.id, assignedModules)}
                             </div>
                             <button class="save-modules-btn" onclick="saveChildModules('${child.id}')">
-                                💾 Save Assigned Modules
+                                ${GleeIcons.get('save', 16, 'white')} Save Assigned Modules
                             </button>
                         </div>
                     </div>
@@ -1446,22 +1468,22 @@
 
         function renderModuleCheckboxes(childId, assignedModules) {
             const availableModules = [
-                { id: 'math', name: '📐 Mathematics', key: 'math' },
-                { id: 'english', name: '📚 English', key: 'english' },
-                { id: 'aptitude', name: '🧩 Aptitude', key: 'aptitude' },
-                { id: 'stories', name: '📖 Stories', key: 'stories' },
-                { id: 'emotional-quotient', name: '❤️ Emotional Quotient', key: 'emotional-quotient' },
-                { id: 'german', name: '🇩🇪 German', key: 'german' },
-                { id: 'drawing', name: '🎨 Drawing', key: 'drawing' },
-                { id: 'german-kids', name: '🇩🇪 German Kids', key: 'german-kids' },
-                { id: 'learn-english-stories', name: '📚 Learn English Stories', key: 'learn-english-stories' }
+                { id: 'math', name: GleeIcons.get('math', 16) + ' Mathematics', key: 'math' },
+                { id: 'english', name: GleeIcons.get('english', 16) + ' English', key: 'english' },
+                { id: 'aptitude', name: GleeIcons.get('aptitude', 16) + ' Aptitude', key: 'aptitude' },
+                { id: 'stories', name: GleeIcons.get('stories', 16) + ' Stories', key: 'stories' },
+                { id: 'emotional-quotient', name: GleeIcons.get('eq', 16) + ' Emotional Quotient', key: 'emotional-quotient' },
+                { id: 'german', name: GleeIcons.get('german', 16) + ' German', key: 'german' },
+                { id: 'drawing', name: GleeIcons.get('drawing', 16) + ' Drawing', key: 'drawing' },
+                { id: 'german-kids', name: GleeIcons.get('germanKids', 16) + ' German Kids', key: 'german-kids' },
+                { id: 'learn-english-stories', name: GleeIcons.get('learnEnglishStories', 16) + ' Learn English Stories', key: 'learn-english-stories' }
             ];
 
             return availableModules.map(module => {
                 const isAssigned = assignedModules[module.key] || false;
                 const checked = isAssigned ? 'checked' : '';
                 const icon = isAssigned ? '✓' : '○';
-                const statusColor = isAssigned ? '#4caf50' : '#999';
+                const statusColor = isAssigned ? 'var(--color-success)' : '#999';
 
                 return `
                     <div class="module-checkbox" style="border-left: 4px solid ${statusColor};">
@@ -1589,7 +1611,7 @@ Would you like to view their children profiles?
             // Show visual feedback
             const card = document.querySelector(`#admin-level-${module}`).closest('.level-select-card');
             if (card) {
-                card.style.borderColor = level ? '#667eea' : '#e0e0e0';
+                card.style.borderColor = level ? 'var(--color-primary)' : 'var(--color-border)';
                 card.style.background = level ? '#f0f4ff' : 'white';
             }
 
@@ -1672,8 +1694,8 @@ Would you like to view their children profiles?
         let allFeedback = [];
 
         const MODULE_ICONS = {
-            general: '🏠', math: '📐', english: '📚', aptitude: '🧩',
-            stories: '📖', drawing: '🎨', eq: '❤️', german: '🇩🇪'
+            general: GleeIcons.get('home', 16), math: GleeIcons.get('math', 16), english: GleeIcons.get('english', 16), aptitude: GleeIcons.get('aptitude', 16),
+            stories: GleeIcons.get('stories', 16), drawing: GleeIcons.get('drawing', 16), eq: GleeIcons.get('eq', 16), german: GleeIcons.get('german', 16)
         };
 
         const MODULE_NAMES = {
@@ -1738,11 +1760,11 @@ Would you like to view their children profiles?
             const overallAvg = totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '-';
 
             let html = `
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                <div style="background: var(--color-primary-gradient); color: white; padding: 20px; border-radius: 12px; text-align: center;">
                     <div style="font-size: 2.5em; font-weight: bold;">${feedbackList.length}</div>
                     <div style="font-size: 0.9em; opacity: 0.9;">Total Responses</div>
                 </div>
-                <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                <div style="background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-dark) 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
                     <div style="font-size: 2.5em; font-weight: bold;">${overallAvg}</div>
                     <div style="font-size: 0.9em; opacity: 0.9;">Avg Rating / 5</div>
                 </div>
@@ -1756,7 +1778,7 @@ Would you like to view their children profiles?
             if (sortedMods.length > 0) {
                 const best = sortedMods[0];
                 html += `
-                    <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="background: linear-gradient(135deg, var(--color-success) 0%, #2e7d32 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
                         <div style="font-size: 2.5em; font-weight: bold;">${MODULE_ICONS[best.mod] || ''} ${best.avg.toFixed(1)}</div>
                         <div style="font-size: 0.9em; opacity: 0.9;">Best: ${MODULE_NAMES[best.mod] || best.mod}</div>
                     </div>
@@ -1820,8 +1842,8 @@ Would you like to view their children profiles?
                     if (!data || (!data.rating && !data.good && !data.improve)) return;
 
                     const stars = data.rating ? renderStars(data.rating) : '<span style="color: #999;">No rating</span>';
-                    const goodText = data.good ? `<div style="margin-top: 8px;"><strong style="color: #4caf50;">Good:</strong> ${escapeHtmlFb(data.good)}</div>` : '';
-                    const improveText = data.improve ? `<div style="margin-top: 5px;"><strong style="color: #ff9800;">Improve:</strong> ${escapeHtmlFb(data.improve)}</div>` : '';
+                    const goodText = data.good ? `<div style="margin-top: 8px;"><strong style="color: var(--color-success);">Good:</strong> ${escapeHtmlFb(data.good)}</div>` : '';
+                    const improveText = data.improve ? `<div style="margin-top: 5px;"><strong style="color: var(--color-warning);">Improve:</strong> ${escapeHtmlFb(data.improve)}</div>` : '';
 
                     modulesHtml += `
                         <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-top: 10px;">
@@ -1844,7 +1866,7 @@ Would you like to view their children profiles?
                 <div style="border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; transition: all 0.2s;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                         <div>
-                            <span style="font-weight: bold; color: #2c3e50; font-size: 1.05em;">👤 ${escapeHtmlFb(parentName)}</span>
+                            <span style="font-weight: bold; color: #2c3e50; font-size: 1.05em;">${GleeIcons.get('user', 16, '#2c3e50')} ${escapeHtmlFb(parentName)}</span>
                             <span style="color: #999; font-size: 0.85em;">${childName}</span>
                         </div>
                         <div style="color: #999; font-size: 0.85em;">
@@ -1915,7 +1937,7 @@ Would you like to view their children profiles?
                     const dist = r.distribution || {};
 
                     return `
-                    <div style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; background: #fafafa;">
+                    <div style="border: 2px solid var(--color-border); border-radius: 12px; padding: 20px; background: #fafafa;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <div>
                                 <strong style="font-size: 1.2em; color: #2c3e50;">${w.childName || 'Unknown'}</strong>
@@ -1944,10 +1966,10 @@ Would you like to view their children profiles?
                             <span>Overall error rate: ${Math.round((r.profileSummary?.overallErrorRate || 0) * 100)}%</span>
                         </div>
                         <details style="margin-top: 10px;">
-                            <summary style="cursor: pointer; color: #667eea; font-weight: bold;">View Problems (${(w.pages || []).length} pages)</summary>
+                            <summary style="cursor: pointer; color: var(--color-primary); font-weight: bold;">View Problems (${(w.pages || []).length} pages)</summary>
                             <div style="margin-top: 10px; max-height: 300px; overflow-y: auto;">
                                 ${(w.pages || []).map((page, idx) => `
-                                    <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                    <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid var(--color-border);">
                                         <strong>Page ${idx + 1}</strong> (${page.problems.length} problems)<br>
                                         <span style="font-size: 0.85em; color: #666;">
                                             ${page.problems.slice(0, 5).map(p => {
@@ -1996,8 +2018,80 @@ Would you like to view their children profiles?
             }
         }
 
+        // Demo Data Seeder
+        async function seedDemoData() {
+            const btn = document.getElementById('btn-seed-demo');
+            const status = document.getElementById('demo-seed-status');
+            btn.disabled = true;
+            btn.textContent = '⏳ Seeding...';
+            status.style.display = 'block';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.innerHTML = 'Creating 5 demo children with 4 weeks of data... This may take a moment.';
+
+            try {
+                const fn = firebase.app().functions('europe-west1').httpsCallable('seedDemoChildren');
+                const result = await fn({});
+                status.style.background = '#d4edda';
+                status.style.color = '#155724';
+                const children = result.data.children;
+                let html = '<strong>Demo data seeded successfully!</strong><br><br>';
+                html += '<table style="width:100%; border-collapse: collapse; font-size: 0.9em;">';
+                html += '<tr style="background: #f8f9fa;"><th style="padding:8px; text-align:left;">Name</th><th>Pattern</th><th>Operation</th><th>Level</th><th>Pages</th><th>Accuracy</th><th>Stars</th></tr>';
+                children.forEach(c => {
+                    html += `<tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding:8px;">${c.name}</td>
+                        <td style="padding:8px; text-align:center;">${c.pattern}</td>
+                        <td style="padding:8px; text-align:center;">${c.operation}</td>
+                        <td style="padding:8px; text-align:center;">${c.level}</td>
+                        <td style="padding:8px; text-align:center;">${c.totalPages}</td>
+                        <td style="padding:8px; text-align:center;">${c.accuracy}%</td>
+                        <td style="padding:8px; text-align:center;">${c.stars}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                status.innerHTML = html;
+                // Reload parents list to show new children
+                if (typeof loadParents === 'function') loadParents();
+            } catch (error) {
+                status.style.background = '#f8d7da';
+                status.style.color = '#721c24';
+                status.innerHTML = '<strong>Error:</strong> ' + (error.message || 'Failed to seed demo data');
+            }
+            btn.disabled = false;
+            btn.innerHTML = GleeIcons.get('seedling', 16, 'white') + ' Seed Demo Children';
+        }
+
+        async function clearDemoData() {
+            if (!confirm('Clear all demo children and their data? This cannot be undone.')) return;
+            const btn = document.getElementById('btn-clear-demo');
+            const status = document.getElementById('demo-seed-status');
+            btn.disabled = true;
+            btn.textContent = '⏳ Clearing...';
+            status.style.display = 'block';
+            status.style.background = '#fff3cd';
+            status.style.color = '#856404';
+            status.innerHTML = 'Deleting demo children and all associated data...';
+
+            try {
+                const fn = firebase.app().functions('europe-west1').httpsCallable('clearDemoChildren');
+                const result = await fn({});
+                status.style.background = '#d4edda';
+                status.style.color = '#155724';
+                status.innerHTML = result.data.message;
+                if (typeof loadParents === 'function') loadParents();
+            } catch (error) {
+                status.style.background = '#f8d7da';
+                status.style.color = '#721c24';
+                status.innerHTML = '<strong>Error:</strong> ' + (error.message || 'Failed to clear demo data');
+            }
+            btn.disabled = false;
+            btn.innerHTML = GleeIcons.get('trash', 16, 'white') + ' Clear Demo Data';
+        }
+
         // Call on page load
         document.addEventListener('DOMContentLoaded', function() {
+            if (typeof GleeIcons !== 'undefined') GleeIcons.init();
             setTimeout(loadSavedLevelSelections, 500);
         });
     </script>

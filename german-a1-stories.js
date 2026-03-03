@@ -1218,7 +1218,7 @@ function loadA1Story(storyKey) {
     story.vocabulary.forEach(item => {
         vocabularyHTML += `
             <div style="margin: 8px 0; font-size: 1.1em;">
-                <span style="font-weight: bold; color: #667eea;">${item.word}</span> = ${item.meaning}
+                <span style="font-weight: bold; color: var(--color-primary);">${item.word}</span> = ${item.meaning}
             </div>
         `;
     });
@@ -1248,7 +1248,7 @@ function loadA1Story(storyKey) {
         });
 
         questionsHTML += `
-            <div style="background: white; border: 2px solid #764ba2; border-radius: 10px; padding: 20px; margin: 15px 0;" id="a1-question-${qIndex}">
+            <div style="background: white; border: 2px solid var(--color-primary-dark); border-radius: 10px; padding: 20px; margin: 15px 0;" id="a1-question-${qIndex}">
                 <div style="font-size: 1.2em; font-weight: bold; color: #2c3e50; margin-bottom: 15px;">
                     ${qIndex + 1}. ${q.question}
                 </div>
@@ -1262,15 +1262,15 @@ function loadA1Story(storyKey) {
 
     const contentArea = document.getElementById('a1-story-content');
     contentArea.innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToA1StoryList()">← Back to Story List</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToA1StoryList()" title="Back to Story List"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
 
-        <div style="background: white; border: 3px solid #667eea; border-radius: 15px; padding: 40px; margin: 30px 0;">
+        <div style="background: white; border: 3px solid var(--color-primary); border-radius: 15px; padding: 40px; margin: 30px 0;">
             <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">${story.icon} ${story.name}</h2>
 
-            <div style="background: #e8f5e9; border-left: 5px solid #4caf50; padding: 20px; margin: 30px 0; border-radius: 8px;">
-                <h3 style="color: #4caf50; margin-top: 0;">📖 Wichtige Wörter (Important Words)</h3>
+            <div style="background: #e8f5e9; border-left: 5px solid var(--color-success); padding: 20px; margin: 30px 0; border-radius: 8px;">
+                <h3 style="color: var(--color-success); margin-top: 0;">📖 Wichtige Wörter (Important Words)</h3>
                 ${vocabularyHTML}
             </div>
 
@@ -1279,7 +1279,7 @@ function loadA1Story(storyKey) {
             </div>
 
             <div style="margin-top: 50px;">
-                <h2 style="text-align: center; color: #764ba2; margin-bottom: 30px;">
+                <h2 style="text-align: center; color: var(--color-primary-dark); margin-bottom: 30px;">
                     ❓ Verständnisfragen (Comprehension Questions)
                 </h2>
                 ${questionsHTML}
@@ -1289,7 +1289,7 @@ function loadA1Story(storyKey) {
                         padding: 18px 45px;
                         font-size: 1.2em;
                         border: none;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: var(--color-primary-gradient);
                         color: white;
                         border-radius: 10px;
                         cursor: pointer;
@@ -1328,9 +1328,9 @@ function selectA1Answer(questionIndex, optionIndex) {
     // Mark current selection
     const selectedBtn = document.getElementById(`a1-answer-${questionIndex}-${optionIndex}`);
     if (selectedBtn) {
-        selectedBtn.style.background = '#667eea';
+        selectedBtn.style.background = 'var(--color-primary)';
         selectedBtn.style.color = 'white';
-        selectedBtn.style.borderColor = '#667eea';
+        selectedBtn.style.borderColor = 'var(--color-primary)';
     }
 
     // Store answer
@@ -1359,9 +1359,9 @@ function checkA1AllAnswers() {
             const btn = document.getElementById(`a1-answer-${qIndex}-${i}`);
             if (btn) {
                 if (i === correctAnswer) {
-                    btn.style.background = '#4caf50';
+                    btn.style.background = 'var(--color-success)';
                     btn.style.color = 'white';
-                    btn.style.borderColor = '#4caf50';
+                    btn.style.borderColor = 'var(--color-success)';
                 } else if (i === userAnswer && !isCorrect) {
                     btn.style.background = '#e74c3c';
                     btn.style.color = 'white';
@@ -1378,7 +1378,7 @@ function checkA1AllAnswers() {
             feedback.style.display = 'block';
             if (isCorrect) {
                 feedback.style.background = '#e8f5e9';
-                feedback.style.color = '#4caf50';
+                feedback.style.color = 'var(--color-success)';
                 feedback.textContent = '✓ Richtig! (Correct!)';
             } else {
                 feedback.style.background = '#ffebee';
@@ -1412,7 +1412,7 @@ function checkA1AllAnswers() {
         scoreDisplay.style.display = 'block';
         scoreDisplay.style.textAlign = 'center';
         scoreDisplay.style.padding = '30px';
-        scoreDisplay.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        scoreDisplay.style.background = 'var(--color-primary-gradient)';
         scoreDisplay.style.color = 'white';
         scoreDisplay.style.borderRadius = '15px';
         scoreDisplay.style.margin = '30px 0';

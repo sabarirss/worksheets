@@ -40,7 +40,9 @@ Module.prototype.require = function(id) {
 const {
     classifySkillBuckets,
     generateAdaptivePages,
-    DISTRIBUTION,
+    getPageProfile,
+    getSkillPool,
+    ZONE_PROFILES,
     THRESHOLDS,
     PROBLEMS_PER_PAGE,
     PAGES_PER_WEEK
@@ -310,13 +312,8 @@ test('handles profile with only weak skills', () => {
 });
 
 // ============================================================================
-console.log('\n=== Distribution Validation ===');
+console.log('\n=== Constants Validation ===');
 // ============================================================================
-
-test('distribution constants are valid', () => {
-    const total = DISTRIBUTION.weak + DISTRIBUTION.medium + DISTRIBUTION.strong;
-    assert(Math.abs(total - 1.0) < 0.001, `Distribution should sum to ~1.0, got ${total}`);
-});
 
 test('problems per page is 20', () => {
     assert.strictEqual(PROBLEMS_PER_PAGE, 20);
@@ -332,6 +329,158 @@ test('weak threshold is 30%', () => {
 
 test('medium threshold is 10%', () => {
     assert.strictEqual(THRESHOLDS.medium, 0.10);
+});
+
+test('zone profiles exist for gentle, standard, challenge', () => {
+    assert.ok(ZONE_PROFILES.gentle, 'gentle profile should exist');
+    assert.ok(ZONE_PROFILES.standard, 'standard profile should exist');
+    assert.ok(ZONE_PROFILES.challenge, 'challenge profile should exist');
+});
+
+test('each zone profile sums to 20 problems', () => {
+    for (const [name, profile] of Object.entries(ZONE_PROFILES)) {
+        let total = 0;
+        for (const zone of Object.values(profile)) {
+            total += zone.count;
+        }
+        assert.strictEqual(total, 20, `${name} profile should have 20 problems, got ${total}`);
+    }
+});
+
+test('each zone profile has 5 zones', () => {
+    const expectedZones = ['warmup', 'rampup', 'focus', 'mixed', 'cooldown'];
+    for (const [name, profile] of Object.entries(ZONE_PROFILES)) {
+        const zones = Object.keys(profile);
+        assert.deepStrictEqual(zones, expectedZones, `${name} profile should have expected zones`);
+    }
+});
+
+// ============================================================================
+console.log('\n=== Motivational Sequencing ===');
+// ============================================================================
+
+test('getPageProfile returns correct profile for each page', () => {
+    assert.strictEqual(getPageProfile(1), 'gentle');
+    assert.strictEqual(getPageProfile(2), 'gentle');
+    assert.strictEqual(getPageProfile(3), 'standard');
+    assert.strictEqual(getPageProfile(4), 'standard');
+    assert.strictEqual(getPageProfile(5), 'standard');
+    assert.strictEqual(getPageProfile(6), 'challenge');
+    assert.strictEqual(getPageProfile(7), 'challenge');
+});
+
+test('getSkillPool returns correct pool for each bucket', () => {
+    const buckets = { weak: ['w1'], medium: ['m1'], strong: ['s1'], untested: [] };
+    const effectiveMedium = ['m1'];
+
+    assert.deepStrictEqual(getSkillPool('weak', buckets, effectiveMedium), ['w1']);
+    assert.deepStrictEqual(getSkillPool('medium', buckets, effectiveMedium), ['m1']);
+    assert.deepStrictEqual(getSkillPool('strong', buckets, effectiveMedium), ['s1']);
+});
+
+test('getSkillPool falls back when target bucket is empty', () => {
+    const buckets = { weak: [], medium: [], strong: ['s1'], untested: [] };
+    const effectiveMedium = [];
+
+    // When weak is empty, should fall through to strong
+    const pool = getSkillPool('weak', buckets, effectiveMedium);
+    assert.deepStrictEqual(pool, ['s1'], 'Should fallback to strong when weak and medium are empty');
+});
+
+test('problems have zone field for motivational sequencing', () => {
+    const profile = {
+        skills: {
+            'add-carry-once': { attempts: 30, errors: 15, errorRate: 0.50 },
+            'add-no-carry': { attempts: 30, errors: 1, errorRate: 0.03 },
+            'add-2digit': { attempts: 30, errors: 5, errorRate: 0.17 }
+        },
+        totalAttempted: 90,
+        totalErrors: 21
+    };
+
+    const { pages } = generateAdaptivePages('addition', '7', profile, 'zone-test');
+    const page1 = pages[0];
+    assert(page1.problems.length > 0, 'Should have problems');
+    assert(page1.problems[0].zone, 'First problem should have zone field');
+    // First problems should be warmup zone
+    assert.strictEqual(page1.problems[0].zone, 'warmup', 'First problem should be warmup zone');
+});
+
+test('page 1 (gentle) starts with strong problems in warmup', () => {
+    const profile = {
+        skills: {
+            'add-carry-once': { attempts: 30, errors: 15, errorRate: 0.50 },
+            'add-no-carry': { attempts: 30, errors: 1, errorRate: 0.03 }
+        },
+        totalAttempted: 60,
+        totalErrors: 16
+    };
+
+    const { pages } = generateAdaptivePages('addition', '7', profile, 'warmup-test');
+    const page1 = pages[0]; // gentle profile: 4 warmup problems
+    // First 4 problems should be warmup zone with strong target
+    for (let i = 0; i < Math.min(4, page1.problems.length); i++) {
+        assert.strictEqual(page1.problems[i].zone, 'warmup', `Problem ${i} should be warmup`);
+        assert.strictEqual(page1.problems[i].targetBucket, 'strong', `Warmup problem ${i} should target strong`);
+    }
+});
+
+test('gentle pages have fewer weak problems than challenge pages', () => {
+    const profile = {
+        skills: {
+            'add-carry-once': { attempts: 30, errors: 15, errorRate: 0.50 },
+            'add-no-carry': { attempts: 30, errors: 1, errorRate: 0.03 },
+            'add-2digit': { attempts: 30, errors: 5, errorRate: 0.17 }
+        },
+        totalAttempted: 90,
+        totalErrors: 21
+    };
+
+    const { pages } = generateAdaptivePages('addition', '7', profile, 'arc-test');
+    const page1Weak = pages[0].problems.filter(p => p.targetBucket === 'weak').length;
+    const page7Weak = pages[6].problems.filter(p => p.targetBucket === 'weak').length;
+
+    assert(page7Weak > page1Weak,
+        `Challenge page 7 weak count (${page7Weak}) should exceed gentle page 1 (${page1Weak})`);
+});
+
+test('every page ends with cooldown zone', () => {
+    const profile = {
+        skills: {
+            'sub-borrow-once': { attempts: 30, errors: 12, errorRate: 0.40 },
+            'sub-no-borrow': { attempts: 30, errors: 2, errorRate: 0.07 },
+            'sub-2digit': { attempts: 30, errors: 5, errorRate: 0.17 }
+        },
+        totalAttempted: 90,
+        totalErrors: 19
+    };
+
+    const { pages } = generateAdaptivePages('subtraction', '8', profile, 'cooldown-test');
+    for (const page of pages) {
+        const lastProblem = page.problems[page.problems.length - 1];
+        assert.strictEqual(lastProblem.zone, 'cooldown',
+            `Page ${page.pageNumber} should end with cooldown zone`);
+    }
+});
+
+test('reasoning includes sequencing metadata', () => {
+    const profile = {
+        skills: {
+            'add-carry-once': { attempts: 30, errors: 15, errorRate: 0.50 },
+            'add-no-carry': { attempts: 30, errors: 1, errorRate: 0.03 }
+        },
+        totalAttempted: 60,
+        totalErrors: 16
+    };
+
+    const { reasoning } = generateAdaptivePages('addition', '7', profile, 'meta-test');
+    assert.ok(reasoning.sequencing, 'Should have sequencing metadata');
+    assert.strictEqual(reasoning.sequencing.type, 'motivational');
+    assert.deepStrictEqual(reasoning.sequencing.zones,
+        ['warmup', 'rampup', 'focus', 'mixed', 'cooldown']);
+    assert.strictEqual(reasoning.sequencing.weeklyArc.length, 7);
+    assert.strictEqual(reasoning.sequencing.weeklyArc[0], 'gentle');
+    assert.strictEqual(reasoning.sequencing.weeklyArc[6], 'challenge');
 });
 
 // ============================================================================

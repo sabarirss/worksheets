@@ -553,15 +553,27 @@ function readStory(index) {
 
     const storyText = story.story || story.text || '';
 
+    // Build TTS button HTML if supported
+    var ttsButtonHTML = '';
+    if (typeof TTSManager !== 'undefined' && TTSManager.isSupported()) {
+        var playIcon = typeof GleeIcons !== 'undefined' ? GleeIcons.get('play', 18, 'white') : '&#9654;';
+        ttsButtonHTML = '<div class="tts-controls">' +
+            '<button class="tts-btn" id="tts-toggle-btn" onclick="toggleStoryTTS()">' +
+            '<span class="tts-btn-icon" id="tts-btn-icon">' + playIcon + '</span>' +
+            '<span class="tts-btn-label" id="tts-btn-label">Listen</span>' +
+            '</button></div>';
+    }
+
     document.getElementById('story-content').innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToList()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to List</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToList()" title="Back to List"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+        <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
             📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
         <div class="story-meta">Story ${index + 1} of ${currentList.length}</div>
         <h1 class="story-title">${story.title}</h1>
+        ${ttsButtonHTML}
         <div class="story-illustration">
             <div class="story-scene">
                 ${illustrationHTML}
@@ -578,7 +590,77 @@ function readStory(index) {
     document.getElementById('next-btn').disabled = (index === currentList.length - 1);
 }
 
+// =============================================
+// TTS (Text-to-Speech) Controls
+// =============================================
+
+function stopStoryTTS() {
+    if (typeof TTSManager !== 'undefined') {
+        TTSManager.stop();
+    }
+}
+
+function updateTTSButton(state) {
+    var iconEl = document.getElementById('tts-btn-icon');
+    var labelEl = document.getElementById('tts-btn-label');
+    var btn = document.getElementById('tts-toggle-btn');
+    if (!iconEl || !labelEl || !btn) return;
+
+    var hasIcons = typeof GleeIcons !== 'undefined';
+
+    if (state === 'playing') {
+        iconEl.innerHTML = hasIcons ? GleeIcons.get('pause', 18, 'white') : '⏸';
+        labelEl.textContent = 'Pause';
+        btn.classList.add('tts-playing');
+    } else if (state === 'paused') {
+        iconEl.innerHTML = hasIcons ? GleeIcons.get('play', 18, 'white') : '▶';
+        labelEl.textContent = 'Resume';
+        btn.classList.remove('tts-playing');
+    } else {
+        iconEl.innerHTML = hasIcons ? GleeIcons.get('play', 18, 'white') : '▶';
+        labelEl.textContent = 'Listen';
+        btn.classList.remove('tts-playing');
+    }
+}
+
+function toggleStoryTTS() {
+    if (typeof TTSManager === 'undefined' || !TTSManager.isSupported()) return;
+
+    // If paused, resume
+    if (TTSManager.isPaused()) {
+        TTSManager.resume();
+        updateTTSButton('playing');
+        return;
+    }
+
+    // If speaking, pause
+    if (TTSManager.isSpeaking()) {
+        TTSManager.pause();
+        updateTTSButton('paused');
+        return;
+    }
+
+    // Not speaking — start reading the story
+    var story = currentList[currentStoryIndex];
+    if (!story) return;
+
+    var storyText = story.story || story.text || '';
+    var fullText = story.title + '. ' + storyText;
+    if (story.moral) fullText += ' The lesson is: ' + story.moral;
+
+    var rate = TTSManager.rateForCategory(currentCategory);
+
+    TTSManager.speak(fullText, {
+        rate: rate,
+        onEnd: function() { updateTTSButton('stopped'); },
+        onError: function() { updateTTSButton('stopped'); }
+    });
+
+    updateTTSButton('playing');
+}
+
 function backToList() {
+    stopStoryTTS();
     const storyReaderEl = document.getElementById('story-reader');
     const storyListEl = document.getElementById('story-list');
 
@@ -587,12 +669,14 @@ function backToList() {
 }
 
 function previousStory() {
+    stopStoryTTS();
     if (currentStoryIndex > 0) {
         readStory(currentStoryIndex - 1);
     }
 }
 
 function nextStory() {
+    stopStoryTTS();
     if (currentStoryIndex < currentList.length - 1) {
         readStory(currentStoryIndex + 1);
     }

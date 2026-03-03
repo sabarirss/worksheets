@@ -563,11 +563,11 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Subjects</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToWorksheetSelection()" title="Back to Subjects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+            <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
                 📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, difficulty) : 'N/A'}
             </div>
             <div class="worksheet-header">
@@ -698,6 +698,7 @@ function checkAnswers() {
             feedback.style.display = 'block';
             feedback.style.marginTop = '10px';
             correct++;
+            if (typeof playSound === 'function') playSound('correct');
         } else if (userAnswer === '') {
             feedback.textContent = '';
         } else {
@@ -706,6 +707,7 @@ function checkAnswers() {
             feedback.style.fontSize = '1.5em';
             feedback.style.display = 'block';
             feedback.style.marginTop = '10px';
+            if (typeof playSound === 'function') playSound('incorrect');
         }
     });
 
@@ -715,6 +717,8 @@ function checkAnswers() {
     let message = '';
     if (percentage === 100) {
         message = '<p style="color: #00aa00; font-weight: bold; font-size: 1.3em;">🎉 Perfect! You have great emotional intelligence! ❤️</p>';
+        if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        if (typeof playSound === 'function') playSound('complete');
     } else if (percentage >= 80) {
         message = '<p style="color: #0066cc; font-weight: bold; font-size: 1.3em;">😊 Excellent! You understand emotions well! 💪</p>';
     } else {
@@ -729,6 +733,32 @@ function checkAnswers() {
     `;
     resultsDiv.style.display = 'block';
     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Record score to server via Cloud Function
+    submitEQScore(correct, total, percentage);
+}
+
+// Submit EQ score to Cloud Function for Firestore persistence
+async function submitEQScore(correctCount, totalProblems, percentage) {
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    if (!child || !child.id) return;
+
+    const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
+
+    try {
+        const validateEQ = firebase.app().functions('europe-west1').httpsCallable('validateEQSubmission');
+        const result = await validateEQ({
+            childId: child.id,
+            difficulty: currentWorksheet.difficulty,
+            score: percentage,
+            correctCount: correctCount,
+            totalProblems: totalProblems,
+            elapsedTime: elapsedTime
+        });
+        console.log('EQ submission recorded by server:', result.data);
+    } catch (err) {
+        console.error('EQ Cloud Function submission failed:', err.message);
+    }
 }
 
 // Save PDF
@@ -739,15 +769,15 @@ function savePDF() {
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
-    const navigation = document.querySelector('.navigation');
+    const backRow = document.querySelector('.back-row');
 
     const controlsDisplay = controls.style.display;
     const resultsDisplay = results.style.display;
-    const navigationDisplay = navigation.style.display;
+    const backRowDisplay = backRow ? backRow.style.display : '';
 
     controls.style.display = 'none';
     results.style.display = 'none';
-    navigation.style.display = 'none';
+    if (backRow) backRow.style.display = 'none';
 
     const element = document.querySelector('.worksheet-container');
     const opt = {
@@ -761,6 +791,6 @@ function savePDF() {
     html2pdf().set(opt).from(element).save().then(() => {
         controls.style.display = controlsDisplay;
         results.style.display = resultsDisplay;
-        navigation.style.display = navigationDisplay;
+        if (backRow) backRow.style.display = backRowDisplay;
     });
 }

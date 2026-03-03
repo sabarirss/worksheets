@@ -166,7 +166,7 @@ function loadAllStories() {
             const difficultyBadge = difficulty === 'easy' ? '⭐' : difficulty === 'medium' ? '⭐⭐' : '⭐⭐⭐';
 
             storyCard.innerHTML = `
-                <div class="story-icon">${story.emoji}</div>
+                <div class="story-icon">${story.icon}</div>
                 <h3 class="story-title">${story.title}</h3>
                 <div class="story-meta">${difficultyBadge}</div>
             `;
@@ -368,9 +368,7 @@ function showEnglishAssessmentGate(child) {
                     <button class="take-assessment-btn" onclick="startEnglishAssessment()">
                         📝 Take English Assessment
                     </button>
-                    <button class="back-btn" onclick="backToHome()">
-                        ← Back to Home
-                    </button>
+                    <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
                 </div>
             </div>
         </div>
@@ -1842,8 +1840,8 @@ function loadStory(storyId) {
         return;
     }
     readerContainer.innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToStoryListFromReader()">← Back to Stories</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToStoryListFromReader()" title="Back to Stories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
 
         <div class="story-container">
@@ -1865,7 +1863,7 @@ function loadStory(storyId) {
             </div>
 
             <div class="questions-section">
-                <h2 style="text-align: center; color: #764ba2; margin-bottom: 30px;">
+                <h2 style="text-align: center; color: var(--color-primary-dark); margin-bottom: 30px;">
                     ❓ Comprehension Questions
                 </h2>
                 ${questionsHTML}
@@ -1875,7 +1873,7 @@ function loadStory(storyId) {
                         padding: 20px 50px;
                         font-size: 1.3em;
                         border: none;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: var(--color-primary-gradient);
                         color: white;
                         border-radius: 12px;
                         cursor: pointer;
@@ -1953,7 +1951,7 @@ function checkAllStoryAnswers() {
             feedback.style.display = 'block';
             if (isCorrect) {
                 feedback.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
-                feedback.style.color = '#4caf50';
+                feedback.style.color = 'var(--color-success)';
                 feedback.classList.add('feedback-correct');
                 if (typeof playSound === 'function') playSound('correct');
             } else {
@@ -1990,7 +1988,7 @@ function checkAllStoryAnswers() {
 
         scoreDisplay.innerHTML = `
             <div style="
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: var(--color-primary-gradient);
                 color: white;
                 padding: 30px;
                 border-radius: 15px;
@@ -3250,8 +3248,8 @@ function renderWritingWorksheet(ageGroup, difficulty, page) {
                 </div>
             </div>
 
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()">← Back to Type Selection</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToWorksheetSelection()" title="Back to Type Selection"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
             <div class="controls">
@@ -3596,7 +3594,7 @@ function saveWritingPDF() {
     const filename = `Writing_Practice_Page${currentPage}_${timestamp}.pdf`;
 
     const controls = document.querySelector('.controls');
-    const navigation = document.querySelectorAll('.navigation');
+    const navigation = document.querySelectorAll('.back-row, .navigation');
     const topNav = document.querySelector('.top-navigation');
 
     const controlsDisplay = controls.style.display;
@@ -3716,8 +3714,8 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button class="back-btn" onclick="backToWorksheetSelection()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">← Back to Type Selection</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToWorksheetSelection()" title="Back to Type Selection"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
             <div class="controls">
@@ -3750,10 +3748,10 @@ function renderWorksheet() {
 
             <!-- Manual Completion and Recognition Buttons -->
             <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <button onclick="checkHandwriting()" class="check-writing-btn" style="padding: 15px 30px; font-size: 1.1em; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
+                <button onclick="checkHandwriting()" class="check-writing-btn" style="padding: 15px 30px; font-size: 1.1em; background: var(--color-primary-gradient); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px var(--color-primary-30); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px var(--color-primary-30)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px var(--color-primary-30)'">
                     🔍 Check My Writing
                 </button>
-                <button onclick="markEnglishWorksheetComplete()" class="complete-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                <button onclick="markEnglishWorksheetComplete()" class="complete-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, var(--color-success), #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
                     ✓ Mark as Complete
                 </button>
                 <div id="completion-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
@@ -3904,6 +3902,7 @@ function checkAnswers() {
     stopTimer();
 
     let total = 0;
+    let emptyCount = 0;
 
     currentWorksheet.problems.forEach((problem, index) => {
         if (problem.type === 'passage') return;
@@ -3915,18 +3914,40 @@ function checkAnswers() {
         const correctAnswer = problem.answer;
         total++;
 
-        // Update feedback (RIGHT of canvas, NOT on canvas) - just the value, no "Answer:" prefix
-        feedback.textContent = correctAnswer;
-        feedback.style.color = '#4caf50';
-        feedback.style.fontSize = '1.5em';
-        feedback.style.fontWeight = 'bold';
-        feedback.style.display = 'inline';
+        // Check if canvas is empty — don't evaluate blank submissions
+        const hwInput = typeof handwritingInputs !== 'undefined' &&
+            handwritingInputs.find(h => h.canvasId === canvas.id);
+        const canvasEmpty = hwInput ? hwInput.isEmpty() :
+            (typeof isCanvasEmpty === 'function' ? isCanvasEmpty(canvas) : false);
+
+        if (canvasEmpty) {
+            // Empty canvas — mark as unanswered
+            feedback.textContent = '✏️ Please write your answer';
+            feedback.style.color = '#cc6600';
+            feedback.style.fontSize = '1em';
+            feedback.style.fontWeight = '600';
+            feedback.style.display = 'inline';
+            canvas.style.borderColor = '#cc6600';
+            emptyCount++;
+            if (typeof playSound === 'function') playSound('incorrect');
+        } else {
+            // Has content — show correct answer for comparison
+            feedback.textContent = correctAnswer;
+            feedback.style.color = 'var(--color-success)';
+            feedback.style.fontSize = '1.5em';
+            feedback.style.fontWeight = 'bold';
+            feedback.style.display = 'inline';
+        }
     });
 
     const resultsDiv = document.getElementById('results-summary');
 
+    const emptyWarning = emptyCount > 0
+        ? `<p style="font-size: 1.1em; color: #cc6600; font-weight: 600;">⚠️ ${emptyCount} answer${emptyCount > 1 ? 's were' : ' was'} left blank.</p>`
+        : '';
     resultsDiv.innerHTML = `
         <h3>Answers Shown</h3>
+        ${emptyWarning}
         <p style="font-size: 1.1em; color: #0066cc;">Correct answers are displayed in green to the right of each problem.</p>
         <p style="font-size: 1em; color: #666;">Compare your handwritten answers with the correct ones.</p>
         <p>Time: ${document.getElementById('elapsed-time').textContent}</p>
@@ -3982,16 +4003,19 @@ function savePDF() {
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
+    const backRow = document.querySelector('.back-row');
     const navigation = document.querySelector('.navigation');
     const answerKey = document.getElementById('answer-key');
 
     const controlsDisplay = controls ? controls.style.display : '';
     const resultsDisplay = results ? results.style.display : '';
+    const backRowDisplay = backRow ? backRow.style.display : '';
     const navigationDisplay = navigation ? navigation.style.display : '';
     const answerKeyDisplay = answerKey ? answerKey.style.display : '';
 
     if (controls) controls.style.display = 'none';
     if (results) results.style.display = 'none';
+    if (backRow) backRow.style.display = 'none';
     if (navigation) navigation.style.display = 'none';
     if (answerKey) answerKey.style.display = 'none';
 
@@ -4014,6 +4038,7 @@ function savePDF() {
     html2pdf().set(opt).from(element).save().then(() => {
         if (controls) controls.style.display = controlsDisplay;
         if (results) results.style.display = resultsDisplay;
+        if (backRow) backRow.style.display = backRowDisplay;
         if (navigation) navigation.style.display = navigationDisplay;
         if (answerKey) answerKey.style.display = answerKeyDisplay;
     });
@@ -4030,12 +4055,26 @@ function toggleAnswers(event) {
 
         if (feedback) {
             if (answersVisible) {
-                // Show answer
-                feedback.textContent = correctAnswer;
-                feedback.style.color = '#4caf50';
-                feedback.style.fontSize = '1.5em';
-                feedback.style.fontWeight = 'bold';
-                feedback.style.display = 'inline';
+                // Check if canvas is empty before showing answer
+                const canvas = document.getElementById(`answer-${index}`);
+                const hwInput = typeof handwritingInputs !== 'undefined' &&
+                    handwritingInputs.find(h => h.canvasId === `answer-${index}`);
+                const canvasEmpty = hwInput ? hwInput.isEmpty() :
+                    (canvas && typeof isCanvasEmpty === 'function' ? isCanvasEmpty(canvas) : false);
+
+                if (canvasEmpty) {
+                    feedback.textContent = '✏️ Please write your answer';
+                    feedback.style.color = '#cc6600';
+                    feedback.style.fontSize = '1em';
+                    feedback.style.fontWeight = '600';
+                    feedback.style.display = 'inline';
+                } else {
+                    feedback.textContent = correctAnswer;
+                    feedback.style.color = 'var(--color-success)';
+                    feedback.style.fontSize = '1.5em';
+                    feedback.style.fontWeight = 'bold';
+                    feedback.style.display = 'inline';
+                }
             } else {
                 // Hide answer
                 feedback.style.display = 'none';
@@ -4204,23 +4243,23 @@ async function checkHandwriting() {
                     feedbackElement.textContent = '✏️ Empty - Try writing!';
                     feedbackElement.style.color = '#999';
                 } else if (result.success) {
-                    const isCorrect = validateHandwriting(result.recognized, expectedAnswer);
+                    const isCorrect = validateHandwriting(result.recognized, expectedAnswer, result.perPositionPredictions);
 
                     if (isCorrect) {
                         checkedCount++;
                         feedbackElement.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Great!');
-                        feedbackElement.style.color = '#4caf50';
+                        feedbackElement.style.color = 'var(--color-success)';
                         feedbackElement.style.fontWeight = 'bold';
                         if (typeof playSound === 'function') playSound('correct');
                     } else {
                         feedbackElement.textContent = (typeof getEncouragement === 'function' ? getEncouragement(false) : 'Keep trying!') + ` (Expected: ${expectedAnswer})`;
-                        feedbackElement.style.color = '#ff9800';
+                        feedbackElement.style.color = 'var(--color-warning)';
                         if (typeof playSound === 'function') playSound('incorrect');
                     }
                     totalChecked++;
                 } else {
                     feedbackElement.textContent = `Answer: ${expectedAnswer}`;
-                    feedbackElement.style.color = '#667eea';
+                    feedbackElement.style.color = 'var(--color-primary)';
                 }
 
                 feedbackElement.style.display = 'inline-block';
@@ -4232,7 +4271,7 @@ async function checkHandwriting() {
         const statusDiv = document.getElementById('completion-status');
         if (statusDiv && totalChecked > 0) {
             statusDiv.style.display = 'block';
-            statusDiv.style.background = '#667eea';
+            statusDiv.style.background = 'var(--color-primary)';
             statusDiv.style.color = 'white';
             statusDiv.innerHTML = `
                 Checked ${totalChecked} answers!
@@ -4290,7 +4329,7 @@ async function markEnglishWorksheetComplete() {
         const statusDiv = document.getElementById('completion-status');
         if (statusDiv) {
             statusDiv.style.display = 'block';
-            statusDiv.style.background = '#4caf50';
+            statusDiv.style.background = 'var(--color-success)';
             statusDiv.style.color = 'white';
             statusDiv.innerHTML = `
                 ✓ Worksheet Completed!
@@ -4303,7 +4342,7 @@ async function markEnglishWorksheetComplete() {
         if (completeBtn) {
             completeBtn.disabled = false;
             completeBtn.textContent = '✓ Completed';
-            completeBtn.style.background = 'linear-gradient(135deg, #4caf50, #45a049)';
+            completeBtn.style.background = 'linear-gradient(135deg, var(--color-success), #45a049)';
         }
 
         console.log(`English worksheet ${identifier} marked as completed manually`);
@@ -4375,10 +4414,7 @@ function showEnglishNoAssignmentMessage(reason, lockoutWeeks) {
             <div style="font-size:3em;margin-bottom:15px;">${icon}</div>
             <h2 style="margin:0 0 12px;color:#333;">${title}</h2>
             <p style="color:#666;line-height:1.6;margin-bottom:25px;">${message}</p>
-            <button onclick="backToTypeSelection()" style="
-                padding:12px 28px;font-size:1em;background:linear-gradient(135deg,#667eea,#764ba2);
-                color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
-            ">&#8592; Back</button>
+            <button class="back-btn-icon" onclick="backToTypeSelection()" title="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
     `);
 }

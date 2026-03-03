@@ -9,10 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -23,10 +25,11 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
     <style>
         /* Hide content initially to prevent flash of inappropriate content */
         .container {
@@ -56,7 +59,7 @@
         });
     </script>
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="user-header">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div id="app-branding"></div>
                 <div>
@@ -64,12 +67,15 @@
                     <p class="subtitle">German B1 Level - DTZ Test Preparation</p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="user-actions">
                 <div id="profile-selector-container"></div>
             </div>
-        </header>
+        </div>
 
         <div class="level-selection" id="main-selection">
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Subjects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+            </div>
             <h2>Practice Modules</h2>
             <div class="level-grid">
                 <button onclick="loadA1Stories()" class="level-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
@@ -149,19 +155,16 @@
                     <span class="level-desc">werden + Partizip II</span>
                 </button>
             </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="window.location.href='index'">← Back to Subjects</button>
-            </div>
         </div>
 
         <!-- A1 Stories Section -->
         <div id="a1-stories-section" style="display: none;">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToMainSelection()">← Back to Practice Modules</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToMainSelection()" title="Back to Practice Modules"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
             <div id="a1-difficulty-selection">
-                <h2>A1 Stories - Select Difficulty</h2>
+                <h2>A1 Stories</h2>
                 <div class="level-grid">
                     <button onclick="loadA1StoryList('easy')" class="level-btn" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
                         <span class="level-name">Einfach (Easy)</span>
@@ -179,10 +182,10 @@
             </div>
 
             <div id="a1-story-selection" style="display: none;">
-                <div class="navigation" style="margin-bottom: 20px;">
-                    <button onclick="window.location.href='index'">← Back to Home</button>
+                <div class="back-row">
+                    <button class="back-btn-icon" onclick="window.location.href='index'" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
                 </div>
-                <h2 id="a1-story-list-title">Choose a Story</h2>
+                <h2 id="a1-story-list-title">Stories</h2>
                 <div id="a1-story-list" class="level-grid"></div>
             </div>
 
@@ -194,18 +197,19 @@
         </footer>
     </div>
 
-    <script src="german-b1-extended.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="german-generator.js"></script>
-    <script src="german-a1-stories.js"></script>
-    <script src="branding.js"></script>
+    <script src="german-b1-extended.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="german-generator.js" defer></script>
+    <script src="german-a1-stories.js" defer></script>
+    <script src="branding.js" defer></script>
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
+    <script>if (typeof GleeIcons !== 'undefined') GleeIcons.init();</script>
 </body>
 </html>

@@ -278,6 +278,10 @@ function generateWritingWorksheet() {
                 </div>
             </div>
 
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="location.reload()" title="Back to Levels"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+            </div>
+
             <div class="controls">
                 <div class="control-buttons">
                     <button onclick="clearAllCanvases()">Clear All</button>
@@ -286,10 +290,6 @@ function generateWritingWorksheet() {
             </div>
 
             <div class="problems-container">${problemsHTML}</div>
-
-            <div class="navigation">
-                <button onclick="location.reload()">Back to Levels</button>
-            </div>
         </div>
     `;
 
@@ -477,13 +477,13 @@ function savePDF() {
     const filename = `Writing_Practice_${timestamp}.pdf`;
 
     const controls = document.querySelector('.controls');
-    const navigation = document.querySelector('.navigation');
+    const backRow = document.querySelector('.back-row');
 
     const controlsDisplay = controls.style.display;
-    const navigationDisplay = navigation.style.display;
+    const backRowDisplay = backRow ? backRow.style.display : '';
 
     controls.style.display = 'none';
-    navigation.style.display = 'none';
+    if (backRow) backRow.style.display = 'none';
 
     const element = document.querySelector('.worksheet-container');
     const opt = {
@@ -496,6 +496,6 @@ function savePDF() {
 
     html2pdf().set(opt).from(element).save().then(() => {
         controls.style.display = controlsDisplay;
-        navigation.style.display = navigationDisplay;
+        if (backRow) backRow.style.display = backRowDisplay;
     });
 }

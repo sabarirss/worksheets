@@ -179,7 +179,7 @@ function showModuleManagement() {
 
     const managementHTML = `
         <div id="module-management-panel" style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             color: white;
             padding: 25px;
             border-radius: 15px;
@@ -306,7 +306,7 @@ async function toggleModule(moduleName, enabled) {
  * Show notification
  */
 function showNotification(title, message, type = 'success') {
-    const bgColor = type === 'error' ? '#e74c3c' : '#4caf50';
+    const bgColor = type === 'error' ? '#e74c3c' : 'var(--color-success)';
 
     const notification = document.createElement('div');
     notification.style.cssText = `

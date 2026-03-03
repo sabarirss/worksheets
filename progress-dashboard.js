@@ -132,15 +132,21 @@ async function loadProgressData() {
         const child = allChildren.find(c => c.id === selectedChildId);
         if (!child) return;
 
-        // Get child's email (username)
-        const childEmail = child.email || child.parentEmail; // Use child email if available
-
-        // Fetch all worksheets for this child
-        const worksheetsSnapshot = await firebase.firestore().collection('worksheets')
-            .where('username', '==', childEmail)
+        // Fetch all completions for this child
+        const worksheetsSnapshot = await firebase.firestore().collection('completions')
+            .where('childId', '==', selectedChildId)
             .get();
 
-        const worksheets = worksheetsSnapshot.docs.map(doc => doc.data());
+        const worksheets = worksheetsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Map completions fields to the format expected by display functions
+            return {
+                ...data,
+                subject: data.module,
+                completed: data.completed || (data.score >= 95),
+                timestamp: data.timestamp
+            };
+        });
 
         // Show content
         document.getElementById('loading').style.display = 'none';

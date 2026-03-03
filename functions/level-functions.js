@@ -105,7 +105,7 @@ const submitAssessment = onCall(
             let isCorrect = false;
             if (userAnswer !== null && userAnswer !== undefined && userAnswer !== '') {
                 if (subject === 'english') {
-                    isCorrect = String(userAnswer).toLowerCase() === String(correctAnswer).toLowerCase();
+                    isCorrect = String(userAnswer).trim().toLowerCase() === String(correctAnswer).trim().toLowerCase();
                 } else {
                     isCorrect = Number(userAnswer) === Number(correctAnswer);
                 }

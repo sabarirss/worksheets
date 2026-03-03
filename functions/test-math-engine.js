@@ -403,9 +403,9 @@ test('mixed type comparison (string number vs number)', () => {
 console.log('\n=== Assessment Generation ===');
 // ============================================================================
 
-test('generates 10 assessment questions', () => {
+test('generates 20 assessment questions (BUG-043: 4 tiers)', () => {
     const q = generateSeededAssessmentQuestions('addition', '7', 'child123');
-    assert.strictEqual(q.length, 10);
+    assert.strictEqual(q.length, 20);
 });
 
 test('assessment is deterministic by childId', () => {
@@ -984,6 +984,75 @@ test('addition: tens-digit-wrong detected', () => {
     const patterns = classifyError('addition', 27, 15, 42, 32);
     // 42 vs 32: ones digit same (2), tens digit different (4 vs 3)
     assert(patterns.includes('err-tens-digit-wrong'), `Expected err-tens-digit-wrong, got ${patterns}`);
+});
+
+// ============================================================================
+console.log('\n=== BUG-042: English Assessment Server-Side ===');
+// ============================================================================
+
+test('English assessment: returns questions for age 4-5', () => {
+    const questions = generateSeededAssessmentQuestions('english', '4-5', 'test-child-1');
+    assert(questions.length > 0, `Expected questions, got ${questions.length}`);
+    assert(questions.length <= 20, `Expected <=20 questions, got ${questions.length}`);
+});
+
+test('English assessment: returns questions for age 6', () => {
+    const questions = generateSeededAssessmentQuestions('english', '6', 'test-child-2');
+    assert(questions.length > 0, `Expected questions for age 6`);
+});
+
+test('English assessment: returns questions for age 7', () => {
+    const questions = generateSeededAssessmentQuestions('english', '7', 'test-child-3');
+    assert(questions.length > 0, `Expected questions for age 7`);
+});
+
+test('English assessment: returns questions for age 8', () => {
+    const questions = generateSeededAssessmentQuestions('english', '8', 'test-child-4');
+    assert(questions.length > 0, `Expected questions for age 8`);
+});
+
+test('English assessment: returns questions for age 9+', () => {
+    const questions = generateSeededAssessmentQuestions('english', '9+', 'test-child-5');
+    assert(questions.length > 0, `Expected questions for age 9+`);
+});
+
+test('English assessment: returns questions for age 10+', () => {
+    const questions = generateSeededAssessmentQuestions('english', '10+', 'test-child-6');
+    assert(questions.length > 0, `Expected questions for age 10+`);
+});
+
+test('English assessment: questions have prompt and answer', () => {
+    const questions = generateSeededAssessmentQuestions('english', '6', 'test-child-7');
+    questions.forEach((q, i) => {
+        assert(q.answer !== undefined, `Question ${i} must have answer`);
+        assert(q.prompt !== undefined || q.problem !== undefined,
+            `Question ${i} must have prompt or problem`);
+    });
+});
+
+test('English assessment: is deterministic (same childId = same questions)', () => {
+    const q1 = generateSeededAssessmentQuestions('english', '7', 'deterministic-child');
+    const q2 = generateSeededAssessmentQuestions('english', '7', 'deterministic-child');
+    assert.strictEqual(q1.length, q2.length, 'Same count');
+    for (let i = 0; i < q1.length; i++) {
+        assert.strictEqual(q1[i].answer, q2[i].answer, `Q${i} answer must match`);
+    }
+});
+
+test('English assessment: different childIds produce different questions', () => {
+    const q1 = generateSeededAssessmentQuestions('english', '7', 'child-alpha');
+    const q2 = generateSeededAssessmentQuestions('english', '7', 'child-beta');
+    // At least one question should differ (very unlikely to be identical)
+    const sameCount = q1.filter((q, i) => q.answer === q2[i]?.answer).length;
+    assert(sameCount < q1.length, 'Different children should get different question orders');
+});
+
+test('English assessment: does not break Math assessment', () => {
+    // Ensure Math still works after English assessment functions added
+    const mathQ = generateSeededAssessmentQuestions('addition', '6', 'math-test-child');
+    assert(mathQ.length > 0, 'Math addition assessment must still work');
+    assert(mathQ[0].a !== undefined, 'Math questions must have a field');
+    assert(mathQ[0].b !== undefined, 'Math questions must have b field');
 });
 
 // ============================================================================

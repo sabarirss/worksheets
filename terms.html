@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -44,11 +44,11 @@
         }
 
         .terms-content h2 {
-            color: #667eea;
+            color: var(--color-primary);
             font-size: 1.8em;
             margin-top: 40px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid var(--color-primary);
             padding-bottom: 10px;
         }
 
@@ -96,17 +96,7 @@
             border-radius: 5px;
         }
 
-        .back-link {
-            display: inline-block;
-            margin-bottom: 30px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
+        /* back-btn-icon defined in styles.css */
 
         .contact-info {
             background: #f8f9fa;
@@ -119,7 +109,7 @@
 <body>
     <div id="app-branding" style="padding:12px 0 0 12px;"></div>
     <div class="terms-container">
-        <a href="index" class="back-link">&larr; Back to Home</a>
+        <a href="index" class="back-btn-icon" title="Back to Home" style="margin-bottom:30px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></a>
 
         <div class="terms-header">
             <h1>Terms and Conditions</h1>
@@ -343,6 +333,6 @@
             </div>
         </div>
     </div>
-    <script src="branding.js"></script>
+    <script src="branding.js" defer></script>
 </body>
 </html>

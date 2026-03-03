@@ -530,7 +530,7 @@ function loadAllStories() {
     storySelection.style.display = 'block';
     storyArea.innerHTML = '';
 
-    document.getElementById('story-list-title').textContent = 'Choose a Story';
+    document.getElementById('story-list-title').textContent = 'Stories';
 
     const storyList = document.getElementById('story-list');
     storyList.innerHTML = '';
@@ -695,11 +695,11 @@ function loadStory(storyIndex) {
     });
 
     storyArea.innerHTML = `
-        <div class="navigation" style="margin-bottom: 20px;">
-            <button onclick="backToStoryList()">← Back to Story List</button>
+        <div class="back-row">
+            <button class="back-btn-icon" onclick="backToStoryList()" title="Back to Story List"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
 
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+        <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
             📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, currentDifficulty) : 'N/A'}
         </div>
 
@@ -718,7 +718,7 @@ function loadStory(storyIndex) {
             </div>
 
             <div class="questions-section">
-                <h2 style="text-align: center; color: #764ba2; margin-bottom: 30px;">
+                <h2 style="text-align: center; color: var(--color-primary-dark); margin-bottom: 30px;">
                     ❓ Verständnisfragen (Comprehension Questions)
                 </h2>
                 ${questionsHTML}
@@ -728,7 +728,7 @@ function loadStory(storyIndex) {
                         padding: 20px 50px;
                         font-size: 1.3em;
                         border: none;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: var(--color-primary-gradient);
                         color: white;
                         border-radius: 12px;
                         cursor: pointer;
@@ -852,6 +852,31 @@ function checkAllAnswers() {
     }
 
     currentScore = score;
+
+    // Record score to server via Cloud Function
+    submitGermanKidsScore(score, totalQuestions, percentage);
+}
+
+// Submit German Kids score to Cloud Function for Firestore persistence
+async function submitGermanKidsScore(correctCount, totalProblems, percentage) {
+    const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
+    if (!child || !child.id) return;
+
+    try {
+        const validateGermanKids = firebase.app().functions('europe-west1').httpsCallable('validateGermanKidsSubmission');
+        const result = await validateGermanKids({
+            childId: child.id,
+            difficulty: currentDifficulty,
+            storyIndex: currentStory,
+            score: percentage,
+            correctCount: correctCount,
+            totalProblems: totalProblems,
+            elapsedTime: '00:00'
+        });
+        console.log('German Kids submission recorded by server:', result.data);
+    } catch (err) {
+        console.error('German Kids Cloud Function submission failed:', err.message);
+    }
 }
 
 /**

@@ -1,6 +1,24 @@
 // Profile Selector Component
 // Manages child profile selection across all module pages
 
+// In-memory cache for children list to avoid redundant Firestore reads
+var _childrenCache = { data: null, parentUid: null, timestamp: 0 };
+var CHILDREN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Calculate age from date of birth (dynamic, not cached)
+function calculateAgeFromDOB(dateOfBirth) {
+    if (!dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    if (isNaN(birthDate.getTime())) return null;
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age >= 0 ? age : 0;
+}
+
 // Initialize profile selector when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeProfileSelector();
@@ -25,12 +43,26 @@ async function loadProfileSelector(parentUid) {
     }
 
     try {
-        // Load all children for this parent
-        // Note: Not using orderBy to avoid requiring created_at field on old documents
-        const snapshot = await firebase.firestore()
-            .collection('children')
-            .where('parent_uid', '==', parentUid)
-            .get();
+        // Check in-memory cache first (5-minute TTL)
+        var now = Date.now();
+        var useCache = _childrenCache.parentUid === parentUid &&
+            _childrenCache.data &&
+            (now - _childrenCache.timestamp) < CHILDREN_CACHE_TTL;
+
+        var snapshot;
+        if (useCache) {
+            console.log('Using cached children list');
+            snapshot = _childrenCache.data;
+        } else {
+            // Load all children for this parent
+            // Note: Not using orderBy to avoid requiring created_at field on old documents
+            snapshot = await firebase.firestore()
+                .collection('children')
+                .where('parent_uid', '==', parentUid)
+                .get();
+            // Cache the result
+            _childrenCache = { data: snapshot, parentUid: parentUid, timestamp: now };
+        }
 
         if (snapshot.empty) {
             // No children found - hide container (redirect will happen from index.html)
@@ -43,9 +75,20 @@ async function loadProfileSelector(parentUid) {
         // Get all children and sort by created_at if available
         const children = [];
         snapshot.forEach(doc => {
+            const data = doc.data();
+            // BUG-036 + BUG-040: Add displayAge from DOB for UI only (never overwrite assessment-based age)
+            if (data.date_of_birth) {
+                const currentAge = calculateAgeFromDOB(data.date_of_birth);
+                if (currentAge !== null) {
+                    data.displayAge = currentAge;
+                }
+            }
+            if (data.displayAge == null) {
+                data.displayAge = data.age;
+            }
             children.push({
                 id: doc.id,
-                ...doc.data()
+                ...data
             });
         });
 
@@ -69,6 +112,14 @@ async function loadProfileSelector(parentUid) {
             // Child is already selected, refresh localStorage with latest data from Firestore
             const selectedChildData = children.find(c => c.id === selectedChildId);
             if (selectedChildData) {
+                // BUG-041: Preserve locally-cached theme to prevent race condition.
+                // saveChildTheme() updates localStorage immediately but Firestore may lag.
+                // Without this, stale Firestore theme overwrites the correct localStorage value.
+                const cachedTheme = localStorage.getItem('gleegrow-theme');
+                if (cachedTheme && (!selectedChildData.theme || selectedChildData.theme !== cachedTheme)) {
+                    selectedChildData.theme = cachedTheme;
+                }
+
                 // Update localStorage with fresh data to ensure version, inputMode, etc. are current
                 localStorage.setItem('selectedChild', JSON.stringify({
                     id: selectedChildId,
@@ -118,7 +169,7 @@ function renderEmptyState(container) {
         <div class="profile-selector-empty">
             <span class="empty-icon">👶</span>
             <button class="add-child-link" onclick="window.location.href='children-profiles'">
-                ➕ Add Child Profile
+                ${typeof GleeIcons !== 'undefined' ? GleeIcons.get('plus', 16, 'currentColor') : '+'} Add Child Profile
             </button>
         </div>
     `;
@@ -134,6 +185,8 @@ function renderProfileSelector(container, children, selectedChildId) {
     }
 
     const avatar = getChildAvatar(selectedChild.gender);
+    // BUG-040: Use displayAge (from DOB) for UI only — never affects worksheet difficulty
+    const displayAge = selectedChild.displayAge || selectedChild.age;
 
     container.innerHTML = `
         <div class="profile-selector">
@@ -141,7 +194,7 @@ function renderProfileSelector(container, children, selectedChildId) {
                 <span class="profile-avatar">${avatar}</span>
                 <div class="profile-info">
                     <span class="profile-name">${selectedChild.name}</span>
-                    <span class="profile-age">Age ${selectedChild.age}</span>
+                    <span class="profile-age">Age ${displayAge}</span>
                 </div>
                 <span class="dropdown-arrow">▼</span>
             </div>
@@ -149,7 +202,7 @@ function renderProfileSelector(container, children, selectedChildId) {
                 ${children.map(child => renderChildOption(child, selectedChildId)).join('')}
                 <div class="profile-dropdown-divider"></div>
                 <div class="profile-dropdown-item add-child-item" onclick="window.location.href='children-profiles'">
-                    ➕ Manage Profiles
+                    ${typeof GleeIcons !== 'undefined' ? GleeIcons.get('plus', 16, 'currentColor') : '+'} Manage Profiles
                 </div>
             </div>
         </div>
@@ -165,18 +218,21 @@ function renderChildOption(child, selectedChildId) {
     const avatar = getChildAvatar(child.gender);
     const isSelected = child.id === selectedChildId;
 
+    // BUG-040: Use displayAge (from DOB) for UI only — never affects worksheet difficulty
+    const displayAge = child.displayAge || child.age;
+
     return `
         <div class="profile-dropdown-item ${isSelected ? 'selected' : ''}" style="display: flex; align-items: center; justify-content: space-between;">
-            <div onclick="selectChildFromDropdown('${child.id}', '${child.name}', ${child.age}, '${child.gender}')" style="display: flex; align-items: center; gap: 12px; flex: 1; padding-right: 10px;">
+            <div onclick="selectChildFromDropdown('${child.id}', '${child.name}', ${displayAge}, '${child.gender}')" style="display: flex; align-items: center; gap: 12px; flex: 1; padding-right: 10px;">
                 <span class="profile-avatar">${avatar}</span>
                 <div class="profile-info">
                     <span class="profile-name">${child.name}</span>
-                    <span class="profile-age">Age ${child.age}</span>
+                    <span class="profile-age">Age ${displayAge}</span>
                 </div>
                 ${isSelected ? '<span class="check-mark">✓</span>' : ''}
             </div>
-            <button onclick="event.stopPropagation(); openChildSettings('${child.id}', '${child.name}')" style="background: none; border: none; padding: 8px; cursor: pointer; font-size: 1.2em; color: #667eea; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Child Settings">
-                ⚙️
+            <button onclick="event.stopPropagation(); openChildSettings('${child.id}', '${child.name}')" style="background: none; border: none; padding: 8px; cursor: pointer; color: var(--color-primary); transition: transform 0.2s; display: flex; align-items: center;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Child Settings">
+                ${typeof GleeIcons !== 'undefined' ? GleeIcons.get('settings', 18, 'var(--color-primary)') : ''}
             </button>
         </div>
     `;
@@ -270,12 +326,18 @@ function selectChild(childId, childData) {
         startActivityTracking();
     }
 
-    // Apply age-adaptive theme
-    const childAge = childData.age || 0;
+    // Apply age-adaptive theme (BUG-036: use DOB-recalculated age)
+    const childAge = childData.date_of_birth ? (calculateAgeFromDOB(childData.date_of_birth) || childData.age || 0) : (childData.age || 0);
     if (childAge > 0 && childAge <= 7) {
         document.body.classList.add('theme-young');
     } else {
         document.body.classList.remove('theme-young');
+    }
+
+    // BUG-041: Apply this child's color theme immediately when switching children
+    if (typeof applyTheme === 'function') {
+        const childTheme = childData.theme || 'ocean';
+        applyTheme(childTheme);
     }
 
     // Update module visibility based on this child's permissions
@@ -300,6 +362,7 @@ function selectChild(childId, childData) {
 
 // Get the currently selected child
 // Returns: { id, name, age, gender, grade, date_of_birth } or null
+// Age is dynamically recalculated from date_of_birth to handle birthdays (BUG-036)
 function getSelectedChild() {
     const childDataStr = localStorage.getItem('selectedChild');
 
@@ -309,6 +372,20 @@ function getSelectedChild() {
 
     try {
         const childData = JSON.parse(childDataStr);
+
+        // BUG-036 + BUG-040: Provide displayAge from DOB for UI only.
+        // child.age is the ASSESSMENT-BASED age — never overwrite it.
+        // Worksheet difficulty is driven by assessment level, not birthday.
+        if (childData.date_of_birth) {
+            const currentAge = calculateAgeFromDOB(childData.date_of_birth);
+            if (currentAge !== null) {
+                childData.displayAge = currentAge;
+            }
+        }
+        if (childData.displayAge == null) {
+            childData.displayAge = childData.age;
+        }
+
         return childData;
     } catch (error) {
         console.error('Error parsing selected child data:', error);
@@ -325,6 +402,8 @@ function isChildSelected() {
 function clearSelectedChild() {
     localStorage.removeItem('selectedChildId');
     localStorage.removeItem('selectedChild');
+    // Invalidate children cache
+    _childrenCache = { data: null, parentUid: null, timestamp: 0 };
 
     // Clear child session (if session manager is loaded)
     if (typeof clearChildSession === 'function') {
@@ -354,6 +433,20 @@ async function openChildSettings(childId, childName) {
         const childData = childDoc.data();
         const childVersion = childData.version || 'demo';
         const currentMode = childData.inputMode || 'keyboard';
+        const currentTheme = childData.theme || 'ocean';
+
+        // Build theme options HTML
+        const themeOptions = typeof THEMES !== 'undefined' ? Object.entries(THEMES).map(([key, t]) => {
+            var iconHtml = (typeof GleeIcons !== 'undefined' && GleeIcons.has(t.iconKey))
+                ? GleeIcons.get(t.iconKey, 32, 'white', {strokeWidth: '2'})
+                : t.name.charAt(0);
+            return `<div class="theme-option ${currentTheme === key ? 'selected' : ''}"
+                  onclick="selectThemeOption('${childId}', '${key}')"
+                  style="background: ${t.gradient}; color: white;">
+                <span class="theme-icon">${iconHtml}</span>
+                <span class="theme-label">${t.name}</span>
+            </div>`;
+        }).join('') : '';
 
         // Create modal
         const modal = document.createElement('div');
@@ -362,7 +455,7 @@ async function openChildSettings(childId, childName) {
             <div class="child-settings-modal-overlay" onclick="closeChildSettings()"></div>
             <div class="child-settings-modal-content">
                 <div class="child-settings-header">
-                    <h2>⚙️ ${childName}'s Settings</h2>
+                    <h2>${typeof GleeIcons !== 'undefined' ? GleeIcons.get('settings', 22, 'var(--color-primary)') : ''} ${childName}'s Settings</h2>
                     <button class="close-btn" onclick="closeChildSettings()">✕</button>
                 </div>
 
@@ -374,18 +467,26 @@ async function openChildSettings(childId, childName) {
                         <div class="input-mode-options">
                             <div class="input-mode-option ${currentMode === 'keyboard' ? 'selected' : ''}"
                                  onclick="selectInputMode('${childId}', 'keyboard')">
-                                <div class="mode-icon">⌨️</div>
+                                <div class="mode-icon">${typeof GleeIcons !== 'undefined' ? GleeIcons.get('keyboard', 28, 'var(--color-primary)') : 'Keyboard'}</div>
                                 <div class="mode-label">Keyboard</div>
                                 <div class="mode-desc">Type answers with keyboard</div>
                             </div>
 
                             <div class="input-mode-option ${currentMode === 'pencil' ? 'selected' : ''}"
                                  onclick="selectInputMode('${childId}', 'pencil')">
-                                <div class="mode-icon">✏️</div>
+                                <div class="mode-icon">${typeof GleeIcons !== 'undefined' ? GleeIcons.get('pencil', 28, 'var(--color-primary)') : 'Pencil'}</div>
                                 <div class="mode-label">Pencil</div>
                                 <div class="mode-desc">Draw answers with stylus</div>
                                 ${childVersion !== 'full' ? '<div class="mode-badge">Full Version Only</div>' : ''}
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Color Theme</h3>
+                        <p class="settings-description">Pick ${childName}'s favorite color theme</p>
+                        <div class="theme-grid" id="theme-grid">
+                            ${themeOptions}
                         </div>
                     </div>
                 </div>
@@ -401,6 +502,19 @@ async function openChildSettings(childId, childName) {
         console.error('Error opening child settings:', error);
         alert('Failed to load child settings');
     }
+}
+
+// Select theme from the settings modal
+async function selectThemeOption(childId, themeName) {
+    if (typeof saveChildTheme === 'function') {
+        await saveChildTheme(childId, themeName);
+    }
+
+    // Update UI — mark selected
+    const options = document.querySelectorAll('.theme-option');
+    options.forEach(opt => opt.classList.remove('selected'));
+    const clicked = document.querySelector(`.theme-option[onclick*="'${themeName}'"]`);
+    if (clicked) clicked.classList.add('selected');
 }
 
 // Close child settings modal
@@ -455,10 +569,6 @@ async function selectInputMode(childId, mode) {
         }
 
         console.log(`Input mode set to ${mode} for child ${childId}`);
-
-        // Close and reopen modal to refresh badge visibility
-        closeChildSettings();
-        setTimeout(() => openChildSettings(childId, childData.name), 100);
 
     } catch (error) {
         console.error('Error setting input mode:', error);
@@ -609,7 +719,7 @@ profileSelectorStyles.textContent = `
     }
 
     .add-child-item {
-        color: #667eea;
+        color: var(--color-primary);
         font-weight: bold;
         justify-content: center;
     }
@@ -634,7 +744,7 @@ profileSelectorStyles.textContent = `
 
     .add-child-link {
         background: rgba(255, 255, 255, 0.9);
-        color: #667eea;
+        color: var(--color-primary);
         border: none;
         padding: 8px 15px;
         border-radius: 8px;
@@ -765,7 +875,7 @@ profileSelectorStyles.textContent = `
         justify-content: space-between;
         padding: 25px 30px;
         border-bottom: 2px solid #f0f0f0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--color-primary-gradient);
         border-radius: 20px 20px 0 0;
     }
 
@@ -834,15 +944,15 @@ profileSelectorStyles.textContent = `
     }
 
     .input-mode-option:hover {
-        border-color: #667eea;
+        border-color: var(--color-primary);
         background: #f8f9ff;
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
     }
 
     .input-mode-option.selected {
-        border-color: #667eea;
-        background: linear-gradient(135deg, #667eea15, #764ba215);
+        border-color: var(--color-primary);
+        background: var(--color-primary-10);
         box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
     }
 
@@ -883,7 +993,7 @@ profileSelectorStyles.textContent = `
     }
 
     .settings-close-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--color-primary-gradient);
         color: white;
         border: none;
         padding: 12px 30px;
@@ -897,6 +1007,46 @@ profileSelectorStyles.textContent = `
     .settings-close-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Theme Picker Grid */
+    .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .theme-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 16px 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 3px solid transparent;
+        text-align: center;
+    }
+
+    .theme-option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .theme-option.selected {
+        border-color: white;
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .theme-icon {
+        font-size: 2em;
+    }
+
+    .theme-label {
+        font-size: 0.8em;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     @media (max-width: 600px) {
@@ -918,6 +1068,10 @@ profileSelectorStyles.textContent = `
 
         .child-settings-body {
             padding: 20px;
+        }
+
+        .theme-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 `;

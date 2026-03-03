@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 
     <!-- Firebase SDK -->
@@ -23,17 +25,18 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth & Storage -->
-    <script src="firebase-auth.js"></script>
-    <script src="firebase-storage.js"></script>
-    <script src="completion-manager.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="admin-level-manager.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="firebase-storage.js" defer></script>
+    <script src="completion-manager.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="admin-level-manager.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
 
     <!-- TensorFlow.js for handwriting recognition -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <!-- TF.js lazy-loaded by handwriting-recognition.js when needed -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
     <style>
         /* Hide content initially to prevent flash of inappropriate content */
         .container {
@@ -66,13 +69,16 @@
             if (!userDoc.empty) {
                 const userData = userDoc.docs[0].data();
                 isAdmin = userData.role === 'admin';
+                // BUG-054: Set window.currentUserRole so generators can check admin status
+                window.currentUserRole = userData.role;
             }
 
             let childAge;
             if (isAdmin) {
-                // Admin doesn't need child profile - use default age 10+ (full access)
-                childAge = '10';
-                console.log('Admin user - using default age:', childAge);
+                // Admin: use selected child's age if available, else default 10+
+                const adminChild = getSelectedChild();
+                childAge = (adminChild && adminChild.age) ? adminChild.age.toString() : '10';
+                console.log('Admin user - using age:', childAge);
             } else {
                 // Auto-detect child's age from selected profile (DOB-based)
                 const child = getSelectedChild();
@@ -100,7 +106,7 @@
         });
     </script>
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="user-header">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div id="app-branding"></div>
                 <div>
@@ -108,14 +114,17 @@
                     <p class="subtitle">Fun brain exercises with difficulty levels!</p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="user-actions">
                 <div id="profile-selector-container"></div>
             </div>
-        </header>
+        </div>
 
         <!-- Challenge Type Selection (Age is auto-detected from profile) -->
         <div class="level-selection" id="type-selection">
-            <h2>Choose Your Challenge</h2>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToAges()" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+            </div>
+            <h2>Challenges</h2>
             <div class="level-grid">
                 <button onclick="selectType('patterns')" class="level-btn">
                     <span class="level-name">🔷 Patterns</span>
@@ -146,9 +155,6 @@
                     <span class="level-desc">Think and solve!</span>
                 </button>
             </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToAges()">← Back to Home</button>
-            </div>
         </div>
 
 
@@ -160,21 +166,22 @@
         </footer>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="handwriting-input.js"></script>
-    <script src="handwriting-recognition.js"></script>
-    <script src="aptitude-handwriting-enhanced.js"></script>
-    <script src="level-mapper.js"></script>
-    <script src="age-content-mapper.js"></script>
-    <script src="aptitude-age-content.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="aptitude-generator.js"></script>
-    <script src="branding.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="handwriting-input.js" defer></script>
+    <script src="handwriting-recognition.js" defer></script>
+    <script src="aptitude-handwriting-enhanced.js" defer></script>
+    <script src="level-mapper.js" defer></script>
+    <script src="age-content-mapper.js" defer></script>
+    <script src="aptitude-age-content.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="aptitude-generator.js" defer></script>
+    <script src="branding.js" defer></script>
     <script>
         // Add completion badges on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Get all completed aptitude worksheets
-            const completedWorksheets = getCompletedWorksheets('aptitude');
+            const completedWorksheets = await getCompletedWorksheets('aptitude');
+            if (!completedWorksheets || !Array.isArray(completedWorksheets)) return;
 
             // Track which types have at least one completed difficulty
             const completedTypes = new Set();
@@ -203,8 +210,9 @@
             originalSelectType(type);
 
             // After showing difficulty selection, add badges to completed difficulties
-            setTimeout(() => {
-                const completedWorksheets = getCompletedWorksheets('aptitude');
+            setTimeout(async () => {
+                const completedWorksheets = await getCompletedWorksheets('aptitude');
+                if (!completedWorksheets || !Array.isArray(completedWorksheets)) return;
                 ['easy', 'medium', 'hard'].forEach(difficulty => {
                     const identifier = `${type}-${difficulty}`;
                     if (completedWorksheets.includes(identifier)) {
@@ -219,11 +227,12 @@
     </script>
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
+    <script>if (typeof GleeIcons !== 'undefined') GleeIcons.init();</script>
 </body>
 </html>

@@ -34,7 +34,7 @@ const AVATAR_ITEMS = {
         { id: 'frame-rainbow', name: 'Rainbow', cost: 10, style: '3px solid transparent; background-image: linear-gradient(white, white), linear-gradient(90deg, red, orange, yellow, green, blue, violet); background-origin: border-box; background-clip: padding-box, border-box' },
         { id: 'frame-stars', name: 'Stars', cost: 8, style: '3px dashed #ffd700' },
         { id: 'frame-hearts', name: 'Hearts', cost: 8, style: '3px double #e91e63' },
-        { id: 'frame-sparkle', name: 'Sparkle', cost: 15, style: '3px solid #667eea; box-shadow: 0 0 8px rgba(102,126,234,0.5)' }
+        { id: 'frame-sparkle', name: 'Sparkle', cost: 15, style: '3px solid var(--color-primary); box-shadow: 0 0 8px var(--color-primary-30)' }
     ],
     backgrounds: [
         { id: 'bg-blue', name: 'Sky Blue', cost: 0, color: '#e3f2fd' },

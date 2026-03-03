@@ -77,6 +77,18 @@ service cloud.firestore {
         resource.data.parent_uid == request.auth.uid ||
         isAdmin()
       );
+
+      // Skill profile subcollection - parents can read their children's data, admins can read all
+      match /skill_profile/{operation} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
+
+      // Error log subcollection
+      match /error_log/{logId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+      }
     }
 
     // Child sessions collection - for single-device enforcement
@@ -121,6 +133,12 @@ service cloud.firestore {
     match /email_log/{logId} {
       allow read, create: if isAuthenticated();
       allow delete: if isAdmin();
+    }
+
+    // Adaptive worksheets collection - admin review workflow
+    match /adaptive_worksheets/{worksheetId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
   }
 }

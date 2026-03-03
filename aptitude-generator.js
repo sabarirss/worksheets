@@ -11,8 +11,39 @@ let timer = null;
 let startTime = null;
 let elapsedSeconds = 0;
 let answersVisible = false;
+let currentWorksheetSeed = null;
 
 // isDemoMode() and getDemoLimit() provided by app-constants.js
+
+// Seeded PRNG — matches server-side aptitude-engine.js for deterministic generation
+class AptitudeSeededRandom {
+    constructor(seed) { this.seed = seed; }
+    next() {
+        this.seed = (this.seed * 9301 + 49297) % 233280;
+        return this.seed / 233280;
+    }
+}
+
+function aptitudeHashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash);
+}
+
+function aptitudeSeededShuffle(array, rng) {
+    const shuffled = array.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(rng.next() * (i + 1));
+        const temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+    }
+    return shuffled;
+}
 
 /**
  * Build a progressive pool of ALL questions for a given type (easy → medium → hard).
@@ -306,7 +337,7 @@ function generatePatternPuzzles(count, difficulty, age) {
     }));
 }
 
-function generateCountingPuzzles(count, difficulty, age) {
+function generateCountingPuzzles(count, difficulty, age, rng) {
     // Map age to age group
     const ageGroup = ageGroupMap[age ? age.toString() : '6'] || '6';
 
@@ -327,17 +358,19 @@ function generateCountingPuzzles(count, difficulty, age) {
     const { min, max } = config.range;
 
     // Generate counting puzzles with age-appropriate numbers
+    // Use seeded RNG if provided (for server-side matching), else Math.random()
     const puzzles = [];
     for (let i = 0; i < count; i++) {
         const itemEmoji = config.items[i % config.items.length];
-        const qty = Math.floor(Math.random() * (max - min + 1)) + min;
+        const qty = Math.floor((rng ? rng.next() : Math.random()) * (max - min + 1)) + min;
 
         puzzles.push({
             type: 'counting',
             emoji: itemEmoji,
             quantity: qty,
             label: getLabelFromEmoji(itemEmoji),
-            answer: String(qty)
+            answer: String(qty),
+            difficulty: difficulty
         });
     }
 
@@ -440,7 +473,7 @@ function generateLogicPuzzles(count, difficulty, age) {
     }));
 }
 
-// Load Puzzles — Progressive pool: unique content per page, easy → medium → hard
+// Load Puzzles — Seeded generation matching server-side aptitude-engine.js
 function loadPuzzles(difficulty, page = 1) {
     // Check for admin level override
     if (window.currentUserRole === 'admin') {
@@ -456,6 +489,11 @@ function loadPuzzles(difficulty, page = 1) {
 
     currentPage = page;
 
+    // Generate seed once per puzzle type session (reset when type changes)
+    if (!currentWorksheetSeed || !currentWorksheet || currentWorksheet.type !== currentType) {
+        currentWorksheetSeed = Date.now();
+    }
+
     // Questions per page for each type (uniform across difficulties)
     const questionsPerPage = {
         patterns: 6, counting: 8, sequences: 4, matching: 6,
@@ -464,8 +502,12 @@ function loadPuzzles(difficulty, page = 1) {
     const count = questionsPerPage[currentType] || 6;
     let problems = [];
 
+    // Create seeded RNG matching server-side aptitude-engine.js
+    const ageGroup = ageGroupMap[currentAge ? currentAge.toString() : '6'] || '6';
+    const compositeSeed = aptitudeHashCode(`aptitude-${currentType}-${ageGroup}-${currentWorksheetSeed}-${page}`);
+    const rng = new AptitudeSeededRandom(compositeSeed);
+
     if (currentType === 'counting') {
-        // Counting uses procedural generation — naturally unique per page via Math.random()
         // Progressive difficulty: pages 1-5 easy, 6-10 medium, 11-15 hard
         totalPages = getDemoLimit(15);
         let pageDifficulty = 'easy';
@@ -473,9 +515,9 @@ function loadPuzzles(difficulty, page = 1) {
         else if (page > 5) pageDifficulty = 'medium';
         currentDifficulty = pageDifficulty;
 
-        problems = generateCountingPuzzles(count, pageDifficulty, currentAge);
+        problems = generateCountingPuzzles(count, pageDifficulty, currentAge, rng);
     } else {
-        // All other types: progressive pool (easy → medium → hard), unique content per page
+        // All other types: progressive pool, seeded shuffle, paginate
         const pool = buildProgressivePool(currentType, currentAge);
 
         if (pool.length === 0) {
@@ -491,8 +533,10 @@ function loadPuzzles(difficulty, page = 1) {
                 case 'logic': problems = generateLogicPuzzles(count, difficulty, currentAge); break;
             }
         } else {
+            // Seeded shuffle matching server-side engine
+            const shuffledPool = aptitudeSeededShuffle(pool, rng);
             const startIdx = (page - 1) * count;
-            problems = pool.slice(startIdx, startIdx + count);
+            problems = shuffledPool.slice(startIdx, startIdx + count);
 
             if (problems.length === 0 && page > 1) {
                 // Past end of pool — don't navigate
@@ -513,11 +557,21 @@ function loadPuzzles(difficulty, page = 1) {
         }
     }
 
+    // Shuffle options deterministically (matching server-side engine)
+    problems = problems.map(p => {
+        const copy = JSON.parse(JSON.stringify(p));
+        if (copy.options) {
+            copy.options = aptitudeSeededShuffle(copy.options, rng);
+        }
+        return copy;
+    });
+
     currentWorksheet = {
         type: currentType,
         difficulty: currentDifficulty,
         age: currentAge,
         page: currentPage,
+        seed: currentWorksheetSeed,
         problems
     };
 
@@ -737,14 +791,14 @@ function renderWorksheet() {
 
     const html = `
         <div class="worksheet-container">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()" style="padding: 12px 24px; border: none; border-radius: 8px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; cursor: pointer;">← Back to Challenges</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToWorksheetSelection()" title="Back to Challenges"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
+            <div style="background: var(--color-primary-gradient); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 1.2em; font-weight: bold;">
                 📊 Level: ${typeof ageAndDifficultyToLevel === 'function' ? ageAndDifficultyToLevel(currentAge, difficulty) : 'N/A'}
                 ${(() => {
-                    const diffColors = { easy: '#4caf50', medium: '#ff9800', hard: '#f44336' };
+                    const diffColors = { easy: 'var(--color-success)', medium: 'var(--color-warning)', hard: '#f44336' };
                     const diffStars = { easy: '⭐', medium: '⭐⭐', hard: '⭐⭐⭐' };
                     return `<span style="margin-left: 15px; background: ${diffColors[difficulty]}; padding: 4px 12px; border-radius: 20px; font-size: 0.85em;">${diffStars[difficulty]} ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>`;
                 })()}
@@ -802,7 +856,7 @@ function renderWorksheet() {
             </div>
 
             <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, var(--color-success), #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
                     ✓ Submit for Evaluation
                 </button>
                 <div id="submission-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
@@ -966,12 +1020,30 @@ function checkAnswers() {
         // Handle handwriting canvases (counting and logic problems)
         if (input.tagName === 'CANVAS') {
             const correctAnswer = String(problem.answer);
-            // Update feedback (RIGHT of canvas, NOT on canvas) - just the value, no "Answer:" prefix
-            feedback.textContent = correctAnswer;
-            feedback.style.color = '#4caf50';
-            feedback.style.fontSize = '1.5em';
-            feedback.style.fontWeight = 'bold';
-            feedback.style.display = 'inline';
+
+            // Check if canvas is empty — don't evaluate blank submissions
+            const hwInput = typeof handwritingInputs !== 'undefined' &&
+                handwritingInputs.find(h => h.canvasId === input.id);
+            const canvasEmpty = hwInput ? hwInput.isEmpty() :
+                (typeof isCanvasEmpty === 'function' ? isCanvasEmpty(input) : false);
+
+            if (canvasEmpty) {
+                // Empty canvas — mark as unanswered
+                feedback.textContent = '✏️ Please write your answer';
+                feedback.style.color = '#cc6600';
+                feedback.style.fontSize = '1em';
+                feedback.style.fontWeight = '600';
+                feedback.style.display = 'inline';
+                input.style.borderColor = '#cc6600';
+                if (typeof playSound === 'function') playSound('incorrect');
+            } else {
+                // Has content — show correct answer for comparison
+                feedback.textContent = correctAnswer;
+                feedback.style.color = 'var(--color-success)';
+                feedback.style.fontSize = '1.5em';
+                feedback.style.fontWeight = 'bold';
+                feedback.style.display = 'inline';
+            }
             return;
         }
 
@@ -1081,14 +1153,17 @@ function savePDF() {
 
     const controls = document.querySelector('.controls');
     const results = document.getElementById('results-summary');
+    const backRow = document.querySelector('.back-row');
     const navigation = document.querySelector('.navigation');
 
     const controlsDisplay = controls ? controls.style.display : '';
     const resultsDisplay = results ? results.style.display : '';
+    const backRowDisplay = backRow ? backRow.style.display : '';
     const navigationDisplay = navigation ? navigation.style.display : '';
 
     if (controls) controls.style.display = 'none';
     if (results) results.style.display = 'none';
+    if (backRow) backRow.style.display = 'none';
     if (navigation) navigation.style.display = 'none';
 
     const element = document.querySelector('.worksheet-container');
@@ -1110,6 +1185,7 @@ function savePDF() {
     html2pdf().set(opt).from(element).save().then(() => {
         if (controls) controls.style.display = controlsDisplay;
         if (results) results.style.display = resultsDisplay;
+        if (backRow) backRow.style.display = backRowDisplay;
         if (navigation) navigation.style.display = navigationDisplay;
     });
 }
@@ -1126,11 +1202,24 @@ function toggleAnswers(event) {
             if (answersVisible) {
                 // Show answer - handle canvas vs button/checkbox answers differently
                 if (input && input.tagName === 'CANVAS') {
-                    const correctAnswer = String(problem.answer);
-                    feedback.textContent = correctAnswer;
-                    feedback.style.color = '#4caf50';
-                    feedback.style.fontSize = '1.5em';
-                    feedback.style.fontWeight = 'bold';
+                    // Check if canvas is empty before showing answer
+                    const hwInput = typeof handwritingInputs !== 'undefined' &&
+                        handwritingInputs.find(h => h.canvasId === input.id);
+                    const canvasEmpty = hwInput ? hwInput.isEmpty() :
+                        (typeof isCanvasEmpty === 'function' ? isCanvasEmpty(input) : false);
+
+                    if (canvasEmpty) {
+                        feedback.textContent = '✏️ Please write your answer';
+                        feedback.style.color = '#cc6600';
+                        feedback.style.fontSize = '1em';
+                        feedback.style.fontWeight = '600';
+                    } else {
+                        const correctAnswer = String(problem.answer);
+                        feedback.textContent = correctAnswer;
+                        feedback.style.color = 'var(--color-success)';
+                        feedback.style.fontSize = '1.5em';
+                        feedback.style.fontWeight = 'bold';
+                    }
                 } else if (input && input.type === 'hidden') {
                     // Button-based problems - show answer with reasoning and highlight
                     const userAnswer = input.value.trim().toLowerCase();
@@ -1451,7 +1540,7 @@ async function submitWorksheet() {
                     }
                 } else {
                     feedbackElement.textContent = 'Recognition loading...';
-                    feedbackElement.style.color = '#ff9800';
+                    feedbackElement.style.color = 'var(--color-warning)';
                     feedbackElement.style.display = 'inline-block';
                     continue;
                 }
@@ -1464,13 +1553,13 @@ async function submitWorksheet() {
                         isEmpty = true;
                     } else {
                         feedbackElement.textContent = '✓ Answer recorded (manual review)';
-                        feedbackElement.style.color = '#667eea';
+                        feedbackElement.style.color = 'var(--color-primary)';
                         feedbackElement.style.display = 'inline-block';
                         continue;
                     }
                 } else {
                     feedbackElement.textContent = 'Manual review required';
-                    feedbackElement.style.color = '#ff9800';
+                    feedbackElement.style.color = 'var(--color-warning)';
                     feedbackElement.style.display = 'inline-block';
                     continue;
                 }
@@ -1483,7 +1572,7 @@ async function submitWorksheet() {
             } else if (isCorrect) {
                 correctCount++;
                 feedbackElement.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
-                feedbackElement.style.color = '#4caf50';
+                feedbackElement.style.color = 'var(--color-success)';
                 feedbackElement.style.fontWeight = 'bold';
                 if (typeof playSound === 'function') playSound('correct');
             } else {
@@ -1499,7 +1588,7 @@ async function submitWorksheet() {
         } catch (error) {
             console.error(`Error evaluating answer ${i}:`, error);
             feedbackElement.textContent = `Answer: ${correctAnswer}`;
-            feedbackElement.style.color = '#ff9800';
+            feedbackElement.style.color = 'var(--color-warning)';
         }
     }
 
@@ -1513,8 +1602,7 @@ async function submitWorksheet() {
     const completionResult = isPageCompleted('aptitude', score, false);
     const isCompleted = completionResult.completed;
 
-    // Cloud Function validation (server-authoritative, no local fallback)
-    const identifier = `${currentWorksheet.type}-${currentWorksheet.difficulty}`;
+    // Cloud Function validation (server-authoritative, seed-based — no client answers sent)
     const elapsedTime = document.getElementById('elapsed-time')?.textContent || '00:00';
     const child = typeof getSelectedChild === 'function' ? getSelectedChild() : null;
 
@@ -1524,6 +1612,9 @@ async function submitWorksheet() {
             childId: child ? child.id : null,
             problemType: currentWorksheet.type,
             difficulty: currentWorksheet.difficulty,
+            age: currentWorksheet.age,
+            seed: currentWorksheet.seed,
+            page: currentWorksheet.page,
             answers: currentWorksheet.problems.map((p, idx) => {
                 if (p.type === 'maze') {
                     const el = document.getElementById(`answer-${idx}`);
@@ -1533,22 +1624,24 @@ async function submitWorksheet() {
                     const el = document.getElementById(`answer-${idx}`);
                     return el ? el.value.trim() : null;
                 }
-                return null; // Canvas-based answers handled by problemData
+                if (p.type === 'counting') {
+                    // For counting, send the recognized value if available
+                    const el = document.getElementById(`answer-${idx}`);
+                    if (el && el.tagName === 'CANVAS') return null;
+                    return el ? el.value.trim() : null;
+                }
+                return null;
             }),
-            problemData: currentWorksheet.problems.map(p => ({
-                type: p.type,
-                answer: p.answer
-            })),
             elapsedTime: elapsedTime
         });
         console.log('Aptitude submission validated by server:', serverResult.data);
     } catch (cfError) {
         console.error('Cloud Function validation failed:', cfError.message);
         alert('Could not reach the evaluation server. Please check your internet connection and try again.');
-        const submitBtn = document.querySelector('.submit-worksheet-btn');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = '✓ Submit for Evaluation';
+        const submitBtn2 = document.querySelector('.submit-worksheet-btn');
+        if (submitBtn2) {
+            submitBtn2.disabled = false;
+            submitBtn2.textContent = '✓ Submit for Evaluation';
         }
         return;
     }
@@ -1561,7 +1654,7 @@ async function submitWorksheet() {
         if (isCompleted) {
             resultsDiv.innerHTML = `
                 <h3>✓ Completed!</h3>
-                <p style="font-size: 1.3em; color: #4caf50; font-weight: bold;">Score: ${correctCount}/${evaluatedProblems} (${score}%)</p>
+                <p style="font-size: 1.3em; color: var(--color-success); font-weight: bold;">Score: ${correctCount}/${evaluatedProblems} (${score}%)</p>
                 <span style="display: inline-block; font-size: 2em;">✓</span>
                 <p style="font-size: 1.1em; margin-top: 10px;">🌟 Excellent! You can now move to the next level.</p>
             `;

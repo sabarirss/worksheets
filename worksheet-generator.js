@@ -45,6 +45,7 @@ function showSubjects() {
     const difficulties = document.getElementById('math-difficulties');
     const worksheetContent = document.getElementById('worksheet-content');
     const progressMap = document.getElementById('progress-map-container');
+    const greetingBanner = document.getElementById('greeting-banner');
 
     if (subjectSelection) subjectSelection.style.display = 'block';
     if (ageGroups) ageGroups.style.display = 'none';
@@ -52,6 +53,8 @@ function showSubjects() {
     if (difficulties) difficulties.style.display = 'none';
     if (worksheetContent) worksheetContent.style.display = 'none';
     if (progressMap) progressMap.style.display = 'none';
+    // Restore greeting banner on home page
+    if (greetingBanner && typeof updateGreeting === 'function') updateGreeting();
 
     // Restore header and footer
     const pageHeader = document.querySelector('.container > header');
@@ -61,6 +64,10 @@ function showSubjects() {
 }
 
 function showMathLevels() {
+    // Hide greeting banner — only shown on home/subject selection
+    const greetingBanner = document.getElementById('greeting-banner');
+    if (greetingBanner) greetingBanner.style.display = 'none';
+
     // Auto-detect age from selected child profile
     let childAge = window.detectedChildAge || '6'; // Use globally stored age or default to 6
 
@@ -97,9 +104,11 @@ function showMathOperations(ageGroup) {
     selectedAgeGroup = ageGroup;
     const operations = document.getElementById('math-operations');
     const difficulties = document.getElementById('math-difficulties');
+    const greetingBanner = document.getElementById('greeting-banner');
 
     if (operations) operations.style.display = 'block';
     if (difficulties) difficulties.style.display = 'none';
+    if (greetingBanner) greetingBanner.style.display = 'none';
 }
 
 function showMathOperationsBack() {
@@ -329,9 +338,7 @@ function showAssessmentGate(operation) {
                     <button class="take-assessment-btn" onclick="startAssessmentFromGate('${operation}')">
                         🚀 Take Assessment
                     </button>
-                    <button class="gate-back-btn" onclick="backToOperations()">
-                        ← Back to Operations
-                    </button>
+                    <button class="back-btn-icon" onclick="backToOperations()" title="Back to Operations"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
                 </div>
             </div>
         </div>
@@ -1448,13 +1455,13 @@ function renderWorksheet() {
                 </div>
             </div>
 
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToWorksheetSelection()">← Back to Operations</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToWorksheetSelection()" title="Back to Operations"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
 
             <div class="controls">
                 <div class="timer">
-                    <span id="timer-display" style="font-size: 1.8em; font-weight: bold; color: #667eea;">⏱️ 00:00</span>
+                    <span id="timer-display" style="font-size: 1.8em; font-weight: bold; color: var(--color-primary);">⏱️ 00:00</span>
                 </div>
                 <div class="control-buttons">
                     <div id="timer-toggle-container" class="timer-toggle-container">
@@ -1522,10 +1529,10 @@ function renderWorksheet() {
 
             <!-- Submit and Clear Buttons -->
             <div class="worksheet-actions" style="margin: 30px 0; display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #4caf50, #45a049); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
+                <button onclick="submitWorksheet()" class="submit-worksheet-btn" style="padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, var(--color-success), var(--color-success-dark)); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(76, 175, 80, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(76, 175, 80, 0.3)'">
                     ✓ Submit for Evaluation
                 </button>
-                <button onclick="clearWorksheet()" class="clear-worksheet-btn" style="padding: 15px 30px; font-size: 1em; background: #ff9800; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 152, 0, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 152, 0, 0.3)'">
+                <button onclick="clearWorksheet()" class="clear-worksheet-btn" style="padding: 15px 30px; font-size: 1em; background: var(--color-warning); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 152, 0, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 152, 0, 0.3)'">
                     🗑️ Clear All
                 </button>
                 <div id="submission-status" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none;"></div>
@@ -1681,7 +1688,7 @@ function updateSubmissionStatusDisplay() {
         // Page has been submitted
         if (statusDiv) {
             statusDiv.style.display = 'block';
-            statusDiv.style.background = submission.score >= 80 ? '#4caf50' : submission.score >= 60 ? '#ff9800' : '#f44336';
+            statusDiv.style.background = submission.score >= 80 ? 'var(--color-success)' : submission.score >= 60 ? 'var(--color-warning)' : '#f44336';
             statusDiv.style.color = 'white';
             statusDiv.innerHTML = `
                 ✓ Done! Score: ${submission.correctCount}/${submission.totalProblems} (${submission.score}%)
@@ -1697,7 +1704,7 @@ function updateSubmissionStatusDisplay() {
         if (pageCounter) {
             pageCounter.innerHTML = `
                 Page ${getPageIndex(currentAbsolutePage)} of ${totalAccessiblePages}
-                <span style="margin-left: 10px; padding: 3px 8px; background: #4caf50; color: white; border-radius: 5px; font-size: 0.9em;">✓ Done</span>
+                <span style="margin-left: 10px; padding: 3px 8px; background: var(--color-success); color: white; border-radius: 5px; font-size: 0.9em;">✓ Done</span>
             `;
         }
     } else {
@@ -1808,8 +1815,8 @@ function savePDF() {
         '.page-navigation',             // Page prev/next navigation
         '.answer-toggle-container',     // Show answers toggle
     ];
-    // Also hide ALL .navigation divs inside the worksheet (back buttons)
-    const allNavigations = element.querySelectorAll('.navigation');
+    // Also hide ALL .back-row and .navigation divs inside the worksheet (back buttons + answer toggles)
+    const allNavigations = element.querySelectorAll('.back-row, .navigation');
 
     const savedDisplays = [];
 
@@ -2351,9 +2358,9 @@ async function submitWorksheet() {
             answerElement.style.borderColor = '#999';
         } else if (fb.correct) {
             feedbackElement.textContent = '✓ ' + (typeof getEncouragement === 'function' ? getEncouragement(true) : 'Correct!');
-            feedbackElement.style.color = '#4caf50';
+            feedbackElement.style.color = 'var(--color-success)';
             feedbackElement.style.fontWeight = 'bold';
-            answerElement.style.borderColor = '#4caf50';
+            answerElement.style.borderColor = 'var(--color-success)';
             answerElement.style.borderWidth = '3px';
             // Add feedback animation class
             const problemEl = answerElement.closest('.problem') || answerElement.parentElement;
@@ -2412,7 +2419,7 @@ async function submitWorksheet() {
         statusDiv.style.display = 'block';
 
         if (isCompleted) {
-            statusDiv.style.background = '#4caf50';
+            statusDiv.style.background = 'var(--color-success)';
             statusDiv.style.color = 'white';
             statusDiv.innerHTML = `
                 ✓ Completed! Score: ${correctCount}/${totalProblems} (${score}%)
@@ -2440,6 +2447,116 @@ async function submitWorksheet() {
     updateNavigationButtons();
 
     console.log(`Page ${currentAbsolutePage} submitted: ${correctCount}/${totalProblems} (${score}%) - Completed: ${isCompleted}`);
+
+    // 0% safety net: show help dialog for adaptive worksheets when child gets everything wrong
+    if (score === 0 && correctCount === 0 && currentWorksheet.adaptive) {
+        setTimeout(() => showZeroScoreDialog(operation), 1500);
+    }
+}
+
+/**
+ * Show a help dialog when a child scores 0% on an adaptive worksheet.
+ * Offers: reduce difficulty level, or watch a visual operation explanation.
+ */
+function showZeroScoreDialog(operation) {
+    const existing = document.getElementById('zero-score-dialog');
+    if (existing) existing.remove();
+
+    const child = getSelectedChild();
+    const opName = operation.charAt(0).toUpperCase() + operation.slice(1);
+
+    // Check current level to decide if "easier level" is available
+    let currentLevel = 1;
+    if (child && child.assessmentData && child.assessmentData[operation]) {
+        currentLevel = child.assessmentData[operation].level || 1;
+    }
+    const canReduceLevel = currentLevel > 1;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'zero-score-dialog';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:15000;animation:explainerFadeIn 0.3s ease;';
+
+    overlay.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:35px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:2.5em;margin-bottom:10px;">&#128543;</div>
+            <h2 style="margin:0 0 8px;color:#333;font-size:1.3em;">That was tough! Let's help you out.</h2>
+            <p style="color:#888;margin-bottom:20px;font-size:0.95em;">Don't worry, everyone needs help sometimes!</p>
+
+            ${canReduceLevel ? `
+            <button id="zero-score-easier" style="
+                display:block;width:100%;padding:14px 20px;margin-bottom:12px;
+                font-size:1.05em;background:#fff;border:2px solid #e0e0e0;border-radius:14px;
+                cursor:pointer;text-align:left;transition:border-color 0.2s;
+            " onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                <span style="font-size:1.3em;">&#128201;</span>
+                <strong style="margin-left:8px;">Go to Easier Level</strong>
+                <div style="color:#888;font-size:0.9em;margin-top:4px;margin-left:32px;">
+                    Let's practice with simpler problems first!
+                </div>
+            </button>
+            ` : ''}
+
+            <button id="zero-score-explain" style="
+                display:block;width:100%;padding:14px 20px;margin-bottom:12px;
+                font-size:1.05em;background:#fff;border:2px solid #e0e0e0;border-radius:14px;
+                cursor:pointer;text-align:left;transition:border-color 0.2s;
+            " onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='#e0e0e0'">
+                <span style="font-size:1.3em;">&#127916;</span>
+                <strong style="margin-left:8px;">Show Me How It Works</strong>
+                <div style="color:#888;font-size:0.9em;margin-top:4px;margin-left:32px;">
+                    Watch a fun explanation of ${opName}!
+                </div>
+            </button>
+
+            <button onclick="document.getElementById('zero-score-dialog').remove()" style="
+                padding:10px 24px;font-size:0.95em;background:none;color:#999;border:none;cursor:pointer;margin-top:8px;
+            ">&#10006; Close &mdash; I'll try again</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Wire up buttons
+    if (canReduceLevel) {
+        document.getElementById('zero-score-easier').addEventListener('click', async () => {
+            const newLevel = Math.max(1, currentLevel - 1);
+            try {
+                if (typeof firebase !== 'undefined' && firebase.firestore && child && child.id) {
+                    await firebase.firestore().collection('children').doc(child.id).update({
+                        [`assessmentData.${operation}.level`]: newLevel,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    // Update in-memory cache
+                    if (typeof _assessmentCache !== 'undefined' && _assessmentCache[child.id]) {
+                        if (_assessmentCache[child.id].assessments[operation]) {
+                            _assessmentCache[child.id].assessments[operation].level = newLevel;
+                        }
+                    }
+                    console.log(`Level reduced: ${operation} ${currentLevel} -> ${newLevel}`);
+                }
+            } catch (err) {
+                console.error('Failed to reduce level:', err);
+            }
+            overlay.innerHTML = `
+                <div style="background:white;border-radius:20px;padding:35px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="font-size:2.5em;margin-bottom:10px;">&#127775;</div>
+                    <h2 style="margin:0 0 10px;color:var(--color-primary,#28a745);font-size:1.2em;">Great! Your next worksheets will be easier.</h2>
+                    <p style="color:#888;margin-bottom:20px;font-size:0.95em;">Keep practicing and you'll get there!</p>
+                    <button onclick="document.getElementById('zero-score-dialog').remove()" style="
+                        padding:14px 32px;font-size:1.05em;background:var(--color-primary-gradient,linear-gradient(135deg,#28a745,#20c997));
+                        color:white;border:none;border-radius:12px;cursor:pointer;font-weight:bold;
+                    ">OK</button>
+                </div>
+            `;
+        });
+    }
+
+    document.getElementById('zero-score-explain').addEventListener('click', () => {
+        overlay.remove();
+        if (typeof showOperationExplanation === 'function') {
+            showOperationExplanation(operation);
+        }
+    });
 }
 
 /**
@@ -2479,7 +2596,7 @@ function clearWorksheet() {
         }
 
         // Reset border
-        answerElement.style.borderColor = '#667eea';
+        answerElement.style.borderColor = 'var(--color-primary)';
         answerElement.style.borderWidth = '2px';
     }
 
@@ -2654,9 +2771,9 @@ function showDemoUpgradePrompt() {
                 You've completed the demo worksheets! Unlock the full version to access weekly progressive worksheets tailored to your child's level.
             </p>
             <button onclick="window.location.href='children-profiles'" style="
-                padding:14px 32px;font-size:1.1em;background:linear-gradient(135deg,#667eea,#764ba2);
+                padding:14px 32px;font-size:1.1em;background:var(--color-primary-gradient);
                 color:white;border:none;border-radius:12px;cursor:pointer;font-weight:bold;
-                box-shadow:0 4px 15px rgba(102,126,234,0.4);margin-bottom:12px;display:block;width:100%;
+                box-shadow:0 4px 15px var(--color-primary-30);margin-bottom:12px;display:block;width:100%;
             ">Upgrade Now</button>
             <button onclick="document.getElementById('demo-upgrade-prompt').remove()" style="
                 padding:10px 24px;font-size:0.95em;background:none;color:#999;border:none;cursor:pointer;
@@ -2706,10 +2823,7 @@ function showNoAssignmentMessage(reason, lockoutWeeks) {
             <div style="font-size:3em;margin-bottom:15px;">${icon}</div>
             <h2 style="margin:0 0 12px;color:#333;">${title}</h2>
             <p style="color:#666;line-height:1.6;margin-bottom:25px;">${message}</p>
-            <button onclick="backToOperations()" style="
-                padding:12px 28px;font-size:1em;background:linear-gradient(135deg,#667eea,#764ba2);
-                color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold;
-            ">&#8592; Back</button>
+            <button class="back-btn-icon" onclick="backToOperations()" title="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);

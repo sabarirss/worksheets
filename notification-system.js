@@ -32,9 +32,12 @@ let _notificationPanelOpen = false;
  * Initialize notification system with Firestore real-time listener.
  * @param {string} childId - Current child ID
  * @param {string} parentUid - Parent's Firebase UID
+ * @param {string} role - User role ('admin', 'parent', 'child')
  */
-function initializeNotifications(childId, parentUid) {
-    if (!childId || !parentUid) return;
+function initializeNotifications(childId, parentUid, role) {
+    if (!parentUid) return;
+    // Admin doesn't need a childId — they see all admin-targeted notifications
+    if (!childId && role !== 'admin') return;
 
     // Clean up previous listener
     if (_notificationListener) {
@@ -42,14 +45,29 @@ function initializeNotifications(childId, parentUid) {
         _notificationListener = null;
     }
 
+    // Build role-scoped query:
+    // - Admin: notifications where parentUid == 'admin' (across all children)
+    // - Parent/child: notifications for this child where parentUid matches OR parentUid == 'all'
+    let query;
+    if (role === 'admin') {
+        query = firebase.firestore()
+            .collection('notifications')
+            .where('parentUid', '==', 'admin')
+            .where('dismissed', '==', false)
+            .orderBy('createdAt', 'desc')
+            .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS);
+    } else {
+        query = firebase.firestore()
+            .collection('notifications')
+            .where('childId', '==', childId)
+            .where('parentUid', 'in', [parentUid, 'all'])
+            .where('dismissed', '==', false)
+            .orderBy('createdAt', 'desc')
+            .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS);
+    }
+
     // Listen for real-time notification updates
-    _notificationListener = firebase.firestore()
-        .collection('notifications')
-        .where('childId', '==', childId)
-        .where('dismissed', '==', false)
-        .orderBy('createdAt', 'desc')
-        .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS)
-        .onSnapshot(snapshot => {
+    _notificationListener = query.onSnapshot(snapshot => {
             _notifications = [];
             snapshot.forEach(doc => {
                 _notifications.push({ id: doc.id, ...doc.data() });
@@ -61,26 +79,38 @@ function initializeNotifications(childId, parentUid) {
         }, error => {
             console.warn('Notification listener error:', error.message);
             // Fallback: load once without real-time
-            loadNotifications(childId);
+            loadNotificationsFallback(childId, parentUid, role);
         });
 }
 
 /**
  * Fallback: load notifications once (no real-time).
  * @param {string} childId
+ * @param {string} parentUid
+ * @param {string} role
  */
-async function loadNotifications(childId) {
-    if (!childId) return;
-
+async function loadNotificationsFallback(childId, parentUid, role) {
     try {
-        const snapshot = await firebase.firestore()
-            .collection('notifications')
-            .where('childId', '==', childId)
-            .where('dismissed', '==', false)
-            .orderBy('createdAt', 'desc')
-            .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS)
-            .get();
+        let query;
+        if (role === 'admin') {
+            query = firebase.firestore()
+                .collection('notifications')
+                .where('parentUid', '==', 'admin')
+                .where('dismissed', '==', false)
+                .orderBy('createdAt', 'desc')
+                .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS);
+        } else {
+            if (!childId) return;
+            query = firebase.firestore()
+                .collection('notifications')
+                .where('childId', '==', childId)
+                .where('parentUid', 'in', [parentUid, 'all'])
+                .where('dismissed', '==', false)
+                .orderBy('createdAt', 'desc')
+                .limit(NOTIFICATION_CONFIG.MAX_NOTIFICATIONS);
+        }
 
+        const snapshot = await query.get();
         _notifications = [];
         snapshot.forEach(doc => {
             _notifications.push({ id: doc.id, ...doc.data() });
@@ -107,7 +137,7 @@ function renderNotificationBell(container) {
     container.innerHTML = `
         <div class="notification-bell-wrapper" id="notification-bell-wrapper">
             <button class="notification-bell-btn" onclick="toggleNotificationPanel()" title="Notifications">
-                <span class="bell-icon">&#128276;</span>
+                <span class="bell-icon">${typeof GleeIcons !== 'undefined' ? GleeIcons.get('bell', 20, 'white') : '&#128276;'}</span>
                 ${unreadCount > 0 ? `<span class="notification-badge" id="notification-badge">${unreadCount > 9 ? '9+' : unreadCount}</span>` : ''}
             </button>
             <div class="notification-panel" id="notification-panel" style="display: none;"></div>
@@ -172,7 +202,7 @@ function renderNotificationPanel() {
     if (_notifications.length === 0) {
         panel.innerHTML = `
             <div class="notification-empty">
-                <span style="font-size: 2em;">&#128276;</span>
+                <span style="display:inline-block;">${typeof GleeIcons !== 'undefined' ? GleeIcons.get('bell', 32, '#ccc') : '&#128276;'}</span>
                 <p>No notifications</p>
             </div>
         `;
@@ -213,11 +243,11 @@ function renderNotificationPanel() {
  */
 function getNotificationIcon(type) {
     switch (type) {
-        case NOTIFICATION_CONFIG.TYPES.NEW_SHEETS: return '&#128214;';
-        case NOTIFICATION_CONFIG.TYPES.INCOMPLETE_WARNING: return '&#9888;&#65039;';
-        case NOTIFICATION_CONFIG.TYPES.LOCKOUT: return '&#128274;';
-        case NOTIFICATION_CONFIG.TYPES.REMINDER: return '&#128276;';
-        default: return '&#128172;';
+        case NOTIFICATION_CONFIG.TYPES.NEW_SHEETS: return typeof GleeIcons !== 'undefined' ? GleeIcons.get('book', 18, 'var(--color-primary)') : '&#128214;';
+        case NOTIFICATION_CONFIG.TYPES.INCOMPLETE_WARNING: return typeof GleeIcons !== 'undefined' ? GleeIcons.get('info', 18, '#ff9800') : '&#9888;&#65039;';
+        case NOTIFICATION_CONFIG.TYPES.LOCKOUT: return typeof GleeIcons !== 'undefined' ? GleeIcons.get('lock', 18, '#f44336') : '&#128274;';
+        case NOTIFICATION_CONFIG.TYPES.REMINDER: return typeof GleeIcons !== 'undefined' ? GleeIcons.get('bell', 18, 'var(--color-primary)') : '&#128276;';
+        default: return typeof GleeIcons !== 'undefined' ? GleeIcons.get('feedback', 18, '#666') : '&#128172;';
     }
 }
 
@@ -457,7 +487,7 @@ notificationStyles.textContent = `
 
     .notification-bell-btn:hover {
         background: white;
-        color: #667eea;
+        color: var(--color-primary);
     }
 
     .bell-icon {

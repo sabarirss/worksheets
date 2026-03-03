@@ -165,29 +165,34 @@ async function checkLevelTestEligibility(childId, module) {
 
 /**
  * Generate level-up test questions for Math.
+ * MUST use same deterministic seed as server (childId + weekStr) so that
+ * server-side validation generates identical questions.
  * 1 easy + 3 medium + 6 hard from current level's content.
  * @param {string} operation - Math operation
  * @param {string} ageGroup - Child's age group
+ * @param {string} childId - Child document ID (for deterministic seed)
+ * @param {string} weekStr - Current week string (for deterministic seed)
  * @returns {Array} Array of question objects
  */
-function generateMathLevelTest(operation, ageGroup) {
-    const questions = [];
-    const difficulties = [
-        ...Array(LEVEL_TEST_CONFIG.EASY_COUNT).fill('easy'),
-        ...Array(LEVEL_TEST_CONFIG.MEDIUM_COUNT).fill('medium'),
-        ...Array(LEVEL_TEST_CONFIG.HARD_COUNT).fill('hard')
-    ];
+function generateMathLevelTest(operation, ageGroup, childId, weekStr) {
+    // CRITICAL: Use exact same seed as server (functions/shared/math-engine.js:generateSeededLevelTestQuestions)
+    // The global `seededRandom` (from worksheet-generator.js) is used by ALL generator functions.
+    // Both client and server generators use: const random = () => seededRandom ? seededRandom.next() : Math.random();
+    // So setting the global here makes all generator() calls produce identical results as the server.
+    const seed = hashCode('leveltest-' + childId + '-' + operation + '-' + weekStr);
+    seededRandom = new SeededRandom(seed);
 
-    // Use the existing content config system
+    const questions = [];
+    const difficulties = ['easy', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard', 'hard', 'hard', 'hard'];
+
+    // Use the existing content config system — generators use global seededRandom
     difficulties.forEach((difficulty, idx) => {
         const config = typeof getConfigByAge === 'function'
             ? getConfigByAge(operation, ageGroup, difficulty)
             : null;
 
         if (config && config.generator) {
-            // Use seeded random for reproducibility
-            const seed = Date.now() + idx;
-            const problem = config.generator(seed);
+            const problem = config.generator();
             questions.push({
                 index: idx,
                 difficulty: difficulty,
@@ -196,33 +201,12 @@ function generateMathLevelTest(operation, ageGroup) {
                 operation: operation,
                 answer: problem.answer
             });
-        } else {
-            // Fallback: generate basic problem
-            const range = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 50 : 100;
-            const a = Math.floor(Math.random() * range) + 1;
-            const b = Math.floor(Math.random() * Math.min(a, range)) + 1;
-            let answer;
-            switch (operation) {
-                case 'addition': answer = a + b; break;
-                case 'subtraction': answer = a - b; break;
-                case 'multiplication': answer = a * b; break;
-                case 'division': answer = Math.floor(a / b); break;
-                default: answer = a + b;
-            }
-            questions.push({
-                index: idx,
-                difficulty: difficulty,
-                problem: { a, b, answer },
-                type: 'math',
-                operation: operation,
-                answer: answer
-            });
         }
     });
 
-    // Shuffle questions so difficulties are mixed
+    // Deterministic shuffle using same global seededRandom as server
     for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(seededRandom.next() * (i + 1));
         [questions[i], questions[j]] = [questions[j], questions[i]];
         questions[i].index = i;
         questions[j].index = j;
@@ -288,15 +272,20 @@ async function startLevelTest(module) {
         ? getAgeGroupFromAge(age)
         : '6';
 
+    // Get week string for deterministic seed (must match server)
+    const weekStr = typeof getWeekString === 'function'
+        ? getWeekString(new Date())
+        : '';
+
     let questions;
     if (module === 'math') {
-        // Determine operation based on age
+        // Determine operation based on age (must match server logic in level-functions.js)
         let operation = 'addition';
         if (age >= 9) operation = 'division';
         else if (age >= 8) operation = 'multiplication';
         else if (age >= 7) operation = 'subtraction';
 
-        questions = generateMathLevelTest(operation, ageGroup);
+        questions = generateMathLevelTest(operation, ageGroup, child.id, weekStr);
     } else {
         questions = generateEnglishLevelTest(ageGroup);
     }
@@ -341,7 +330,7 @@ function renderLevelTest() {
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
         ">
             <div style="text-align: center; margin-bottom: 25px;">
-                <h2 style="color: #667eea; margin: 0;">Level ${currentLevel} Test</h2>
+                <h2 style="color: var(--color-primary); margin: 0;">Level ${currentLevel} Test</h2>
                 <p style="color: #666; margin: 5px 0;">${childName} - ${module === 'math' ? 'Mathematics' : 'English'}</p>
                 <p style="color: #999; font-size: 0.9em;">Score 90% or higher to advance to Level ${currentLevel + 1}</p>
                 <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px;">
@@ -405,7 +394,7 @@ function renderLevelTest() {
             <div style="text-align: center; margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
                 <button onclick="submitLevelTest()" id="level-test-submit-btn" style="
                     padding: 14px 40px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--color-primary-gradient);
                     color: white;
                     border: none;
                     border-radius: 12px;
@@ -683,7 +672,7 @@ async function renderLevelTestButtons(container) {
         html += `
             <button onclick="startLevelTest('english')" style="
                 padding: 12px 24px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: var(--color-primary-gradient);
                 color: white;
                 border: none;
                 border-radius: 12px;
@@ -691,7 +680,7 @@ async function renderLevelTestButtons(container) {
                 font-weight: bold;
                 cursor: pointer;
                 transition: transform 0.2s;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                box-shadow: 0 4px 15px var(--color-primary-30);
             " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
                 📚 Take English Level Test (Lv ${englishEligibility.currentLevel})
             </button>

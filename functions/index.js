@@ -16,6 +16,8 @@
  *   8. submitAssessment — Server-side assessment grading and level assignment
  *   9. submitLevelTest — Server-side level test grading and advancement
  *  10. checkLevelTestEligibility — Server-side eligibility check
+ *  11. seedDemoChildren — Seed 5 demo children with 4 weeks of performance data
+ *  12. clearDemoChildren — Clear all demo children and associated data
  *
  * Deployment:
  *   firebase deploy --only functions
@@ -718,12 +720,15 @@ exports.scheduledAdaptiveAutoApprove = onSchedule(
 // ============================================================================
 
 // Import callable functions from separate modules
-const { validateMathSubmission, validateAdaptiveSubmission, validateEnglishSubmission, validateAptitudeSubmission } = require('./validators');
+const { validateMathSubmission, validateAdaptiveSubmission, validateEnglishSubmission, validateAptitudeSubmission, validateEQSubmission, validateGermanSubmission, validateGermanKidsSubmission } = require('./validators');
 const { checkPageAccess, getAccessiblePages: getAccessiblePagesFunc } = require('./access-control');
 const { submitAssessment, submitLevelTest, checkLevelTestEligibility } = require('./level-functions');
 
 // Adaptive Learning Engine
 const { generateAdaptiveWorksheetCF, approveAdaptiveWorksheetCF, rejectAdaptiveWorksheetCF, generateAdaptivePages, deliverApprovedWorksheet } = require('./adaptive-engine');
+
+// Demo Data Seeder
+const { seedDemoChildrenCF, clearDemoChildrenCF } = require('./demo-seeder');
 
 // Export all callable functions
 exports.validateMathSubmission = validateMathSubmission;
@@ -738,3 +743,8 @@ exports.checkLevelTestEligibility = checkLevelTestEligibility;
 exports.generateAdaptiveWorksheet = generateAdaptiveWorksheetCF;
 exports.approveAdaptiveWorksheet = approveAdaptiveWorksheetCF;
 exports.rejectAdaptiveWorksheet = rejectAdaptiveWorksheetCF;
+exports.validateEQSubmission = validateEQSubmission;
+exports.validateGermanSubmission = validateGermanSubmission;
+exports.validateGermanKidsSubmission = validateGermanKidsSubmission;
+exports.seedDemoChildren = seedDemoChildrenCF;
+exports.clearDemoChildren = clearDemoChildrenCF;

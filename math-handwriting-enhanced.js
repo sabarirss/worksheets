@@ -160,7 +160,7 @@ function getKidFriendlyFeedback(result) {
         return {
             icon: '🤔',
             message: 'Let me look again...',
-            color: '#ff9800'
+            color: 'var(--color-warning)'
         };
     }
 
@@ -168,7 +168,7 @@ function getKidFriendlyFeedback(result) {
         return {
             icon: '🌟',
             message: `Great! I see a ${result.digit}`,
-            color: '#4caf50'
+            color: 'var(--color-success)'
         };
     }
 
@@ -184,14 +184,14 @@ function getKidFriendlyFeedback(result) {
         return {
             icon: '🔍',
             message: `Maybe ${result.digit} or ${result.alternativeDigit}?`,
-            color: '#ff9800'
+            color: 'var(--color-warning)'
         };
     }
 
     return {
         icon: '💪',
         message: `I think it's ${result.digit}. Try again if not!`,
-        color: '#667eea'
+        color: 'var(--color-primary)'
     };
 }
 

@@ -9,12 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="progress-map.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -26,49 +28,20 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth & Storage -->
-    <script src="firebase-auth.js"></script>
-    <script src="firebase-storage.js"></script>
-    <script src="storage-manager.js"></script>
-    <script src="completion-manager.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
-    <script src="input-mode-manager.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="firebase-storage.js" defer></script>
+    <script src="storage-manager.js" defer></script>
+    <script src="completion-manager.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
+    <script src="input-mode-manager.js" defer></script>
     <style>
-        .user-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+        /* user-header, header-btn now in styles.css */
 
         .user-info {
             font-size: 1.1em;
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .header-btn {
-            padding: 10px 20px;
-            border: 2px solid white;
-            background: transparent;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .header-btn:hover {
-            background: white;
-            color: #667eea;
         }
 
         /* Input Mode Toggle Styles */
@@ -99,7 +72,7 @@
 
         .mode-btn.active {
             background: white;
-            color: #667eea;
+            color: var(--color-primary);
         }
 
         /* Modal Styles */
@@ -150,14 +123,8 @@
             }
         }
 
-        /* Mobile Responsive Styles */
+        /* Mobile Responsive Styles (user-header responsive in styles.css) */
         @media (max-width: 480px) {
-            .user-header {
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
-            }
-
             .user-info {
                 font-size: 1em;
                 text-align: center;
@@ -175,12 +142,6 @@
                 margin-bottom: 10px;
             }
 
-            .header-btn {
-                padding: 10px 15px;
-                font-size: 0.9em;
-                width: 100%;
-            }
-
             .modal-content {
                 padding: 20px;
                 margin: 20px;
@@ -189,11 +150,6 @@
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
-            .user-header {
-                padding: 15px 20px;
-                flex-wrap: wrap;
-            }
-
             .user-actions {
                 flex-wrap: wrap;
             }
@@ -215,429 +171,8 @@
                 max-width: 600px;
             }
         }
-        /* Assessment Styles */
-        #assessment-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #f5f7fa;
-            overflow-y: auto;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        #assessment-container > * {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .assessment-page {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .assessment-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .assessment-header h2 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .assessment-instructions {
-            color: #666;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-
-        .assessment-questions {
-            display: grid;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .assessment-question {
-            display: grid;
-            grid-template-columns: 40px 1fr;
-            gap: 15px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .question-number {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .question-content {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .math-problem {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #333;
-            font-family: 'Courier New', monospace;
-        }
-
-        .answer-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .answer-canvas {
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            cursor: crosshair;
-            background: white;
-        }
-
-        .answer-input {
-            width: 120px;
-            height: 60px;
-            font-size: 2em;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            font-weight: bold;
-            color: #333;
-            background: white;
-            transition: all 0.3s;
-        }
-
-        .answer-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-        }
-
-        .answer-input::placeholder {
-            color: #ccc;
-            font-weight: normal;
-        }
-
-        .clear-btn {
-            padding: 8px 15px;
-            background: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-
-        .clear-btn:hover {
-            background: #f57c00;
-        }
-
-        .assessment-actions {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .submit-assessment-btn,
-        .cancel-assessment-btn {
-            padding: 15px 40px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-
-        .submit-assessment-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .submit-assessment-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-assessment-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .cancel-assessment-btn {
-            background: #f5f5f5;
-            color: #666;
-            border: 2px solid #ddd;
-        }
-
-        .cancel-assessment-btn:hover {
-            background: #e0e0e0;
-        }
-
-        .assessment-results-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .score-display {
-            margin: 30px 0;
-        }
-
-        .score-big {
-            font-size: 4em;
-            font-weight: bold;
-        }
-
-        .score-percentage {
-            font-size: 2em;
-            margin-top: 10px;
-        }
-
-        .result-message {
-            margin: 20px 0;
-        }
-
-        .level-assignment {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin: 30px 0;
-        }
-
-        .assigned-level {
-            font-size: 3em;
-            font-weight: bold;
-            color: #667eea;
-            margin: 15px 0;
-        }
-
-        .level-reason,
-        .level-description {
-            color: #666;
-            font-style: italic;
-            margin-top: 10px;
-        }
-
-        .assessment-actions-final {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .start-learning-btn {
-            padding: 15px 40px;
-            font-size: 1.3em;
-            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .start-learning-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .retake-assessment-btn {
-            padding: 15px 30px;
-            font-size: 1.1em;
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .retake-assessment-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
-        }
-
-        /* Assessment Gate Styles */
-        .assessment-gate {
-            max-width: 700px;
-            margin: 50px auto;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .gate-content {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 40px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            border: 3px solid #667eea;
-        }
-
-        .gate-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-
-        .gate-content h2 {
-            color: #667eea;
-            font-size: 2.2em;
-            margin-bottom: 20px;
-        }
-
-        .gate-message {
-            font-size: 1.3em;
-            color: #333;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .gate-description {
-            color: #666;
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        .gate-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info-icon {
-            font-size: 2em;
-        }
-
-        .info-item span:last-child {
-            font-size: 0.9em;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .gate-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .take-assessment-btn {
-            padding: 18px 50px;
-            font-size: 1.4em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .take-assessment-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .gate-back-btn {
-            padding: 12px 30px;
-            font-size: 1em;
-            background: #f5f5f5;
-            color: #666;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .gate-back-btn:hover {
-            background: #e0e0e0;
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .assessment-question {
-                grid-template-columns: 30px 1fr;
-            }
-
-            .math-problem {
-                font-size: 1.4em;
-            }
-
-            .answer-canvas {
-                width: 100px;
-                height: 70px;
-            }
-
-            .submit-assessment-btn,
-            .cancel-assessment-btn {
-                padding: 12px 25px;
-                font-size: 1em;
-            }
-
-            .score-big {
-                font-size: 3em;
-            }
-
-            .assigned-level {
-                font-size: 2em;
-            }
-
-            .gate-content {
-                padding: 30px 20px;
-            }
-
-            .gate-icon {
-                font-size: 3em;
-            }
-
-            .gate-content h2 {
-                font-size: 1.6em;
-            }
-
-            .gate-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .take-assessment-btn {
-                font-size: 1.2em;
-                padding: 15px 35px;
-            }
-        }
     </style>
+    <link rel="stylesheet" href="assessment.css">
 </head>
 <body>
     <script>
@@ -698,8 +233,10 @@
                     // Auto-detect child's age for Math module
                     let childAge;
                     if (userData.role === 'admin') {
-                        childAge = '10'; // Admin gets full access
-                        console.log('Admin user - using default age:', childAge);
+                        // If admin has a selected child (demo accounts), use that child's age
+                        const adminChild = getSelectedChild();
+                        childAge = (adminChild && adminChild.age) ? adminChild.age.toString() : '10';
+                        console.log('Admin user - using age:', childAge, adminChild ? '(from child profile)' : '(default full access)');
                     } else {
                         const child = getSelectedChild();
                         if (child && child.age) {
@@ -720,23 +257,29 @@
                     // Initialize UI with user data
                     initializeUserInterface(userData);
 
-                    // Load weekly assignment progress (non-admin only)
-                    if (userData.role !== 'admin' && typeof renderWeeklyProgress === 'function') {
-                        renderWeeklyProgress(document.getElementById('weekly-progress-container'));
-                    }
-
-                    // Initialize notification system (non-admin only)
-                    if (userData.role !== 'admin' && typeof initializeNotifications === 'function') {
-                        const child = getSelectedChild();
-                        if (child) {
-                            initializeNotifications(child.id, firebaseUser.uid);
+                    // Load weekly assignment progress (show for admin if they have a selected child)
+                    if (typeof renderWeeklyProgress === 'function') {
+                        const wpChild = getSelectedChild();
+                        if (userData.role !== 'admin' || wpChild) {
+                            renderWeeklyProgress(document.getElementById('weekly-progress-container'));
                         }
-                        renderNotificationBell(document.getElementById('notification-bell-container'));
                     }
 
-                    // Show level test buttons if eligible (non-admin only)
-                    if (userData.role !== 'admin' && typeof renderLevelTestButtons === 'function') {
-                        renderLevelTestButtons(document.getElementById('level-test-buttons'));
+                    // Initialize notification system
+                    if (typeof initializeNotifications === 'function') {
+                        const nChild = getSelectedChild();
+                        if (nChild || userData.role === 'admin') {
+                            initializeNotifications(nChild ? nChild.id : null, firebaseUser.uid, window.currentUserRole);
+                            renderNotificationBell(document.getElementById('notification-bell-container'));
+                        }
+                    }
+
+                    // Show level test buttons if eligible
+                    if (typeof renderLevelTestButtons === 'function') {
+                        const ltChild = getSelectedChild();
+                        if (userData.role !== 'admin' || ltChild) {
+                            renderLevelTestButtons(document.getElementById('level-test-buttons'));
+                        }
                     }
                 } else {
                     console.error('INDEX.HTML: User document not found in Firestore for email:', firebaseUser.email);
@@ -806,11 +349,8 @@
                 // Admin users see all modules without needing child selection
                 showAllModulesForAdmin(user);
 
-                // Hide profile selector for admin
-                const profileSelectorContainer = document.getElementById('profile-selector-container');
-                if (profileSelectorContainer) {
-                    profileSelectorContainer.style.display = 'none';
-                }
+                // Show profile selector for admin if they have children (demo accounts)
+                // This lets admin view progress for seeded demo children
 
                 // Initialize input mode for admin (without creating header toggle)
                 if (typeof initializeInputMode === 'function') {
@@ -836,7 +376,7 @@
             const isAdminDemoPreview = localStorage.getItem('adminDemoPreview') === 'true';
 
             if (isAdminDemoPreview) {
-                versionBadge.textContent = '🔍 DEMO PREVIEW MODE (Click to disable)';
+                versionBadge.textContent = 'DEMO PREVIEW MODE (Click to disable)';
                 versionBadge.style.display = 'block';
                 versionBadge.style.background = 'rgba(255, 193, 7, 0.95)';
                 versionBadge.style.border = '2px solid #ff9800';
@@ -846,7 +386,7 @@
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
                 versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else {
-                versionBadge.textContent = '👑 Admin - Full Access';
+                versionBadge.textContent = 'Admin - Full Access';
                 versionBadge.style.display = 'block';
                 versionBadge.style.background = 'rgba(156, 39, 176, 0.9)';
                 versionBadge.style.border = 'none';
@@ -925,7 +465,7 @@
 
             if (isAdminDemoPreview) {
                 // Admin in demo preview mode
-                versionBadge.textContent = '🔍 DEMO PREVIEW MODE (Click to disable)';
+                versionBadge.textContent = 'DEMO PREVIEW MODE (Click to disable)';
                 versionBadge.style.display = 'block';
                 versionBadge.style.background = 'rgba(255, 193, 7, 0.95)';
                 versionBadge.style.border = '2px solid #ff9800';
@@ -935,7 +475,7 @@
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 193, 7, 0.95)'; };
                 versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else if (version === 'demo') {
-                versionBadge.textContent = '📦 Demo Version (2 pages per activity)';
+                versionBadge.textContent = 'Demo Version (2 pages per activity)';
                 versionBadge.style.display = 'block';
                 versionBadge.style.background = 'rgba(255, 152, 0, 0.9)';
                 versionBadge.style.border = 'none';
@@ -944,13 +484,8 @@
                 versionBadge.onmouseout = function() { this.style.background = 'rgba(255, 152, 0, 0.9)'; };
                 versionBadge.onclick = function() { window.location.href = 'settings'; };
             } else if (version === 'full') {
-                versionBadge.textContent = '⭐ Full Version';
-                versionBadge.style.display = 'block';
-                versionBadge.style.background = 'rgba(76, 175, 80, 0.9)';
-                versionBadge.style.border = 'none';
-                versionBadge.style.animation = 'none';
-                versionBadge.style.cursor = 'default';
-                versionBadge.onclick = null;
+                // Full version: hide badge (only show DEMO badge)
+                versionBadge.style.display = 'none';
             }
 
             // Update each module's visibility based on TWO-TIER LOGIC
@@ -1002,23 +537,23 @@
                 </div>
                 <div id="notification-bell-container"></div>
                 <button class="header-btn" id="admin-btn" style="display: none;" onclick="window.location.href='admin'">
-                    👤 Admin Panel
+                    <span data-icon="user" data-icon-size="16" data-icon-color="white"></span> Admin Panel
                 </button>
 
                 <!-- Parent Settings Dropdown -->
                 <div style="position: relative;">
                     <button class="header-btn" onclick="toggleParentSettings()" id="parent-settings-btn" title="Settings">
-                        ⚙️
+                        <span data-icon="settings" data-icon-size="18" data-icon-color="white"></span>
                     </button>
                     <div id="parent-settings-dropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); min-width: 200px; z-index: 1000;">
-                        <div onclick="window.location.href='settings'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
-                            ⚙️ Account Settings
+                        <div onclick="window.location.href='settings'" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            <span data-icon="settings" data-icon-size="16" data-icon-color="#666"></span> Account Settings
                         </div>
-                        <div onclick="openFeedbackModal()" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
-                            💬 Give Feedback
+                        <div onclick="openFeedbackModal()" style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            <span data-icon="feedback" data-icon-size="16" data-icon-color="#666"></span> Give Feedback
                         </div>
-                        <div onclick="logout()" style="padding: 12px 20px; cursor: pointer; color: #333; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
-                            🚪 Logout
+                        <div onclick="logout()" style="padding: 12px 20px; cursor: pointer; color: #333; transition: background 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                            <span data-icon="logout" data-icon-size="16" data-icon-color="#666"></span> Logout
                         </div>
                     </div>
                 </div>
@@ -1045,7 +580,7 @@
         <!-- Parent Mode Verification Modal -->
         <div id="parent-mode-modal" class="modal">
             <div class="modal-content" style="max-width: 500px;">
-                <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Mode Verification</h2>
+                <h2 style="margin-top: 0; color: var(--color-primary); display: flex; align-items: center; gap: 8px;"><span data-icon="lock" data-icon-size="24" data-icon-color="var(--color-primary)"></span> Parent Mode Verification</h2>
                 <p style="color: #666; line-height: 1.6;">
                     Parent Mode allows you to manage which modules are available to your child.
                     To verify you are a parent/guardian, please enter your date of birth.
@@ -1078,7 +613,7 @@
                     <button onclick="verifyAndEnableParentMode()" style="
                         padding: 12px 30px;
                         border: none;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: var(--color-primary-gradient);
                         color: white;
                         border-radius: 8px;
                         cursor: pointer;
@@ -1103,61 +638,73 @@
         <div class="subject-selection">
             <div class="subject-grid">
                 <button onclick="showMathLevels()" class="subject-btn">
-                    <span class="subject-name">📐 Mathematics</span>
-                    <span class="subject-desc">Addition, Subtraction, Multiplication, Division</span>
+                    <span data-icon="math" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.math">Mathematics</span>
+                    <span class="subject-desc" data-string="subjects.mathDesc">Addition, Subtraction, Multiplication, Division</span>
                 </button>
                 <button onclick="window.location.href='english'" class="subject-btn">
-                    <span class="subject-name">📚 English</span>
-                    <span class="subject-desc">Reading, Vocabulary, Grammar, Writing</span>
+                    <span data-icon="english" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.english">English</span>
+                    <span class="subject-desc" data-string="subjects.englishDesc">Reading, Vocabulary, Grammar, Writing</span>
                 </button>
                 <button onclick="window.location.href='aptitude'" class="subject-btn">
-                    <span class="subject-name">🧩 Aptitude</span>
-                    <span class="subject-desc">Puzzles, Mazes, Patterns, Logic Games</span>
+                    <span data-icon="aptitude" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.aptitude">Aptitude</span>
+                    <span class="subject-desc" data-string="subjects.aptitudeDesc">Puzzles, Mazes, Patterns, Logic Games</span>
                 </button>
                 <button onclick="window.location.href='stories'" class="subject-btn">
-                    <span class="subject-name">📖 Story Time</span>
-                    <span class="subject-desc">Quality Hand-Written Stories with Real Photos (Ages 4-12)</span>
+                    <span data-icon="stories" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.stories">Story Time</span>
+                    <span class="subject-desc" data-string="subjects.storiesDesc">Quality Hand-Written Stories with Real Photos (Ages 4-12)</span>
                 </button>
                 <button onclick="window.location.href='emotional-quotient'" class="subject-btn">
-                    <span class="subject-name">❤️ Emotional Quotient</span>
-                    <span class="subject-desc">Understanding Feelings & Social Skills (Age 6)</span>
+                    <span data-icon="eq" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.eq">Emotional Quotient</span>
+                    <span class="subject-desc" data-string="subjects.eqDesc">Understanding Feelings & Social Skills (Age 6)</span>
                 </button>
                 <button onclick="window.location.href='german'" class="subject-btn">
-                    <span class="subject-name">🇩🇪 German (B1)</span>
-                    <span class="subject-desc">DTZ Preparation - Grammar, Reading, Writing</span>
+                    <span data-icon="german" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.german">German (B1)</span>
+                    <span class="subject-desc" data-string="subjects.germanDesc">DTZ Preparation - Grammar, Reading, Writing</span>
                 </button>
                 <button onclick="window.location.href='drawing'" class="subject-btn">
-                    <span class="subject-name">🎨 Drawing</span>
-                    <span class="subject-desc">Step-by-Step Art Tutorials with Canvas</span>
+                    <span data-icon="drawing" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.drawing">Drawing</span>
+                    <span class="subject-desc" data-string="subjects.drawingDesc">Step-by-Step Art Tutorials with Canvas</span>
                 </button>
                 <button onclick="window.location.href='german-kids'" class="subject-btn">
-                    <span class="subject-name">🇩🇪 German Kids</span>
-                    <span class="subject-desc">Simple Stories for Ages 6-8</span>
+                    <span data-icon="germanKids" data-icon-circled="56" data-icon-bg="var(--color-primary-10)" data-icon-color="var(--color-primary)"></span>
+                    <span class="subject-name" data-string="subjects.germanKids">German Kids</span>
+                    <span class="subject-desc" data-string="subjects.germanKidsDesc">Simple Stories for Ages 6-8</span>
                 </button>
             </div>
         </div>
 
         <!-- Operation Selection -->
         <div class="level-selection" id="math-operations" style="display: none;">
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="showSubjects()">← Back to Subjects</button>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="showSubjects()" title="Back to Subjects"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
             </div>
             <div class="level-grid">
                 <button onclick="showProgressMap('math','addition')" class="level-btn">
-                    <span class="level-name">➕ Addition</span>
-                    <span class="level-desc">Basic addition skills</span>
+                    <span data-icon="addition" data-icon-size="20" data-icon-color="var(--color-primary)"></span>
+                    <span class="level-name" data-string="operations.addition">Addition</span>
+                    <span class="level-desc" data-string="operations.additionDesc">Basic addition skills</span>
                 </button>
                 <button onclick="showProgressMap('math','subtraction')" class="level-btn">
-                    <span class="level-name">➖ Subtraction</span>
-                    <span class="level-desc">Basic subtraction skills</span>
+                    <span data-icon="subtraction" data-icon-size="20" data-icon-color="var(--color-primary)"></span>
+                    <span class="level-name" data-string="operations.subtraction">Subtraction</span>
+                    <span class="level-desc" data-string="operations.subtractionDesc">Basic subtraction skills</span>
                 </button>
                 <button onclick="showProgressMap('math','multiplication')" class="level-btn">
-                    <span class="level-name">✖️ Multiplication</span>
-                    <span class="level-desc">Times tables and more</span>
+                    <span data-icon="multiplication" data-icon-size="20" data-icon-color="var(--color-primary)"></span>
+                    <span class="level-name" data-string="operations.multiplication">Multiplication</span>
+                    <span class="level-desc" data-string="operations.multiplicationDesc">Times tables and more</span>
                 </button>
                 <button onclick="showProgressMap('math','division')" class="level-btn">
-                    <span class="level-name">➗ Division</span>
-                    <span class="level-desc">Division skills</span>
+                    <span data-icon="division" data-icon-size="20" data-icon-color="var(--color-primary)"></span>
+                    <span class="level-name" data-string="operations.division">Division</span>
+                    <span class="level-desc" data-string="operations.divisionDesc">Division skills</span>
                 </button>
             </div>
         </div>
@@ -1172,34 +719,40 @@
         <!-- Footer -->
         <footer style="margin-top: auto; padding: 30px 20px; border-top: 1px solid #e0e0e0; text-align: center; color: #888; font-size: 0.85em; line-height: 1.8;">
             <div style="margin-bottom: 12px;">
-                <a href="privacy-policy" style="color: #667eea; text-decoration: none; margin: 0 12px;">Privacy Policy</a>
+                <a href="privacy-policy" style="color: var(--color-primary); text-decoration: none; margin: 0 12px;">Privacy Policy</a>
                 <span style="color: #ccc;">|</span>
-                <a href="terms" style="color: #667eea; text-decoration: none; margin: 0 12px;">Terms &amp; Conditions</a>
+                <a href="terms" style="color: var(--color-primary); text-decoration: none; margin: 0 12px;">Terms &amp; Conditions</a>
                 <span style="color: #ccc;">|</span>
-                <a href="mailto:contact@gleegrow.com" style="color: #667eea; text-decoration: none; margin: 0 12px;">Contact Us</a>
+                <a href="mailto:contact@gleegrow.com" style="color: var(--color-primary); text-decoration: none; margin: 0 12px;">Contact Us</a>
             </div>
             <p style="margin: 0; color: #aaa;">&copy; <script>document.write(new Date().getFullYear())</script> GleeGrow. All rights reserved.</p>
         </footer>
     </div>
 
     <!-- TensorFlow.js for Handwriting Recognition -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+    <!-- TF.js lazy-loaded by handwriting-recognition.js when needed -->
 
-    <script src="level-mapper.js"></script>
-    <script src="admin-level-manager.js"></script>
-    <script src="handwriting-input.js"></script>
-    <script src="handwriting-recognition.js"></script>
-    <script src="math-handwriting-enhanced.js"></script>
-    <script src="assessment.js"></script>
-    <script src="parent-mode.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="weekly-assignments.js"></script>
-    <script src="level-test.js"></script>
-    <script src="feedback-system.js"></script>
-    <script src="notification-system.js"></script>
-    <script src="progress-map.js"></script>
-    <script src="worksheet-generator.js"></script>
-    <script src="branding.js"></script>
+    <script src="level-mapper.js" defer></script>
+    <script src="admin-level-manager.js" defer></script>
+    <script src="handwriting-input.js" defer></script>
+    <script src="handwriting-recognition.js" defer></script>
+    <script src="math-handwriting-enhanced.js" defer></script>
+    <script src="assessment.js" defer></script>
+    <script src="parent-mode.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="weekly-assignments.js" defer></script>
+    <script src="level-test.js" defer></script>
+    <script src="feedback-system.js" defer></script>
+    <script src="notification-system.js" defer></script>
+    <script src="progress-map.js" defer></script>
+    <script src="operation-explainer.js" defer></script>
+    <script src="worksheet-generator.js" defer></script>
+    <script src="branding.js" defer></script>
+    <script>
+        // Initialize icon and string systems
+        if (typeof GleeIcons !== 'undefined') GleeIcons.init();
+        if (typeof STRINGS !== 'undefined' && STRINGS.init) STRINGS.init();
+    </script>
     <script>
         // Add completion badges when worksheets load
         // This runs after user authentication is complete
@@ -1270,10 +823,10 @@
     </script>
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item active"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
 </body>

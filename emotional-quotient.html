@@ -9,10 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -23,11 +25,12 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="admin-level-manager.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="admin-level-manager.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
 
     <style>
         .eq-selection {
@@ -42,7 +45,7 @@
         }
 
         .difficulty-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             border: none;
             padding: 40px 20px;
             cursor: pointer;
@@ -71,7 +74,7 @@
             line-height: 1.8;
             padding: 20px;
             background: #f8f9fa;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid var(--color-primary);
             border-radius: 8px;
             margin: 15px 0;
         }
@@ -93,7 +96,7 @@
         .emotion-btn {
             padding: 15px 25px;
             font-size: 1.1em;
-            border: 3px solid #667eea;
+            border: 3px solid var(--color-primary);
             background: white;
             color: #333;
             cursor: pointer;
@@ -111,16 +114,16 @@
         }
 
         .emotion-btn.selected {
-            background: #4caf50;
-            border-color: #4caf50;
+            background: var(--color-success);
+            border-color: var(--color-success);
             color: white;
             font-weight: bold;
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
         }
 
         .emotion-btn.selected:hover {
-            background: #45a049;
-            border-color: #45a049;
+            background: var(--color-success-dark);
+            border-color: var(--color-success-dark);
         }
 
         .question-text {
@@ -231,13 +234,16 @@
             if (!userDoc.empty) {
                 const userData = userDoc.docs[0].data();
                 isAdmin = userData.role === 'admin';
+                // BUG-054: Set window.currentUserRole so generators can check admin status
+                window.currentUserRole = userData.role;
             }
 
             let childAge;
             if (isAdmin) {
-                // Admin doesn't need child profile - use default age 10+ (full access)
-                childAge = '10';
-                console.log('Admin user - using default age:', childAge);
+                // Admin: use selected child's age if available, else default 10+
+                const adminChild = getSelectedChild();
+                childAge = (adminChild && adminChild.age) ? adminChild.age.toString() : '10';
+                console.log('Admin user - using age:', childAge);
             } else {
                 // Auto-detect child's age from selected profile
                 const child = getSelectedChild();
@@ -265,7 +271,7 @@
         });
     </script>
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="user-header">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div id="app-branding"></div>
                 <div>
@@ -273,10 +279,10 @@
                     <p class="subtitle">Building emotional intelligence and empathy!</p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="user-actions">
                 <div id="profile-selector-container"></div>
             </div>
-        </header>
+        </div>
 
 
         <div id="worksheet-area"></div>
@@ -286,20 +292,21 @@
         </footer>
     </div>
 
-    <script src="age-content-mapper.js"></script>
-    <script src="level-mapper.js"></script>
-    <script src="eq-age-content.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="eq-generator.js"></script>
-    <script src="branding.js"></script>
+    <script src="age-content-mapper.js" defer></script>
+    <script src="level-mapper.js" defer></script>
+    <script src="eq-age-content.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="eq-generator.js" defer></script>
+    <script src="branding.js" defer></script>
     <!-- Activities loaded from onAuthStateChanged callback after age is set -->
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
+    <script>if (typeof GleeIcons !== 'undefined') GleeIcons.init();</script>
 </body>
 </html>

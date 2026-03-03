@@ -9,8 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="strings.js" defer></script>
+    <script src="icons.js" defer></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="stories.css">
@@ -24,11 +26,12 @@
     <script src="firebase-config.js"></script>
 
     <!-- Firebase Auth -->
-    <script src="firebase-auth.js"></script>
-    <script src="age-filter.js"></script>
-    <script src="admin-level-manager.js"></script>
-    <script src="child-session-manager.js"></script>
-    <script src="profile-selector.js"></script>
+    <script src="firebase-auth.js" defer></script>
+    <script src="age-filter.js" defer></script>
+    <script src="admin-level-manager.js" defer></script>
+    <script src="child-session-manager.js" defer></script>
+    <script src="profile-selector.js" defer></script>
+    <script src="theme-manager.js" defer></script>
     <style>
         /* Hide content initially to prevent flash of inappropriate content */
         .container {
@@ -61,13 +64,16 @@
             if (!userDoc.empty) {
                 const userData = userDoc.docs[0].data();
                 isAdmin = userData.role === 'admin';
+                // BUG-054: Set window.currentUserRole so generators can check admin status
+                window.currentUserRole = userData.role;
             }
 
             let childAge;
             if (isAdmin) {
-                // Admin doesn't need child profile - use default age 10+ (full access)
-                childAge = '10';
-                console.log('Admin user - using default age:', childAge);
+                // Admin: use selected child's age if available, else default 10+
+                const adminChild = getSelectedChild();
+                childAge = (adminChild && adminChild.age) ? adminChild.age.toString() : '10';
+                console.log('Admin user - using age:', childAge);
             } else {
                 // Auto-detect child's age from selected profile
                 const child = getSelectedChild();
@@ -94,7 +100,7 @@
         });
     </script>
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <div class="user-header">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div id="app-branding"></div>
                 <div>
@@ -102,14 +108,17 @@
                     <p class="subtitle">Hand-Written Quality Stories with Real Photos!</p>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="user-actions">
                 <div id="profile-selector-container"></div>
             </div>
-        </header>
+        </div>
 
         <!-- Story Category Selection (Age is auto-detected from profile) -->
         <div class="story-selection" id="category-selection">
-            <h2>Choose a Story Category</h2>
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToAges()" title="Back to Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+            </div>
+            <h2>Story Categories</h2>
             <div class="category-grid">
                 <button onclick="selectCategory('animals')" class="category-btn">
                     <span class="category-icon">🦁</span>
@@ -142,18 +151,15 @@
                     <span class="story-count">44+ unique stories</span>
                 </button>
             </div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToAges()">← Back to Home</button>
-            </div>
         </div>
 
 
         <div class="story-list" id="story-list" style="display: none;">
+            <div class="back-row">
+                <button class="back-btn-icon" onclick="backToCategories()" title="Back to Categories"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+            </div>
             <h2 id="category-title">Stories</h2>
             <div id="stories-container"></div>
-            <div class="navigation" style="margin-bottom: 20px;">
-                <button onclick="backToCategories()">← Back to Categories</button>
-            </div>
         </div>
 
         <div class="story-reader" id="story-reader" style="display: none;">
@@ -169,26 +175,28 @@
         </footer>
     </div>
 
-    <script src="level-mapper.js"></script>
-    <script src="age-content-mapper.js"></script>
-    <script src="stories-age-content.js"></script>
-    <script src="unique-stories-database.js"></script>
-    <script src="stories-db-animals.js"></script>
-    <script src="stories-db-nature.js"></script>
-    <script src="stories-db-family.js"></script>
-    <script src="stories-db-adventures.js"></script>
-    <script src="stories-db-learning.js"></script>
-    <script src="stories-db-bedtime.js"></script>
-    <script src="app-constants.js"></script>
-    <script src="stories-generator.js"></script>
-    <script src="branding.js"></script>
+    <script src="level-mapper.js" defer></script>
+    <script src="age-content-mapper.js" defer></script>
+    <script src="stories-age-content.js" defer></script>
+    <script src="unique-stories-database.js" defer></script>
+    <script src="stories-db-animals.js" defer></script>
+    <script src="stories-db-nature.js" defer></script>
+    <script src="stories-db-family.js" defer></script>
+    <script src="stories-db-adventures.js" defer></script>
+    <script src="stories-db-learning.js" defer></script>
+    <script src="stories-db-bedtime.js" defer></script>
+    <script src="app-constants.js" defer></script>
+    <script src="tts-manager.js" defer></script>
+    <script src="stories-generator.js" defer></script>
+    <script src="branding.js" defer></script>
     <nav class="bottom-nav" aria-label="Main navigation">
         <div class="bottom-nav-inner">
-            <a href="index" class="bottom-nav-item"><span class="nav-icon">🏠</span>Home</a>
-            <a href="stories" class="bottom-nav-item"><span class="nav-icon">📖</span>Stories</a>
-            <a href="rewards" class="bottom-nav-item"><span class="nav-icon">⭐</span>Rewards</a>
-            <a href="settings" class="bottom-nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+            <a href="index" class="bottom-nav-item"><span class="nav-icon" data-icon="home" data-icon-size="22" data-icon-color="currentColor"></span>Home</a>
+            <a href="stories" class="bottom-nav-item"><span class="nav-icon" data-icon="book" data-icon-size="22" data-icon-color="currentColor"></span>Stories</a>
+            <a href="rewards" class="bottom-nav-item"><span class="nav-icon" data-icon="star" data-icon-size="22" data-icon-color="currentColor"></span>Rewards</a>
+            <a href="settings" class="bottom-nav-item"><span class="nav-icon" data-icon="settings" data-icon-size="22" data-icon-color="currentColor"></span>Settings</a>
         </div>
     </nav>
+    <script>if (typeof GleeIcons !== 'undefined') GleeIcons.init();</script>
 </body>
 </html>

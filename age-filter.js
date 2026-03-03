@@ -161,34 +161,37 @@ function filterSubjectButtons() {
 
 // Initialize age filtering when page loads
 function initAgeFilter() {
-    // Wait for user to be loaded
-    const checkUser = setInterval(() => {
-        const user = getCurrentUser && getCurrentUser();
-        if (user) {
-            clearInterval(checkUser);
+    // Use Firebase auth state change instead of polling
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(function() {
+            applyAgeFilters();
+        });
+    } else {
+        // Fallback: try once after a short delay
+        setTimeout(applyAgeFilters, 500);
+    }
+}
 
-            const userAge = getUserAge();
-            if (userAge) {
-                console.log(`Age filter initialized for user age: ${userAge}`);
+// Apply age-based filters to the current page
+function applyAgeFilters() {
+    const userAge = getUserAge();
+    if (!userAge) {
+        console.log('No age found for user, skipping age filter');
+        return;
+    }
 
-                // Apply appropriate filters based on page
-                if (document.querySelector('.level-grid')) {
-                    filterLevelButtons();
-                }
-                if (document.querySelector('.subject-grid')) {
-                    filterSubjectButtons();
-                }
-                if (document.querySelector('.difficulty-grid') || document.querySelector('.difficulty-btn')) {
-                    filterLevelButtons(); // Reuse same filter for difficulty buttons
-                }
-            } else {
-                console.warn('User age not set. Please update profile with age.');
-            }
-        }
-    }, 100);
+    console.log('Age filter initialized for user age: ' + userAge);
 
-    // Timeout after 5 seconds
-    setTimeout(() => clearInterval(checkUser), 5000);
+    // Apply appropriate filters based on page
+    if (document.querySelector('.level-grid')) {
+        filterLevelButtons();
+    }
+    if (document.querySelector('.subject-grid')) {
+        filterSubjectButtons();
+    }
+    if (document.querySelector('.difficulty-grid') || document.querySelector('.difficulty-btn')) {
+        filterLevelButtons(); // Reuse same filter for difficulty buttons
+    }
 }
 
 // Parent mode: Update child's age
@@ -274,7 +277,7 @@ function showPinEntry() {
 
     modal.innerHTML = `
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">🔒 Parent Verification</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);">🔒 Parent Verification</h2>
             <p style="color: #666; margin-bottom: 20px;">
                 Enter your 4-digit parent PIN to access age settings.
             </p>
@@ -291,7 +294,7 @@ function showPinEntry() {
             </div>
             <div id="pin-error" style="color: #e74c3c; font-weight: bold; margin: 10px 0; display: none;"></div>
             <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button onclick="verifyPinAndOpenSettings()" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <button onclick="verifyPinAndOpenSettings()" style="flex: 1; padding: 12px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                     Verify
                 </button>
                 <button onclick="closePinEntry()" style="flex: 1; padding: 12px; background: #ddd; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
@@ -397,13 +400,13 @@ function showParentSettingsForm() {
 
     modal.innerHTML = `
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">👨‍👩‍👧 Parent Settings</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);">👨‍👩‍👧 Parent Settings</h2>
             <p style="color: #666; margin-bottom: 20px;">
                 Content is filtered based on your child's age to ensure age-appropriate learning materials.
             </p>
             <div style="margin: 20px 0;">
                 <strong style="color: #333;">Current Age:</strong>
-                <span style="color: #667eea; font-size: 1.2em;">${currentAge} years old</span>
+                <span style="color: var(--color-primary); font-size: 1.2em;">${currentAge} years old</span>
             </div>
             <div style="margin: 20px 0;">
                 <label style="display: block; font-weight: bold; color: #333; margin-bottom: 10px;">
@@ -424,7 +427,7 @@ function showParentSettingsForm() {
                 </select>
             </div>
             <div style="background: #f0f4ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <strong style="color: #667eea;">Age Guidelines:</strong>
+                <strong style="color: var(--color-primary);">Age Guidelines:</strong>
                 <ul style="margin: 10px 0; color: #666; font-size: 0.9em;">
                     <li><strong>Ages 4-5:</strong> Math/English 6A only, Easy stories & aptitude</li>
                     <li><strong>Age 6:</strong> Math/English 6A-5A, Easy content, German Kids available</li>
@@ -436,7 +439,7 @@ function showParentSettingsForm() {
                 </ul>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button onclick="saveNewAge()" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <button onclick="saveNewAge()" style="flex: 1; padding: 12px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                     Save Changes
                 </button>
                 <button onclick="closeParentSettings()" style="flex: 1; padding: 12px; background: #ddd; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
@@ -484,7 +487,7 @@ function showSetupParentPin() {
 
     modal.innerHTML = `
         <div style="background: white; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%;">
-            <h2 style="margin-top: 0; color: #667eea;">🔐 Set Up Parent PIN</h2>
+            <h2 style="margin-top: 0; color: var(--color-primary);">🔐 Set Up Parent PIN</h2>
             <p style="color: #666; margin-bottom: 20px;">
                 Create a 4-digit PIN to protect age settings. You'll need this PIN to change your child's age or access parent controls.
             </p>
@@ -518,7 +521,7 @@ function showSetupParentPin() {
             </div>
             <div id="setup-pin-error" style="color: #e74c3c; font-weight: bold; margin: 10px 0; display: none;"></div>
             <div style="display: flex; gap: 10px; margin-top: 30px;">
-                <button onclick="saveParentPin()" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <button onclick="saveParentPin()" style="flex: 1; padding: 12px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                     Create PIN
                 </button>
                 <button onclick="closeSetupPin()" style="flex: 1; padding: 12px; background: #ddd; color: #333; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">

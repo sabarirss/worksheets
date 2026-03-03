@@ -66,8 +66,8 @@ function openFeedbackModal() {
                 id="feedback-tab-${m.id}"
                 style="
                     padding: 8px 16px;
-                    border: 2px solid ${idx === 0 ? '#667eea' : '#ddd'};
-                    background: ${idx === 0 ? '#667eea' : 'white'};
+                    border: 2px solid ${idx === 0 ? 'var(--color-primary)' : '#ddd'};
+                    background: ${idx === 0 ? 'var(--color-primary)' : 'white'};
                     color: ${idx === 0 ? 'white' : '#333'};
                     border-radius: 20px;
                     cursor: pointer;
@@ -131,7 +131,7 @@ function openFeedbackModal() {
             ">
                 <div style="
                     padding: 25px 30px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--color-primary-gradient);
                     border-radius: 20px 20px 0 0;
                     display: flex; justify-content: space-between; align-items: center;
                 ">
@@ -162,7 +162,7 @@ function openFeedbackModal() {
                     ">Cancel</button>
                     <button onclick="submitFeedback()" id="feedback-submit-btn" style="
                         padding: 12px 30px;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: var(--color-primary-gradient);
                         color: white; border: none; border-radius: 10px;
                         font-size: 1.05em; font-weight: bold; cursor: pointer;
                         transition: transform 0.2s;
@@ -198,9 +198,9 @@ function switchFeedbackTab(moduleId) {
     const selectedTab = document.getElementById(`feedback-tab-${moduleId}`);
     if (selectedPage) selectedPage.style.display = 'block';
     if (selectedTab) {
-        selectedTab.style.background = '#667eea';
+        selectedTab.style.background = 'var(--color-primary)';
         selectedTab.style.color = 'white';
-        selectedTab.style.borderColor = '#667eea';
+        selectedTab.style.borderColor = 'var(--color-primary)';
     }
 }
 

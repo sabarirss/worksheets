@@ -9,12 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="feedback.css">
-    <script src="feedback.js"></script>
-    <script src="sound-manager.js"></script>
+    <script src="feedback.js" defer></script>
+    <script src="sound-manager.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -78,13 +78,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--color-primary);
         }
 
         .signup-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-primary-gradient);
             color: white;
             border: none;
             border-radius: 8px;
@@ -97,7 +97,7 @@
 
         .signup-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px var(--color-primary-30);
         }
 
         .signup-btn:disabled {
@@ -133,7 +133,7 @@
         }
 
         .login-link a {
-            color: #667eea;
+            color: var(--color-primary);
             text-decoration: none;
             font-weight: bold;
         }
@@ -245,7 +245,7 @@
                     >
                     <span style="font-size: 0.95em; line-height: 1.6;">
                         I have read and agree to the
-                        <a href="terms" target="_blank" style="color: #667eea; text-decoration: underline;">Terms and Conditions</a>.
+                        <a href="terms" target="_blank" style="color: var(--color-primary); text-decoration: underline;">Terms and Conditions</a>.
                         <strong>(Required)</strong><br>
                         <span style="color: #666; font-size: 0.9em;">
                             ⚠️ If creating an account for a child under 16, you confirm you are the parent/guardian and consent to their use of this service.
@@ -541,6 +541,6 @@
             }
         }
     </script>
-    <script src="branding.js"></script>
+    <script src="branding.js" defer></script>
 </body>
 </html>
